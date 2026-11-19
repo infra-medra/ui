@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { SelectComponent } from '@medra/ui';
+import { SelectComponent } from '@medra.dev/ui';
 
 /** A city in the consumer's own data: its own field names, not the `label`/`value` defaults. */
 interface City {

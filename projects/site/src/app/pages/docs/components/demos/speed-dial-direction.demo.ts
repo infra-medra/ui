@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { SpeedDialComponent, type MenuItem } from '@medra/ui';
+import { SpeedDialComponent, type MenuItem } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-speed-dial-direction-demo',

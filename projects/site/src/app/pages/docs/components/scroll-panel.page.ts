@@ -14,7 +14,7 @@ import apiEntries from '../../../../content/api/scroll-panel.json';
 import introContent from '../../../../content/docs/scroll-panel-intro.txt?raw';
 import scrollToContent from '../../../../content/docs/scroll-panel-scroll-to.txt?raw';
 
-const IMPORT_CODE = `import { ScrollPanelComponent } from '@medra/ui';`;
+const IMPORT_CODE = `import { ScrollPanelComponent } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'ScrollPanel — MedraUi',

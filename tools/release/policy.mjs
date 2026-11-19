@@ -1,4 +1,4 @@
-// Pure release-policy rules for @medra/ui. The CLI in `check.mjs` gathers the facts
+// Pure release-policy rules for @medra.dev/ui. The CLI in `check.mjs` gathers the facts
 // (package files, git state) and passes them in, so every rule here is unit-testable.
 
 /** The only accepted release branch shape. */

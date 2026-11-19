@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { ListboxComponent } from '@medra/ui';
+import { ListboxComponent } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-listbox-loading-demo',

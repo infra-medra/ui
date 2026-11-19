@@ -11,7 +11,7 @@ import toggleSwitchBasicCode from './demos/toggle-switch-basic.demo.html?raw';
 import apiEntries from '../../../../content/api/toggle-switch.json';
 import introContent from '../../../../content/docs/toggle-switch-intro.txt?raw';
 
-const IMPORT_CODE = `import { ToggleSwitchComponent } from '@medra/ui';`;
+const IMPORT_CODE = `import { ToggleSwitchComponent } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'ToggleSwitch — MedraUi',

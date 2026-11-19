@@ -1,6 +1,6 @@
 import { Component, HostListener, computed, effect, inject, signal, untracked } from '@angular/core';
 import { Router } from '@angular/router';
-import { DialogComponent } from '@medra/ui';
+import { DialogComponent } from '@medra.dev/ui';
 
 import { loadSearchIndex } from '../search/search-loader';
 import { searchEntries, type SearchEntry } from '../search/search-match';

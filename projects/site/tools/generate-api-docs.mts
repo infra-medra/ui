@@ -2,7 +2,7 @@
  * Generates one JSON file per documented component under
  * `src/content/api/`, read by each component doc page's `<api-table>`.
  *
- * Runs against `@medra/ui`'s own source (never third-party docs) via the
+ * Runs against `@medra.dev/ui`'s own source (never third-party docs) via the
  * TypeScript Compiler API rather than a regex/comment parser: the lib mixes
  * `input()`/`input.required()`/`output()`/`model()` signal syntax with
  * inconsistent per-property JSDoc coverage (some properties documented, some

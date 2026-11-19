@@ -6,13 +6,13 @@ through the Router without reloading the page, while Ctrl/Cmd+click, middle-clic
 to the browser. `command` still runs, and `routerLink` wins over `url` when an item has both. Links are
 resolved from the app root, and a disabled item renders no `href`.
 
-The Router bridge lives in the optional `@medra/ui/router` entry point, so apps that never use `routerLink`
+The Router bridge lives in the optional `@medra.dev/ui/router` entry point, so apps that never use `routerLink`
 don't need `@angular/router`. Register it once, after `provideRouter(...)`; rendering an item with
 `routerLink` without it throws an error that says so:
 
 ```ts
 import { provideRouter } from '@angular/router';
-import { provideMedraMenuRouterLinks } from '@medra/ui/router';
+import { provideMedraMenuRouterLinks } from '@medra.dev/ui/router';
 
 export const appConfig = {
   providers: [provideRouter(routes), provideMedraMenuRouterLinks()],

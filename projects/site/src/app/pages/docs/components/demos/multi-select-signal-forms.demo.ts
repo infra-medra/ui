@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { FormField, form } from '@angular/forms/signals';
-import { MultiSelectComponent } from '@medra/ui';
+import { MultiSelectComponent } from '@medra.dev/ui';
 import { SELECT_DEMO_CITIES } from './select-demo-data';
 
 @Component({

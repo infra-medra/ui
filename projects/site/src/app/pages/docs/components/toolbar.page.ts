@@ -11,7 +11,7 @@ import toolbarBasicCode from './demos/toolbar-basic.demo.html?raw';
 import apiEntries from '../../../../content/api/toolbar.json';
 import introContent from '../../../../content/docs/toolbar-intro.txt?raw';
 
-const IMPORT_CODE = `import { ButtonDirective, ToolbarCenterDirective, ToolbarComponent, ToolbarEndDirective, ToolbarStartDirective } from '@medra/ui';`;
+const IMPORT_CODE = `import { ButtonDirective, ToolbarCenterDirective, ToolbarComponent, ToolbarEndDirective, ToolbarStartDirective } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'Toolbar — MedraUi',

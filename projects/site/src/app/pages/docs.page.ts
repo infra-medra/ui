@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { DrawerComponent } from '@medra/ui';
+import { DrawerComponent } from '@medra.dev/ui';
 
 import { MobileNav } from '../shell/mobile-nav';
 import { SiteSidebar } from '../shell/site-sidebar';

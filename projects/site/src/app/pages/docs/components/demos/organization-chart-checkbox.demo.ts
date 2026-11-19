@@ -1,5 +1,5 @@
 import { Component, signal } from '@angular/core';
-import { OrganizationChartComponent, type OrgChartNode } from '@medra/ui';
+import { OrganizationChartComponent, type OrgChartNode } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-organization-chart-checkbox-demo',

@@ -1,5 +1,5 @@
 import { Component, signal } from '@angular/core';
-import { DataTableComponent, TableColumnComponent, type TableRowReorderEvent } from '@medra/ui';
+import { DataTableComponent, TableColumnComponent, type TableRowReorderEvent } from '@medra.dev/ui';
 
 interface Playlist {
   readonly id: string;

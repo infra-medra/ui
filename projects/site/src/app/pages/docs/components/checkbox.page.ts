@@ -17,7 +17,7 @@ import introContent from '../../../../content/docs/checkbox-intro.txt?raw';
 import statesContent from '../../../../content/docs/checkbox-states.txt?raw';
 import groupContent from '../../../../content/docs/checkbox-group.txt?raw';
 
-const IMPORT_CODE = `import { CheckboxComponent } from '@medra/ui';`;
+const IMPORT_CODE = `import { CheckboxComponent } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'Checkbox — MedraUi',

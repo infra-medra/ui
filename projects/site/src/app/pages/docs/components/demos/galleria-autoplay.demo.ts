@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { GalleriaComponent, type GalleriaItem } from '@medra/ui';
+import { GalleriaComponent, type GalleriaItem } from '@medra.dev/ui';
 
 function placeholderPhoto(label: string, color: string): string {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="640" height="400">

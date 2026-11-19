@@ -8,8 +8,8 @@ module.exports = {
   testMatch: ['<rootDir>/projects/**/*.spec.ts', '<rootDir>/tests/**/*.test.ts'],
   testPathIgnorePatterns: ['<rootDir>/node_modules/', '<rootDir>/dist/'],
   moduleNameMapper: {
-    '^@medra/ui$': '<rootDir>/projects/medra/ui/src/public-api.ts',
-    '^@medra/ui/router$': '<rootDir>/projects/medra/ui/router/src/public-api.ts',
+    '^@medra.dev/ui$': '<rootDir>/projects/medra/ui/src/public-api.ts',
+    '^@medra.dev/ui/router$': '<rootDir>/projects/medra/ui/router/src/public-api.ts',
   },
   transform: {
     '^.+\\.(ts|mts|mjs|js|html)$': [

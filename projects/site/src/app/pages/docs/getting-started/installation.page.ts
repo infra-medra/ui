@@ -8,14 +8,14 @@ import stylesNoteContent from '../../../../content/docs/getting-started-styles-n
 
 export const routeMeta: RouteMeta = {
   title: 'Installation — MedraUi',
-  meta: [{ name: 'description', content: 'Install @medra/ui and add its styles to an Angular app.' }],
+  meta: [{ name: 'description', content: 'Install @medra.dev/ui and add its styles to an Angular app.' }],
 };
 
-const installCode = `npm install @medra/ui @angular/cdk`;
+const installCode = `npm install @medra.dev/ui @angular/cdk`;
 
 const stylesCode = `// angular.json
 "styles": [
-  "node_modules/@medra/ui/styles.css",
+  "node_modules/@medra.dev/ui/styles.css",
   "src/styles.css"
 ]`;
 

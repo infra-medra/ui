@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { AutocompleteComponent, type SelectOption } from '@medra/ui';
+import { AutocompleteComponent, type SelectOption } from '@medra.dev/ui';
 
 const LANGUAGES: SelectOption<string>[] = [
   'Ada', 'Bash', 'C', 'C#', 'Dart', 'Elixir', 'Erlang', 'Go', 'Haskell', 'Java', 'Kotlin', 'Lua', 'OCaml', 'Python', 'Rust', 'Scala', 'Swift', 'TypeScript',

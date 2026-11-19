@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { ScrollPanelComponent } from '@medra/ui';
+import { ScrollPanelComponent } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-scroll-panel-basic-demo',

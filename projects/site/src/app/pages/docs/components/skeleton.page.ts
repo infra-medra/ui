@@ -11,7 +11,7 @@ import skeletonBasicCode from './demos/skeleton-basic.demo.html?raw';
 import apiEntries from '../../../../content/api/skeleton.json';
 import introContent from '../../../../content/docs/skeleton-intro.txt?raw';
 
-const IMPORT_CODE = `import { SkeletonComponent } from '@medra/ui';`;
+const IMPORT_CODE = `import { SkeletonComponent } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'Skeleton — MedraUi',

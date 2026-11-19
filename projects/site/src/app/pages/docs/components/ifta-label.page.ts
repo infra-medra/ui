@@ -11,7 +11,7 @@ import iftaLabelBasicCode from './demos/ifta-label-basic.demo.html?raw';
 import apiEntries from '../../../../content/api/ifta-label.json';
 import introContent from '../../../../content/docs/ifta-label-intro.txt?raw';
 
-const IMPORT_CODE = `import { IftaLabelComponent, IftaLabelTextDirective, InputTextDirective } from '@medra/ui';`;
+const IMPORT_CODE = `import { IftaLabelComponent, IftaLabelTextDirective, InputTextDirective } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'IftaLabel — MedraUi',

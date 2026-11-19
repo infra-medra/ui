@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { KnobComponent } from '@medra/ui';
+import { KnobComponent } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-knob-colors-template-demo',

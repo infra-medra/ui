@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { DataTableComponent, TableColumnComponent } from '@medra/ui';
+import { DataTableComponent, TableColumnComponent } from '@medra.dev/ui';
 
 interface EquipmentItem {
   readonly name: string;

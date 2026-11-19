@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { AutocompleteComponent, type SelectOption } from '@medra/ui';
+import { AutocompleteComponent, type SelectOption } from '@medra.dev/ui';
 
 const FRAMEWORKS: SelectOption<string>[] = ['Angular', 'React', 'Vue', 'Svelte', 'SolidJS', 'Qwik', 'Ember'].map((label) => ({ label, value: label.toLowerCase() }));
 

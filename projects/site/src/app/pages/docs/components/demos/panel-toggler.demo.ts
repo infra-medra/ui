@@ -1,5 +1,5 @@
 import { Component, signal } from '@angular/core';
-import { ButtonDirective, PanelComponent } from '@medra/ui';
+import { ButtonDirective, PanelComponent } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-panel-toggler-demo',

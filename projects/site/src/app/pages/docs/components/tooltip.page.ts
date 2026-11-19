@@ -17,7 +17,7 @@ import introContent from '../../../../content/docs/tooltip-intro.txt?raw';
 import statesContent from '../../../../content/docs/tooltip-states.txt?raw';
 import behaviorContent from '../../../../content/docs/tooltip-behavior.txt?raw';
 
-const IMPORT_CODE = `import { ButtonDirective, TooltipDirective } from '@medra/ui';`;
+const IMPORT_CODE = `import { ButtonDirective, TooltipDirective } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'Tooltip — MedraUi',

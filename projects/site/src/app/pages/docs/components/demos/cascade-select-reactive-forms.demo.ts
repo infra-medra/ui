@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
-import { CascadeSelectComponent } from '@medra/ui';
+import { CascadeSelectComponent } from '@medra.dev/ui';
 import { CASCADE_SELECT_CATALOG } from './cascade-select-demo-data';
 
 @Component({

@@ -14,7 +14,7 @@ import apiEntries from '../../../../content/api/input-text.json';
 import introContent from '../../../../content/docs/input-text-intro.txt?raw';
 import statesContent from '../../../../content/docs/input-text-states.txt?raw';
 
-const IMPORT_CODE = `import { InputTextDirective } from '@medra/ui';`;
+const IMPORT_CODE = `import { InputTextDirective } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'InputText — MedraUi',

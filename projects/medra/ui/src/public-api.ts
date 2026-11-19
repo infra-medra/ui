@@ -1,5 +1,5 @@
 /*
- * Public API Surface of @medra/ui
+ * Public API Surface of @medra.dev/ui
  */
 
 export * from './lib/utils/merge-classes';

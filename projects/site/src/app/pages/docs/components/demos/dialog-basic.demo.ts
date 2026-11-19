@@ -1,5 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
-import { ButtonDirective, DialogService } from '@medra/ui';
+import { ButtonDirective, DialogService } from '@medra.dev/ui';
 import { DialogContentDemo } from './dialog-content.demo';
 
 @Component({

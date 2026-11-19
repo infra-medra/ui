@@ -1,5 +1,5 @@
 import { Component, signal } from '@angular/core';
-import { ListboxComponent, type SelectOption } from '@medra/ui';
+import { ListboxComponent, type SelectOption } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-listbox-dragdrop-demo',

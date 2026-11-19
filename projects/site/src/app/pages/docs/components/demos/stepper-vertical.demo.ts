@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { StepPanelComponent, StepperComponent } from '@medra/ui';
+import { StepPanelComponent, StepperComponent } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-stepper-vertical-demo',

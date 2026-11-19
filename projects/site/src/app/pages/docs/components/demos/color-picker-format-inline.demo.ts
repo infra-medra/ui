@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ColorPickerComponent } from '@medra/ui';
+import { ColorPickerComponent } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-color-picker-format-inline-demo',

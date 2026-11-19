@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { IconComponent, TreeComponent, TreeNodeTemplateDirective, type TreeNode } from '@medra/ui';
+import { IconComponent, TreeComponent, TreeNodeTemplateDirective, type TreeNode } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-tree-node-template-demo',

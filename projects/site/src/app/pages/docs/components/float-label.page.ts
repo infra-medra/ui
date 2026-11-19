@@ -14,7 +14,7 @@ import apiEntries from '../../../../content/api/float-label.json';
 import introContent from '../../../../content/docs/float-label-intro.txt?raw';
 import variantsContent from '../../../../content/docs/float-label-variants.txt?raw';
 
-const IMPORT_CODE = `import { FloatLabelComponent, FloatLabelTextDirective, InputTextDirective } from '@medra/ui';`;
+const IMPORT_CODE = `import { FloatLabelComponent, FloatLabelTextDirective, InputTextDirective } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'FloatLabel — MedraUi',

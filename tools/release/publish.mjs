@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Publishes the built @medra/ui package from `dist/medra/ui` and then tags the release.
+// Publishes the built @medra.dev/ui package from `dist/medra/ui` and then tags the release.
 // Authentication is npm Trusted Publishing (OIDC); no token is read or written here.
 // Usage: `node tools/release/publish.mjs [--dry-run]`.
 // Commands are run with argument arrays and no shell (M-09).

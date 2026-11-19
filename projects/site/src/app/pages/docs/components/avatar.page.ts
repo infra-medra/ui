@@ -11,7 +11,7 @@ import avatarBasicCode from './demos/avatar-basic.demo.html?raw';
 import apiEntries from '../../../../content/api/avatar.json';
 import introContent from '../../../../content/docs/avatar-intro.txt?raw';
 
-const IMPORT_CODE = `import { AvatarComponent } from '@medra/ui';`;
+const IMPORT_CODE = `import { AvatarComponent } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'Avatar — MedraUi',

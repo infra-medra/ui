@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { TreeComponent, type TreeNode } from '@medra/ui';
+import { TreeComponent, type TreeNode } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-tree-filter-virtual-scroll-demo',

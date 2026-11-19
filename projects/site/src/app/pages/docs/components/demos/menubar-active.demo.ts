@@ -1,5 +1,5 @@
 import { Component, signal } from '@angular/core';
-import { MenubarComponent, type MenubarItem } from '@medra/ui';
+import { MenubarComponent, type MenubarItem } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-menubar-active-demo',

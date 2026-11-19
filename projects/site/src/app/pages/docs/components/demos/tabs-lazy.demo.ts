@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { TabComponent, TabsComponent } from '@medra/ui';
+import { TabComponent, TabsComponent } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-tabs-lazy-demo',

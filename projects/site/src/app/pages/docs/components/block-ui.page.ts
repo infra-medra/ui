@@ -14,7 +14,7 @@ import apiEntries from '../../../../content/api/block-ui.json';
 import introContent from '../../../../content/docs/block-ui-intro.txt?raw';
 import targetContent from '../../../../content/docs/block-ui-target.txt?raw';
 
-const IMPORT_CODE = `import { BlockUiComponent, ButtonDirective, InputTextDirective } from '@medra/ui';`;
+const IMPORT_CODE = `import { BlockUiComponent, ButtonDirective, InputTextDirective } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'BlockUI — MedraUi',

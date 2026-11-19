@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { PasswordComponent } from '@medra/ui';
+import { PasswordComponent } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-password-basic-demo',

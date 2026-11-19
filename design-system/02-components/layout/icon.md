@@ -38,7 +38,7 @@ Medra UI natively supports Font Awesome icons in two ways without forcing heavy 
 1. **Direct input via `[icon]`:**
 ```ts
 import { Component } from '@angular/core';
-import { IconComponent } from '@medra/ui';
+import { IconComponent } from '@medra.dev/ui';
 import { faCoffee } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
@@ -53,7 +53,7 @@ export class MyComponent {
 2. **Global registration via `provideIcons()`:**
 ```ts
 import { ApplicationConfig } from '@angular/core';
-import { provideIcons } from '@medra/ui';
+import { provideIcons } from '@medra.dev/ui';
 import { faCoffee, faUser } from '@fortawesome/free-solid-svg-icons';
 
 export const appConfig: ApplicationConfig = {

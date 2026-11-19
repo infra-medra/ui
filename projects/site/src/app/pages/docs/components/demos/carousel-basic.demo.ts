@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { CarouselComponent } from '@medra/ui';
+import { CarouselComponent } from '@medra.dev/ui';
 
 interface WorkshopTool {
   readonly name: string;

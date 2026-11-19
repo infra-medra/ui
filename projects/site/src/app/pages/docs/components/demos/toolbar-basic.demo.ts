@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { ButtonDirective, ToolbarCenterDirective, ToolbarComponent, ToolbarEndDirective, ToolbarStartDirective } from '@medra/ui';
+import { ButtonDirective, ToolbarCenterDirective, ToolbarComponent, ToolbarEndDirective, ToolbarStartDirective } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-toolbar-basic-demo',

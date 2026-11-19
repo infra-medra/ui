@@ -20,7 +20,7 @@ import headlessContent from '../../../../content/docs/confirm-dialog-headless.tx
 import messageContent from '../../../../content/docs/confirm-dialog-message.txt?raw';
 import draggableContent from '../../../../content/docs/confirm-dialog-draggable.txt?raw';
 
-const IMPORT_CODE = `import { ButtonDirective, ConfirmDialogService } from '@medra/ui';`;
+const IMPORT_CODE = `import { ButtonDirective, ConfirmDialogService } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'ConfirmDialog — MedraUi',

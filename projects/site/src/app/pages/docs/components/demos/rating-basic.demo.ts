@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RatingComponent } from '@medra/ui';
+import { RatingComponent } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-rating-basic-demo',

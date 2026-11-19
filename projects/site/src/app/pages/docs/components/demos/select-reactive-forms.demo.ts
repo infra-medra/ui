@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
-import { SelectComponent } from '@medra/ui';
+import { SelectComponent } from '@medra.dev/ui';
 import { SELECT_DEMO_CITIES } from './select-demo-data';
 
 @Component({

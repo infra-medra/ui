@@ -14,7 +14,7 @@ import apiEntries from '../../../../content/api/card.json';
 import introContent from '../../../../content/docs/card-intro.txt?raw';
 import richTitleContent from '../../../../content/docs/card-rich-title.txt?raw';
 
-const IMPORT_CODE = `import { CardComponent, CardFooterDirective, CardHeaderDirective } from '@medra/ui';`;
+const IMPORT_CODE = `import { CardComponent, CardFooterDirective, CardHeaderDirective } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'Card — MedraUi',

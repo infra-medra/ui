@@ -1,5 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
-import { ButtonDirective, ConfirmPopupService } from '@medra/ui';
+import { ButtonDirective, ConfirmPopupService } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-confirm-popup-basic-demo',

@@ -20,7 +20,7 @@ import navIconsContent from '../../../../content/docs/carousel-nav-icons.txt?raw
 import responsiveContent from '../../../../content/docs/carousel-responsive.txt?raw';
 import verticalContent from '../../../../content/docs/carousel-vertical.txt?raw';
 
-const IMPORT_CODE = `import { CarouselComponent } from '@medra/ui';`;
+const IMPORT_CODE = `import { CarouselComponent } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'Carousel — MedraUi',

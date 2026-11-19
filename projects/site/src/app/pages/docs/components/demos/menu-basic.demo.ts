@@ -1,5 +1,5 @@
 import { Component, signal } from '@angular/core';
-import { ButtonDirective, MenuComponent, type MenuItem } from '@medra/ui';
+import { ButtonDirective, MenuComponent, type MenuItem } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-menu-basic-demo',

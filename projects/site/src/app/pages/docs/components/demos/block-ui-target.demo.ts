@@ -1,5 +1,5 @@
 import { Component, ElementRef, signal, viewChild } from '@angular/core';
-import { BlockUiComponent, ButtonDirective } from '@medra/ui';
+import { BlockUiComponent, ButtonDirective } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-block-ui-target-demo',

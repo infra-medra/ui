@@ -14,7 +14,7 @@ import apiEntries from '../../../../content/api/galleria.json';
 import introContent from '../../../../content/docs/galleria-intro.txt?raw';
 import autoplayContent from '../../../../content/docs/galleria-autoplay.txt?raw';
 
-const IMPORT_CODE = `import { GalleriaComponent, type GalleriaItem } from '@medra/ui';`;
+const IMPORT_CODE = `import { GalleriaComponent, type GalleriaItem } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'Galleria — MedraUi',

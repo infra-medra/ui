@@ -1,4 +1,4 @@
-import type { SelectOption } from '@medra/ui';
+import type { SelectOption } from '@medra.dev/ui';
 
 /** Cities shared by the Select examples that do not need data of their own. */
 export const SELECT_DEMO_CITIES: SelectOption<string>[] = [

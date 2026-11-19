@@ -1,5 +1,5 @@
 import { Component, signal } from '@angular/core';
-import { PanelComponent } from '@medra/ui';
+import { PanelComponent } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-panel-basic-demo',

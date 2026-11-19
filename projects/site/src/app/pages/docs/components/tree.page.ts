@@ -17,7 +17,7 @@ import introContent from '../../../../content/docs/tree-intro.txt?raw';
 import filterVirtualScrollContent from '../../../../content/docs/tree-filter-virtual-scroll.txt?raw';
 import nodeTemplateContent from '../../../../content/docs/tree-node-template.txt?raw';
 
-const IMPORT_CODE = `import { TreeComponent, type TreeNode } from '@medra/ui';`;
+const IMPORT_CODE = `import { TreeComponent, type TreeNode } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'Tree — MedraUi',

@@ -11,7 +11,7 @@ import editorBasicCode from './demos/editor-basic.demo.html?raw';
 import apiEntries from '../../../../content/api/editor.json';
 import introContent from '../../../../content/docs/editor-intro.txt?raw';
 
-const IMPORT_CODE = `import { EditorComponent } from '@medra/ui';`;
+const IMPORT_CODE = `import { EditorComponent } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'Editor — MedraUi',

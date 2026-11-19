@@ -11,7 +11,7 @@ import inputChipsBasicCode from './demos/input-chips-basic.demo.html?raw';
 import apiEntries from '../../../../content/api/input-chips.json';
 import introContent from '../../../../content/docs/input-chips-intro.txt?raw';
 
-const IMPORT_CODE = `import { InputChipsComponent } from '@medra/ui';`;
+const IMPORT_CODE = `import { InputChipsComponent } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'InputChips — MedraUi',

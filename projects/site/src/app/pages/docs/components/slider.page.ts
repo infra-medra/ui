@@ -14,7 +14,7 @@ import apiEntries from '../../../../content/api/slider.json';
 import introContent from '../../../../content/docs/slider-intro.txt?raw';
 import rangeConstraintsContent from '../../../../content/docs/slider-range-constraints.txt?raw';
 
-const IMPORT_CODE = `import { SliderComponent } from '@medra/ui';`;
+const IMPORT_CODE = `import { SliderComponent } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'Slider — MedraUi',

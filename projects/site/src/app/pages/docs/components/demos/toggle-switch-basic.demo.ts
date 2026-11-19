@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ToggleSwitchComponent } from '@medra/ui';
+import { ToggleSwitchComponent } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-toggle-switch-basic-demo',

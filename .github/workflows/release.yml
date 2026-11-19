@@ -1,4 +1,4 @@
-# Publishes @medra/ui. Runs only on pushes to protected branches, and alone holds the
+# Publishes @medra.dev/ui. Runs only on pushes to protected branches, and alone holds the
 # publishing identity. Renaming this file requires re-registering the npm trusted publisher.
 name: Release
 

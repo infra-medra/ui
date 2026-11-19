@@ -49,7 +49,7 @@ const WAVE5_EXPECTED_MEMBERS: Record<string, string[]> = {
 const WAVE5_FILES = Object.keys(WAVE5_EXPECTED_MEMBERS);
 
 describe('Docs Site API Content — Wave 5 (SITE-007.S1, SITE-007.S2)', () => {
-  it.each(WAVE5_FILES)('publishes valid API reference entries for %s matching @medra/ui members', (fileName) => {
+  it.each(WAVE5_FILES)('publishes valid API reference entries for %s matching @medra.dev/ui members', (fileName) => {
     const filePath = path.join(API_DIR, fileName);
     expect(fs.existsSync(filePath)).toBe(true);
 
@@ -71,7 +71,7 @@ describe('Docs Site API Content — Wave 5 (SITE-007.S1, SITE-007.S2)', () => {
     }
   });
 
-  it('exports all Wave 5 symbols in @medra/ui public-api.ts (SITE-007.S2)', () => {
+  it('exports all Wave 5 symbols in @medra.dev/ui public-api.ts (SITE-007.S2)', () => {
     const publicApi = fs.readFileSync(PUBLIC_API_PATH, 'utf8');
     expect(publicApi).toContain('./lib/chart/chart.component');
     expect(publicApi).toContain('./lib/style-class/style-class.directive');

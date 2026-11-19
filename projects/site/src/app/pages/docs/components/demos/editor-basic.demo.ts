@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { EditorComponent } from '@medra/ui';
+import { EditorComponent } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-editor-basic-demo',

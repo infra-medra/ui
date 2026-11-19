@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { CascadeSelectComponent } from '@medra/ui';
+import { CascadeSelectComponent } from '@medra.dev/ui';
 
 /** A node of the consumer's own data: its own field names, not the `label`/`value`/`children` defaults. */
 interface Place {

@@ -1,5 +1,5 @@
 import { Component, computed, signal } from '@angular/core';
-import { ButtonDirective, TabMenuComponent, type MenuItem } from '@medra/ui';
+import { ButtonDirective, TabMenuComponent, type MenuItem } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-tab-menu-visible-demo',

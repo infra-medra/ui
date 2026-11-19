@@ -11,7 +11,7 @@ import inputOtpBasicCode from './demos/input-otp-basic.demo.html?raw';
 import apiEntries from '../../../../content/api/input-otp.json';
 import introContent from '../../../../content/docs/input-otp-intro.txt?raw';
 
-const IMPORT_CODE = `import { InputOtpComponent } from '@medra/ui';`;
+const IMPORT_CODE = `import { InputOtpComponent } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'InputOtp — MedraUi',

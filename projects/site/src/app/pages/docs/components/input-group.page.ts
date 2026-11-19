@@ -11,7 +11,7 @@ import inputGroupBasicCode from './demos/input-group-basic.demo.html?raw';
 import apiEntries from '../../../../content/api/input-group.json';
 import introContent from '../../../../content/docs/input-group-intro.txt?raw';
 
-const IMPORT_CODE = `import { InputGroupAddonDirective, InputGroupComponent, InputTextDirective } from '@medra/ui';`;
+const IMPORT_CODE = `import { InputGroupAddonDirective, InputGroupComponent, InputTextDirective } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'InputGroup — MedraUi',

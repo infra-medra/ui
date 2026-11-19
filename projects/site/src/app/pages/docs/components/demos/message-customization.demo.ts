@@ -1,5 +1,5 @@
 import { Component, signal } from '@angular/core';
-import { ButtonDirective, MessageComponent } from '@medra/ui';
+import { ButtonDirective, MessageComponent } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-message-customization-demo',

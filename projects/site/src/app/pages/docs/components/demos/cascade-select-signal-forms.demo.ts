@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { FormField, form } from '@angular/forms/signals';
-import { CascadeSelectComponent } from '@medra/ui';
+import { CascadeSelectComponent } from '@medra.dev/ui';
 import { CASCADE_SELECT_CATALOG } from './cascade-select-demo-data';
 
 @Component({

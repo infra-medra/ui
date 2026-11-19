@@ -23,7 +23,7 @@ import megaMenuVisibleContent from '../../../../content/docs/mega-menu-visible.t
 import megaMenuRouterLinkContent from '../../../../content/docs/mega-menu-router-link.txt?raw';
 import megaMenuActiveContent from '../../../../content/docs/mega-menu-active.txt?raw';
 
-const IMPORT_CODE = `import { MegaMenuComponent, type MegaMenuItem } from '@medra/ui';`;
+const IMPORT_CODE = `import { MegaMenuComponent, type MegaMenuItem } from '@medra.dev/ui';`;
 
 /** The examples listed in "On this page", in page order; each `id` is the anchor of its block. */
 const EXAMPLES = [

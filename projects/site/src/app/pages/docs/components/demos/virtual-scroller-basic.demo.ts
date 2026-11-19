@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { VirtualScrollerComponent } from '@medra/ui';
+import { VirtualScrollerComponent } from '@medra.dev/ui';
 
 interface LogEntry {
   readonly id: number;

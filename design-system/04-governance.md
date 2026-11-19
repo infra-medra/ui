@@ -16,7 +16,7 @@ The library is currently pre-1.0 (`package.json` version `0.1.0`), so this secti
 
 - **Token value changes** (e.g. changing `--radius-md` from 6px to 8px) ripple to every component consuming it silently — treat any `01-foundations/` token value change as a breaking visual change requiring a full visual regression pass (Phase 7's style guide preview is exactly the tool for this: diff the "Atual" vs. "Proposta" render before merging).
 - **Token renames/removals** (e.g. deciding `shadow-overlay-md` should be added, or that the two call sites referencing it should be redirected instead) are breaking for any external consumer using the removed name directly, even though today's only consumers are internal.
-- **Prop renames** on any `@Input()`/`@Output()` are breaking for `@medra/ui` consumers by definition (Angular template bindings fail silently-to-loudly depending on strict template checking). Deprecate with a clear migration note in the component's own doc page before removing.
+- **Prop renames** on any `@Input()`/`@Output()` are breaking for `@medra.dev/ui` consumers by definition (Angular template bindings fail silently-to-loudly depending on strict template checking). Deprecate with a clear migration note in the component's own doc page before removing.
 - **Selector or directive-attribute renames** are breaking and highly visible (templates stop compiling) — avoid unless the current audit's naming-consistency findings (e.g. the `rounded` vs `rounded-sm` radius spelling) specifically require it.
 
 ## Minimum quality checklist for a new component

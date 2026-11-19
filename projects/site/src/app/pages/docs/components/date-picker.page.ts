@@ -17,7 +17,7 @@ import introContent from '../../../../content/docs/date-picker-intro.txt?raw';
 import showTimeContent from '../../../../content/docs/date-picker-show-time.txt?raw';
 import multipleMonthContent from '../../../../content/docs/date-picker-multiple-month.txt?raw';
 
-const IMPORT_CODE = `import { DatePickerComponent } from '@medra/ui';`;
+const IMPORT_CODE = `import { DatePickerComponent } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'DatePicker — MedraUi',

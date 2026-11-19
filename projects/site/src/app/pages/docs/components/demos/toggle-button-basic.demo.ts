@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ToggleButtonComponent } from '@medra/ui';
+import { ToggleButtonComponent } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-toggle-button-basic-demo',

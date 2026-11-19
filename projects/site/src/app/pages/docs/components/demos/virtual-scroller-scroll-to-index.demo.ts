@@ -1,5 +1,5 @@
 import { Component, signal, viewChild } from '@angular/core';
-import { ButtonDirective, VirtualScrollerComponent } from '@medra/ui';
+import { ButtonDirective, VirtualScrollerComponent } from '@medra.dev/ui';
 
 interface LogEntry {
   readonly id: number;

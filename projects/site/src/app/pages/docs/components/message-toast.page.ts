@@ -27,7 +27,7 @@ import toastPositionContent from '../../../../content/docs/message-toast-positio
 import toastHeadlessContent from '../../../../content/docs/message-toast-headless.txt?raw';
 import toastMessageContent from '../../../../content/docs/toast-message.txt?raw';
 
-const IMPORT_CODE = `import { MessageComponent, ButtonDirective, ToastService } from '@medra/ui';`;
+const IMPORT_CODE = `import { MessageComponent, ButtonDirective, ToastService } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'Message / Toast — MedraUi',

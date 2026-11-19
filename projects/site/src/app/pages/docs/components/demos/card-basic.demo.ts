@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { CardComponent, CardFooterDirective, CardHeaderDirective } from '@medra/ui';
+import { CardComponent, CardFooterDirective, CardHeaderDirective } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-card-basic-demo',

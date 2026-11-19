@@ -2,7 +2,7 @@
  * Reuses the library's own design tokens (brand/severity/surface colors,
  * the `.dark` variant, radii, shadows, etc. — see
  * projects/medra/ui/src/styles/tailwind-theme-medraui.css) so the site's
- * chrome and its live `@medra/ui` component demos share one source of
+ * chrome and its live `@medra.dev/ui` component demos share one source of
  * truth, instead of a second, drifting copy of the same palette.
  */
 @import '../../medra/ui/src/styles/tailwind-theme-medraui.css';
@@ -24,7 +24,7 @@
 /*
  * Marketing/docs-chrome-only typography (brand-identity.md): Space Grotesk
  * for headings/logotype, IBM Plex Sans for body/interface text. Neither is
- * used by `@medra/ui` itself — this site is where they're first wired up.
+ * used by `@medra.dev/ui` itself — this site is where they're first wired up.
  */
 @import '@fontsource/space-grotesk/500.css';
 @import '@fontsource/ibm-plex-sans/400.css';

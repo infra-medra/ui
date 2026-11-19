@@ -1,5 +1,5 @@
 import { Component, TemplateRef, ViewChild, inject } from '@angular/core';
-import { ButtonDirective, type ToastMessage, ToastService } from '@medra/ui';
+import { ButtonDirective, type ToastMessage, ToastService } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-toast-message-demo',

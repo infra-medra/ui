@@ -1,5 +1,5 @@
 import { Component, signal } from '@angular/core';
-import { DataViewComponent } from '@medra/ui';
+import { DataViewComponent } from '@medra.dev/ui';
 
 interface Recipe {
   readonly title: string;

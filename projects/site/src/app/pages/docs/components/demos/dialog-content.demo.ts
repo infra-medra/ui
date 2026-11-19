@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { ButtonDirective, DIALOG_REF } from '@medra/ui';
+import { ButtonDirective, DIALOG_REF } from '@medra.dev/ui';
 
 /** The dialog's own content component — passed to `DialogService.open()` below. */
 @Component({

@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { DockComponent, IconComponent, type MenuItem } from '@medra/ui';
+import { DockComponent, IconComponent, type MenuItem } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-dock-item-template-demo',

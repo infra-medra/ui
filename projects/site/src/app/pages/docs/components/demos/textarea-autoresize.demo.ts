@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { TextareaDirective } from '@medra/ui';
+import { TextareaDirective } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-textarea-autoresize-demo',

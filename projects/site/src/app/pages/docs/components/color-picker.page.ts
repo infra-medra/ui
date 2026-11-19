@@ -14,7 +14,7 @@ import apiEntries from '../../../../content/api/color-picker.json';
 import introContent from '../../../../content/docs/color-picker-intro.txt?raw';
 import formatInlineContent from '../../../../content/docs/color-picker-format-inline.txt?raw';
 
-const IMPORT_CODE = `import { ColorPickerComponent } from '@medra/ui';`;
+const IMPORT_CODE = `import { ColorPickerComponent } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'ColorPicker — MedraUi',

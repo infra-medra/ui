@@ -11,7 +11,7 @@ import passwordBasicCode from './demos/password-basic.demo.html?raw';
 import apiEntries from '../../../../content/api/password.json';
 import introContent from '../../../../content/docs/password-intro.txt?raw';
 
-const IMPORT_CODE = `import { PasswordComponent } from '@medra/ui';`;
+const IMPORT_CODE = `import { PasswordComponent } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'Password — MedraUi',

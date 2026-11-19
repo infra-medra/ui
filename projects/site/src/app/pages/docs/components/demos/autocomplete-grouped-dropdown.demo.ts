@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { AutocompleteComponent, type SelectOption } from '@medra/ui';
+import { AutocompleteComponent, type SelectOption } from '@medra.dev/ui';
 
 /**
  * Each option carries its own group in `SelectOption.group`; the panel renders the group label as a header.

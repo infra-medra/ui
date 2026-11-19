@@ -1,5 +1,5 @@
 import { Component, signal } from '@angular/core';
-import { PaginatorComponent } from '@medra/ui';
+import { PaginatorComponent } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-paginator-basic-demo',

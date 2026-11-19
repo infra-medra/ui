@@ -1,5 +1,5 @@
 import { Component, viewChild } from '@angular/core';
-import { ButtonDirective, ScrollPanelComponent } from '@medra/ui';
+import { ButtonDirective, ScrollPanelComponent } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-scroll-panel-scroll-to-demo',

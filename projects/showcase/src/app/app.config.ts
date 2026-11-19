@@ -1,7 +1,7 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
-import { heroMiniIcons, heroOutlineIcons, heroSolidIcons, provideIcons } from '@medra/ui';
+import { heroMiniIcons, heroOutlineIcons, heroSolidIcons, provideIcons } from '@medra.dev/ui';
 
 import { routes } from './app.routes';
 

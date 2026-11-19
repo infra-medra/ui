@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { TreeSelectComponent, type TreeNode } from '@medra/ui';
+import { TreeSelectComponent, type TreeNode } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-tree-select-basic-demo',

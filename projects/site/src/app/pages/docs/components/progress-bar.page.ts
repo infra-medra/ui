@@ -20,7 +20,7 @@ import sizesContent from '../../../../content/docs/progress-bar-sizes.txt?raw';
 import contentDemoContent from '../../../../content/docs/progress-bar-content.txt?raw';
 import unitContent from '../../../../content/docs/progress-bar-unit.txt?raw';
 
-const IMPORT_CODE = `import { ProgressBarComponent } from '@medra/ui';`;
+const IMPORT_CODE = `import { ProgressBarComponent } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'ProgressBar — MedraUi',

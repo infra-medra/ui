@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { FloatLabelComponent, FloatLabelTextDirective, InputTextDirective } from '@medra/ui';
+import { FloatLabelComponent, FloatLabelTextDirective, InputTextDirective } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-float-label-variants-demo',

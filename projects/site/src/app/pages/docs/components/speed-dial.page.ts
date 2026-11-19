@@ -17,7 +17,7 @@ import introContent from '../../../../content/docs/speed-dial-intro.txt?raw';
 import directionContent from '../../../../content/docs/speed-dial-direction.txt?raw';
 import maskContent from '../../../../content/docs/speed-dial-mask.txt?raw';
 
-const IMPORT_CODE = `import { SpeedDialComponent, type MenuItem } from '@medra/ui';`;
+const IMPORT_CODE = `import { SpeedDialComponent, type MenuItem } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'SpeedDial — MedraUi',

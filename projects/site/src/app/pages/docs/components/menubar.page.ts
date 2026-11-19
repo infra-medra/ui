@@ -20,7 +20,7 @@ import menubarVisibleContent from '../../../../content/docs/menubar-visible.txt?
 import menubarRouterLinkContent from '../../../../content/docs/menubar-router-link.txt?raw';
 import menubarActiveContent from '../../../../content/docs/menubar-active.txt?raw';
 
-const IMPORT_CODE = `import { MenubarComponent, type MenubarItem } from '@medra/ui';`;
+const IMPORT_CODE = `import { MenubarComponent, type MenubarItem } from '@medra.dev/ui';`;
 
 /** The examples listed in "On this page", in page order; each `id` is the anchor of its block. */
 const EXAMPLES = [

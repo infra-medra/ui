@@ -7,7 +7,7 @@
   },
   "newProjectRoot": "projects",
   "projects": {
-    "@medra/ui": {
+    "@medra.dev/ui": {
       "projectType": "library",
       "root": "projects/medra/ui",
       "sourceRoot": "projects/medra/ui/src",

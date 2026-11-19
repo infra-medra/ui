@@ -14,7 +14,7 @@ import apiEntries from '../../../../content/api/timeline.json';
 import introContent from '../../../../content/docs/timeline-intro.txt?raw';
 import markerOppositeContent from '../../../../content/docs/timeline-marker-opposite.txt?raw';
 
-const IMPORT_CODE = `import { TimelineComponent } from '@medra/ui';`;
+const IMPORT_CODE = `import { TimelineComponent } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'Timeline — MedraUi',

@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { FileUploadComponent, type RejectedFile } from '@medra/ui';
+import { FileUploadComponent, type RejectedFile } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-file-upload-basic-demo',

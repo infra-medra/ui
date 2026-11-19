@@ -9,9 +9,9 @@ export interface MenuItemRouterLinkActiveOptions {
 }
 
 /**
- * Bridge between the menu components and the app's Router. `@medra/ui` has
+ * Bridge between the menu components and the app's Router. `@medra.dev/ui` has
  * no dependency on `@angular/router`; the implementation lives in the
- * optional `@medra/ui/router` entry point (`provideMedraMenuRouterLinks()`).
+ * optional `@medra.dev/ui/router` entry point (`provideMedraMenuRouterLinks()`).
  */
 export interface MenuLinkStrategy {
   /** Final `href` for the link, including the app's base href. */
@@ -22,9 +22,9 @@ export interface MenuLinkStrategy {
   isActive(link: MenuItemRouterLink, exact: boolean): boolean;
 }
 
-/** Provided by `provideMedraMenuRouterLinks()` from `@medra/ui/router`. Menu items with `routerLink` need it. */
+/** Provided by `provideMedraMenuRouterLinks()` from `@medra.dev/ui/router`. Menu items with `routerLink` need it. */
 export const MED_MENU_LINK_STRATEGY = new InjectionToken<MenuLinkStrategy>('MED_MENU_LINK_STRATEGY');
 
 /** Thrown when an item has `routerLink` but no `MED_MENU_LINK_STRATEGY` is provided. */
 export const MENU_ROUTER_LINK_MISSING_MESSAGE =
-  "MenuItem.routerLink needs the Router integration: add provideMedraMenuRouterLinks() from '@medra/ui/router' to the app providers (after provideRouter).";
+  "MenuItem.routerLink needs the Router integration: add provideMedraMenuRouterLinks() from '@medra.dev/ui/router' to the app providers (after provideRouter).";

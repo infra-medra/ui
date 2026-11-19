@@ -14,7 +14,7 @@ import apiEntries from '../../../../content/api/fieldset.json';
 import introContent from '../../../../content/docs/fieldset-intro.txt?raw';
 import richLegendContent from '../../../../content/docs/fieldset-rich-legend.txt?raw';
 
-const IMPORT_CODE = `import { ButtonDirective, FieldsetComponent, InputTextDirective } from '@medra/ui';`;
+const IMPORT_CODE = `import { ButtonDirective, FieldsetComponent, InputTextDirective } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'Fieldset — MedraUi',

@@ -23,7 +23,7 @@ import tieredMenuVisibleContent from '../../../../content/docs/tiered-menu-visib
 import tieredMenuRouterLinkContent from '../../../../content/docs/tiered-menu-router-link.txt?raw';
 import tieredMenuActiveContent from '../../../../content/docs/tiered-menu-active.txt?raw';
 
-const IMPORT_CODE = `import { ButtonDirective, TieredMenuComponent, type TieredMenuItem } from '@medra/ui';`;
+const IMPORT_CODE = `import { ButtonDirective, TieredMenuComponent, type TieredMenuItem } from '@medra.dev/ui';`;
 
 /** The examples listed in "On this page", in page order; each `id` is the anchor of its block. */
 const EXAMPLES = [

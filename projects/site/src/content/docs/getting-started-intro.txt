@@ -1,4 +1,4 @@
-MedraUi ships as a single npm package, `@medra/ui`, built against Angular's signal-based
+MedraUi ships as a single npm package, `@medra.dev/ui`, built against Angular's signal-based
 APIs (`input()`/`output()`/`model()`) throughout — every component here is a real,
 standalone Angular component or directive, not a wrapper generated from another
 framework. The four steps below are everything a new Angular app needs: install the

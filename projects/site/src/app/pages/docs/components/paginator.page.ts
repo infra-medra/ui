@@ -17,7 +17,7 @@ import introContent from '../../../../content/docs/paginator-intro.txt?raw';
 import rowsPerPageContent from '../../../../content/docs/paginator-rows-per-page.txt?raw';
 import firstLastJumpContent from '../../../../content/docs/paginator-first-last-jump.txt?raw';
 
-const IMPORT_CODE = `import { PaginatorComponent } from '@medra/ui';`;
+const IMPORT_CODE = `import { PaginatorComponent } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'Paginator — MedraUi',

@@ -11,7 +11,7 @@ import orderListBasicCode from './demos/order-list-basic.demo.html?raw';
 import apiEntries from '../../../../content/api/order-list.json';
 import introContent from '../../../../content/docs/order-list-intro.txt?raw';
 
-const IMPORT_CODE = `import { OrderListComponent } from '@medra/ui';`;
+const IMPORT_CODE = `import { OrderListComponent } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'OrderList — MedraUi',

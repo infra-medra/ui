@@ -1,6 +1,6 @@
 # Component Index
 
-Source library: `@medra/ui` (`projects/medra/ui/src/lib/`). Showcase: `projects/showcase/` (single-page, `localhost:4200`).
+Source library: `@medra.dev/ui` (`projects/medra/ui/src/lib/`). Showcase: `projects/showcase/` (single-page, `localhost:4200`).
 
 **Total: 89 component folders.** The original planning prompt referenced "87 components"; the actual count in the repository is 89 (confirmed via folder count and commit history — see `00-audit-report.md`). `ripple` is a behavioral directive with no visual variants/states of its own and is documented in `03-patterns/` rather than as a standalone component page.
 

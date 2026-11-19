@@ -14,7 +14,7 @@ import apiEntries from '../../../../content/api/breadcrumb.json';
 import introContent from '../../../../content/docs/breadcrumb-intro.txt?raw';
 import homeTemplatesContent from '../../../../content/docs/breadcrumb-home-templates.txt?raw';
 
-const IMPORT_CODE = `import { BreadcrumbComponent, type BreadcrumbItem } from '@medra/ui';`;
+const IMPORT_CODE = `import { BreadcrumbComponent, type BreadcrumbItem } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'Breadcrumb — MedraUi',

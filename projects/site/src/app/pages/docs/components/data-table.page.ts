@@ -26,7 +26,7 @@ import lazyContent from '../../../../content/docs/data-table-lazy.txt?raw';
 import groupedRowsContent from '../../../../content/docs/data-table-grouped-rows.txt?raw';
 import reorderEventsContent from '../../../../content/docs/data-table-reorder-events.txt?raw';
 
-const IMPORT_CODE = `import { DataTableComponent, TableColumnComponent } from '@medra/ui';`;
+const IMPORT_CODE = `import { DataTableComponent, TableColumnComponent } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'DataTable — MedraUi',

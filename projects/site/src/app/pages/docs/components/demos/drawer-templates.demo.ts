@@ -1,5 +1,5 @@
 import { Component, signal } from '@angular/core';
-import { ButtonDirective, DrawerComponent, IconComponent } from '@medra/ui';
+import { ButtonDirective, DrawerComponent, IconComponent } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-drawer-templates-demo',

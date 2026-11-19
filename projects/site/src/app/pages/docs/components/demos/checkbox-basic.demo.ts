@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { CheckboxComponent } from '@medra/ui';
+import { CheckboxComponent } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-checkbox-basic-demo',

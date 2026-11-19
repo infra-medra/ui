@@ -4,8 +4,8 @@
   "compilerOptions": {
     "baseUrl": "./",
     "paths": {
-      "@medra/ui": ["../../dist/medra/ui"],
-      "@medra/ui/router": ["../../dist/medra/ui/router"]
+      "@medra.dev/ui": ["../../dist/medra/ui"],
+      "@medra.dev/ui/router": ["../../dist/medra/ui/router"]
     },
     "outDir": "./dist/out-tsc",
     "forceConsistentCasingInFileNames": true,

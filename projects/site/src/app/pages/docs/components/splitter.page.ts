@@ -14,7 +14,7 @@ import apiEntries from '../../../../content/api/splitter.json';
 import introContent from '../../../../content/docs/splitter-intro.txt?raw';
 import collapsibleContent from '../../../../content/docs/splitter-collapsible.txt?raw';
 
-const IMPORT_CODE = `import { SplitterComponent, SplitterGutterComponent, SplitterPanelComponent } from '@medra/ui';`;
+const IMPORT_CODE = `import { SplitterComponent, SplitterGutterComponent, SplitterPanelComponent } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'Splitter — MedraUi',

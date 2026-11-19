@@ -2,8 +2,8 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 
 /**
- * UI-043.S7 — the primary `@medra/ui` entry point must not depend on
- * `@angular/router`. Only the secondary `@medra/ui/router` entry may import it,
+ * UI-043.S7 — the primary `@medra.dev/ui` entry point must not depend on
+ * `@angular/router`. Only the secondary `@medra.dev/ui/router` entry may import it,
  * and `@angular/router` stays an optional peer with a patched floor (M-04).
  */
 

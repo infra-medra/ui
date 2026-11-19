@@ -17,7 +17,7 @@ import introContent from '../../../../content/docs/chip-intro.txt?raw';
 import removeIconContent from '../../../../content/docs/chip-remove-icon.txt?raw';
 import brokenImageContent from '../../../../content/docs/chip-broken-image.txt?raw';
 
-const IMPORT_CODE = `import { ChipComponent } from '@medra/ui';`;
+const IMPORT_CODE = `import { ChipComponent } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'Chip — MedraUi',

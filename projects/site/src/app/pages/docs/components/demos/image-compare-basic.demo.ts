@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { ImageCompareComponent } from '@medra/ui';
+import { ImageCompareComponent } from '@medra.dev/ui';
 
 /** Flat-colored placeholder image as an inline SVG data URI — no external image host involved. */
 function placeholderRoom(label: string, wallColor: string, floorColor: string): string {

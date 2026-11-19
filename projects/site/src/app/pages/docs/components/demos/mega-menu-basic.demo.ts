@@ -1,5 +1,5 @@
 import { Component, signal } from '@angular/core';
-import { MegaMenuComponent, type MegaMenuItem } from '@medra/ui';
+import { MegaMenuComponent, type MegaMenuItem } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-mega-menu-basic-demo',

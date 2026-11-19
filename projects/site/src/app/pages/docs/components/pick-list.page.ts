@@ -14,7 +14,7 @@ import apiEntries from '../../../../content/api/pick-list.json';
 import introContent from '../../../../content/docs/pick-list-intro.txt?raw';
 import filterDisabledContent from '../../../../content/docs/pick-list-filter-disabled.txt?raw';
 
-const IMPORT_CODE = `import { PickListComponent } from '@medra/ui';`;
+const IMPORT_CODE = `import { PickListComponent } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'PickList — MedraUi',

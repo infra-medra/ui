@@ -79,7 +79,7 @@ const EXAMPLES = [
   { id: 'example-virtual-scroll', label: 'Virtual scroll' },
 ] as const;
 
-const IMPORT_CODE = `import { AutocompleteComponent, type SelectOption } from '@medra/ui';`;
+const IMPORT_CODE = `import { AutocompleteComponent, type SelectOption } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'AutoComplete — MedraUi',

@@ -14,7 +14,7 @@ import apiEntries from '../../../../content/api/dock.json';
 import introContent from '../../../../content/docs/dock-intro.txt?raw';
 import itemTemplateContent from '../../../../content/docs/dock-item-template.txt?raw';
 
-const IMPORT_CODE = `import { DockComponent, type MenuItem } from '@medra/ui';`;
+const IMPORT_CODE = `import { DockComponent, type MenuItem } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'Dock — MedraUi',

@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { IconComponent, TimelineComponent } from '@medra/ui';
+import { IconComponent, TimelineComponent } from '@medra.dev/ui';
 
 interface ShipmentEvent {
   title: string;

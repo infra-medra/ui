@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ButtonDirective, TreeSelectComponent, type TreeNode } from '@medra/ui';
+import { ButtonDirective, TreeSelectComponent, type TreeNode } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-tree-select-loading-demo',

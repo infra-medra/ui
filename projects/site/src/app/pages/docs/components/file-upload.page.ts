@@ -14,7 +14,7 @@ import apiEntries from '../../../../content/api/file-upload.json';
 import introContent from '../../../../content/docs/file-upload-intro.txt?raw';
 import realUploadContent from '../../../../content/docs/file-upload-real.txt?raw';
 
-const IMPORT_CODE = `import { FileUploadComponent, type RejectedFile } from '@medra/ui';`;
+const IMPORT_CODE = `import { FileUploadComponent, type RejectedFile } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'FileUpload — MedraUi',

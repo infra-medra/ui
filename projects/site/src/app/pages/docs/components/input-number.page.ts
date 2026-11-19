@@ -14,7 +14,7 @@ import apiEntries from '../../../../content/api/input-number.json';
 import introContent from '../../../../content/docs/input-number-intro.txt?raw';
 import verticalClearContent from '../../../../content/docs/input-number-vertical-clear.txt?raw';
 
-const IMPORT_CODE = `import { InputNumberComponent } from '@medra/ui';`;
+const IMPORT_CODE = `import { InputNumberComponent } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'InputNumber — MedraUi',

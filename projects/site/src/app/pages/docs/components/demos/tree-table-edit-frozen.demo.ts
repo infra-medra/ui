@@ -1,5 +1,5 @@
 import { Component, signal } from '@angular/core';
-import { InputTextDirective, TreeTableComponent, TableColumnComponent, type TreeTableNode } from '@medra/ui';
+import { InputTextDirective, TreeTableComponent, TableColumnComponent, type TreeTableNode } from '@medra.dev/ui';
 
 interface StorageLocation {
   readonly name: string;

@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { SelectButtonComponent, type SelectOption } from '@medra/ui';
+import { SelectButtonComponent, type SelectOption } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-select-button-basic-demo',

@@ -14,7 +14,7 @@ import apiEntries from '../../../../content/api/organization-chart.json';
 import introContent from '../../../../content/docs/organization-chart-intro.txt?raw';
 import checkboxContent from '../../../../content/docs/organization-chart-checkbox.txt?raw';
 
-const IMPORT_CODE = `import { OrganizationChartComponent, type OrgChartNode } from '@medra/ui';`;
+const IMPORT_CODE = `import { OrganizationChartComponent, type OrgChartNode } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'OrganizationChart — MedraUi',

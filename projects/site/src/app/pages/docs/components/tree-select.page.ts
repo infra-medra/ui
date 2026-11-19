@@ -17,7 +17,7 @@ import introContent from '../../../../content/docs/tree-select-intro.txt?raw';
 import filterableContent from '../../../../content/docs/tree-select-filterable.txt?raw';
 import loadingContent from '../../../../content/docs/tree-select-loading.txt?raw';
 
-const IMPORT_CODE = `import { TreeSelectComponent, type TreeNode } from '@medra/ui';`;
+const IMPORT_CODE = `import { TreeSelectComponent, type TreeNode } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'TreeSelect — MedraUi',

@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { BreadcrumbComponent, type BreadcrumbItem } from '@medra/ui';
+import { BreadcrumbComponent, type BreadcrumbItem } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-breadcrumb-basic-demo',

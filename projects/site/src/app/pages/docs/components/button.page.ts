@@ -21,7 +21,7 @@ import variantsContent from '../../../../content/docs/button-variants.txt?raw';
 import statesContent from '../../../../content/docs/button-states.txt?raw';
 import raisedPlainContent from '../../../../content/docs/button-raised-plain.txt?raw';
 
-const IMPORT_CODE = `import { ButtonDirective } from '@medra/ui';`;
+const IMPORT_CODE = `import { ButtonDirective } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'Button — MedraUi',

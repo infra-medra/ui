@@ -11,7 +11,7 @@ import iconFieldBasicCode from './demos/icon-field-basic.demo.html?raw';
 import apiEntries from '../../../../content/api/icon-field.json';
 import introContent from '../../../../content/docs/icon-field-intro.txt?raw';
 
-const IMPORT_CODE = `import { IconComponent, IconFieldComponent, IconFieldIconDirective, InputTextDirective } from '@medra/ui';`;
+const IMPORT_CODE = `import { IconComponent, IconFieldComponent, IconFieldIconDirective, InputTextDirective } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'IconField — MedraUi',

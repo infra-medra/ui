@@ -14,7 +14,7 @@ import apiEntries from '../../../../content/api/panel.json';
 import introContent from '../../../../content/docs/panel-intro.txt?raw';
 import togglerContent from '../../../../content/docs/panel-toggler.txt?raw';
 
-const IMPORT_CODE = `import { PanelComponent } from '@medra/ui';`;
+const IMPORT_CODE = `import { PanelComponent } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'Panel — MedraUi',

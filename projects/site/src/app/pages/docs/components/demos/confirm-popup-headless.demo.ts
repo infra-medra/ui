@@ -1,5 +1,5 @@
 import { Component, TemplateRef, ViewChild, inject, signal } from '@angular/core';
-import { ButtonDirective, type ConfirmPopupData, ConfirmPopupService } from '@medra/ui';
+import { ButtonDirective, type ConfirmPopupData, ConfirmPopupService } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-confirm-popup-headless-demo',

@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { AutocompleteComponent, type SelectOption } from '@medra/ui';
+import { AutocompleteComponent, type SelectOption } from '@medra.dev/ui';
 
 /** Each option carries its group in `SelectOption.group`; options of the same group stay together. */
 const FRAMEWORKS: SelectOption<string>[] = [

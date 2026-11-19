@@ -12,4 +12,4 @@ unwritten value defaults to `min` (or `{ start: min, end: max }` in range mode) 
 rendering without one. Keyboard support covers Arrow keys (by `step`), Page Up/Down (by
 `step * 10`), and Home/End (jump to `min`/`max`) on whichever thumb has focus. It implements
 `ControlValueAccessor`, so bind it with `[(ngModel)]` or a reactive `formControl`, typed as
-`SliderValue` from `@medra/ui` if needed.
+`SliderValue` from `@medra.dev/ui` if needed.

@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import type { RouteMeta } from '@analogjs/router';
-import { ButtonDirective } from '@medra/ui';
+import { ButtonDirective } from '@medra.dev/ui';
 
 export const routeMeta: RouteMeta = {
   title: 'MedraUi — Angular components built for teams that build to last',

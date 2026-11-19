@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { CarouselComponent, type CarouselResponsiveOption } from '@medra/ui';
+import { CarouselComponent, type CarouselResponsiveOption } from '@medra.dev/ui';
 
 interface WorkshopTool {
   readonly name: string;

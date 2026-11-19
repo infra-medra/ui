@@ -14,7 +14,7 @@ import apiEntries from '../../../../content/api/meter-group.json';
 import introContent from '../../../../content/docs/meter-group-intro.txt?raw';
 import verticalContent from '../../../../content/docs/meter-group-vertical.txt?raw';
 
-const IMPORT_CODE = `import { MeterGroupComponent, type MeterItem } from '@medra/ui';`;
+const IMPORT_CODE = `import { MeterGroupComponent, type MeterItem } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'MeterGroup — MedraUi',

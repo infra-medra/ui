@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { IftaLabelComponent, IftaLabelTextDirective, InputTextDirective } from '@medra/ui';
+import { IftaLabelComponent, IftaLabelTextDirective, InputTextDirective } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-ifta-label-basic-demo',

@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { CascadeSelectComponent, type CascadeSelectOption } from '@medra/ui';
+import { CascadeSelectComponent, type CascadeSelectOption } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-cascade-select-basic-demo',

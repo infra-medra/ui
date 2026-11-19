@@ -1,5 +1,5 @@
 import { Component, signal } from '@angular/core';
-import { DataTableComponent, InputTextDirective, TableColumnComponent } from '@medra/ui';
+import { DataTableComponent, InputTextDirective, TableColumnComponent } from '@medra.dev/ui';
 
 interface EquipmentItem {
   readonly name: string;

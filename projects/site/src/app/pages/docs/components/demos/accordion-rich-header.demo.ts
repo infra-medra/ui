@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { AccordionComponent, AccordionTabComponent, AccordionTabHeaderDirective, IconComponent } from '@medra/ui';
+import { AccordionComponent, AccordionTabComponent, AccordionTabHeaderDirective, IconComponent } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-accordion-rich-header-demo',

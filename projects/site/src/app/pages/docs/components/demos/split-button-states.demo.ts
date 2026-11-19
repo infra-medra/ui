@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { SplitButtonComponent, type MenuItem } from '@medra/ui';
+import { SplitButtonComponent, type MenuItem } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-split-button-states-demo',

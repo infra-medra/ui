@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { SelectComponent, IftaLabelComponent, IftaLabelTextDirective } from '@medra/ui';
+import { SelectComponent, IftaLabelComponent, IftaLabelTextDirective } from '@medra.dev/ui';
 import { SELECT_DEMO_CITIES } from './select-demo-data';
 
 @Component({

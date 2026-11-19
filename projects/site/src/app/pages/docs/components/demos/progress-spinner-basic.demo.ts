@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { ProgressSpinnerComponent } from '@medra/ui';
+import { ProgressSpinnerComponent } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-progress-spinner-basic-demo',

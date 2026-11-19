@@ -37,7 +37,7 @@ export interface MenuItem {
    * renders as a real `<a href>` that navigates through the Router on a
    * plain click and is left to the browser for Ctrl/Cmd/Shift/Alt/middle
    * clicks. Wins over `url`; `command` still runs. Needs
-   * `provideMedraMenuRouterLinks()` from `@medra/ui/router` — without it
+   * `provideMedraMenuRouterLinks()` from `@medra.dev/ui/router` — without it
    * rendering the item throws. A UI hint, **not authorization**: protect
    * the route with a guard, since hiding or disabling the item does not
    * stop anyone from opening the URL.

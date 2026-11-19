@@ -17,7 +17,7 @@ import introContent from '../../../../content/docs/context-menu-intro.txt?raw';
 import nestedContent from '../../../../content/docs/context-menu-nested.txt?raw';
 import globalContent from '../../../../content/docs/context-menu-global.txt?raw';
 
-const IMPORT_CODE = `import { ContextMenuDirective, type MenuItem } from '@medra/ui';`;
+const IMPORT_CODE = `import { ContextMenuDirective, type MenuItem } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'ContextMenu — MedraUi',

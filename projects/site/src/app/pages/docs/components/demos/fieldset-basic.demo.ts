@@ -1,5 +1,5 @@
 import { Component, signal } from '@angular/core';
-import { ButtonDirective, FieldsetComponent, InputTextDirective } from '@medra/ui';
+import { ButtonDirective, FieldsetComponent, InputTextDirective } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-fieldset-basic-demo',

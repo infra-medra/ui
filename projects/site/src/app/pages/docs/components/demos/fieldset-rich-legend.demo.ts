@@ -1,5 +1,5 @@
 import { Component, signal } from '@angular/core';
-import { FieldsetComponent, FieldsetLegendDirective, IconComponent, InputTextDirective } from '@medra/ui';
+import { FieldsetComponent, FieldsetLegendDirective, IconComponent, InputTextDirective } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-fieldset-rich-legend-demo',

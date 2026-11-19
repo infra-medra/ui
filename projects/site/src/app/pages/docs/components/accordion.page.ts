@@ -20,7 +20,7 @@ import multipleContent from '../../../../content/docs/accordion-multiple.txt?raw
 import richHeaderContent from '../../../../content/docs/accordion-rich-header.txt?raw';
 import eventsContent from '../../../../content/docs/accordion-events.txt?raw';
 
-const IMPORT_CODE = `import { AccordionComponent, AccordionTabComponent } from '@medra/ui';`;
+const IMPORT_CODE = `import { AccordionComponent, AccordionTabComponent } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'Accordion — MedraUi',

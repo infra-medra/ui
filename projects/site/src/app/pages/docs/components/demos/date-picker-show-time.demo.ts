@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { DatePickerComponent } from '@medra/ui';
+import { DatePickerComponent } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-date-picker-show-time-demo',

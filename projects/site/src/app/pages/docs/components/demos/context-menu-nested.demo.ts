@@ -1,5 +1,5 @@
 import { Component, signal } from '@angular/core';
-import { ContextMenuDirective, type TieredMenuItem } from '@medra/ui';
+import { ContextMenuDirective, type TieredMenuItem } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-context-menu-nested-demo',

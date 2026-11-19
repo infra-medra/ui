@@ -4,8 +4,8 @@
   "compileOnSave": false,
   "compilerOptions": {
     "paths": {
-      "@medra/ui": ["./dist/medra/ui"],
-      "@medra/ui/router": ["./dist/medra/ui/router"]
+      "@medra.dev/ui": ["./dist/medra/ui"],
+      "@medra.dev/ui/router": ["./dist/medra/ui/router"]
     },
     "strict": true,
     "noImplicitOverride": true,

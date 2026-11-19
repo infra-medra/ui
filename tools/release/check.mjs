@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Release checks for @medra/ui. Gathers file and git facts, then delegates every rule to
+// Release checks for @medra.dev/ui. Gathers file and git facts, then delegates every rule to
 // `policy.mjs`. Usage: `node tools/release/check.mjs policy|changeset`.
 // Git is always called with an argument array and no shell, because branch names are
 // attacker-controlled input.

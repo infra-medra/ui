@@ -14,7 +14,7 @@ import apiEntries from '../../../../content/api/rating.json';
 import introContent from '../../../../content/docs/rating-intro.txt?raw';
 import allowHalfContent from '../../../../content/docs/rating-allow-half.txt?raw';
 
-const IMPORT_CODE = `import { RatingComponent } from '@medra/ui';`;
+const IMPORT_CODE = `import { RatingComponent } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'Rating — MedraUi',

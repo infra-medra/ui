@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { MultiSelectComponent, type SelectOption } from '@medra/ui';
+import { MultiSelectComponent, type SelectOption } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-multi-select-template-icons-demo',

@@ -11,7 +11,7 @@ import overlayBadgeBasicCode from './demos/overlay-badge-basic.demo.html?raw';
 import apiEntries from '../../../../content/api/overlay-badge.json';
 import introContent from '../../../../content/docs/overlay-badge-intro.txt?raw';
 
-const IMPORT_CODE = `import { IconComponent, OverlayBadgeComponent } from '@medra/ui';`;
+const IMPORT_CODE = `import { IconComponent, OverlayBadgeComponent } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'OverlayBadge — MedraUi',

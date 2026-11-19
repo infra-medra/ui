@@ -14,7 +14,7 @@ import apiEntries from '../../../../content/api/knob.json';
 import introContent from '../../../../content/docs/knob-intro.txt?raw';
 import colorsTemplateContent from '../../../../content/docs/knob-colors-template.txt?raw';
 
-const IMPORT_CODE = `import { KnobComponent } from '@medra/ui';`;
+const IMPORT_CODE = `import { KnobComponent } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'Knob — MedraUi',

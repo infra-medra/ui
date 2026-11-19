@@ -5,13 +5,13 @@
 
 ## Purpose
 
-Lets maintainers publish `@medra/ui` with a version that tells consumers which Angular major it supports. It covers the version policy, the checks on pull requests and the automated release.
+Lets maintainers publish `@medra.dev/ui` with a version that tells consumers which Angular major it supports. It covers the version policy, the checks on pull requests and the automated release.
 
 ## Requirements
 
 ### REQ REL-001: Initial version
 
-The first published version of `@medra/ui` SHALL be `21.0.0`.
+The first published version of `@medra.dev/ui` SHALL be `21.0.0`.
 
 #### Scenario REL-001.S1: Baseline version
 
@@ -21,7 +21,7 @@ The first published version of `@medra/ui` SHALL be `21.0.0`.
 
 ### REQ REL-002: Major equals Angular major
 
-The `@medra/ui` major version SHALL equal the Angular major version the repository is built and tested against, and the peer dependency ranges on Angular packages SHALL target that same major.
+The `@medra.dev/ui` major version SHALL equal the Angular major version the repository is built and tested against, and the peer dependency ranges on Angular packages SHALL target that same major.
 
 #### Scenario REL-002.S1: Aligned versions
 
@@ -47,7 +47,7 @@ While the Angular major stays the same, pending changesets SHALL NOT request a `
 
 #### Scenario REL-003.S1: Major changeset without baseline change
 
-- **Given** a pending changeset requests a `major` bump for `@medra/ui`
+- **Given** a pending changeset requests a `major` bump for `@medra.dev/ui`
 - **And** the repository's Angular major is unchanged
 - **When** the version-policy check runs
 - **Then** the check fails and names the changeset
@@ -100,7 +100,7 @@ When a branch that releases (`main` or `release/<major>`) receives a commit with
 
 ### REQ REL-006: Gated publication
 
-Merging the "Version Packages" pull request SHALL publish `@medra/ui` to npm only after the tests, the builds and the version-policy check pass; if any of them fails, nothing SHALL be published.
+Merging the "Version Packages" pull request SHALL publish `@medra.dev/ui` to npm only after the tests, the builds and the version-policy check pass; if any of them fails, nothing SHALL be published.
 
 #### Scenario REL-006.S1: All checks pass
 

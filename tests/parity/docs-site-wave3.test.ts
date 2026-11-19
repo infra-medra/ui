@@ -33,7 +33,7 @@ function readApi(name: string): ApiEntry[] {
 // @scenario SITE-005.S1
 describe('Docs Site Wave 3 Coverage (SITE-005.S1)', () => {
   it('documents all 23 Wave 3 Feedback, Overlay, Forms & Fluid API additions', () => {
-    // Members listed here are limited to API that exists in @medra/ui and that the generator can
+    // Members listed here are limited to API that exists in @medra.dev/ui and that the generator can
     // extract. Dropped because the library has no such member (docs must match code, L-003):
     // dialog `modal`/`show`/`hide`, confirm-dialog `breakpoints`/`close`, confirm-popup
     // `#message`/`close`, message-toast `preventOpenDuplicates`.

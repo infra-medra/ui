@@ -53,7 +53,7 @@ export const MED_ICONS = new InjectionToken<IconSet[]>('MED_ICONS');
  * Accepts Heroicons strings, Font Awesome icon definitions, and custom icon objects.
  * Typical usage:
  * ```ts
- * import { heroOutlineIcons, provideIcons } from '@medra/ui';
+ * import { heroOutlineIcons, provideIcons } from '@medra.dev/ui';
  * providers: [provideIcons({ outline: { academicCap: heroOutlineIcons.academicCap } })]
  *
  * // Font Awesome usage:

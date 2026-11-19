@@ -1,4 +1,4 @@
-import type { CascadeSelectOption } from '@medra/ui';
+import type { CascadeSelectOption } from '@medra.dev/ui';
 
 /** Two-level catalog shared by the template examples of the CascadeSelect page. */
 export const CASCADE_SELECT_CATALOG: CascadeSelectOption<string>[] = [

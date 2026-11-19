@@ -11,7 +11,7 @@ import inplaceBasicCode from './demos/inplace-basic.demo.html?raw';
 import apiEntries from '../../../../content/api/inplace.json';
 import introContent from '../../../../content/docs/inplace-intro.txt?raw';
 
-const IMPORT_CODE = `import { InplaceComponent, InplaceContentDirective, InplaceDisplayDirective, InputTextDirective } from '@medra/ui';`;
+const IMPORT_CODE = `import { InplaceComponent, InplaceContentDirective, InplaceDisplayDirective, InputTextDirective } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'Inplace — MedraUi',

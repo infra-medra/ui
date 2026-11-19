@@ -14,7 +14,7 @@ import apiEntries from '../../../../content/api/textarea.json';
 import introContent from '../../../../content/docs/textarea-intro.txt?raw';
 import autoresizeContent from '../../../../content/docs/textarea-autoresize.txt?raw';
 
-const IMPORT_CODE = `import { TextareaDirective } from '@medra/ui';`;
+const IMPORT_CODE = `import { TextareaDirective } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'Textarea — MedraUi',

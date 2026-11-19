@@ -1,5 +1,5 @@
 import { Component, signal } from '@angular/core';
-import { PanelMenuComponent, type MenuItem, type TieredMenuItem } from '@medra/ui';
+import { PanelMenuComponent, type MenuItem, type TieredMenuItem } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-panel-menu-basic-demo',

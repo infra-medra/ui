@@ -11,7 +11,7 @@ import imageCompareBasicCode from './demos/image-compare-basic.demo.html?raw';
 import apiEntries from '../../../../content/api/image-compare.json';
 import introContent from '../../../../content/docs/image-compare-intro.txt?raw';
 
-const IMPORT_CODE = `import { ImageCompareComponent } from '@medra/ui';`;
+const IMPORT_CODE = `import { ImageCompareComponent } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'ImageCompare — MedraUi',

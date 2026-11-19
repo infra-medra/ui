@@ -11,7 +11,7 @@ import stepsBasicCode from './demos/steps-basic.demo.html?raw';
 import apiEntries from '../../../../content/api/steps.json';
 import introContent from '../../../../content/docs/steps-intro.txt?raw';
 
-const IMPORT_CODE = `import { ButtonDirective, StepsComponent, type StepItem } from '@medra/ui';`;
+const IMPORT_CODE = `import { ButtonDirective, StepsComponent, type StepItem } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'Steps — MedraUi',

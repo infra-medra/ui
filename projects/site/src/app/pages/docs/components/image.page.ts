@@ -14,7 +14,7 @@ import apiEntries from '../../../../content/api/image.json';
 import introContent from '../../../../content/docs/image-intro.txt?raw';
 import dimensionsContent from '../../../../content/docs/image-dimensions.txt?raw';
 
-const IMPORT_CODE = `import { ImageComponent } from '@medra/ui';`;
+const IMPORT_CODE = `import { ImageComponent } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'Image — MedraUi',

@@ -71,7 +71,7 @@ export default defineConfig(({ mode }) => ({
   },
   resolve: {
     mainFields: ['module'],
-    // Resolves the "@medra/ui" import to `../../dist/medra/ui` (see tsconfig.json),
+    // Resolves the "@medra.dev/ui" import to `../../dist/medra/ui` (see tsconfig.json),
     // the same alias @angular/build already honors for the showcase app.
     tsconfigPaths: true,
   },

@@ -20,7 +20,7 @@ import tabMenuVisibleContent from '../../../../content/docs/tab-menu-visible.txt
 import tabMenuRouterLinkContent from '../../../../content/docs/tab-menu-router-link.txt?raw';
 import tabMenuActiveContent from '../../../../content/docs/tab-menu-active.txt?raw';
 
-const IMPORT_CODE = `import { TabMenuComponent, type MenuItem } from '@medra/ui';`;
+const IMPORT_CODE = `import { TabMenuComponent, type MenuItem } from '@medra.dev/ui';`;
 
 /** The examples listed in "On this page", in page order; each `id` is the anchor of its block. */
 const EXAMPLES = [

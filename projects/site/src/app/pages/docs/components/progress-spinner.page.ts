@@ -11,7 +11,7 @@ import progressSpinnerBasicCode from './demos/progress-spinner-basic.demo.html?r
 import apiEntries from '../../../../content/api/progress-spinner.json';
 import introContent from '../../../../content/docs/progress-spinner-intro.txt?raw';
 
-const IMPORT_CODE = `import { ProgressSpinnerComponent } from '@medra/ui';`;
+const IMPORT_CODE = `import { ProgressSpinnerComponent } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'ProgressSpinner — MedraUi',

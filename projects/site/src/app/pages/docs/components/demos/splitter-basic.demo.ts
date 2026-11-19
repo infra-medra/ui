@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { SplitterComponent, SplitterGutterComponent, SplitterPanelComponent } from '@medra/ui';
+import { SplitterComponent, SplitterGutterComponent, SplitterPanelComponent } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-splitter-basic-demo',

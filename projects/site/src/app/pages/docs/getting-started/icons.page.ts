@@ -12,7 +12,7 @@ export const routeMeta: RouteMeta = {
 
 const iconsCode = `// app.config.ts
 import { ApplicationConfig } from '@angular/core';
-import { heroOutlineIcons, heroMiniIcons, provideIcons } from '@medra/ui';
+import { heroOutlineIcons, heroMiniIcons, provideIcons } from '@medra.dev/ui';
 
 export const appConfig: ApplicationConfig = {
   providers: [

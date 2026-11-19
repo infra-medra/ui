@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { IconComponent, IconFieldComponent, IconFieldIconDirective, InputTextDirective } from '@medra/ui';
+import { IconComponent, IconFieldComponent, IconFieldIconDirective, InputTextDirective } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-icon-field-basic-demo',

@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { ButtonDirective, type GlobalOverlayPosition, ToastService } from '@medra/ui';
+import { ButtonDirective, type GlobalOverlayPosition, ToastService } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-toast-position-demo',

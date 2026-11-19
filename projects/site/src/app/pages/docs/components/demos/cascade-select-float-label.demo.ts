@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { CascadeSelectComponent, FloatLabelComponent, FloatLabelTextDirective } from '@medra/ui';
+import { CascadeSelectComponent, FloatLabelComponent, FloatLabelTextDirective } from '@medra.dev/ui';
 import { CASCADE_SELECT_CATALOG } from './cascade-select-demo-data';
 
 @Component({

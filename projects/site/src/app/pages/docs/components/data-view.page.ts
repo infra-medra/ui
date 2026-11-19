@@ -17,7 +17,7 @@ import introContent from '../../../../content/docs/data-view-intro.txt?raw';
 import templatesFilterContent from '../../../../content/docs/data-view-templates-filter.txt?raw';
 import lazyContent from '../../../../content/docs/data-view-lazy.txt?raw';
 
-const IMPORT_CODE = `import { DataViewComponent } from '@medra/ui';`;
+const IMPORT_CODE = `import { DataViewComponent } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'DataView — MedraUi',

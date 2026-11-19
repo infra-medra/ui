@@ -1,5 +1,5 @@
 import { Component, signal } from '@angular/core';
-import { ProgressBarComponent } from '@medra/ui';
+import { ProgressBarComponent } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-progress-bar-unit-demo',

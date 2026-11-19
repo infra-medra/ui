@@ -1,5 +1,5 @@
 import { Component, signal } from '@angular/core';
-import { MenuComponent, type MenuItemGroup } from '@medra/ui';
+import { MenuComponent, type MenuItemGroup } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-menu-inline-groups-demo',

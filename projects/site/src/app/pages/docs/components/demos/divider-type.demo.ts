@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { DividerComponent } from '@medra/ui';
+import { DividerComponent } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-divider-type-demo',

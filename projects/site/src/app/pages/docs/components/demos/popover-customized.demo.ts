@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { ButtonDirective, PopoverComponent } from '@medra/ui';
+import { ButtonDirective, PopoverComponent } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-popover-customized-demo',

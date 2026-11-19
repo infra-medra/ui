@@ -1,4 +1,4 @@
-# Design System Audit — MedraUi (`@medra/ui`)
+# Design System Audit — MedraUi (`@medra.dev/ui`)
 
 Method: cross-referenced the live showcase (`localhost:4200`) against the library source (`projects/medra/ui/src/lib/`, 89 component folders) and the theme source (`tailwind-theme-medraui.css`). All findings below are backed by a file/line citation; nothing here was inferred without source evidence. This report covers Phase 2's token findings, a repo-wide structural scan, and Phase 4's per-component Wave 1 pass (all 89 components now have an essentials doc page in `02-components/`).
 

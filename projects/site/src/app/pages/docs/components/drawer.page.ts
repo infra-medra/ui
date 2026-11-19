@@ -20,7 +20,7 @@ import modalContent from '../../../../content/docs/drawer-modal.txt?raw';
 import templatesContent from '../../../../content/docs/drawer-templates.txt?raw';
 import behaviorContent from '../../../../content/docs/drawer-behavior.txt?raw';
 
-const IMPORT_CODE = `import { ButtonDirective, DrawerComponent } from '@medra/ui';`;
+const IMPORT_CODE = `import { ButtonDirective, DrawerComponent } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'Drawer — MedraUi',

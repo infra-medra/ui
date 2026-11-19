@@ -16,22 +16,22 @@ export const routeMeta: RouteMeta = {
   meta: [
     {
       name: 'description',
-      content: 'How to install @medra/ui, add its styles, register icons, and render your first component in an Angular app.',
+      content: 'How to install @medra.dev/ui, add its styles, register icons, and render your first component in an Angular app.',
     },
   ],
 };
 
-const INSTALL_CODE = `npm install @medra/ui @angular/cdk`;
+const INSTALL_CODE = `npm install @medra.dev/ui @angular/cdk`;
 
 const STYLES_CODE = `// angular.json
 "styles": [
-  "node_modules/@medra/ui/styles.css",
+  "node_modules/@medra.dev/ui/styles.css",
   "src/styles.css"
 ]`;
 
 const ICONS_CODE = `// app.config.ts
 import { ApplicationConfig } from '@angular/core';
-import { heroOutlineIcons, heroMiniIcons, provideIcons } from '@medra/ui';
+import { heroOutlineIcons, heroMiniIcons, provideIcons } from '@medra.dev/ui';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -45,7 +45,7 @@ export const appConfig: ApplicationConfig = {
 
 const USAGE_CODE = `import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { CheckboxComponent } from '@medra/ui';
+import { CheckboxComponent } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-terms',

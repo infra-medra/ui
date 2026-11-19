@@ -1,7 +1,7 @@
 import { LocationStrategy } from '@angular/common';
 import { DestroyRef, EnvironmentProviders, inject, makeEnvironmentProviders, signal } from '@angular/core';
 import { NavigationEnd, Router, UrlTree } from '@angular/router';
-import { MED_MENU_LINK_STRATEGY, MenuItemRouterLink, MenuLinkStrategy } from '@medra/ui';
+import { MED_MENU_LINK_STRATEGY, MenuItemRouterLink, MenuLinkStrategy } from '@medra.dev/ui';
 
 /**
  * Registers the Router-backed `MenuLinkStrategy` that menu items with

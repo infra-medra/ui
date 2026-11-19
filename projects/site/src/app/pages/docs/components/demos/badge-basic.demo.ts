@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { BadgeComponent } from '@medra/ui';
+import { BadgeComponent } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-badge-basic-demo',

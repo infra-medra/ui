@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { SkeletonComponent } from '@medra/ui';
+import { SkeletonComponent } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-skeleton-basic-demo',

@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { ChipComponent } from '@medra/ui';
+import { ChipComponent } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-chip-basic-demo',

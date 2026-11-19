@@ -14,7 +14,7 @@ import apiEntries from '../../../../content/api/select-button.json';
 import introContent from '../../../../content/docs/select-button-intro.txt?raw';
 import allowEmptyContent from '../../../../content/docs/select-button-allow-empty.txt?raw';
 
-const IMPORT_CODE = `import { SelectButtonComponent, type SelectOption } from '@medra/ui';`;
+const IMPORT_CODE = `import { SelectButtonComponent, type SelectOption } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'SelectButton — MedraUi',

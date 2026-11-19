@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { InputOtpComponent } from '@medra/ui';
+import { InputOtpComponent } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-input-otp-basic-demo',

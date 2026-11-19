@@ -9,7 +9,7 @@ const ACTIVE_CLASSES = ['text-brand-600', 'dark:text-brand-400'];
  * Internal (not exported from the public API): turns an `<a>` of a menu item
  * that has `routerLink` into a real router link without importing
  * `@angular/router` — the Router is reached through `MED_MENU_LINK_STRATEGY`,
- * which `@medra/ui/router` provides.
+ * which `@medra.dev/ui/router` provides.
  *
  * - `href` comes from the strategy (the Router's own serialization, never the
  *   raw string), so hostile values cannot become `javascript:` or

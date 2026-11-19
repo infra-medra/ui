@@ -9,8 +9,8 @@ import {
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
 import { provideFileRouter, requestContextInterceptor } from '@analogjs/router';
 import { withInMemoryScrolling } from '@angular/router';
-import { heroMiniIcons, heroOutlineIcons, heroSolidIcons, provideIcons } from '@medra/ui';
-import { provideMedraMenuRouterLinks } from '@medra/ui/router';
+import { heroMiniIcons, heroOutlineIcons, heroSolidIcons, provideIcons } from '@medra.dev/ui';
+import { provideMedraMenuRouterLinks } from '@medra.dev/ui/router';
 
 export const appConfig: ApplicationConfig = {
   providers: [

@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { InputNumberComponent } from '@medra/ui';
+import { InputNumberComponent } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-input-number-vertical-clear-demo',

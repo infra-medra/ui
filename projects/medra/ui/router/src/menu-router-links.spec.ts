@@ -12,12 +12,12 @@ import {
   PanelMenuComponent,
   TabMenuComponent,
   TieredMenuComponent,
-} from '@medra/ui';
+} from '@medra.dev/ui';
 import { provideMedraMenuRouterLinks } from './menu-router-links';
 
 /**
  * UI-043 (routerLink) with the real Router and the real strategy from
- * `@medra/ui/router`, in all six menu components. The threat-model cases
+ * `@medra.dev/ui/router`, in all six menu components. The threat-model cases
  * (M-01 hostile URLs, M-02 disabled items) live here too.
  */
 
@@ -82,7 +82,7 @@ function click(el: HTMLElement, init: MouseEventInit = {}): { defaultPrevented: 
   return { defaultPrevented };
 }
 
-describe('menu routerLink with @medra/ui/router', () => {
+describe('menu routerLink with @medra.dev/ui/router', () => {
   let router: Router;
 
   beforeEach(() => {

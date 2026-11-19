@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { AvatarComponent } from '@medra/ui';
+import { AvatarComponent } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-avatar-basic-demo',

@@ -17,7 +17,7 @@ import introContent from '../../../../content/docs/dialog-intro.txt?raw';
 import windowControlsContent from '../../../../content/docs/dialog-window-controls.txt?raw';
 import behaviorContent from '../../../../content/docs/dialog-behavior.txt?raw';
 
-const IMPORT_CODE = `import { ButtonDirective, DialogService } from '@medra/ui';`;
+const IMPORT_CODE = `import { ButtonDirective, DialogService } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'Dialog — MedraUi',

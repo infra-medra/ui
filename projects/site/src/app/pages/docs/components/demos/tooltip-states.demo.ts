@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { ButtonDirective, TooltipDirective } from '@medra/ui';
+import { ButtonDirective, TooltipDirective } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-tooltip-states-demo',

@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { SelectComponent, type SelectOption } from '@medra/ui';
+import { SelectComponent, type SelectOption } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-select-lazy-demo',

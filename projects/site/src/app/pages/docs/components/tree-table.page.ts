@@ -17,7 +17,7 @@ import introContent from '../../../../content/docs/tree-table-intro.txt?raw';
 import resizableVirtualScrollContent from '../../../../content/docs/tree-table-resizable-virtual-scroll.txt?raw';
 import editFrozenContent from '../../../../content/docs/tree-table-edit-frozen.txt?raw';
 
-const IMPORT_CODE = `import { TreeTableComponent, TableColumnComponent, type TreeTableNode } from '@medra/ui';`;
+const IMPORT_CODE = `import { TreeTableComponent, TableColumnComponent, type TreeTableNode } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'TreeTable — MedraUi',

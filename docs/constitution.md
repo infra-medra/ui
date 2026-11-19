@@ -69,9 +69,9 @@ Any text a component renders internally (labels, aria-labels, default messages) 
 
 ### Article X: Version follows the Angular major
 
-The `@medra/ui` major version MUST equal the Angular major that the repository is built and tested against (the `@angular/core` version in the root `package.json`). Changesets MUST use only `minor` (features) and `patch` (fixes) while that Angular major stays the same, and breaking API changes MUST NOT ship until the Angular baseline moves to a new major. The peer dependency ranges in `projects/medra/ui/package.json` MUST target that same Angular major.
+The `@medra.dev/ui` major version MUST equal the Angular major that the repository is built and tested against (the `@angular/core` version in the root `package.json`). Changesets MUST use only `minor` (features) and `patch` (fixes) while that Angular major stays the same, and breaking API changes MUST NOT ship until the Angular baseline moves to a new major. The peer dependency ranges in `projects/medra/ui/package.json` MUST target that same Angular major.
 
-**Gate:** Does this change keep the `@medra/ui` major equal to the repository's Angular major, use no `major` changeset unless it also moves the Angular baseline, and keep the peer ranges on that Angular major?
+**Gate:** Does this change keep the `@medra.dev/ui` major equal to the repository's Angular major, use no `major` changeset unless it also moves the Angular baseline, and keep the peer ranges on that Angular major?
 **Rationale:** Consumers pick the library version from their Angular version, and an unmanaged major (the package is still 0.x while targeting Angular 21) hides which Angular a release supports.
 
 ## Amendments

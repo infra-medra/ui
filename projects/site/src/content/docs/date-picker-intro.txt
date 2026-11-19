@@ -10,4 +10,4 @@ keystroke by keystroke, but only once it parses into a real calendar date inside
 `[minDate, maxDate]` — an unparseable or out-of-range string is silently reverted to the last
 committed value on blur, never carried into the form. It implements `ControlValueAccessor`, so
 bind it with `[(ngModel)]` or a reactive `formControl`, typed as `DatePickerValue` from
-`@medra/ui` if you need the union explicitly.
+`@medra.dev/ui` if you need the union explicitly.

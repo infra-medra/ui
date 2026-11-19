@@ -14,7 +14,7 @@ import apiEntries from '../../../../content/api/inline-message.json';
 import introContent from '../../../../content/docs/inline-message-intro.txt?raw';
 import severitiesContent from '../../../../content/docs/inline-message-severities.txt?raw';
 
-const IMPORT_CODE = `import { InlineMessageComponent, InputTextDirective } from '@medra/ui';`;
+const IMPORT_CODE = `import { InlineMessageComponent, InputTextDirective } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'InlineMessage — MedraUi',

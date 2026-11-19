@@ -1,5 +1,5 @@
 import { Component, signal } from '@angular/core';
-import { OrderListComponent } from '@medra/ui';
+import { OrderListComponent } from '@medra.dev/ui';
 
 interface DeploymentStep {
   readonly label: string;

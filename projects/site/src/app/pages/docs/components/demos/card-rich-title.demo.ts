@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { BadgeComponent, CardComponent, CardSubtitleDirective, CardTitleDirective, IconComponent } from '@medra/ui';
+import { BadgeComponent, CardComponent, CardSubtitleDirective, CardTitleDirective, IconComponent } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-card-rich-title-demo',

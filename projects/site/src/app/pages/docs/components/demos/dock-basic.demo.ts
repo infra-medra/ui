@@ -1,5 +1,5 @@
 import { Component, signal } from '@angular/core';
-import { DockComponent, type MenuItem } from '@medra/ui';
+import { DockComponent, type MenuItem } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-dock-basic-demo',

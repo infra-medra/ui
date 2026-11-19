@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { MeterGroupComponent, type MeterItem } from '@medra/ui';
+import { MeterGroupComponent, type MeterItem } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-meter-group-basic-demo',

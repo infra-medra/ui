@@ -11,7 +11,7 @@ import radioButtonBasicCode from './demos/radio-button-basic.demo.html?raw';
 import apiEntries from '../../../../content/api/radio-button.json';
 import introContent from '../../../../content/docs/radio-button-intro.txt?raw';
 
-const IMPORT_CODE = `import { RadioButtonComponent } from '@medra/ui';`;
+const IMPORT_CODE = `import { RadioButtonComponent } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'RadioButton — MedraUi',

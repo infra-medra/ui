@@ -11,7 +11,7 @@ import toggleButtonBasicCode from './demos/toggle-button-basic.demo.html?raw';
 import apiEntries from '../../../../content/api/toggle-button.json';
 import introContent from '../../../../content/docs/toggle-button-intro.txt?raw';
 
-const IMPORT_CODE = `import { ToggleButtonComponent } from '@medra/ui';`;
+const IMPORT_CODE = `import { ToggleButtonComponent } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'ToggleButton — MedraUi',

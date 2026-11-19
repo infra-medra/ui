@@ -14,7 +14,7 @@ import apiEntries from '../../../../content/api/stepper.json';
 import introContent from '../../../../content/docs/stepper-intro.txt?raw';
 import verticalContent from '../../../../content/docs/stepper-vertical.txt?raw';
 
-const IMPORT_CODE = `import { StepPanelComponent, StepperComponent } from '@medra/ui';`;
+const IMPORT_CODE = `import { StepPanelComponent, StepperComponent } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'Stepper — MedraUi',

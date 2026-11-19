@@ -17,7 +17,7 @@ import introContent from '../../../../content/docs/virtual-scroller-intro.txt?ra
 import lazyLoadContent from '../../../../content/docs/virtual-scroller-lazy-load.txt?raw';
 import scrollToIndexContent from '../../../../content/docs/virtual-scroller-scroll-to-index.txt?raw';
 
-const IMPORT_CODE = `import { VirtualScrollerComponent } from '@medra/ui';`;
+const IMPORT_CODE = `import { VirtualScrollerComponent } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'VirtualScroller — MedraUi',

@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { IconComponent, TagComponent } from '@medra/ui';
+import { IconComponent, TagComponent } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-tag-basic-demo',

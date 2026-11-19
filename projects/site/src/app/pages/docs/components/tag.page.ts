@@ -11,7 +11,7 @@ import tagBasicCode from './demos/tag-basic.demo.html?raw';
 import apiEntries from '../../../../content/api/tag.json';
 import introContent from '../../../../content/docs/tag-intro.txt?raw';
 
-const IMPORT_CODE = `import { IconComponent, TagComponent } from '@medra/ui';`;
+const IMPORT_CODE = `import { IconComponent, TagComponent } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'Tag — MedraUi',

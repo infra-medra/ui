@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { InputGroupAddonDirective, InputGroupComponent, InputTextDirective } from '@medra/ui';
+import { InputGroupAddonDirective, InputGroupComponent, InputTextDirective } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-input-group-basic-demo',

@@ -1,5 +1,5 @@
 import { Component, computed, signal } from '@angular/core';
-import { ButtonDirective, MegaMenuComponent, type MegaMenuItem } from '@medra/ui';
+import { ButtonDirective, MegaMenuComponent, type MegaMenuItem } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-mega-menu-visible-demo',

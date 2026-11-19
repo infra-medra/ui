@@ -1,5 +1,5 @@
 import { Component, signal } from '@angular/core';
-import { TabMenuComponent, type MenuItem } from '@medra/ui';
+import { TabMenuComponent, type MenuItem } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-tab-menu-basic-demo',

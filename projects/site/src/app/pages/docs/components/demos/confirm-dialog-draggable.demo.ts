@@ -1,5 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
-import { ButtonDirective, ConfirmDialogService } from '@medra/ui';
+import { ButtonDirective, ConfirmDialogService } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-confirm-dialog-draggable-demo',

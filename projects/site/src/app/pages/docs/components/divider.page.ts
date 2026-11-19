@@ -14,7 +14,7 @@ import apiEntries from '../../../../content/api/divider.json';
 import introContent from '../../../../content/docs/divider-intro.txt?raw';
 import typeContent from '../../../../content/docs/divider-type.txt?raw';
 
-const IMPORT_CODE = `import { DividerComponent } from '@medra/ui';`;
+const IMPORT_CODE = `import { DividerComponent } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'Divider — MedraUi',

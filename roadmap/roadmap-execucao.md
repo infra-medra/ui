@@ -35,12 +35,12 @@ licenciamento, o `license-server` e o painel do cliente foram removidos do repos
 ## Trilha 6 — Documentação e site público (paralela, própria equipe/foco) — ✅ Completa em 2026-09-07
 1. ✅ Site em Analog (`projects/site`), Node 22, SSR/SSG real (prerendering com conteúdo
    de verdade, não só um shell client-side) — pensado pra hospedagem estática no
-   Cloudflare Pages. Reaproveita os tokens de design do próprio `@medra/ui`
+   Cloudflare Pages. Reaproveita os tokens de design do próprio `@medra.dev/ui`
    (`tailwind-theme-medraui.css`) em vez de duplicar a paleta; tipografia de marca
    (Space Grotesk/IBM Plex Sans) usada pela primeira vez aqui — antes só documentada,
    nunca aplicada em nenhum app.
 2. ✅ Os 5 componentes piloto documentados (`/docs/components/*`) — prosa e exemplos
-   100% originais, exemplos interativos ao vivo com o `@medra/ui` de verdade, e
+   100% originais, exemplos interativos ao vivo com o `@medra.dev/ui` de verdade, e
    referência de API gerada via TypeScript Compiler API a partir do TSDoc do próprio
    código-fonte (`tools/generate-api-docs.mts`), não regex nem cópia de doc de
    terceiro. Dialog/Toast (serviços `@Injectable`, sem inputs de sinal) extraem métodos
@@ -51,7 +51,7 @@ licenciamento, o `license-server` e o painel do cliente foram removidos do repos
 
 **Achados durante a Trilha 6, corrigidos de verdade em 2026-09-08** (inicialmente só
 contornados via `isPlatformBrowser` no site, depois revisitados e corrigidos na origem):
-três gaps de SSR, dois no próprio `@medra/ui`, um na configuração de build do site —
+três gaps de SSR, dois no próprio `@medra.dev/ui`, um na configuração de build do site —
 (1) `IconComponent` usava `[innerHTML]` num `<svg>`, e o Domino (shim de DOM do
 `@angular/platform-server`) só implementa o setter de `innerHTML` em `HTMLElement`, não em
 `SVGElement` (herda o `nyi` da base `Element`, que lança incondicionalmente). Corrigido
@@ -66,7 +66,7 @@ Vite não estava inlinando `@angular/cdk`, então o estado interno de "injector 
 Angular ficava dessincronizado entre a cópia de `@angular/core` usada pelo app e a usada
 pelo CDK. Corrigido com uma linha em `projects/site/vite.config.ts`:
 `ssr: { noExternal: ['@angular/cdk'] }` — nenhuma mudança de código foi necessária no
-`@medra/ui` pra esse (uma tentativa de `runInInjectionContext` em `OverlayService` foi
+`@medra.dev/ui` pra esse (uma tentativa de `runInInjectionContext` em `OverlayService` foi
 testada e descartada por não ser a causa real). Com os três corrigidos, os ~30 guards
 `isPlatformBrowser` espalhados pelas páginas de doc (Dialog/Toast/Select/Menu-família/
 Checkbox indeterminate/etc.) foram todos removidos — as demos agora renderizam conteúdo

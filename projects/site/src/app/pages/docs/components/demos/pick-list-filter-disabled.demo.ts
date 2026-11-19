@@ -1,5 +1,5 @@
 import { Component, signal } from '@angular/core';
-import { PickListComponent } from '@medra/ui';
+import { PickListComponent } from '@medra.dev/ui';
 
 interface Reviewer {
   readonly name: string;

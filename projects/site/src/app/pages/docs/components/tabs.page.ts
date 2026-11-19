@@ -17,7 +17,7 @@ import introContent from '../../../../content/docs/tabs-intro.txt?raw';
 import lazyContent from '../../../../content/docs/tabs-lazy.txt?raw';
 import navigatorsContent from '../../../../content/docs/tabs-navigators.txt?raw';
 
-const IMPORT_CODE = `import { TabComponent, TabsComponent } from '@medra/ui';`;
+const IMPORT_CODE = `import { TabComponent, TabsComponent } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'Tabs — MedraUi',

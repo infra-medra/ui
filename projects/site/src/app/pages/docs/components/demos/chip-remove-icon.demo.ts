@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { ChipComponent, IconComponent } from '@medra/ui';
+import { ChipComponent, IconComponent } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-chip-remove-icon-demo',

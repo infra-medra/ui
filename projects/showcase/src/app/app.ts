@@ -135,7 +135,7 @@ import {
   ToolbarEndDirective,
   ToolbarStartDirective,
   TooltipDirective,
-} from '@medra/ui';
+} from '@medra.dev/ui';
 
 @Component({
   standalone: true,

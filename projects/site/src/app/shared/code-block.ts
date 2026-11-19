@@ -1,5 +1,5 @@
 import { Component, input, signal } from '@angular/core';
-import { ButtonDirective, IconComponent } from '@medra/ui';
+import { ButtonDirective, IconComponent } from '@medra.dev/ui';
 
 /**
  * Displays a component demo's actual template source as a read-only code block.

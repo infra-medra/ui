@@ -14,7 +14,7 @@ import { MenuItem } from './menu.types';
  */
 
 const MESSAGE =
-  "MenuItem.routerLink needs the Router integration: add provideMedraMenuRouterLinks() from '@medra/ui/router' to the app providers (after provideRouter).";
+  "MenuItem.routerLink needs the Router integration: add provideMedraMenuRouterLinks() from '@medra.dev/ui/router' to the app providers (after provideRouter).";
 
 const WITH_LINK: MenuItem[] = [{ label: 'Reports', routerLink: '/reports' }];
 const WITHOUT_LINK: MenuItem[] = [{ label: 'Home' }, { label: 'External', url: 'https://example.com' }];

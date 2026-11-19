@@ -1,5 +1,5 @@
 import { Component, signal } from '@angular/core';
-import { ButtonDirective, StepsComponent, type StepItem } from '@medra/ui';
+import { ButtonDirective, StepsComponent, type StepItem } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-steps-basic-demo',

@@ -11,7 +11,7 @@ import avatarGroupBasicCode from './demos/avatar-group-basic.demo.html?raw';
 import apiEntries from '../../../../content/api/avatar-group.json';
 import introContent from '../../../../content/docs/avatar-group-intro.txt?raw';
 
-const IMPORT_CODE = `import { AvatarGroupComponent } from '@medra/ui';`;
+const IMPORT_CODE = `import { AvatarGroupComponent } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'AvatarGroup — MedraUi',

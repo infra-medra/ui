@@ -1,6 +1,6 @@
-# Releasing `@medra/ui`
+# Releasing `@medra.dev/ui`
 
-This document is the maintainer runbook for publishing `@medra/ui`. It covers the
+This document is the maintainer runbook for publishing `@medra.dev/ui`. It covers the
 one-time setup that cannot live in the repository (npm and GitHub settings) and the
 rules the pipeline enforces from then on.
 
@@ -13,7 +13,7 @@ How the pipeline works, in short:
   Changesets action, which opens the "Version Packages" PR or publishes through
   `tools/release/publish.mjs` using npm Trusted Publishing. No npm token is stored
   anywhere.
-- The `@medra/ui` major always equals the repository's Angular major (the major of
+- The `@medra.dev/ui` major always equals the repository's Angular major (the major of
   `@angular/core` in the root `package.json`). The policy check enforces this.
 
 ## 1. First publish of `21.0.0` (manual, once)
@@ -22,7 +22,7 @@ The trusted publisher can only be registered after the package exists on npm, so
 first version is published by hand. This is the only publish without provenance, so
 it is done carefully.
 
-Prerequisites: an npm account that is a member of the `@medra` scope, with two-factor
+Prerequisites: an npm account that is a member of the `@medra.dev` scope, with two-factor
 authentication (2FA) enabled for authorization and publishing.
 
 1. Start from a clean checkout of the reviewed commit that sets the version to
@@ -65,13 +65,13 @@ authentication (2FA) enabled for authorization and publishing.
    ```
 
    Enter the one-time password when asked. Confirm the result with
-   `npm view @medra/ui@21.0.0`.
+   `npm view @medra.dev/ui@21.0.0`.
 
 5. Tag the release commit and push the tag:
 
    ```bash
-   git tag @medra/ui@21.0.0
-   git push origin @medra/ui@21.0.0
+   git tag @medra.dev/ui@21.0.0
+   git push origin @medra.dev/ui@21.0.0
    ```
 
 6. Continue with section 2 immediately, so no long-lived credential stays around.
@@ -80,7 +80,7 @@ authentication (2FA) enabled for authorization and publishing.
 
 Do this right after the first publish.
 
-1. On npmjs.com, open the package `@medra/ui` → **Settings** → **Trusted Publisher**
+1. On npmjs.com, open the package `@medra.dev/ui` → **Settings** → **Trusted Publisher**
    and register GitHub Actions with:
 
    | Field | Value |
@@ -98,7 +98,7 @@ Do this right after the first publish.
    authentication and disallow tokens**. After this, only 2FA-authenticated users
    and trusted publishers can publish.
 
-3. Revoke every npm token that could publish `@medra/ui`: list them under
+3. Revoke every npm token that could publish `@medra.dev/ui`: list them under
    npm → **Access Tokens** and delete each one, including any created for the first
    publish. Run `npm logout` on the machine used in section 1.
 
@@ -152,7 +152,7 @@ maintainers team exist, replace the handle with the team.
 
 ## 4. Cutting a `release/<major>` branch before an Angular baseline change
 
-When the repository moves to a new Angular major, the `@medra/ui` major moves with
+When the repository moves to a new Angular major, the `@medra.dev/ui` major moves with
 it. Before the pull request that changes it merges, the previous major must keep a
 maintenance line.
 

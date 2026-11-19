@@ -1,5 +1,5 @@
 import { Component, signal } from '@angular/core';
-import { ContextMenuDirective, type MenuItem } from '@medra/ui';
+import { ContextMenuDirective, type MenuItem } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-context-menu-basic-demo',

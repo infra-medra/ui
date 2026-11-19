@@ -11,7 +11,7 @@ import badgeBasicCode from './demos/badge-basic.demo.html?raw';
 import apiEntries from '../../../../content/api/badge.json';
 import introContent from '../../../../content/docs/badge-intro.txt?raw';
 
-const IMPORT_CODE = `import { BadgeComponent } from '@medra/ui';`;
+const IMPORT_CODE = `import { BadgeComponent } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'Badge — MedraUi',

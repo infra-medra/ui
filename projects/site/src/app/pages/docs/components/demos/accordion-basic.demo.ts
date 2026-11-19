@@ -1,5 +1,5 @@
 import { Component, signal } from '@angular/core';
-import { AccordionComponent, AccordionTabComponent } from '@medra/ui';
+import { AccordionComponent, AccordionTabComponent } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-accordion-basic-demo',

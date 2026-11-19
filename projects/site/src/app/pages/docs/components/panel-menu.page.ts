@@ -23,7 +23,7 @@ import panelMenuVisibleContent from '../../../../content/docs/panel-menu-visible
 import panelMenuRouterLinkContent from '../../../../content/docs/panel-menu-router-link.txt?raw';
 import panelMenuActiveContent from '../../../../content/docs/panel-menu-active.txt?raw';
 
-const IMPORT_CODE = `import { PanelMenuComponent, type MenuItem, type TieredMenuItem } from '@medra/ui';`;
+const IMPORT_CODE = `import { PanelMenuComponent, type MenuItem, type TieredMenuItem } from '@medra.dev/ui';`;
 
 /** The examples listed in "On this page", in page order; each `id` is the anchor of its block. */
 const EXAMPLES = [

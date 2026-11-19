@@ -102,7 +102,7 @@ const EXAMPLES = [
   { id: 'example-reactive-forms', label: 'Reactive Forms' },
 ] as const;
 
-const IMPORT_CODE = `import { ListboxComponent, type SelectOption } from '@medra/ui';`;
+const IMPORT_CODE = `import { ListboxComponent, type SelectOption } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'Listbox — MedraUi',

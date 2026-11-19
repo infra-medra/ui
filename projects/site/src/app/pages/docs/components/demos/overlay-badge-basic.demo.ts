@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { IconComponent, OverlayBadgeComponent } from '@medra/ui';
+import { IconComponent, OverlayBadgeComponent } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-overlay-badge-basic-demo',

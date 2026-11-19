@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { GalleriaComponent, type GalleriaItem } from '@medra/ui';
+import { GalleriaComponent, type GalleriaItem } from '@medra.dev/ui';
 
 /**
  * Builds a flat-colored placeholder photo as an inline SVG data URI — avoids depending on an

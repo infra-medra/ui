@@ -14,7 +14,7 @@ import apiEntries from '../../../../content/api/popover.json';
 import introContent from '../../../../content/docs/popover-intro.txt?raw';
 import customizedContent from '../../../../content/docs/popover-customized.txt?raw';
 
-const IMPORT_CODE = `import { ButtonDirective, InputTextDirective, PopoverComponent } from '@medra/ui';`;
+const IMPORT_CODE = `import { ButtonDirective, InputTextDirective, PopoverComponent } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'Popover — MedraUi',

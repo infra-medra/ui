@@ -1,5 +1,5 @@
 import { Component, signal } from '@angular/core';
-import { ImageComponent } from '@medra/ui';
+import { ImageComponent } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-image-basic-demo',

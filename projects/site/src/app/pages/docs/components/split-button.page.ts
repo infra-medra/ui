@@ -14,7 +14,7 @@ import apiEntries from '../../../../content/api/split-button.json';
 import introContent from '../../../../content/docs/split-button-intro.txt?raw';
 import statesContent from '../../../../content/docs/split-button-states.txt?raw';
 
-const IMPORT_CODE = `import { SplitButtonComponent, type MenuItem } from '@medra/ui';`;
+const IMPORT_CODE = `import { SplitButtonComponent, type MenuItem } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'SplitButton — MedraUi',

@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { FileUploadComponent } from '@medra/ui';
+import { FileUploadComponent } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-file-upload-real-demo',

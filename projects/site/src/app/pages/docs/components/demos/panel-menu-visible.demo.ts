@@ -1,5 +1,5 @@
 import { Component, computed, signal } from '@angular/core';
-import { ButtonDirective, PanelMenuComponent, type TieredMenuItem } from '@medra/ui';
+import { ButtonDirective, PanelMenuComponent, type TieredMenuItem } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-panel-menu-visible-demo',

@@ -1,4 +1,4 @@
-# @medra/ui
+# @medra.dev/ui
 
 ## 21.0.0
 
@@ -16,7 +16,7 @@
   - `routerLink`: renders the item as a real `<a href>` that navigates through the Router on a plain click and leaves Ctrl/Cmd/Shift/Alt and middle clicks to the browser. It wins over `url`, still calls `command`, and a disabled item renders no `href`.
   - `routerLinkActiveOptions`: `{ exact: true }` limits the active state to an exact URL match. An item with `routerLink` is marked with `aria-current="page"` and the active style while its route is active.
 
-  `routerLink` needs the new optional entry point `@medra/ui/router`: register `provideMedraMenuRouterLinks()` after `provideRouter(...)`. Rendering an item with `routerLink` without it throws an error that says so. The main entry point still does not import `@angular/router`, which is now an optional peer dependency (`^21.2.25`). Apps that never set `routerLink` need no change.
+  `routerLink` needs the new optional entry point `@medra.dev/ui/router`: register `provideMedraMenuRouterLinks()` after `provideRouter(...)`. Rendering an item with `routerLink` without it throws an error that says so. The main entry point still does not import `@angular/router`, which is now an optional peer dependency (`^21.2.25`). Apps that never set `routerLink` need no change.
 
 - `med-multi-select`: add additional inputs, outputs and templates. New inputs map consumer data (`optionLabel`, `optionValue`, `optionDisabled`, `optionGroupLabel`, `optionGroupChildren`, `dataKey`), tune the panel filter (`filterBy`, `filterMatchMode`, `resetFilterOnHide`, `autofocusFilter`), and set field attributes and appearance (`name`, `tabindex`, `ariaLabel`, `ariaLabelledBy`, `autofocus`, `required`, `variant`, `fluid`, `panelStyleClass`, `appendTo`, `scrollHeight`). `name` renders one hidden input per chosen value. New outputs cover selection, chip removal, select all, clear, field click, focus, blur, filter, and panel show and hide (with their before events). Eleven named templates (`#value`, `#chip`, `#option`, `#group`, `#header`, `#footer`, `#empty`, `#triggerIcon`, `#clearIcon`, `#loadingIcon` and `#chipRemoveIcon`) customize the field and the panel. `selectTriggerVariants` is reused with its `variant` option.
 

@@ -1,5 +1,5 @@
 import { Component, computed, signal } from '@angular/core';
-import { ButtonDirective, MenubarComponent, type MenubarItem } from '@medra/ui';
+import { ButtonDirective, MenubarComponent, type MenubarItem } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-menubar-visible-demo',

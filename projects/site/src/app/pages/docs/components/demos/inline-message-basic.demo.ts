@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { InlineMessageComponent, InputTextDirective } from '@medra/ui';
+import { InlineMessageComponent, InputTextDirective } from '@medra.dev/ui';
 
 @Component({
   selector: 'app-inline-message-basic-demo',

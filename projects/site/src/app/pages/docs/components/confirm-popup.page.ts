@@ -20,7 +20,7 @@ import headlessContent from '../../../../content/docs/confirm-popup-headless.txt
 import contentTemplateContent from '../../../../content/docs/confirm-popup-content.txt?raw';
 import acceptOnlyContent from '../../../../content/docs/confirm-popup-accept-only.txt?raw';
 
-const IMPORT_CODE = `import { ButtonDirective, ConfirmPopupService } from '@medra/ui';`;
+const IMPORT_CODE = `import { ButtonDirective, ConfirmPopupService } from '@medra.dev/ui';`;
 
 export const routeMeta: RouteMeta = {
   title: 'ConfirmPopup — MedraUi',
