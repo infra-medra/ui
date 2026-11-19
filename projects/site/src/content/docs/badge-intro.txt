@@ -1,0 +1,12 @@
+Badge is a small standalone label — a colored pill for a count or short status — not a
+positioning helper attached to another element; that job belongs to the separate OverlayBadge
+component. Its content is projected via `<ng-content>` rather than passed as a string input, so
+anything can go inside it, not only plain text. Setting `dot` collapses the badge to a small
+colored circle with no content, useful as a lightweight status marker; because a dot conveys
+meaning purely through color, pass `ariaLabel` alongside it so assistive tech has something to
+announce — `ariaLabel` is otherwise ignored while `dot` is false, since the projected content
+already gives the badge an accessible name. `severity` reuses the exact same filled color set as
+Button, so a badge with `severity="danger"` matches a danger button precisely. `size`
+(`sm`/`default`/`lg`/`xl`) scales both the pill and the dot variant together. `badgeDisabled` hides
+the badge outright (`hidden`, not a dimmed/grayed-out look) — for a consumer that wants to keep the
+same markup in place and toggle visibility with one input rather than an `@if` around it.

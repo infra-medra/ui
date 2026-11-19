@@ -1,0 +1,4 @@
+## Group template
+
+`#group` replaces the content of each group header; the group label is the implicit variable. Open
+the field below to see the headers.

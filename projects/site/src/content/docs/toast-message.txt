@@ -1,0 +1,6 @@
+## Custom message content
+
+`messageTemplate` is the lighter-touch sibling of `headlessTemplate` — it replaces just the
+summary/detail text while keeping the surrounding `<med-message>` chrome (icon, severity color,
+close button). Context: `{ $implicit: message }`, the resolved `ToastMessage`. Reach for this for
+richer text (bold, multiple text runs) without rebuilding the toast's whole shell.

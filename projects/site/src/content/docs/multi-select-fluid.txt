@@ -1,0 +1,3 @@
+## Fluid
+
+`fluid` makes the field fill the width of its container.

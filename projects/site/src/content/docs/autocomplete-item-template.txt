@@ -1,0 +1,1 @@
+Project `#item` to customize each row. The template receives the option and its `index`; the default rendering of the label is replaced by your content. A taller `#item` needs a matching `virtualScrollItemSize` in a virtual list.

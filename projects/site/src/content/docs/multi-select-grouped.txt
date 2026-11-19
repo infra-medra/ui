@@ -1,0 +1,5 @@
+## Grouped options
+
+Setting `group` on consecutive `SelectOption` entries inserts a non-interactive group-header row
+right before the first option of each new group. Groups have to be consecutive in the array; the
+header renders once per run, not once per distinct label.

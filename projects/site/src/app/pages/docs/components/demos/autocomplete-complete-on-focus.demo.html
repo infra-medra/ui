@@ -1,0 +1,7 @@
+<med-autocomplete
+  [suggestions]="suggestions()"
+  [(ngModel)]="framework"
+  [completeOnFocus]="true"
+  placeholder="Focus to see suggestions"
+  (search)="onSearch($event)"
+/>

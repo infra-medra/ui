@@ -1,0 +1,7 @@
+Drawer is declared inline where it's used, with its content authored directly inside it —
+`<med-drawer [(visible)]="open" position="left">...content...</med-drawer>` — rather than opened
+imperatively like Dialog/Toast. `[(visible)]` is a two-way `model()`, so a "Close" button inside
+your own content can just set it to `false`. `position` (`left`/`right`/`top`/`bottom`) picks
+which viewport edge the panel slides in from and is stretched against — `left`/`right` panels get
+a fixed width and fill the full height, `top`/`bottom` get full width, capped at 85% of the
+viewport height.

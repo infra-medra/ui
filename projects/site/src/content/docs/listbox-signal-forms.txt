@@ -1,0 +1,5 @@
+## Signal Forms
+
+Bind the list to a signal form with the `formField` directive of `@angular/forms/signals`. With
+`multiple`, the bound value is an array. The component already implements `ControlValueAccessor`, so
+it needs no change.

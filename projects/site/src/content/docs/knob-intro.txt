@@ -1,0 +1,11 @@
+Knob is a circular dial with the same discrete-numeric-value contract `Slider` implements —
+`min`/`max`/`step`, Arrow/Home/End keyboard support, and drag-to-set — just laid out radially
+instead of along a line. The bound value is a plain `number`, clamped to `[min, max]` and rounded
+to the nearest `step` on every commit, whether that commit comes from a drag or a keypress.
+Visually it's a 270° arc, leaving a 90° gap at the bottom — the shape people actually recognize as
+a volume dial rather than a full ring — and dragging into that gap just clamps to whichever end is
+angularly closer, so there's no way to produce a value outside `[min, max]` by dragging past an
+edge. Set `readonly` to keep the current value visible and the dial still focusable, without
+accepting pointer or keyboard input; `showValue` (on by default) toggles the centered numeric
+label. It implements `ControlValueAccessor`, so bind it with `[(ngModel)]` or a reactive
+`formControl`.

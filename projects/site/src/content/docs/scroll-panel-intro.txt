@@ -1,0 +1,7 @@
+ScrollPanel is a themed replacement for a plain `overflow-auto` div — styled scrollbars via CSS
+(`scrollbar-*` properties in Firefox, `::-webkit-scrollbar` pseudo-elements elsewhere) rather than
+a synthetic scrollbar built from draggable divs. The real scrollbar still drives real native
+scrolling, so there's no position/momentum sync to get wrong between a fake thumb and the actual
+content offset. The host itself is the scrollable viewport (`tabindex="0"`, so it's reachable by
+keyboard) — you're expected to size it yourself (e.g. `class="h-48"`), same as any other
+`overflow-auto` box.

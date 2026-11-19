@@ -1,0 +1,33 @@
+# Internationalization
+
+MedraUi does not ship a global translation service. Localization is handled per component, through two mechanisms: a `locale` input where formatting depends on the language, and text inputs for the labels a component shows.
+
+## The locale input
+
+Components that format numbers or dates take a `locale` input and pass it to the browser's `Intl` APIs. The default is `en-US`.
+
+| Component | What the locale controls |
+|---|---|
+| Input number | Number and currency formatting |
+| Date picker | Month and day names and the date format |
+
+```html
+<med-input-number [locale]="'pt-BR'" />
+<med-date-picker [locale]="'pt-BR'" />
+```
+
+The `locale` input changes how a value is displayed. It does not change the value your form model receives.
+
+## Replaceable labels
+
+Other components expose their fixed text as inputs with English defaults, so you can replace each one with your own string. Examples:
+
+- The paginator offers `ariaLabel`, `previousLabel` and `nextLabel`.
+- The tree table offers `ariaLabel`, `emptyLabel`, `expandLabel` and `collapseLabel`.
+
+Check the API tab of each component page for the exact label inputs it offers.
+
+## Limits
+
+- There is no built-in set of translations. Pass your own strings, for example from your i18n library.
+- There is no right-to-left mode documented for the library.

@@ -1,0 +1,9 @@
+InputGroup is a flex wrapper that visually joins an input with one or more
+`<span medInputGroupAddon>` pieces into a single continuous field — a `$` prefix, a `.00` suffix,
+or as many addons as the layout needs. It only handles what nothing else already styles: closing
+the border gap between adjacent pieces and keeping a focused piece's ring above its neighbors. It
+doesn't reach into the projected input or addons to strip their corner radius for you — each piece
+sheds its own rounded corners through its own `class` (`rounded-l-none` on a piece after the first,
+`rounded-r-none` on one before the last), since `InputTextDirective` and `InputGroupAddonDirective`
+each already bake their own `rounded-md` at the same CSS specificity a wrapper-level override would
+fight unpredictably.

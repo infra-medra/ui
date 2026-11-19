@@ -1,0 +1,7 @@
+<med-data-table [value]="equipment" rowGroupMode="subheader" groupRowsBy="category" ariaLabel="Lab equipment by category">
+  <ng-template #groupHeader let-row>
+    <span class="font-semibold text-surface-700 dark:text-surface-200">{{ row.category }}</span>
+  </ng-template>
+  <med-table-column field="name" header="Name" />
+  <med-table-column field="quantity" header="Quantity" align="right" />
+</med-data-table>

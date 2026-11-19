@@ -1,0 +1,7 @@
+<med-autocomplete
+  [suggestions]="suggestions()"
+  [(ngModel)]="framework"
+  [readonly]="true"
+  [showClear]="true"
+  (search)="onSearch($event)"
+/>

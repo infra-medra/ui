@@ -1,0 +1,4 @@
+## Icon templates
+
+`#triggerIcon` replaces the open icon in the field and `#groupIcon` replaces the icon of the rows that
+open a sub-level. `#loadingIcon` and `#clearIcon` do the same for the loading indicator and the clear button.

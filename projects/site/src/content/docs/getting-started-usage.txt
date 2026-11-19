@@ -1,0 +1,5 @@
+## 4. Use a component
+
+Every component works with Angular's own forms APIs directly — no MedraUi-specific
+binding syntax. Checkbox, for example, is a standard `ControlValueAccessor`, so
+`[(ngModel)]` (or a reactive `FormControl`) just works.

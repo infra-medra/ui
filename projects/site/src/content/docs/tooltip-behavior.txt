@@ -1,0 +1,9 @@
+## Ellipsis-only, auto-hide, and Escape
+
+`showOnEllipsis` (default `false`) only shows the tooltip when the host's own text is actually
+truncated (`overflow: hidden` + `text-overflow: ellipsis` clipping it) — pair it with a fixed
+width and `truncate` so the tooltip surfaces exactly the text that got cut off, and stays silent
+otherwise. `life` auto-hides an open tooltip after that many ms, independent of `mouseleave`/
+`blur` — useful for a tooltip that shouldn't linger even if the pointer never moves away.
+`hideOnEscape` (default `true`) closes an open tooltip on Escape, the same WCAG 1.4.13
+("Content on Hover or Focus") criterion already behind this directive's hover/focus dismissal.

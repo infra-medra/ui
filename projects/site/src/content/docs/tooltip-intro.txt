@@ -1,0 +1,7 @@
+Tooltip is an attribute directive (`[medTooltip]="'Copy to clipboard'"`) on any host element,
+not a wrapping component — same reasoning as Button/InputText: it shouldn't change the host's
+tag or semantics. It shows on hover *and* focus (so keyboard users reach the same text a mouse
+user gets) and hides on the matching `mouseleave`/`blur`. `tooltipPosition` (`top`/`bottom`/
+`left`/`right`) picks the preferred side, with the opposite side as a fallback if it doesn't fit
+in the viewport. Content is plain text only — there's no `innerHTML` path, so there's no
+HTML/XSS surface to worry about sanitizing.

@@ -1,0 +1,8 @@
+IconField is a plain positioning wrapper around an input and one or more overlaid `<med-icon
+medIconFieldIcon>` elements. It only handles the icon's own absolute positioning — `position="left"`
+(the default) or `position="right"` — it never reaches into the projected `<input>` to add matching
+padding, so the consumer adds `pl-9`/`pr-9` on the input itself to keep typed text clear of the
+icon. The icon is `pointer-events-none` by default, since it sits visually on top of the input's
+padding and shouldn't intercept clicks meant to focus the field underneath; pass
+`class="pointer-events-auto"` on it for the less common case of a real clickable icon button in
+that slot.

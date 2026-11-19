@@ -1,0 +1,6 @@
+Breadcrumb renders real `<a [href]>` elements for every navigable item — working links even
+without JavaScript, no dependency on `@angular/router`. Clicking an enabled, non-last item also
+emits `itemSelect` with `{ item, event }`, so a Router-based app can call `event.preventDefault()`
+in its own handler and navigate via `Router.navigateByUrl()` instead of a full page load. The last
+item is always plain text with `aria-current="page"`, never a link, even if it carries a `url` —
+it represents the current page, which isn't itself something to navigate to.

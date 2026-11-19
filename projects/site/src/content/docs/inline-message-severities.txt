@@ -1,0 +1,4 @@
+## Severities
+
+All four severities side by side — same icon and color mapping as Message/Toast, just rendered
+inline instead of as a card.

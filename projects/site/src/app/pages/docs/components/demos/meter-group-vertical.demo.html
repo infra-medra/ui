@@ -1,0 +1,5 @@
+<med-meter-group [value]="storage" [max]="100" unit=" GB" orientation="vertical" labelPosition="start" verticalHeight="10rem">
+  <ng-template #end let-items>
+    <p class="mt-2 text-sm text-surface-500 dark:text-surface-400">Total: {{ total(items) }} GB used</p>
+  </ng-template>
+</med-meter-group>

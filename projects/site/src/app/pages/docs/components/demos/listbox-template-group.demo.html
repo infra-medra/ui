@@ -1,0 +1,5 @@
+<med-listbox [options]="cities" [(ngModel)]="selectedCities" [multiple]="true" class="max-w-xs" ariaLabel="Cities">
+  <ng-template #group let-label>
+    <span data-testid="group-template" class="font-semibold uppercase tracking-wide">{{ label }}</span>
+  </ng-template>
+</med-listbox>

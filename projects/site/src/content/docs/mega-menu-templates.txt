@@ -1,0 +1,5 @@
+## Custom item/start/end content
+
+`#item` (`let-menuItem`), `#start`, and `#end` are named projection slots. `#start`/`#end` render before/
+after the item row, only when projected; `#item` replaces what would otherwise be the internal
+icon+label+badge rendering for every top-level item.

@@ -1,0 +1,7 @@
+<med-autocomplete
+  [suggestions]="suggestions()"
+  [(ngModel)]="framework"
+  [autoHighlight]="false"
+  placeholder="No suggestion is active until you move"
+  (search)="onSearch($event)"
+/>

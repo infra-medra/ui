@@ -1,0 +1,10 @@
+## Real HTTP upload
+
+Setting `url` turns on an actual `HttpClient` upload — `method` (`'POST'`/`'PUT'`, default `'POST'`)
+and `fileFieldName` (the `FormData` field name, default `'file'`) cover the common server contracts,
+and `withCredentials` forwards cookies when the endpoint needs them. Selecting files still only adds
+them to the pending list; an "Upload" button appears once there's something to send, or set `auto`
+to upload immediately on selection/drop instead. Progress, success, and failure surface through the
+`progress`/`uploaded`/`uploadError` outputs — a failed upload stays in the list so the same button
+can retry it, and removing a file mid-upload cancels its request. This demo posts to a local demo
+endpoint that discards whatever it receives and reports back its size.

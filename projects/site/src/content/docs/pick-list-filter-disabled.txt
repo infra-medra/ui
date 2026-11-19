@@ -1,0 +1,5 @@
+## Filtering, disabled items, and transfer events
+
+Each list gets its own search box once `filterPredicate` is set; `itemDisabled` (here, reviewers
+currently on leave) removes a row from selection, transfer, and drag entirely, while `keepSelection`
+carries a moved item's selected state to the side it lands on instead of clearing it.

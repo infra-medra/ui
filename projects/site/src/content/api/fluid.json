@@ -1,0 +1,22 @@
+[
+  {
+    "name": "medFluid",
+    "kind": "input",
+    "type": "boolean",
+    "default": "true",
+    "description": "Enables or disables full-width fluid layout context for the host and descendant controls."
+  },
+  {
+    "name": "fluid",
+    "kind": "input",
+    "type": "boolean | undefined",
+    "default": "undefined",
+    "description": "Explicit override for the fluid layout state."
+  },
+  {
+    "name": "MED_FLUID_CONTEXT",
+    "kind": "token",
+    "type": "InjectionToken<Signal<boolean>>",
+    "description": "Injection token providing the active fluid boolean signal to descendant form controls."
+  }
+]

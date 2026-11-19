@@ -1,0 +1,11 @@
+<med-autocomplete
+  [suggestions]="suggestions()"
+  [loading]="loading()"
+  [(ngModel)]="framework"
+  placeholder="Search a framework"
+  (search)="onSearch($event)"
+  (panelShow)="onPanelShow()"
+  class="max-w-sm"
+>
+  <ng-template #loader><p data-testid="loader-template" class="px-3 py-2 text-sm">Refreshing suggestions…</p></ng-template>
+</med-autocomplete>

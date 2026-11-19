@@ -1,0 +1,3 @@
+## Filled
+
+`variant="filled"` swaps the outline for a filled background.

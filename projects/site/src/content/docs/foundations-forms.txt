@@ -1,0 +1,31 @@
+# Forms
+
+Form components in MedraUi work with Angular forms. They implement `ControlValueAccessor`, so they bind with `ngModel` and with reactive form controls.
+
+## Marking a field invalid
+
+Fields such as input text, text area, input number, password, select, multi select, cascade select, tree select, auto complete and date picker expose an `invalid` input. When it is true, the field switches to the danger border and ring.
+
+Bind it to the state of your control:
+
+```html
+<input medInputText formControlName="email" [invalid]="email.invalid && email.touched" />
+```
+
+## Showing the message
+
+Place an inline message with the danger severity directly below or beside the field. It is made to sit next to a field, without the card padding of the full message component:
+
+```html
+<med-inline-message severity="danger">Enter a valid email address.</med-inline-message>
+```
+
+## What you compose yourself
+
+- There is no shared wrapper for label, field, hint and error. Compose them in your template.
+- The float label and ifta label components position a label; they do not wire validation.
+- The inline message is announced through a live region, but the field does not reference it through `aria-describedby`. Add the attribute yourself if you need the link. See [Accessibility](/docs/foundations/accessibility).
+
+## Formatting
+
+Locale-aware fields take a `locale` input. See [Internationalization](/docs/foundations/i18n).

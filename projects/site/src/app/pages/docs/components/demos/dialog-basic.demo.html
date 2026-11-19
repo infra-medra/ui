@@ -1,0 +1,6 @@
+<button medButton severity="danger" variant="outlined" (click)="openDialog()">Delete project…</button>
+@if (lastResult() !== null) {
+  <p class="mt-2 text-sm text-surface-500 dark:text-surface-400">
+    Last result: {{ lastResult() ? 'confirmed' : 'cancelled' }}
+  </p>
+}

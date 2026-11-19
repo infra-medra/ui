@@ -1,0 +1,5 @@
+## Sizes and states
+
+`size` takes the same `sm`/`default`/`lg` scale Button uses. `invalid` layers a danger-colored
+ring for validation errors. `disabled` is the plain native attribute — bind it directly, there's
+no separate input for it.

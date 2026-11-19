@@ -1,0 +1,6 @@
+## Select all
+
+In `multiple` mode, `showToggleAll` (on by default) adds a header checkbox that selects or clears every
+enabled option that is currently shown, so with a filter it acts only on the filtered options.
+`toggleAllLabel` sets its text, and `selectAllChanged` reports whether the checkbox marked or cleared
+the options.

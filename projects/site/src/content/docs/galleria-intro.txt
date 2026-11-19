@@ -1,0 +1,11 @@
+Galleria pairs one large main image with a synchronized thumbnail strip below it — clicking a
+thumbnail (or arrowing through it with the keyboard) updates `activeIndex`, a `model()` so it's
+two-way bindable from outside too. The main image is a real `<med-image preview>` under the hood,
+so clicking it opens the same full-screen zoom overlay every other previewable image in this
+library already gives you, with the same broken-image fallback and retry behavior — Galleria
+doesn't reimplement any of that. `class` sizes the whole component, thumbnail row included, not
+just the main image box: put your height (e.g. `h-80`) on the host, and the main image flexes to
+fill whatever space the thumbnails leave behind. There's no separate full-screen "lightbox" mode
+beyond that per-image preview — easy to add later without changing the `items`/`activeIndex`
+contract, but not in scope for this version. By default `prev()`/`next()` clamp at the edges (the
+buttons disappear entirely there); set `circular` to wrap around instead.

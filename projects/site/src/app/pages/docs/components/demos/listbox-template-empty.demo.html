@@ -1,0 +1,5 @@
+<med-listbox [options]="cities" [(ngModel)]="selectedCities" [multiple]="true" [filter]="true" class="max-w-xs" ariaLabel="Cities">
+  <ng-template #empty>
+    <div data-testid="empty-template" class="px-3 py-2 text-sm">No city matches your search.</div>
+  </ng-template>
+</med-listbox>

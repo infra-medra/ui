@@ -1,0 +1,6 @@
+## Scrolling programmatically
+
+`scrollTop(value)` sets the panel's scroll position from outside — grab a reference via
+`viewChild(ScrollPanelComponent)` and call it (e.g. from a "jump to top/bottom" button, or after
+appending new content). The value is clamped to the panel's actual scrollable range, so a value
+past the bottom just lands at the bottom instead of erroring.

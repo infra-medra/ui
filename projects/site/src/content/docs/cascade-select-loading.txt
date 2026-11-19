@@ -1,0 +1,3 @@
+## Loading
+
+`loading` shows a spinner in place of the open icon and marks the field `aria-busy`. The panel still opens, so the consumer decides whether to wait.

@@ -1,0 +1,11 @@
+Select implements the WAI-ARIA "select-only combobox" pattern: a `role="combobox"`
+trigger drives a `role="listbox"` overlay panel, giving full control over option
+styling instead of the limited native `<select>`. The trigger is a `<div>`, not a
+`<button>` — it needs to host an optional nested clear button, and a `<button>`
+can't contain another `<button>` — so disabled state is expressed through
+`aria-disabled` rather than the `:disabled` pseudo-class. Options are plain
+`{ label, value, disabled? }` objects passed via `[options]`, and the panel rows
+are virtualized so long lists stay smooth. `filter` adds a search box inside the
+panel, `showClear` adds a button to reset the value to `null`, and the component
+implements `ControlValueAccessor`, so it drops straight into template-driven or
+reactive forms.

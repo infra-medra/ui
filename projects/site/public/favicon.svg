@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Medra">
+  <rect width="64" height="64" rx="14" fill="#1a1c1b"></rect>
+  <g transform="translate(8,8) scale(0.4)">
+    <rect x="15" y="15" width="10" height="10" fill="#f4f4f1"></rect>
+    <rect x="52" y="12" width="16" height="16" fill="#f4f4f1"></rect>
+    <rect x="12" y="52" width="16" height="16" fill="#f4f4f1"></rect>
+    <rect x="49" y="49" width="22" height="22" fill="#f4f4f1"></rect>
+    <path d="M85.5 45.5h19a10 10 0 0 1 10 10v19h-29z" fill="#f4f4f1"></path>
+    <rect x="9" y="89" width="22" height="22" fill="#f4f4f1"></rect>
+    <path d="M45.5 85.5h19a10 10 0 0 1 10 10v19h-29z" fill="#f4f4f1"></path>
+    <path d="M82.5 82.5h13a22 22 0 0 1 22 22v13h-35z" fill="#14b8a6"></path>
+  </g>
+</svg>

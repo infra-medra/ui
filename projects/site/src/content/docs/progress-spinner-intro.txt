@@ -1,0 +1,4 @@
+ProgressSpinner is always indeterminate — there's no `value`/determinate mode, unlike ProgressBar;
+a spinner with a numeric percentage would just be ProgressBar's job. It's a partial ring rotated
+via a CSS animation, colored with `severity` the same solid color scale Button/ProgressBar use.
+`size` (`sm`/`default`/`lg`) picks the diameter.

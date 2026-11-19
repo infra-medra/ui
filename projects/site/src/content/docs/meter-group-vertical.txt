@@ -1,0 +1,9 @@
+## Vertical orientation and custom slots
+
+`orientation="vertical"` stacks segments top-to-bottom instead of side-to-side — an explicit
+`verticalHeight` (default `'12rem'`) sets the track's length, since a vertical track has no natural
+size to derive it from. `min` (default `0`) shifts the percent formula to account for a non-zero
+floor. `labelPosition` moves the legend before or after the track. Five named templates
+(`#label`/`#meter`/`#start`/`#end`/`#icon`) let you replace the legend, a segment's own content, the
+slots immediately before/after the track, or a legend item's icon — `#start`/`#end` shown here with
+the full `value` array as context.

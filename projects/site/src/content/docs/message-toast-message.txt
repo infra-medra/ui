@@ -1,0 +1,6 @@
+## Message
+
+Content is projected, not passed as a string input — write whatever markup the status needs
+inside `<med-message>`. `closable` adds a close button that emits `(closed)`; Message doesn't
+track its own visibility, so the consumer decides what happens next (usually removing it from the
+template, as in the danger example above).

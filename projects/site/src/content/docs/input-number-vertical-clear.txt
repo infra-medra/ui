@@ -1,0 +1,6 @@
+## Vertical layout and clear button
+
+`buttonLayout` also accepts `'vertical'` — a single stepper column beside the field, stacking
+increment above decrement — alongside the existing `'stacked'` (default) and `'horizontal'`.
+`showClear` adds an inline button that resets the value to `null`, shown only once there's a value
+to clear.

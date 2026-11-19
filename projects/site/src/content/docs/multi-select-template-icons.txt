@@ -1,0 +1,5 @@
+## Icon templates
+
+`#triggerIcon` replaces the open icon, `#clearIcon` the icon of the clear button, `#loadingIcon` the
+loading indicator of the panel and `#chipRemoveIcon` the remove icon of each chip. Pick an option
+below to see the clear icon.

@@ -1,0 +1,8 @@
+<button medButton variant="outlined" (click)="open()">Open non-dismissable, responsive dialog</button>
+@if (log().length) {
+  <ul class="mt-2 space-y-1 text-sm text-surface-500 dark:text-surface-400">
+    @for (line of log(); track line) {
+      <li>{{ line }}</li>
+    }
+  </ul>
+}

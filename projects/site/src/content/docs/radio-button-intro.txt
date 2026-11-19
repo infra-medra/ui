@@ -1,0 +1,9 @@
+RadioButton is a standalone component, not a directive you attach to a native `<input>` — like
+Checkbox, a real (visually hidden) native `<input type="radio">` underneath drives the actual
+interaction, with a decorative ring rendered next to it. There's no separate group/wrapper
+component: a group is formed the same way plain HTML radios are grouped, by giving every
+`med-radio-button` in the set the same `name`, plus binding the same `[(ngModel)]` (or the same
+`FormControl`) to each one and a distinct `value` per option. Because each instance implements
+`ControlValueAccessor` independently, the shared bound value — compared with `===` against each
+option's own `value`, so `undefined`, `0`, or `false` all work correctly as real option values —
+is what keeps the whole group in sync, not the `name` attribute alone.

@@ -1,0 +1,11 @@
+<med-autocomplete
+  [suggestions]="suggestions()"
+  [(ngModel)]="frameworks"
+  [multiple]="true"
+  placeholder="Search a framework"
+  (search)="onSearch($event)"
+  class="max-w-sm"
+/>
+<p class="mt-2 text-sm text-surface-500 dark:text-surface-400">
+  Selected: {{ frameworks.map((f) => f.label).join(', ') || 'none' }}
+</p>

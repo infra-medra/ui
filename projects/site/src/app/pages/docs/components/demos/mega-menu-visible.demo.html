@@ -1,0 +1,4 @@
+<div class="max-w-lg space-y-3">
+  <button medButton variant="outlined" size="sm" type="button" [attr.aria-pressed]="showReports()" (click)="showReports.set(!showReports())">{{ showReports() ? 'Hide' : 'Show' }} Reports</button>
+  <med-mega-menu [items]="items()" />
+</div>

@@ -1,0 +1,6 @@
+## Grouped suggestions and a dropdown button
+
+Each suggestion carries its own group in the `group` field of `SelectOption`, and the options of the same group must stay together in the list: a header is inserted whenever `group` changes from the previous option, so a group split in two would show its header twice. Setting `group` on consecutive suggestion entries inserts a group-header row, the same shared
+grouping `Select` uses. `dropdown` adds a chevron button that searches with an empty string and
+opens the panel — a way to browse the full suggestion list without typing anything first — or
+closes it again if it's already open.

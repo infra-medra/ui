@@ -1,0 +1,4 @@
+## Value template
+
+The `#value` template replaces the default breadcrumb in the field once a leaf is picked. Its context
+gives the chosen value as the implicit variable and the labels of the path in `path`.

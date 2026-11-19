@@ -1,0 +1,1 @@
+The component emits `optionSelected`, `optionRemoved`, `inputFocus`, `inputBlur`, `cleared`, `panelShow`, `panelHide` and `dropdownClick`. The list below shows the latest events of this example.

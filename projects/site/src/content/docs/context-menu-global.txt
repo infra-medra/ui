@@ -1,0 +1,9 @@
+## Global attach and long-press
+
+`global` attaches the right-click listener to `document` instead of this directive's own host
+element, so a right-click anywhere on the page opens this instance — the host element's own
+right-click handling becomes a no-op while it's on, to avoid double-handling a click that lands on
+the host itself. `pressDelay` (default `500`ms) adds long-press support for touch, since mobile has
+no `contextmenu` event of its own: a `touchstart` held for that long opens the menu at the touch
+point, cancelled by a real drag or lifting the finger early. Typing while the menu is open jumps to
+the first matching item, the same typeahead the shared panel gives TieredMenu too.

@@ -1,0 +1,3 @@
+## Striped
+
+`striped` alternates the background of the rows to make long lists easier to scan.

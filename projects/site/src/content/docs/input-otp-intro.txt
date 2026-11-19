@@ -1,0 +1,9 @@
+InputOtp renders `length` single-character boxes but exposes the whole thing as one plain `string`
+value through `ControlValueAccessor` — the segmented layout is only a display detail, `[(ngModel)]`
+still binds a single joined string like `"482913"`. Typing a valid character auto-advances to the
+next box, and `Backspace` on an already-empty box clears the previous box and jumps back into it.
+Pasting a full code into any box distributes it across the remaining boxes from that point on,
+which is the more reliable path across browsers compared to relying on segmented-input autofill —
+this component still sets `autocomplete="one-time-code"` on every box, but doesn't depend on it.
+`integerOnly` (default `true`) rejects anything that isn't a digit as it's typed; `mask` swaps each
+filled box's character for a dot, the same masking idea `Password` uses, just applied per box.

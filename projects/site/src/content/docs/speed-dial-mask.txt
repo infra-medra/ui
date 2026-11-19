@@ -1,0 +1,6 @@
+## Mask and staggered reveal
+
+`mask` dims the rest of the page with a backdrop while the dial is open, the same overlay affordance
+Dialog/Drawer use, and clicking it closes the dial. `transitionDelay` (in ms, default `0`) staggers
+each item's reveal — item `i` starts its transition `i * transitionDelay`ms after the dial opens,
+instead of every item animating in lockstep.

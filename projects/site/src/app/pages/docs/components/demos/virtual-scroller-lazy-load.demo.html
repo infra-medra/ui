@@ -1,0 +1,15 @@
+<med-virtual-scroller
+  [items]="entries()"
+  [itemSize]="32"
+  [loading]="loading()"
+  (lazyLoad)="onLazyLoad($event)"
+  class="h-72 rounded-lg border border-surface-200 dark:border-surface-700"
+>
+  <ng-template let-entry let-index="index">
+    <div class="flex items-center px-3 font-mono text-xs text-surface-600 dark:text-surface-300">
+      <span class="mr-2 w-12 shrink-0 text-surface-400 dark:text-surface-500">#{{ index }}</span>
+      <span>{{ entry.message }}</span>
+    </div>
+  </ng-template>
+</med-virtual-scroller>
+<p class="mt-2 text-sm text-surface-500 dark:text-surface-400">{{ entries().length }} of 500 loaded — scroll to fetch more.</p>

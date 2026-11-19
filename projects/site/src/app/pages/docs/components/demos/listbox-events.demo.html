@@ -1,0 +1,16 @@
+<med-listbox
+  [options]="cities"
+  [(ngModel)]="selectedCities"
+  [multiple]="true"
+  [filter]="true"
+  class="max-w-xs"
+  ariaLabel="Cities"
+  (selectionChanged)="log('selectionChanged: ' + $event.itemValue)"
+  (selectAllChanged)="log('selectAllChanged: ' + $event.checked)"
+  (optionClicked)="log('optionClicked: ' + $event.value)"
+  (optionDoubleClicked)="log('optionDoubleClicked: ' + $event.value)"
+  (filtered)="log('filtered: ' + $event.filter)"
+  (listFocus)="log('listFocus')"
+  (listBlur)="log('listBlur')"
+/>
+<p class="mt-2 text-sm text-surface-500 dark:text-surface-400" data-testid="last-event">Last event: {{ lastEvent }}</p>

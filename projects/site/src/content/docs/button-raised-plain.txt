@@ -1,0 +1,8 @@
+## Raised and plain
+
+`raised` adds elevation — a subtle `shadow`/`shadow-md` pair, not the heavier overlay shadows
+Dialog/Popover/Drawer use, since a button only slightly lifted off flat siblings shouldn't read as
+floating above the page. `plain` forces the neutral/gray treatment regardless of `severity` —
+reusing `secondary`'s own colors rather than a third palette, since "plain" and "muted secondary"
+are visually the same idea. Both are independent booleans, combinable with each other and with any
+`severity`/`variant`.

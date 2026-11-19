@@ -1,0 +1,1 @@
+Set `forceSelection` to discard typed text that was not picked from the list when the field loses focus. The field returns to the picked suggestion, or becomes empty.

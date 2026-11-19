@@ -1,0 +1,15 @@
+<med-data-table
+  [value]="equipment"
+  [filterable]="true"
+  filterPlaceholder="Search inventory"
+  [paginator]="true"
+  [rows]="5"
+  selectionMode="multiple"
+  [(selection)]="selectedEquipment"
+  ariaLabel="Lab equipment inventory"
+>
+  <med-table-column field="name" header="Name" sortable />
+  <med-table-column field="category" header="Category" sortable />
+  <med-table-column field="quantity" header="Quantity" align="right" sortable />
+  <med-table-column field="status" header="Status" />
+</med-data-table>

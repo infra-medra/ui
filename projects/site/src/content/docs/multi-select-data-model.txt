@@ -1,0 +1,12 @@
+## Data model
+
+Each option carries a `label` and a `value`, and may carry `disabled`. A flat list is grouped with
+the `group` field: consecutive options that share a `group` sit under one header. Nested data uses
+`optionGroupLabel` for the header field and `optionGroupChildren` for the field that holds each
+group's options.
+
+When your data uses other field names, you do not have to reshape it. `optionLabel` reads the label
+from another field, `optionValue` reads the value from another field, and `optionDisabled` reads
+the disabled flag from another field (or takes a function). The example below keeps its own fields,
+`name`, `code`, `closed`, `country` and `cities`. The bound value is the array of the `optionValue`
+field of each chosen option.

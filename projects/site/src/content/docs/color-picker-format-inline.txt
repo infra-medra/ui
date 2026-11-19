@@ -1,0 +1,5 @@
+## Format and inline
+
+`format` switches the bound string's grammar without changing anything else — `'hex'` (the
+default), `'rgb'` (`rgb(r, g, b)`), or `'hsb'` (`hsb(h, s%, b%)`). `inline` renders the picking panel
+directly in the page instead of behind a swatch-button overlay, for a permanently visible picker.

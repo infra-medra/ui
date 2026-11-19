@@ -1,0 +1,5 @@
+## Basic
+
+Pass `options` as `{ label, value }` objects and bind an array with `ngModel`. Choosing an option
+toggles it and keeps the panel open, and the field shows the labels of the chosen options.
+`showClear` adds a button that resets the value to an empty array.

@@ -1,0 +1,11 @@
+Tag renders a small, solid status label on a plain `<span>` — no click handler, no
+focus state, nothing interactive. It reuses Button's own filled severity color classes
+(`primary`, `secondary`, `info`, `success`, `warn`, `help`, `danger`, `contrast`) via the
+`severity` input, so a tag's color always matches what a same-severity button would look
+like elsewhere on the page. `pill` switches the corners from `rounded-md` to fully round. `icon` renders a leading Heroicons
+name, same convention `Chip`'s own `icon` uses; for a custom icon (or anything else), project it
+directly through `<ng-content>` instead, the same way a button combines an icon with a label —
+there's no separate `iconTemplate` slot, since `<ng-content>` already covers that. `value` is a
+plain-string alternative to `<ng-content>` for the label itself, for building tags from data
+(`*ngFor` over `{ value, severity }`) where a bound `[value]` reads better than interpolating inside
+the tag's own content.

@@ -1,0 +1,25 @@
+<div class="flex flex-wrap gap-3">
+  <button medButton variant="outlined" (click)="headerFooterVisible.set(true)">#header/#footer</button>
+  <button medButton variant="outlined" (click)="headlessVisible.set(true)">#headless</button>
+</div>
+
+<med-drawer [(visible)]="headerFooterVisible" position="right" header="Cart">
+  <ng-template #header>
+    <med-icon name="star" variant="solid" class="size-5 text-yellow-500" />
+  </ng-template>
+  <p class="text-sm text-surface-600 dark:text-surface-300">3 items in your cart.</p>
+  <ng-template #footer>
+    <button medButton type="button" class="w-full justify-center">Checkout</button>
+  </ng-template>
+</med-drawer>
+
+<med-drawer [(visible)]="headlessVisible" position="right">
+  <ng-template #headless>
+    <div class="flex h-full flex-col items-center justify-center gap-3 bg-brand-600 p-6 text-center text-white">
+      <med-icon name="star" variant="solid" class="size-10" />
+      <p class="text-lg font-semibold">Fully custom panel</p>
+      <p class="text-sm text-brand-100">No default header, close button, or padding — this is #headless.</p>
+      <button medButton type="button" variant="outlined" class="border-white text-white" (click)="headlessVisible.set(false)">Close</button>
+    </div>
+  </ng-template>
+</med-drawer>

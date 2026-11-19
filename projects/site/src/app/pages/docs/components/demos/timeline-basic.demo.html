@@ -1,0 +1,7 @@
+<med-timeline [value]="events" class="max-w-md">
+  <ng-template #content let-event>
+    <p class="text-sm font-medium text-surface-900 dark:text-surface-50">{{ event.title }}</p>
+    <p class="text-xs text-surface-500 dark:text-surface-400">{{ event.timestamp }}</p>
+    <p class="mt-1 text-sm text-surface-600 dark:text-surface-300">{{ event.description }}</p>
+  </ng-template>
+</med-timeline>

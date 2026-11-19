@@ -1,0 +1,2 @@
+<med-listbox [options]="cities" [formControl]="selectedCities" [multiple]="true" [invalid]="selectedCities.invalid && selectedCities.touched" class="max-w-xs" ariaLabel="Cities" />
+<p class="mt-2 text-sm text-surface-500 dark:text-surface-400">Selected: {{ selectedCities.value.join(', ') || 'none' }} · {{ selectedCities.valid ? 'valid' : 'required' }}</p>

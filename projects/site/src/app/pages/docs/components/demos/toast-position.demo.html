@@ -1,0 +1,5 @@
+<div class="grid w-fit grid-cols-3 gap-2">
+  @for (position of positions; track position) {
+    <button medButton size="sm" variant="outlined" (click)="show(position)">{{ position }}</button>
+  }
+</div>

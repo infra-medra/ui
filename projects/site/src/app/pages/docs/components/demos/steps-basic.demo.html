@@ -1,0 +1,7 @@
+<div class="max-w-lg">
+  <med-steps [items]="items" [(activeIndex)]="activeIndex" />
+  <div class="mt-4 flex justify-between">
+    <button medButton type="button" variant="outlined" severity="secondary" [disabled]="activeIndex() === 0" (click)="back()">Back</button>
+    <button medButton type="button" [disabled]="activeIndex() === items.length - 1" (click)="next()">Next</button>
+  </div>
+</div>

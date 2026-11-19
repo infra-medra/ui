@@ -1,0 +1,9 @@
+## Positioning, dragging, and single-action prompts
+
+`position` and `draggable` are plain passthroughs onto `DialogService.open()` — anchor the
+confirmation to a screen edge (`'top'`, `'bottom-end'`, …) or let the user drag it out of the way
+of the content underneath. `acceptVisible`/`rejectVisible` (both default `true`) hide either
+button for a single-action prompt that only needs an acknowledgement, and `defaultFocus`
+(`'accept'`/`'reject'`/`'close'`/`'none'`) picks which control starts focused — it defaults to
+`'reject'`, the safer choice for a two-button confirm, so set it to `'accept'` explicitly once
+the reject button is gone.

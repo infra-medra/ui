@@ -1,0 +1,9 @@
+FileUpload is a validated file *picker*, not an uploader — it never issues an HTTP request on its
+own. Choosing files (via the dropzone button, or dragging and dropping) collects them into a plain
+`File[]` value through `ControlValueAccessor`, exactly what a consumer needs to drive their own
+upload call against whatever backend they use. `accept` and `maxFileSize` are enforced on the
+client for every selection, whether it came from the native picker or a drop — drag-and-drop
+bypasses the browser's own `accept` filtering entirely, so this component checks both the file
+extension/MIME type and the size itself rather than relying on it. A rejected file never joins the
+list; the most recent rejections are shown inline and also emitted through `rejected`, replacing
+(not accumulating on top of) whatever was rejected by the previous attempt.

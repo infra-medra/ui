@@ -1,0 +1,7 @@
+<med-autocomplete
+  [suggestions]="suggestions()"
+  [(ngModel)]="language"
+  scrollHeight="120px"
+  placeholder="Search a language"
+  (search)="onSearch($event)"
+/>

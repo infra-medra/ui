@@ -1,0 +1,14 @@
+<med-data-table
+  [value]="rows()"
+  [loading]="loading()"
+  lazy
+  [totalRecords]="83"
+  paginator
+  [rows]="5"
+  [rowsPerPageOptions]="[5, 10, 20]"
+  (lazyLoad)="onLazyLoad($event)"
+  ariaLabel="Customers (server-paged)"
+>
+  <med-table-column field="name" header="Name" sortable />
+  <med-table-column field="plan" header="Plan" sortable />
+</med-data-table>

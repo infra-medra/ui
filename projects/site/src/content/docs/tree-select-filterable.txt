@@ -1,0 +1,6 @@
+## Filtering and clearing
+
+`filterable` adds a search box to the top of the panel, forwarded straight through to the same
+tree/match/force-expand logic Tree's own `filterable` uses — a node renders when it matches the
+search text itself or any descendant does, with the ancestor chain down to a match staying visible.
+`showClear` adds an inline button that resets the value to `null`, same placement as `Select`'s own.

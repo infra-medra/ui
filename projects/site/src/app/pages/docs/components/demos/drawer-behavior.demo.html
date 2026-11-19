@@ -1,0 +1,24 @@
+<div class="flex flex-wrap gap-3">
+  <button medButton variant="outlined" (click)="fullScreenVisible.set(true)">Open full-screen drawer</button>
+  <button medButton variant="outlined" (click)="lockedVisible.set(true)">Open non-modal, scroll-locked drawer</button>
+</div>
+
+<med-drawer [(visible)]="fullScreenVisible" position="left" fullScreen header="Full-screen">
+  <p class="text-sm text-surface-600 dark:text-surface-300">
+    <code>fullScreen</code> covers the whole viewport regardless of <code>position</code>.
+  </p>
+</med-drawer>
+
+<med-drawer
+  [(visible)]="lockedVisible"
+  position="right"
+  modal="false"
+  blockScroll
+  closeOnEscape="false"
+  header="Scroll-locked"
+>
+  <p class="text-sm text-surface-600 dark:text-surface-300">
+    Non-modal (no backdrop), but <code>blockScroll</code> still locks the page underneath, and
+    <code>closeOnEscape="false"</code> means Escape won't close this one — use the close button.
+  </p>
+</med-drawer>

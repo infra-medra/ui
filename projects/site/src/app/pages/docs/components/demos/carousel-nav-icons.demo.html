@@ -1,0 +1,15 @@
+<med-carousel [value]="tools" [numVisible]="1" ariaLabel="Workshop tools">
+  <ng-template #previousicon>
+    <med-icon name="arrow-left-circle" variant="solid" class="size-5" />
+  </ng-template>
+  <ng-template #nexticon>
+    <med-icon name="arrow-right-circle" variant="solid" class="size-5" />
+  </ng-template>
+  <ng-template #item let-tool>
+    <div class="mx-2 flex flex-col gap-1 rounded-lg border border-surface-200 p-4 dark:border-surface-700">
+      <span class="text-xs font-medium text-brand-600 dark:text-brand-400">{{ tool.category }}</span>
+      <span class="font-display text-base text-surface-900 dark:text-surface-50">{{ tool.name }}</span>
+      <span class="text-sm text-surface-500 dark:text-surface-400">{{ tool.priceLabel }}</span>
+    </div>
+  </ng-template>
+</med-carousel>

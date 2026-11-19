@@ -1,0 +1,15 @@
+<med-multi-select
+  [options]="cities"
+  [(ngModel)]="selectedCities"
+  showClear
+  placeholder="Pick cities"
+  class="max-w-xs"
+  (selectionChanged)="log('selectionChanged: ' + $event.value.length + ' chosen')"
+  (selectAllChanged)="log('selectAllChanged: ' + $event.checked)"
+  (panelShow)="log('panelShow')"
+  (panelHide)="log('panelHide')"
+  (cleared)="log('cleared')"
+  (inputFocus)="log('inputFocus')"
+  (inputBlur)="log('inputBlur')"
+/>
+<p class="mt-2 text-sm text-surface-500 dark:text-surface-400" data-testid="last-event">Last event: {{ lastEvent }}</p>

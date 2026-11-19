@@ -1,0 +1,5 @@
+If your own app also uses Tailwind CSS and you want your own utility classes (not just
+MedraUi's components) to share the same color/font tokens, only the compiled CSS is
+published today, not the raw `@theme` source — the design tokens are readable as CSS
+custom properties (`var(--color-brand-500)`, etc.) from the compiled file, but there's no
+importable Tailwind config for your own build yet.

@@ -1,0 +1,9 @@
+## Inline mode and labeled groups
+
+`popup` (default `true`) keeps the usual toggle-a-button-opens-an-overlay behavior; set it to
+`false` to render the same panel directly and always visible instead — a persistent sidebar-style
+menu, the same shape TieredMenu's own `popup` input already established.
+`toggle()`/`open()`/`close()`/`isOpen` stay popup-only and are no-ops while `popup` is off.
+`items` also accepts `readonly MenuItemGroup[]` (`{ label, items }`) instead of a flat item list, for
+a labeled-section menu — a separate type from `MenuItem` rather than widening it, and never mixed
+with a flat list at the top level.

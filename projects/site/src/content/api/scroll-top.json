@@ -1,0 +1,50 @@
+[
+  {
+    "name": "target",
+    "kind": "input",
+    "type": "'window' | 'parent'",
+    "default": "'window'",
+    "description": "Target element whose scroll position is monitored."
+  },
+  {
+    "name": "threshold",
+    "kind": "input",
+    "type": "number",
+    "default": "400",
+    "description": "Scroll offset in pixels required before the scroll-top button becomes visible."
+  },
+  {
+    "name": "icon",
+    "kind": "input",
+    "type": "string | undefined",
+    "default": "undefined",
+    "description": "Optional icon CSS class rendered inside the button; falls back to an inline SVG chevron when omitted."
+  },
+  {
+    "name": "behavior",
+    "kind": "input",
+    "type": "ScrollBehavior",
+    "default": "'smooth'",
+    "description": "Scroll behavior passed to scrollTo when returning to the top."
+  },
+  {
+    "name": "styleClass",
+    "kind": "input",
+    "type": "string",
+    "default": "''",
+    "description": "Additional CSS classes applied to the button element."
+  },
+  {
+    "name": "ariaLabel",
+    "kind": "input",
+    "type": "string",
+    "default": "'Scroll to top'",
+    "description": "Accessible label for the scroll-top button."
+  },
+  {
+    "name": "scrollToTop",
+    "kind": "method",
+    "signature": "scrollToTop(): void",
+    "description": "Programmatically scrolls the target container or window back to the top."
+  }
+]

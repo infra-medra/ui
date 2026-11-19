@@ -1,0 +1,10 @@
+VirtualScroller is a themed wrapper around Angular CDK's own `cdk-virtual-scroll-viewport` — it
+only ever keeps a handful of rows in the DOM at once, no matter how long `items` is. `itemSize`
+has to be a fixed pixel number, not a CSS value: the CDK needs to compute the total scrollable
+height as `itemSize * items.length` up front, without ever measuring a real rendered row, since
+most rows never actually exist in the DOM. Item markup is a single required
+`<ng-template let-item let-index="index">`, the same one-template convention DataView already
+uses for arbitrary per-item content. One thing this component can't do for you: give the viewport
+an explicit height (e.g. `class="h-72"`). `cdk-virtual-scroll-viewport` uses `contain: strict`
+internally, so unlike a normal element it never derives its own height from its (virtualized)
+content — you always have to size the container yourself.

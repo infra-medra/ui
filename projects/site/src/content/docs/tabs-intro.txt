@@ -1,0 +1,7 @@
+Tabs takes its panels as real content children — `<med-tabs><med-tab header="...">...</med-tab></med-tabs>`
+— rather than a `tabs[]` data input paired with an index-based slot, so authoring rich per-tab content
+stays simple. `activeIndex` is a `model()` for `[(activeIndex)]`. The keyboard model is ARIA APG's
+"automatic activation": arrow keys move real DOM focus between the tab buttons *and* switch the active
+tab immediately, using a roving `tabindex` that skips disabled tabs. The tab row doesn't hide overflow
+behind a menu — each tab keeps its natural width and the row scrolls horizontally once tabs stop
+fitting, the same touch-scrollable behavior Material Design 3's "scrollable tabs" describes.

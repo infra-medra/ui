@@ -1,0 +1,7 @@
+BlockUI wraps arbitrary content and overlays a mask + spinner directly on top of it while
+`blocked` is `true` — scoped to its own box, not a viewport-level overlay, so it stays put over
+its own content as that content scrolls rather than escaping into a top-level stacking context the
+way Dialog/Drawer do. The blocked content gets the native `inert` attribute rather than a manual
+focus trap, which removes the whole subtree from focus, pointer interaction, and assistive-tech
+exposure in one step. The mask defaults to a spinner, or you can replace it entirely with your own
+projected `<ng-template>`.

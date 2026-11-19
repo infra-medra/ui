@@ -1,0 +1,7 @@
+## Rich title and subtitle
+
+`<div medCardTitle>`/`<div medCardSubtitle>` are rich alternatives to the plain-string
+`title`/`subtitle` inputs, for a heading that needs an icon, a Badge, or a link — same
+unstyled, consumer-owns-the-markup slot convention as the header/footer slots, not a
+`TemplateRef`. Projecting one suppresses its plain-string counterpart underneath it, so a rich
+title never doubles up with the `title` input's own heading.

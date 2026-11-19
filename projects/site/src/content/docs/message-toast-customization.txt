@@ -1,0 +1,6 @@
+## Icon, size, and auto-dismiss
+
+`icon` overrides the severity-derived default (an `IconComponent` name, not a raw CSS
+class); `size` (`sm`/`default`/`lg`) sets the size; `life` auto-emits
+`(closed)` after N milliseconds — the same event the close button emits, since this component
+doesn't track its own visibility.

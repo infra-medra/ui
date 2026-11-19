@@ -1,0 +1,47 @@
+# Design tokens
+
+MedraUi styles its components with Tailwind CSS v4 theme tokens declared in a single CSS file. Color tokens are aliases onto Tailwind's default palette, so there is no separate primitive palette to maintain. Each token is available as a CSS custom property and as a Tailwind utility, such as `bg-brand-500` or `text-surface-900`.
+
+## Brand
+
+The `brand` ramp is the primary color of the library. It aliases the Tailwind `teal` ramp, from `--color-brand-50` to `--color-brand-950`.
+
+| Token | Aliased to |
+|---|---|
+| `--color-brand-50` to `--color-brand-950` | `teal-50` to `teal-950` |
+
+Interactive components use it for the primary severity, for example `bg-brand-500` with `hover:bg-brand-600` on a filled primary button.
+
+## Severity
+
+Five more semantic ramps share the same 50 to 950 shape.
+
+| Token | Aliased to | Meaning |
+|---|---|---|
+| `--color-info-*` | `sky` | Informational |
+| `--color-success-*` | `green` | Success |
+| `--color-warn-*` | `amber` | Warning |
+| `--color-help-*` | `purple` | Help and assistance |
+| `--color-danger-*` | `red` | Error and destructive actions |
+
+The secondary and contrast severities have no ramp of their own. Components build them from the `surface` tokens directly.
+
+## Surface
+
+The `surface` scale holds the neutral colors for text, borders and backgrounds. It is redefined per color scheme rather than per component.
+
+| Token | Light | Dark |
+|---|---|---|
+| `--color-surface-0` | `#ffffff` | `#ffffff` |
+| `--color-surface-50` to `--color-surface-950` | `slate-50` to `slate-950` | `zinc-50` to `zinc-950` |
+
+This site uses the scale for page text and backgrounds, for example `text-surface-900` in light mode and `dark:text-surface-50` in dark mode.
+
+## Other tokens
+
+- Radius tokens such as `--radius-xs` are declared in the same file.
+- `--icon-size` is a plain CSS variable, `1.5rem` by default, that the icon component reads. Override it at any scope to resize icons below that scope.
+
+## Using the tokens
+
+Import the theme file once in your global stylesheet and use the utilities in your own templates. Prefer a token over a literal hex value so your UI follows the active color scheme. The color picker is the exception, because its value is a raw color by design.

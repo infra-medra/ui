@@ -1,0 +1,4 @@
+## Custom navigation icons
+
+`#previousicon`/`#nexticon` replace the default chevron arrows with any projected content —
+they take no context.

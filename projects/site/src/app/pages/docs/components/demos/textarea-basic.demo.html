@@ -1,0 +1,5 @@
+<label class="block text-sm text-surface-900 dark:text-surface-50">
+  Feedback
+  <textarea medTextarea rows="4" placeholder="Tell us what could be better..." class="mt-1 block w-full" [(ngModel)]="feedback"></textarea>
+</label>
+<p class="mt-2 text-sm text-surface-500 dark:text-surface-400">Characters: {{ feedback.length }}</p>

@@ -1,0 +1,4 @@
+## Custom item content
+
+`#item` replaces each item's entire rendered content — not just the icon — with the item itself
+as context (`let-menuItem`). 

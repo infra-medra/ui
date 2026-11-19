@@ -1,0 +1,4 @@
+## Basic
+
+Pass `options` as `{ label, value }` objects and bind a single value with `ngModel`. Clicking an
+option marks it as selected, and the list stays visible instead of closing like a Select panel.

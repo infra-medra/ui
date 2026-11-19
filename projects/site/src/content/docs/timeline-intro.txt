@@ -1,0 +1,9 @@
+Timeline lays out `value` as a vertical list of events: a marker dot connected by a line to
+the next one, with your own content next to it. There's no fixed field set for an
+event — you supply a single `<ng-template>` inside `<med-timeline>` and it's rendered once
+per item, with the item itself as the template's implicit context (`let-event`), so each
+entry can show whatever combination of title, timestamp, description, or actions your data
+actually has. Layout is currently fixed to left-aligned — marker and connecting line on the
+left, content on the right — there's no `align` or horizontal-mode input yet. Markup is
+plain `<ul>`/`<li>`, with no extra ARIA role added: a timeline is a list of content a
+screen reader already understands as a list, so nothing beyond that is layered on top.

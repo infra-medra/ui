@@ -1,0 +1,4 @@
+## Sizes and severity
+
+Three track heights (`sm`/`default`/`lg`), and `severity` reuses the same solid color scale
+Button/Tag already use for the fill.

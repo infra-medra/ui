@@ -1,0 +1,4 @@
+<div class="flex h-40 items-end gap-3">
+  <med-speed-dial [items]="items" (itemSelect)="onSelect($event)" />
+  <p class="text-sm text-surface-500 dark:text-surface-400">{{ lastAction() }}</p>
+</div>

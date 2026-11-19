@@ -1,0 +1,5 @@
+## License
+
+MedraUi is free and open source, released under the MIT license. There is no license key to
+request, and nothing to configure: the library works the same on `localhost` and in
+production, with no limit on apps, hosts, or developers.

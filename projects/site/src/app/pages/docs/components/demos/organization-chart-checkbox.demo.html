@@ -1,0 +1,4 @@
+<med-organization-chart [value]="chart" selectionMode="checkbox" [(selection)]="selection" />
+<p class="mt-3 text-sm text-surface-500 dark:text-surface-400">
+  Fully checked: {{ selection().map((node) => node.label).join(', ') || 'none' }}
+</p>

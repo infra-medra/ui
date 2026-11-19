@@ -1,0 +1,7 @@
+## Custom message only
+
+`messageTemplate` is the lighter-touch sibling of `headlessTemplate` — it replaces only the
+message text, keeping the built-in icon and Accept/Reject buttons. Context: `{ $implicit: data }`
+(the resolved `ConfirmDialogData`).
+Reach for this when you need rich formatting in the message (bold text, a second paragraph) without
+rebuilding the whole dialog body the way `headlessTemplate` requires.

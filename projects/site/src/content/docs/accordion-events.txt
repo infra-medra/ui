@@ -1,0 +1,8 @@
+## Events and custom icons
+
+`opened`/`closed` fire with the toggled panel's index whenever a panel's state changes — in
+single mode, switching from one panel to another only fires `opened` for the new one (no `closed`
+for the one that got replaced). `expandIcon`/`collapseIcon`
+(both default `'chevron-down'`) pick the icon shown per state; leaving both at the same name keeps
+the built-in rotation animation, while different names (like `'plus'`/`'minus'` here) swap the icon
+outright instead of rotating it.

@@ -1,0 +1,5 @@
+Button turns a native `<button>` or `<a>` element into a MedraUi button. It's an attribute
+directive, not a wrapping component, so you keep the browser's own semantics for free — the
+native `disabled` behavior, submit/reset button types, and anchor navigation all keep working
+exactly as they would without the directive. Apply `medButton` to the element you already have,
+then shape its look with the `severity`, `variant`, and `size` inputs below.

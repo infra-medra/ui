@@ -1,0 +1,8 @@
+<button medButton variant="outlined" (click)="visible.set(true)">Open drawer</button>
+
+<med-drawer [(visible)]="visible" position="left" header="Notifications">
+  <p class="text-sm text-surface-600 dark:text-surface-300">
+    Your recent activity shows up here. This content is authored directly inside
+    <code>&lt;med-drawer&gt;</code>, not passed to a service.
+  </p>
+</med-drawer>

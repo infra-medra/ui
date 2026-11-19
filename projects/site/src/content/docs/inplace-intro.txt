@@ -1,0 +1,10 @@
+Inplace is a click-to-edit toggle between a compact display view and a richer content view,
+typically a form control — `<med-inplace><span medInplaceDisplay>{{ value }}</span><input
+medInplaceContent [(ngModel)]="value" /></med-inplace>`. The two views are mutually exclusive by
+construction, so there's just the two named projection slots, no catch-all default one. Both stay
+in the DOM (toggled via `hidden`, not added/removed), so a form control's typed-in value survives
+a close/reopen instead of being lost to re-instantiation. `[(active)]` is a two-way `model()` —
+local UI state, not a value you submit. `closable` adds a small close button inside the content
+view for convenience; there's no auto-close on blur or Enter, since this component can't know
+whether your projected content is a single field (Enter = done) or something with its own internal
+focus moves.

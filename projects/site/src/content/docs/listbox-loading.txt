@@ -1,0 +1,4 @@
+## Loading
+
+`loading` shows a loading indicator in the list while the options are still on their way, and
+`loadingLabel` sets its text. A `#loadingIcon` template replaces the indicator's icon.

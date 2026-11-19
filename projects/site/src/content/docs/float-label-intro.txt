@@ -1,0 +1,8 @@
+FloatLabel is a pure-CSS positioning wrapper: it doesn't watch the input's value or focus state
+from JavaScript, it just gives the projected `<label medFloatLabelText>` a `peer` sibling to react
+to via Tailwind's `peer-*` variants. That means the wrapped input needs `class="peer"` and a
+non-empty `placeholder` (a single space works) — `:placeholder-shown` only engages when the
+attribute is actually present, and without it the label never drops into its resting position
+inside the field. The label sits above the field's border by default (the "floating" state) and
+only collapses down to placeholder size and position when the input is empty and unfocused;
+otherwise it stays up, whether that's because the field has a value or because it's focused.

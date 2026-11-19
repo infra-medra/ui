@@ -1,0 +1,12 @@
+OverlayBadge is the positioning wrapper Badge itself doesn't provide: it projects arbitrary
+content — an icon, an avatar, anything — and overlays a small Badge on one of its four corners via
+`position`. `value` is plain data (a count or short code), not UI text this library owns, so it
+carries no built-in announcement: the visible digit renders `aria-hidden`, and it's on the consumer
+to pass `badgeAriaLabel` (e.g. "5 unread notifications") whenever the badge's meaning isn't already
+obvious from surrounding context, such as a bare icon. `dot` swaps the value badge for a small
+colored circle, the same mode Badge itself exposes, paired here with a thinner ring so it doesn't
+visually balloon into a blob at small sizes. `size` defaults to `'sm'` rather than Badge's own
+`'default'`, since an overlay badge usually sits on icon-scale content where a larger pill would
+swallow it; `'default'`/`'lg'` are still there for bigger wrapped content, like an avatar. `hidden`
+keeps the wrapped content rendered while suppressing the badge entirely — for a notification count
+of zero, say — without tearing down and re-adding the projection.

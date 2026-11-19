@@ -1,0 +1,27 @@
+/*
+ * Tailwind entry point dedicated to the showcase app — separate from the
+ * lib's own `projects/medra/ui/src/styles/entry.css`, which deliberately
+ * scans only the lib's source so the distributed package CSS never carries
+ * showcase-only utility classes. This file scans both, so responsive
+ * (`sm:`, etc.) utility classes written directly in the showcase's own
+ * templates actually get generated.
+ */
+@import '../../../medra/ui/src/styles/tailwind-theme-medraui.css';
+
+/* Same CDK overlay CSS + cascade-layer fix the lib's entry.css uses — see
+ * that file's comment for why it must be imported into the `base` layer. */
+@import '@angular/cdk/overlay-prebuilt.css' layer(base);
+
+/* Same overlay text-color default the lib's entry.css sets — see that
+ * file's comment for why `.cdk-overlay-container` needs its own default. */
+@layer base {
+  .cdk-overlay-container {
+    color: var(--color-surface-900);
+  }
+  .dark .cdk-overlay-container {
+    color: var(--color-surface-50);
+  }
+}
+
+@source '../../../medra/ui/src/lib/**/*.{html,ts}';
+@source '../app/**/*.{html,ts}';

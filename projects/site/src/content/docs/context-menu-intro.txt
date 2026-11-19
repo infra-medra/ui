@@ -1,0 +1,8 @@
+ContextMenu is an attribute directive — `[medContextMenu]="items"` on any host element — not a
+declared component like Menu, since right-click doesn't need a template reference to toggle from; it
+reacts to the browser's own `contextmenu` event on whatever element it decorates. It calls
+`event.preventDefault()` to suppress the native menu, but only once there are items and the directive
+isn't `contextMenuDisabled` — otherwise the native menu still shows through. Right-clicking again,
+anywhere, always closes whatever instance is open and opens a fresh one at the new cursor position —
+unlike a click-to-toggle trigger, a second right-click is never "close what I just opened." The
+`ContextMenu` key and Shift+F10 open the menu anchored to the host element itself, for keyboard users.

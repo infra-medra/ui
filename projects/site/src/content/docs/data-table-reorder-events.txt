@@ -1,0 +1,12 @@
+## Drag-to-reorder, dataKey, and richer events
+
+`reorderable` adds a drag-handle column; dropping emits `rowReorder` with `dragIndex`/`dropIndex` —
+real positions in `value` itself, not the sorted/filtered/paged view — since `value` is a plain
+`input()`, the consumer applies the reorder to their own array. `dataKey` switches selection
+comparisons from row *reference* equality to comparing `row[dataKey]`, so selection survives a
+freshly-fetched array of otherwise-equal objects (unset, the default, keeps today's reference
+equality). `rowSelect`/`rowUnselect` fire only on an actual selection change, richer companions to
+the `selection` model that hand you the resulting row directly. `globalFilterFields` narrows which
+columns the global search scans (unset: every declared column); `filterDelay` (default `300`ms)
+debounces committing a keystroke to the value that actually re-filters, without delaying what the
+input itself displays.

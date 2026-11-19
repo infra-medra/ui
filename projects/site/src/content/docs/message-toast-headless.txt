@@ -1,0 +1,7 @@
+## Fully custom toast
+
+`headlessTemplate` skips `<med-message>` entirely — no chrome, no default close button — for a
+single toast call. Grab a `TemplateRef` and pass it to `show()`; the context
+(`{ $implicit: message, onClose }`) lets your own template dismiss itself. `messageTemplate` is
+the lighter-touch version — it renders inside the usual `<med-message>`, replacing only the
+summary/detail text.

@@ -1,0 +1,10 @@
+<button medButton variant="outlined" severity="danger" (click)="confirmDelete()">Delete workspace…</button>
+<p class="mt-2 text-sm text-surface-500 dark:text-surface-400">{{ result() }}</p>
+
+<ng-template #messageTpl let-data>
+  <p>
+    This deletes <strong>all projects, members, and billing history</strong> for this workspace.
+    Type the workspace name to confirm you understand — icon and buttons above are still the
+    built-in ones, only this text is custom.
+  </p>
+</ng-template>

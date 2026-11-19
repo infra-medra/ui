@@ -1,0 +1,3 @@
+## Custom remove icon
+
+`#removeicon` replaces the default `x-mark` on the remove button; it takes no context.

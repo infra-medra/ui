@@ -1,0 +1,42 @@
+# Brand identity
+
+The MedraUi mark is a nine-module grid with the top-right cell left empty. Each module grows by five points per diagonal step, and the three largest modules get an increasingly rounded corner. Only the largest module is teal; every other module is ink.
+
+## Lockup and symbol
+
+The primary lockup pairs the symbol with the wordmark, separated by a gap equal to one grid cell. Use the symbol alone where the lockup is too small to read, such as an app icon, a favicon or an avatar.
+
+| Variant | Use it on |
+|---|---|
+| Lockup | Light backgrounds |
+| Inverted lockup | Dark backgrounds, where ink is swapped for a light neutral |
+| Mono lockup | One-color contexts, where the accent module also collapses to ink |
+
+This site switches between the regular and inverted lockup with the dark color scheme.
+
+## Clear space and minimum size
+
+Keep clear space equal to one grid cell on every side of the lockup. The minimum size is 24 px; below that, use the symbol alone.
+
+## Palette
+
+| Value | Role |
+|---|---|
+| `#1a1c1b` | Ink, for text and the symbol |
+| `#14b8a6` | Primary accent |
+| `#0d9488` | Hover and action |
+| `#0f766e` | Outline and teal text |
+| `#134e4a` | Monochrome |
+| `#ccfbf1` | Tint, for soft backgrounds |
+
+These values match the Tailwind `teal` ramp that the library exposes as the `brand` color tokens. See [Design tokens](/docs/foundations/design-tokens).
+
+## Typography
+
+The brand pairs Space Grotesk Medium for the logotype and titles with IBM Plex Sans Regular for body copy and interface text. The pairing belongs to the brand and this site; the component library does not load or require either font.
+
+## Don'ts
+
+- Do not use gradient fills.
+- Do not rotate the symbol.
+- Do not substitute the typeface of the wordmark.

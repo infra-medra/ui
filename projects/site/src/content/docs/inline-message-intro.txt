@@ -1,0 +1,5 @@
+InlineMessage is the compact sibling of Message — an icon + short text pairing meant to sit
+directly next to a form field (a validation hint), not a bordered card. No background, no border,
+no close button, `inline-flex` instead of `block`, and `role="status"`/`aria-live="polite"` on the
+host so assistive tech announces it when it appears. `severity` picks the icon and text color, the
+same four-way `info`/`success`/`warn`/`danger` map Message/Toast already use.

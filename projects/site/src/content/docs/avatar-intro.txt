@@ -1,0 +1,10 @@
+Avatar renders one of three fallbacks, in a fixed order: a supplied `image` until it fails to
+load, then `label` rendered as up to two uppercase initials, then a generic user icon. A broken
+`image` URL doesn't leave a blank box — the `error` event on the underlying `<img>` flips the
+avatar into the initials/icon fallback automatically, no manual retry logic needed on the consumer
+side. `severity` only colors the solid background behind the initials/icon fallbacks; it has no
+effect once a real image is actually showing. With every input left unset — no `image`, no
+`label`, no `alt` — the avatar has genuinely nothing to announce, so it renders `aria-hidden="true"`
+instead of inventing a placeholder accessible name; supplying either `label` or `alt` turns that
+into a real `aria-label` on the fallback. `shape` switches between a circular and a rounded-square
+avatar independently of `size`.

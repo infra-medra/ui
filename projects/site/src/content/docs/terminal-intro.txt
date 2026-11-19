@@ -1,0 +1,2 @@
+Terminal provides an interactive command-line prompt (`<med-terminal>`) that emits submitted commands and displays streamed responses.
+Bind `(command)` to handle user input and call `respond(output)` on the component reference to append output lines.

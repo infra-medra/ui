@@ -1,0 +1,3 @@
+## Header and footer templates
+
+`#header` renders above the filter and the list, and `#footer` renders below the list.

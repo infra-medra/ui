@@ -1,0 +1,4 @@
+## Ifta Label
+
+`med-ifta-label` places the label above the value inside the same box. It does not depend on an
+`<input>`, so it works with the MultiSelect as it is.

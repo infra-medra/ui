@@ -1,0 +1,3 @@
+## Events
+
+The field emits `optionSelected`, `groupOpened`, `panelBeforeShow`, `panelShow`, `panelBeforeHide`, `panelHide`, `cleared`, `inputFocus` and `inputBlur`. This example prints the last one it receives.

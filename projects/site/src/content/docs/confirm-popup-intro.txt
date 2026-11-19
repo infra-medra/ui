@@ -1,0 +1,8 @@
+ConfirmPopupService is the anchored, non-modal counterpart to ConfirmDialog — same icon + message
++ Accept/Reject shape, but positioned next to the element that triggered it instead of centered
+over a dimmed backdrop. `confirm()` takes that trigger element explicitly as its first argument
+(the caller already has it from its own click handler, the same way `MenuComponent.open()` and
+`PopoverComponent.open()` work) and returns an `OverlayHandle` whose `closed$` resolves the same
+`true`/`false`/`undefined` shape ConfirmDialog does. Use this for a lightweight "are you sure?"
+right next to a row's delete button; reach for ConfirmDialog when the action is significant enough
+to warrant blocking the whole page.

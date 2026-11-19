@@ -1,0 +1,7 @@
+<div class="max-w-xs">
+  <div class="mb-3 flex gap-2">
+    <button medButton size="sm" variant="outlined" (click)="pm.expandAll()">Expand all</button>
+    <button medButton size="sm" variant="outlined" (click)="pm.collapseAll()">Collapse all</button>
+  </div>
+  <med-panel-menu #pm [items]="items" ariaLabel="Sidebar navigation" />
+</div>

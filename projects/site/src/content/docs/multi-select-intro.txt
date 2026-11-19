@@ -1,0 +1,14 @@
+MultiSelect reuses the exact same trigger and overlay panel as Select — the only
+real differences are that its value is an array (`T[]` instead of `T | null`) and
+that choosing an option toggles it in place, leaving the panel open instead of
+closing it, since picking more than one option is the whole point. `display`
+governs the trigger summary: `'comma'` (default) shows one or two selections'
+labels joined by a comma, collapsing to "N selected" past two; `'chip'` (see
+further down this page) swaps that for one removable chip per selection instead.
+`showToggleAll` (default `true`) adds a header checkbox in the panel that selects
+or clears every currently *filtered* option at once, tri-state depending on how
+many are selected — narrower than Listbox's own version, which always targets the
+full option list regardless of its filter. `filter` and `showClear` behave the
+same as on Select, and `ControlValueAccessor` support means the bound value is
+always a plain array of the underlying `value`s, never the option objects
+themselves.

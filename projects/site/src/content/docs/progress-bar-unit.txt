@@ -1,0 +1,5 @@
+## Custom unit
+
+`unit` (default `'%'`) replaces the suffix on the `showValue` label — pass any string, including
+one with a leading space, for a value that isn't really a percentage (bytes downloaded, steps
+completed, and so on).

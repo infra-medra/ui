@@ -1,0 +1,7 @@
+TieredMenu has the same declared-once, imperatively-toggled shape as Menu —
+`<med-tiered-menu #menu [items]="items" /><button (click)="menu.toggle($event.currentTarget)">` —
+but items can nest to any depth via `TieredMenuItem.items`, opening as a sideways cascade of panels
+instead of Menu's flat list or Menubar's single dropdown level. ArrowRight on an item with children
+opens its submenu and moves focus inside; ArrowLeft collapses only the deepest open level and returns
+focus to the item that opened it, per the ARIA APG submenu keyboard pattern. Selecting any leaf item,
+anywhere in the cascade, closes every open level at once.

@@ -1,0 +1,5 @@
+## Explicit dimensions and srcSet
+
+`width`/`height` pass straight through as the native unitless `<img>` attributes — reserving
+layout space before the image loads, the same purpose they serve on a plain `<img>`. `srcSet`
+(with `sizes`) passes straight through too, for serving a different resolution per viewport.

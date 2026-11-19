@@ -1,0 +1,12 @@
+Skeleton is a loading placeholder box: the host element itself is the shape, there's no
+wrapper markup around it. It supports exactly two shapes — `rectangle` (rounded corners,
+the default) and `circle` — there's no separate "text line" shape; a line of placeholder
+text is just a `rectangle` sized down via `height`. `width`/`height` are plain CSS length
+strings bound as real inline styles, since a skeleton's dimensions usually mirror one
+specific piece of real content (a 240px thumbnail, an avatar) rather than a reusable
+design-system size; `size` is a shortcut that sets both to the same value at once, which
+covers the common `shape="circle"` case. The shimmer sweep can be turned off entirely with
+`animation="none"`, leaving a static placeholder color. The whole element is always
+`aria-hidden`, since a stack of empty placeholder boxes has nothing to announce — wrap a
+group of them in your own `role="status"` (or use ProgressSpinner) if the loading state
+itself needs to be announced.

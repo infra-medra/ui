@@ -1,0 +1,4 @@
+## Multiple
+
+Set `multiple` to bind an array. Clicking an option toggles it, and the header checkbox
+(`showToggleAll`) selects or clears every enabled option at once.

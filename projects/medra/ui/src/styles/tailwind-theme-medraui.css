@@ -1,0 +1,234 @@
+/*
+ * MedraUi — internal Tailwind theme (initial draft)
+ * Tailwind v4, CSS-first configuration via @theme.
+ * Based on the functional coverage described in roadmap/catalogo-tokens-design.md.
+ * Primitive color palette: reuses Tailwind's default palette (not rebuilt).
+ */
+
+@import "tailwindcss";
+
+/* Dark mode via a class on the root element, as decided (Phase 2). */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* --- Brand/primary color: Teal ---
+   * Chosen for evoking growth with a more technical/trustworthy feel,
+   * avoiding the direct collision "emerald" would have with Supabase's brand.
+   */
+  --color-brand-50: var(--color-teal-50);
+  --color-brand-100: var(--color-teal-100);
+  --color-brand-200: var(--color-teal-200);
+  --color-brand-300: var(--color-teal-300);
+  --color-brand-400: var(--color-teal-400);
+  --color-brand-500: var(--color-teal-500);
+  --color-brand-600: var(--color-teal-600);
+  --color-brand-700: var(--color-teal-700);
+  --color-brand-800: var(--color-teal-800);
+  --color-brand-900: var(--color-teal-900);
+  --color-brand-950: var(--color-teal-950);
+
+  /* --- Severity colors, shared across every interactive component's CVA ---
+   * Aliases onto Tailwind's default palette, same approach as --color-brand-*.
+   * "secondary" and "contrast" intentionally have no ramp here: they're
+   * neutral and reuse --color-surface-* directly in each component's CVA.
+   */
+  --color-info-50: var(--color-sky-50);
+  --color-info-100: var(--color-sky-100);
+  --color-info-200: var(--color-sky-200);
+  --color-info-300: var(--color-sky-300);
+  --color-info-400: var(--color-sky-400);
+  --color-info-500: var(--color-sky-500);
+  --color-info-600: var(--color-sky-600);
+  --color-info-700: var(--color-sky-700);
+  --color-info-800: var(--color-sky-800);
+  --color-info-900: var(--color-sky-900);
+  --color-info-950: var(--color-sky-950);
+
+  --color-success-50: var(--color-green-50);
+  --color-success-100: var(--color-green-100);
+  --color-success-200: var(--color-green-200);
+  --color-success-300: var(--color-green-300);
+  --color-success-400: var(--color-green-400);
+  --color-success-500: var(--color-green-500);
+  --color-success-600: var(--color-green-600);
+  --color-success-700: var(--color-green-700);
+  --color-success-800: var(--color-green-800);
+  --color-success-900: var(--color-green-900);
+  --color-success-950: var(--color-green-950);
+
+  --color-warn-50: var(--color-amber-50);
+  --color-warn-100: var(--color-amber-100);
+  --color-warn-200: var(--color-amber-200);
+  --color-warn-300: var(--color-amber-300);
+  --color-warn-400: var(--color-amber-400);
+  --color-warn-500: var(--color-amber-500);
+  --color-warn-600: var(--color-amber-600);
+  --color-warn-700: var(--color-amber-700);
+  --color-warn-800: var(--color-amber-800);
+  --color-warn-900: var(--color-amber-900);
+  --color-warn-950: var(--color-amber-950);
+
+  --color-help-50: var(--color-purple-50);
+  --color-help-100: var(--color-purple-100);
+  --color-help-200: var(--color-purple-200);
+  --color-help-300: var(--color-purple-300);
+  --color-help-400: var(--color-purple-400);
+  --color-help-500: var(--color-purple-500);
+  --color-help-600: var(--color-purple-600);
+  --color-help-700: var(--color-purple-700);
+  --color-help-800: var(--color-purple-800);
+  --color-help-900: var(--color-purple-900);
+  --color-help-950: var(--color-purple-950);
+
+  --color-danger-50: var(--color-red-50);
+  --color-danger-100: var(--color-red-100);
+  --color-danger-200: var(--color-red-200);
+  --color-danger-300: var(--color-red-300);
+  --color-danger-400: var(--color-red-400);
+  --color-danger-500: var(--color-red-500);
+  --color-danger-600: var(--color-red-600);
+  --color-danger-700: var(--color-red-700);
+  --color-danger-800: var(--color-red-800);
+  --color-danger-900: var(--color-red-900);
+  --color-danger-950: var(--color-red-950);
+
+  /* --- Surface scale (light by default, redefined under .dark below) --- */
+  --color-surface-0: #ffffff;
+  --color-surface-50: var(--color-slate-50);
+  --color-surface-100: var(--color-slate-100);
+  --color-surface-200: var(--color-slate-200);
+  --color-surface-300: var(--color-slate-300);
+  --color-surface-400: var(--color-slate-400);
+  --color-surface-500: var(--color-slate-500);
+  --color-surface-600: var(--color-slate-600);
+  --color-surface-700: var(--color-slate-700);
+  --color-surface-800: var(--color-slate-800);
+  --color-surface-900: var(--color-slate-900);
+  --color-surface-950: var(--color-slate-950);
+
+  /* --- Radius --- */
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+
+  /* --- Focus (keyboard accessibility) --- */
+  --focus-ring-width: 1px;
+  --focus-ring-offset: 2px;
+
+  /* --- Disabled --- */
+  --opacity-disabled: 0.6;
+
+  /*
+   * --- Transition durations ---
+   * `-base` is the shared color/border transition pace (hover/focus states).
+   * `-fast`/`-slow` were named after a design-system audit found Dock and
+   * Carousel each hardcoding a duration outside `-base` with no token behind
+   * it. Values are unchanged from what was already there — this only makes
+   * the deliberate deviation traceable instead of a silent magic number.
+   */
+  --transition-duration-fast: 0.15s;
+  --transition-duration-base: 0.2s;
+  --transition-duration-slow: 0.3s;
+
+  /* --- Form field (shared base for input/select/etc.) --- */
+  --spacing-field-x: 0.75rem;
+  --spacing-field-y: 0.5rem;
+  --spacing-field-sm-x: 0.625rem;
+  --spacing-field-sm-y: 0.375rem;
+  --spacing-field-lg-x: 0.875rem;
+  --spacing-field-lg-y: 0.625rem;
+  --text-field-sm: 0.875rem;
+  --text-field-base: 1rem;
+  --text-field-lg: 1.125rem;
+
+  /*
+   * --- Overlay (popover/modal/select) ---
+   * `-md` was added after a design-system audit found `shadow-overlay-md`
+   * already referenced by ImageCompare's drag handle and SpeedDial's action
+   * button with no matching token defined — both were silently rendering
+   * with no shadow at all. Value interpolated between `-sm` and `-lg`
+   * following Tailwind's own default box-shadow progression, rather than
+   * picked freehand.
+   */
+  --shadow-overlay-sm: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-overlay-md: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-overlay-lg: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+
+  /*
+   * Indeterminate ProgressBar sweep. A `--animate-*` theme key (Tailwind v4)
+   * generates the `animate-progress-indeterminate` utility, paired with the
+   * `@keyframes` of the same name defined below (outside `@theme`, same as
+   * any plain CSS keyframes).
+   */
+  --animate-progress-indeterminate: med-progress-indeterminate 1.5s ease-in-out infinite;
+
+  /*
+   * Skeleton's shimmer sweep — an `after:` pseudo-element gradient bar
+   * translated across the placeholder box, same "define once, `animate-*`
+   * utility generated automatically" convention as the ProgressBar sweep
+   * above. Kept as a *duration*-only difference (1.5s, matching
+   * `--transition-duration-base`'s spirit of one shared pace for this kind
+   * of ambient motion) — the gradient colors themselves live in the
+   * component's own CVA (`skeleton.styles.ts`), not here, since they need
+   * light/dark variants that a single keyframe can't express.
+   */
+  --animate-skeleton-wave: med-skeleton-wave 1.5s ease-in-out infinite;
+}
+
+@keyframes med-progress-indeterminate {
+  0% {
+    transform: translateX(-100%);
+  }
+  60% {
+    transform: translateX(200%);
+  }
+  100% {
+    transform: translateX(200%);
+  }
+}
+
+@keyframes med-skeleton-wave {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/*
+ * Icon size token (Trilha 2 — Heroicons icon wrapper).
+ * Plain CSS var (outside @theme: not a utility-generation token, it's a
+ * value overridable at any scope via `--icon-size: ...`), consumed by the
+ * `med-icon` component as `size-[var(--icon-size,1.5rem)]`.
+ */
+:root {
+  --icon-size: 1.5rem;
+}
+
+/* --- Surface scale and brand color redefinition under .dark --- */
+.dark {
+  --color-surface-0: #ffffff;
+  --color-surface-50: var(--color-zinc-50);
+  --color-surface-100: var(--color-zinc-100);
+  --color-surface-200: var(--color-zinc-200);
+  --color-surface-300: var(--color-zinc-300);
+  --color-surface-400: var(--color-zinc-400);
+  --color-surface-500: var(--color-zinc-500);
+  --color-surface-600: var(--color-zinc-600);
+  --color-surface-700: var(--color-zinc-700);
+  --color-surface-800: var(--color-zinc-800);
+  --color-surface-900: var(--color-zinc-900);
+  --color-surface-950: var(--color-zinc-950);
+}
+
+/*
+ * Notes:
+ * - Style variants (filled/outlined/text/link) and per-component sizes do NOT
+ *   go here — they're resolved in each component's CVA (Phase 2, already
+ *   decided), which consumes these semantic color tokens as its base.
+ * - This file is a starting point; it grows as the per-component audit
+ *   (tracking checklist) reveals additional tokens as needed.
+ */

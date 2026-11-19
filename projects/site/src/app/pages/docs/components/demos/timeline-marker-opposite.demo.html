@@ -1,0 +1,11 @@
+<med-timeline [value]="events" class="max-w-md">
+  <ng-template #opposite let-event>
+    <p class="text-xs text-surface-500 dark:text-surface-400">{{ event.timestamp }}</p>
+  </ng-template>
+  <ng-template #marker let-event>
+    <med-icon [name]="event.icon" variant="mini" class="size-4" [class.text-success-500]="event.done" [class.text-surface-400]="!event.done" />
+  </ng-template>
+  <ng-template #content let-event>
+    <p class="text-sm font-medium text-surface-900 dark:text-surface-50">{{ event.title }}</p>
+  </ng-template>
+</med-timeline>

@@ -1,0 +1,9 @@
+[
+  {
+    "name": "medBind",
+    "kind": "input",
+    "type": "BindMap | null | undefined (Record<string, unknown> | null | undefined)",
+    "default": "undefined",
+    "description": "Map of safe DOM attributes, ARIA properties, and event listeners dynamically bound to the host element via [medBind] with an explicit security allowlist."
+  }
+]

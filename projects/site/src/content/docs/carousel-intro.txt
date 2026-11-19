@@ -1,0 +1,9 @@
+Carousel pages through a `value` array `numVisible` items at a time, sliding the whole track with a
+single `transform: translateX(...)` rather than animating each item — item markup is entirely
+yours, supplied as one projected `<ng-template let-item>`. There's no seamless infinite loop for
+v1: Prev/Next just clamp at the edges, so the last page always shows a full set of items instead of
+trailing off into empty space. Autoplay, when `autoplayInterval` is set, does wrap back to the
+first page once it reaches the end, but that's a plain reset of the current position, not the
+clone-the-edge-items trick real seamless looping needs. Pausing autoplay is a persistent, always-visible button rather than a hover/focus trick —
+hover-only pausing leaves keyboard and touch users with no way to stop auto-advancing content, and
+this component only ships the version that works for everyone.

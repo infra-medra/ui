@@ -1,0 +1,9 @@
+## Lazy loading
+
+`lazyLoad` emits `{ first, last }` once the rendered range comes within `lazyLoadThreshold` rows
+(default `10`) of the end of `items` — `first` is the next not-yet-loaded index, `last` a
+same-sized-chunk hint — so a consumer can fetch and append the next page before the user actually
+scrolls into a blank area. It only fires once per `items` length: scrolling back and forth within an
+already-requested-but-not-yet-arrived zone doesn't re-emit. `loading` is purely presentational — a
+trailing spinner row after the last real item — it doesn't gate `lazyLoad` itself, so a consumer
+still has to avoid fetching again while a previous fetch is in flight.

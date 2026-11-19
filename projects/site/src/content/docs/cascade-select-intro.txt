@@ -1,0 +1,15 @@
+CascadeSelect looks like Select from the outside — same trigger, same
+`selectTriggerVariants` styling — but opens a panel of cascading side-levels
+instead of one flat list, for options that only make sense picked in stages.
+Each option is `{ label, value?, children? }`: only leaves (no `children`) carry
+a real `value`, since picking a leaf is the only thing that resolves this
+control's value — intermediate levels exist purely to narrow the choice down.
+Once a leaf is picked, the trigger shows the full breadcrumb of labels that led
+to it, joined by `separator` (default `' / '`). Because a bare `value` doesn't
+carry the path that produced it, writing a value onto the control programmatically
+means it has to search the whole tree to rebuild that breadcrumb. `showClear` adds
+an inline button that resets the value to `null`, same placement as `Select`'s own.
+Below `breakpoint` (default `'960px'`) the panel's side-by-side levels stack
+vertically instead of flying out sideways, so a cascading pick still fits a narrow
+viewport — try shrinking the window. There's no `filter` — the cascading-panel mechanism is already
+the part of this component that earns its keep over plain Select.

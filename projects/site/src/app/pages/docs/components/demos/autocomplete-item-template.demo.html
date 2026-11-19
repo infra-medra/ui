@@ -1,0 +1,11 @@
+<med-autocomplete
+  [suggestions]="suggestions()"
+  [(ngModel)]="framework"
+  placeholder="Search a framework"
+  (search)="onSearch($event)"
+  class="max-w-sm"
+>
+  <ng-template #item let-option let-index="index">
+    <span data-testid="item-template"><strong>{{ index + 1 }}.</strong> {{ option.label }}</span>
+  </ng-template>
+</med-autocomplete>

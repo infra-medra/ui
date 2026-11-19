@@ -1,0 +1,6 @@
+Dialog is an imperative service, not a component you place in a template. Call
+`dialogService.open(YourComponent, options)` with a standalone component of your own — Dialog
+renders it inside a shell (header + optional close button) and hands it a `DialogRef` (via the
+`DIALOG_REF` token) to close itself with a result, plus whatever `data` you passed in (via
+`DIALOG_DATA`). `open()` returns that same `DialogRef` to the caller, so you can subscribe to
+`closed$` to react to how the dialog was dismissed.

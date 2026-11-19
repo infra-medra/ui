@@ -1,0 +1,17 @@
+OrderList reorders a single array in place — `value` is a `model()`, so binding `[(value)]` keeps
+your own array in sync on every move. Reordering happens through the four buttons above the list
+(move to top, up, down, to bottom) — every move stays reachable from the keyboard with no extra
+work. `dragdrop` (default `true`) layers native HTML5 drag-and-drop on top, reordering a single row
+at a time dropped at another row's position; it's a mouse/touch-only enhancement rather than a
+replacement, since drag-and-drop has no built-in keyboard equivalent or reliable screen-reader
+support — set `dragdrop="false"` to turn it off and keep only the buttons. Selecting items works
+like a standard multi-select listbox — clicking,
+or pressing Enter/Space on the focused row, toggles an item in and out of the selection — and a
+move button acts on the whole selection as one contiguous block, preserving the selected items'
+relative order among themselves as it shifts. Move up/down are disabled once the selection already
+touches that edge of the list, and all four buttons are disabled when nothing is selected. `selection`
+is a `model<readonly T[]>`, so `[(selection)]` reads and drives it from the outside, the same as
+`value`. `disabled` turns off every interaction at once — the four move buttons, click-to-select,
+keyboard navigation, and drag-and-drop. Each row is rendered from your own `<ng-template
+let-item>`, so `OrderListComponent` never assumes anything about the item shape beyond what that
+template references.

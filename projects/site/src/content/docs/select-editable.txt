@@ -1,0 +1,6 @@
+## Editable
+
+`editable` swaps the trigger for a real `<input>` whose typed text commits live, on every
+keystroke, as the value — cast to `T`, so it's only type-safe when `T` accepts a plain `string`.
+Typing doesn't filter the option list the way AutoComplete does; `filter` stays independent and
+opt-in if you want both.

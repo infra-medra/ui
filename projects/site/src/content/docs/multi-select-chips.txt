@@ -1,0 +1,7 @@
+## Chip display
+
+`display` defaults to `"comma"` — the trigger summary shows selected labels joined by a comma
+(collapsing to "N selected" past two). Set `display="chip"` to render one removable `<med-chip>`
+per selection inside the trigger instead. Each chip's own remove button stops the click from also
+toggling the dropdown open — clicking a chip's label still opens it, same as clicking anywhere else
+on the trigger.

@@ -1,0 +1,10 @@
+<div class="flex flex-wrap items-start gap-8">
+  <div class="flex items-center gap-3">
+    <med-color-picker [(ngModel)]="rgbColor" format="rgb" ariaLabel="Accent color (RGB)" />
+    <span class="font-mono text-sm text-surface-500 dark:text-surface-400">{{ rgbColor }}</span>
+  </div>
+  <div class="flex flex-col items-start gap-2">
+    <med-color-picker [(ngModel)]="inlineColor" inline ariaLabel="Accent color (inline)" />
+    <span class="font-mono text-sm text-surface-500 dark:text-surface-400">{{ inlineColor }}</span>
+  </div>
+</div>

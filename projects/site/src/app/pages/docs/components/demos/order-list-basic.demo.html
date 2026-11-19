@@ -1,0 +1,15 @@
+<div class="flex flex-col gap-3">
+  <label class="flex items-center gap-2 text-sm text-surface-700 dark:text-surface-200">
+    <input type="checkbox" [checked]="disabled()" (change)="disabled.set(!disabled())" />
+    Disable the whole list
+  </label>
+  <med-order-list [(value)]="steps" [(selection)]="selection" [disabled]="disabled()" header="Deployment steps">
+    <ng-template let-step>
+      <div class="flex items-center justify-between gap-3">
+        <span>{{ step.label }}</span>
+        <span class="text-xs text-surface-400 dark:text-surface-500">{{ step.eta }}</span>
+      </div>
+    </ng-template>
+  </med-order-list>
+  <p class="text-sm text-surface-500 dark:text-surface-400">Selected: {{ selection().length }} step(s)</p>
+</div>

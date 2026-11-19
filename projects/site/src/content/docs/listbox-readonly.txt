@@ -1,0 +1,4 @@
+## Read only
+
+`readonly` keeps the list focusable and shows the current selection, but clicks and keys do not
+change it.

@@ -1,0 +1,8 @@
+## Full-screen and scroll locking
+
+`fullScreen` (default `false`) covers the whole viewport regardless of `position` — it fades in
+instead of sliding, since there's no edge left to slide from once the panel already fills the
+screen. `closeOnEscape` (default `true`) controls whether Escape closes the drawer. `blockScroll`
+(default `false`) locks the page's own scroll while the drawer is open — a *modal* drawer already
+blocks scroll for free via its backdrop, so this option mainly matters for a non-modal
+(`modal="false"`) drawer that still wants to keep the background from scrolling underneath it.

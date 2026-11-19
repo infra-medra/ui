@@ -1,0 +1,9 @@
+[
+  {
+    "name": "medRippleDisabled",
+    "kind": "input",
+    "type": "boolean",
+    "default": "false",
+    "description": "Disables the pointerdown ink ripple animation when true."
+  }
+]

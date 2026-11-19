@@ -1,0 +1,5 @@
+## Filter
+
+`filter` adds a search box above the list. `filterBy` picks the fields to match, `filterMatchMode`
+sets how (`contains`, `startsWith`, `endsWith`, `equals`, ...), and `filtered` reports each change.
+In `multiple` mode, "Select all" acts only on the options the filter leaves visible.

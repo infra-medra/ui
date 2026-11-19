@@ -1,0 +1,14 @@
+Image wraps a plain `<img>` with two things a raw tag doesn't give you: an optional
+full-screen preview and a broken-image fallback. `preview` (default `false`) turns the
+thumbnail into a button that opens the image in a full-screen overlay with zoom-in/zoom-out
+buttons (fixed 0.5x steps, capped between 1x and 3x — no scroll-to-zoom, no drag-to-pan),
+rotate-left/rotate-right buttons (±90° per click, unbounded — repeated clicks keep spinning
+past 360° rather than clamping), and a close button; Esc, clicking the backdrop, focus
+trapping, and focus restore on close all come from the same overlay service every other
+overlay in this library uses. `opened`/`closed` emit as the preview overlay opens and closes,
+for a consumer that wants to react to it beyond the overlay's own lifecycle. If the image
+at `src` fails to load, `imageError` fires and swaps in a fallback panel with a generic photo
+icon instead of the browser's broken-image glyph — and if you passed an `alt`, that
+description isn't thrown away, it becomes the fallback's accessible label ("Image failed to
+load: …") instead of just vanishing. The fallback itself is never clickable, even with
+`preview` on, since there's no image to enlarge.

@@ -1,0 +1,1 @@
+Project `#group` to customize the header row of each group. The template receives the group label, taken from the `group` field of the options. Options of the same group must stay together for the header to appear once.

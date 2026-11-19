@@ -1,0 +1,12 @@
+<div class="flex justify-center py-6">
+  <med-dock [items]="items">
+    <ng-template #item let-menuItem>
+      <span class="relative">
+        <med-icon [name]="menuItem.icon" class="size-6" />
+        @if (menuItem.label === 'Mail') {
+          <span class="absolute -right-0.5 -top-0.5 size-2 rounded-full bg-danger-500"></span>
+        }
+      </span>
+    </ng-template>
+  </med-dock>
+</div>

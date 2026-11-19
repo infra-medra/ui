@@ -1,0 +1,6 @@
+## Responsive breakpoints
+
+`responsiveOptions` swaps `numVisible`/`numScroll` for a per-breakpoint tier once the viewport
+narrows past a given pixel width — the smallest matching `breakpoint` always wins, and the plain
+`numVisible`/`numScroll` inputs stay as the default for anything wider than the widest tier. Resize
+the window to see the item count step down.

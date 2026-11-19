@@ -1,0 +1,13 @@
+DatePicker is a real `<input role="combobox">` with a calendar overlay, so a date can be typed
+directly or picked visually. In its default `selectionMode="single"`, the bound value is a plain
+`Date | null`; switching to `selectionMode="range"` changes the value shape entirely, to a
+`{ start: Date | null; end: Date | null }` object — the input becomes read-only in that mode, since
+parsing a two-endpoint range out of free text reliably isn't worth the added complexity.
+`dateFormat` (a numeric token string like `mm/dd/yyyy` or `dd/mm/yyyy`) controls only what's typed
+and displayed in the field; it's independent from `locale`, which drives only the `Intl`-based
+month and weekday names shown in the calendar's own header and grid. Typed text is committed live,
+keystroke by keystroke, but only once it parses into a real calendar date inside
+`[minDate, maxDate]` — an unparseable or out-of-range string is silently reverted to the last
+committed value on blur, never carried into the form. It implements `ControlValueAccessor`, so
+bind it with `[(ngModel)]` or a reactive `formControl`, typed as `DatePickerValue` from
+`@medra/ui` if you need the union explicitly.

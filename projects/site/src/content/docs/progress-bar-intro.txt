@@ -1,0 +1,6 @@
+ProgressBar is a linear indicator with two modes: `determinate` (the default) shows a real
+`value` from 0-100, clamped at both ends; `indeterminate` sweeps a fixed-width segment back and
+forth for "in progress, duration unknown" work. `aria-valuenow` is correctly omitted in
+indeterminate mode, per the ARIA `progressbar` spec — there's no real number to report.
+`showValue` adds the percentage as text under the bar, only meaningful (and only shown) in
+determinate mode.

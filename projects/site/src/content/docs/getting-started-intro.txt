@@ -1,0 +1,7 @@
+MedraUi ships as a single npm package, `@medra/ui`, built against Angular's signal-based
+APIs (`input()`/`output()`/`model()`) throughout — every component here is a real,
+standalone Angular component or directive, not a wrapper generated from another
+framework. The four steps below are everything a new Angular app needs: install the
+package, add one CSS file, register the icons your app actually uses, and render your
+first component. Nothing else is required to get pixels on screen — MedraUi is MIT-licensed
+(see the note at the end of this page), so there's no key to request before you can use it.

@@ -1,0 +1,10 @@
+## Resizable columns and virtual scroll
+
+`columnResizable` adds a drag handle to each column header's trailing edge — dragging it sets that
+column's pixel width, applied the same way an explicit `width` on `<med-table-column>` already is.
+
+`virtualScroll` switches to a from-scratch CSS Grid row layout instead of a real `<table>` —
+combining a real table with CDK's transform-based virtualization is a known source of rendering
+bugs, so this mode avoids it entirely rather than risk it. Because only a handful of rows are ever
+in the DOM, every column needs a definite track size regardless of content — an explicit `width` in
+pixels, or a shared fallback that still splits remaining space reasonably for columns with none.

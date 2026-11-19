@@ -1,0 +1,5 @@
+<med-multi-select [options]="cities" [(ngModel)]="selectedCities" placeholder="Pick cities" class="max-w-xs">
+  <ng-template #value let-value let-options="options">
+    <span data-testid="value-template" class="font-medium">{{ options.length }} of {{ cities.length }} cities: {{ value.join(', ') }}</span>
+  </ng-template>
+</med-multi-select>

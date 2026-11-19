@@ -1,0 +1,10 @@
+<div class="flex flex-col gap-3">
+  <med-message severity="info" icon="star">icon="star" — overrides the default severity icon</med-message>
+  <med-message severity="info" size="sm">size="sm"</med-message>
+  <med-message severity="info" size="lg">size="lg"</med-message>
+  @if (lifeVisible()) {
+    <med-message severity="warn" [life]="2000" (closed)="lifeVisible.set(false)">life="2000" — auto-closes in 2s</med-message>
+  } @else {
+    <button medButton type="button" variant="outlined" class="w-fit" (click)="lifeVisible.set(true)">Show auto-closing message again</button>
+  }
+</div>

@@ -1,0 +1,5 @@
+Checkbox is a standalone component, not an attribute directive like Button or InputText — the
+decorative box needs its own markup, so a real (visually hidden) native `<input type="checkbox">`
+drives all the actual interaction underneath it. It implements Angular's `ControlValueAccessor`,
+so it works with `[(ngModel)]` and reactive forms out of the box; there's no separate `checked`
+input to bind directly.

@@ -1,0 +1,11 @@
+<med-mega-menu [items]="items">
+  <ng-template #start>
+    <span class="mr-2 flex items-center font-bold text-brand-600 dark:text-brand-400">MedraUi</span>
+  </ng-template>
+  <ng-template #item let-menuItem>
+    <span class="font-bold">{{ menuItem.label }}</span>
+  </ng-template>
+  <ng-template #end>
+    <med-icon name="magnifying-glass" variant="mini" class="ml-2 size-4 text-surface-500" />
+  </ng-template>
+</med-mega-menu>

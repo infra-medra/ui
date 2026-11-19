@@ -1,0 +1,30 @@
+[
+  {
+    "name": "prompt",
+    "kind": "input",
+    "type": "string",
+    "default": "'$ '",
+    "description": "Command prompt prefix rendered before the active input line and history entries."
+  },
+  {
+    "name": "welcomeMessage",
+    "kind": "input",
+    "type": "string",
+    "default": "''",
+    "description": "Initial banner message displayed above the first command prompt."
+  },
+  {
+    "name": "command",
+    "kind": "output",
+    "type": "EventEmitter<string>",
+    "default": "-",
+    "description": "Emitted with the trimmed command text whenever the user submits a line with Enter."
+  },
+  {
+    "name": "respond",
+    "kind": "method",
+    "type": "(output: string) => void",
+    "default": "-",
+    "description": "Appends a response line to the terminal history and scrolls to the bottom."
+  }
+]

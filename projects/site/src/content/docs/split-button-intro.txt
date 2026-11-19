@@ -1,0 +1,7 @@
+SplitButton fuses a primary action button to a dropdown-toggle button, for when one action is
+the common case and a handful of related ones should stay one click away without cluttering the
+primary button itself. Clicking the main part emits `buttonClick` immediately; clicking the
+chevron opens a menu built from the same `items` shape Menu/Menubar/ContextMenu already use
+(`label`/`icon`/`disabled`/`command`), and picking an item emits `itemSelect` and closes the menu.
+`label`/`icon` are plain inputs, not projected content — there's no slot for arbitrary markup on
+the primary button.

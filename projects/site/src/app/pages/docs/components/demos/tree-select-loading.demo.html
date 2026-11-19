@@ -1,0 +1,4 @@
+<div class="flex items-center gap-3">
+  <button medButton type="button" variant="outlined" size="sm" (click)="simulateFetch()">Fetch bins</button>
+  <med-tree-select [options]="bins()" [(ngModel)]="selectedBin" [loading]="loading()" placeholder="Choose a storage bin" class="max-w-xs" />
+</div>

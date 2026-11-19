@@ -1,0 +1,8 @@
+## Time selection
+
+`showTime` (single mode only) adds an hour/minute row to the panel, and the committed `Date`
+carries a real time-of-day instead of always midnight. `hourFormat` (`'12'`/`'24'`, default `'24'`)
+governs a suffix appended to the displayed text — a separate formatting concern from `dateFormat`,
+never typed or parsed back from free text, so the field becomes read-only whenever `showTime` is
+on. Picking a day doesn't auto-close the panel — a "Done" button in the time row closes it once
+the time is also dialed in.

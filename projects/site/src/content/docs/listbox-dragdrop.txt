@@ -1,0 +1,12 @@
+## Drag-and-drop reordering
+
+`dragdrop` enables reordering via Angular CDK's own drag-drop module — a genuinely separate,
+non-virtualized row template, since CDK's virtual scroll (recycling DOM nodes as rows scroll)
+conflicts with drag tracking needing a stable element. This component never mutates `options`
+itself: `reorder` emits the moved indices plus a convenience pre-reordered copy of the array, so the
+consumer just assigns it back. Rows stay keyboard-operable via CDK's own built-in reordering: focus
+a row, Enter to pick it up, arrow keys to move it, Enter or Escape to drop or cancel.
+
+The mode has a limit: with `dragdrop`, groups, filter and templates do not apply. The list is the
+flat, ungrouped sequence of `options`, with no search box and no custom option, group, header,
+footer or empty templates.

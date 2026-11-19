@@ -1,0 +1,7 @@
+<med-tabs showNavigators class="max-w-sm">
+  @for (month of months; track month) {
+    <med-tab [header]="month">
+      <p class="p-3 text-sm text-surface-600 dark:text-surface-300">Report for {{ month }}.</p>
+    </med-tab>
+  }
+</med-tabs>

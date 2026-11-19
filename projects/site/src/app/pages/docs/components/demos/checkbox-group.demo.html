@@ -1,0 +1,16 @@
+<div class="flex flex-col gap-4">
+  <div class="flex flex-wrap items-center gap-5">
+    @for (topic of topics; track topic) {
+      <label class="flex items-center gap-2 text-sm text-surface-900 dark:text-surface-50">
+        <med-checkbox [value]="topic" [(ngModel)]="selectedTopics" name="topics-group" />
+        {{ topic }}
+      </label>
+    }
+  </div>
+  <p class="text-sm text-surface-500 dark:text-surface-400">Selected: {{ selectedTopics.join(', ') || 'none' }}</p>
+
+  <label class="flex items-center gap-2 text-sm text-surface-900 dark:text-surface-50">
+    <med-checkbox trueValue="yes" falseValue="no" [(ngModel)]="acceptance" name="acceptance" />
+    I agree ({{ acceptance }})
+  </label>
+</div>

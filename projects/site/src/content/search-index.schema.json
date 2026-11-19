@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "search-index.schema.json",
+  "title": "Docs site search index",
+  "description": "Static file generated at build time to projects/site/public/search-index.json and fetched same-origin by the search dialog.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "entries"],
+  "properties": {
+    "version": { "const": 1 },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["title", "section", "group", "url"],
+        "properties": {
+          "title": { "type": "string", "minLength": 1, "maxLength": 120 },
+          "section": { "enum": ["getting-started", "foundations", "components", "guides", "reference"] },
+          "group": { "type": "string", "minLength": 1, "maxLength": 120 },
+          "url": { "type": "string", "pattern": "^/(?!/)[A-Za-z0-9/_-]*$", "maxLength": 200 }
+        }
+      }
+    }
+  }
+}

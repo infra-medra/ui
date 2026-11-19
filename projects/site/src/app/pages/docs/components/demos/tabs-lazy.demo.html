@@ -1,0 +1,24 @@
+<med-tabs class="max-w-lg">
+  <med-tab header="Overview">
+    <p class="p-3 text-sm text-surface-600 dark:text-surface-300">
+      Plain projected content — created the moment the page rendered, whether or not this tab is
+      ever opened.
+    </p>
+  </med-tab>
+  <med-tab header="Reports">
+    <ng-template>
+      <p class="p-3 text-sm text-surface-600 dark:text-surface-300">
+        Wrapped in &lt;ng-template&gt; — created {{ reportsMountedAt() }}ms after page load, the
+        first time this tab was opened. Switch away and back — the number won't change.
+      </p>
+    </ng-template>
+  </med-tab>
+  <med-tab header="Billing">
+    <ng-template>
+      <p class="p-3 text-sm text-surface-600 dark:text-surface-300">
+        Also wrapped in &lt;ng-template&gt; — created {{ billingMountedAt() }}ms after page load,
+        the first time this tab was opened.
+      </p>
+    </ng-template>
+  </med-tab>
+</med-tabs>

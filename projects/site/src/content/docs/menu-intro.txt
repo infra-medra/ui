@@ -1,0 +1,7 @@
+Menu is declared once in the template and controlled imperatively by whatever trigger opens it —
+`<med-menu #menu [items]="items" /><button (click)="menu.toggle($event.currentTarget)">` — rather than
+a directive-pair pattern like `matMenuTriggerFor`. The host itself renders nothing (`display: none`);
+only the popup panel it opens via the overlay service is visible. `items` accepts `label`/`icon`/
+`disabled`/`command`, plus `separator: true` for a non-interactive divider line — disabled items and
+separators are both skipped by keyboard navigation. Selecting an item runs its own `command()` and
+emits `itemSelect`, then closes the menu; Escape and an outside click close it too.

@@ -1,0 +1,8 @@
+## States
+
+`disabled` is the plain native attribute — bind it directly, Button doesn't add an input of its
+own for it. `loading` dims the button and blocks interaction (including a synthesized click from
+keyboard activation) without rendering a spinner itself, since Button has no template of its own
+to inject one into — project a spinner alongside your label when you need one. `invalid` layers a
+danger-colored ring on top of whatever severity and variant are already set. `pill` rounds the
+corners fully, independent of every other input.

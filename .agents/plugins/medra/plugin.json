@@ -1,0 +1,19 @@
+{
+  "$schema": "https://antigravity.google/schemas/v1/plugin.json",
+  "name": "medra",
+  "version": "1.9.0",
+  "description": "Spec-driven development workflow: living specs, delta proposals, constitution-gated plans, test-first tasks, verified implementation and archive with project learnings. Portable to Antigravity via the medra CLI.",
+  "author": {
+    "name": "Tiago Cavalli"
+  },
+  "license": "MIT",
+  "keywords": [
+    "spec-driven-development",
+    "sdd",
+    "openspec",
+    "spec-kit",
+    "tdd",
+    "bdd",
+    "antigravity"
+  ]
+}

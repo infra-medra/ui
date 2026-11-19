@@ -1,0 +1,5 @@
+<med-progress-bar [value]="value" showValue severity="info">
+  <ng-template #content let-value>
+    <span class="font-semibold">{{ value }}/100 done</span>
+  </ng-template>
+</med-progress-bar>

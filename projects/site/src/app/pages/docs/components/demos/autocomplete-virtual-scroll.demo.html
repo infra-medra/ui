@@ -1,0 +1,12 @@
+<med-autocomplete
+  [suggestions]="suggestions()"
+  [(ngModel)]="item"
+  [virtualScroll]="true"
+  [lazy]="true"
+  placeholder="Search among 10,000 samples"
+  (search)="onSearch($event)"
+  (lazyLoad)="onLazyLoad($event)"
+/>
+<p class="mt-2 text-sm text-surface-500 dark:text-surface-400">
+  Last range near the end: <span data-testid="lazy-range">{{ lastRange() }}</span>
+</p>

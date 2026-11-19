@@ -1,0 +1,7 @@
+Fieldset is Panel's sibling for grouping actual form controls — a real `<fieldset>`/`<legend>`,
+not a generic `<div>`/`<h3>`. That matters for two reasons a styled div can't replicate: a screen
+reader announces the `legend` as context for every control inside, and the native `disabled`
+input cascades to every descendant form control automatically via the browser's own `<fieldset
+disabled>` behavior, no per-child logic needed. `toggleable`/`[(collapsed)]` work exactly like
+Panel's — the whole legend is clickable, and collapsing hides the content via `hidden` while
+keeping it in the DOM.

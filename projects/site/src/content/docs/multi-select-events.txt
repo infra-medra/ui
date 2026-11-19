@@ -1,0 +1,5 @@
+## Events
+
+The field emits `selectionChanged`, `chipRemoved`, `selectAllChanged`, `cleared`, `fieldClick`,
+`filtered`, `inputFocus`, `inputBlur`, `panelBeforeShow`, `panelShow`, `panelBeforeHide` and
+`panelHide`. This example prints the last one it receives.

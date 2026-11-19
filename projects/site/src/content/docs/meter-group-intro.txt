@@ -1,0 +1,13 @@
+MeterGroup draws several related quantities as one segmented bar, each segment's width
+proportional to its share of `max` (default `100`) — a disk-usage-by-category or
+budget-by-line-item summary, not a single progress value. Each `value` array entry
+(`{ label, value, severity?, icon? }`) doesn't have to already be a percentage: `value` is
+a real-unit number (GB, dollars, whatever `unit` describes) compared against the real
+total in `max`. Segment color comes from `severity`, reusing the same severity palette as
+Button and Tag; an item that omits `severity` gets one assigned automatically by rotating
+through the palette in list order, so a plain list of labeled numbers still renders in
+distinct colors with no per-item styling required. The bar itself is `aria-hidden` — the
+legend below it (plain text, one line per item) is the actual accessible content — and
+`showLegend="false"` keeps that legend in the DOM as screen-reader-only text instead of
+removing it outright. Segments aren't individually clickable; this is a static summary,
+not an interactive chart.

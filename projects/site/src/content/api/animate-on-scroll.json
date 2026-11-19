@@ -1,0 +1,37 @@
+[
+  {
+    "name": "enterClass",
+    "kind": "input",
+    "type": "string",
+    "default": "''",
+    "description": "CSS class added to the host element when it enters the viewport."
+  },
+  {
+    "name": "leaveClass",
+    "kind": "input",
+    "type": "string",
+    "default": "''",
+    "description": "CSS class added to the host element when it leaves the viewport."
+  },
+  {
+    "name": "rootMargin",
+    "kind": "input",
+    "type": "string",
+    "default": "'0px'",
+    "description": "IntersectionObserver rootMargin option controlling viewport detection bounds."
+  },
+  {
+    "name": "threshold",
+    "kind": "input",
+    "type": "number | number[]",
+    "default": "0.5",
+    "description": "Intersection ratio threshold at which enter and leave classes are toggled."
+  },
+  {
+    "name": "once",
+    "kind": "input",
+    "type": "boolean",
+    "default": "false",
+    "description": "Disconnects the observer after the first intersection when true."
+  }
+]

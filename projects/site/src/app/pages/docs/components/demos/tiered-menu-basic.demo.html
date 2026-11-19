@@ -1,0 +1,5 @@
+<div class="flex items-center gap-3">
+  <button medButton variant="outlined" #trigger (click)="menu.toggle(trigger)">File</button>
+  <med-tiered-menu #menu [items]="items" />
+  <p class="text-sm text-surface-500 dark:text-surface-400">{{ lastAction() }}</p>
+</div>

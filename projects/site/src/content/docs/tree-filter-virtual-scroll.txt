@@ -1,0 +1,12 @@
+## Filtering and virtual scroll
+
+`filterable` adds a built-in search box above the tree: a case-insensitive substring match against
+each node's `label`. A node renders when no filter is active, it matches itself, or any descendant
+does — the ancestor chain down to a match stays visible, and a node with a matching descendant
+force-expands while filtering without touching its own `expanded` state, so clearing the filter
+restores exactly whatever collapse state you had before searching.
+
+`virtualScroll` switches to a genuinely different rendering path for large trees — a flat, windowed
+list instead of one component instance per node — so performance stays flat regardless of how many
+nodes exist, not just how many are currently expanded. It composes with `filterable`: only the rows
+that pass the filter are ever flattened into the virtualized list.

@@ -1,0 +1,5 @@
+Message and Toast share one severity-colored card style — Message is the inline, static half,
+placed directly in your template and staying until you remove it; Toast is the ephemeral half, an
+imperative service that stacks temporary notifications in a fixed corner and auto-dismisses them.
+Reach for Message when a status needs to stay visible as part of the page; reach for Toast for a
+one-off notification about something that just happened.

@@ -1,0 +1,5 @@
+<med-multi-select [options]="cities" [(ngModel)]="selectedCities" [filter]="true" placeholder="Pick cities" class="max-w-xs">
+  <ng-template #empty>
+    <div data-testid="empty-template" class="px-3 py-2 text-sm">No city matches your search.</div>
+  </ng-template>
+</med-multi-select>

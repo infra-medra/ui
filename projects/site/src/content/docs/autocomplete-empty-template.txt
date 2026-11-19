@@ -1,0 +1,1 @@
+Project `#empty` to replace the default empty message when no suggestion matches the search.

@@ -1,0 +1,5 @@
+<div class="flex flex-col gap-3">
+  <med-autocomplete [suggestions]="suggestions()" size="sm" placeholder="Small" (search)="onSearch($event)" />
+  <med-autocomplete [suggestions]="suggestions()" placeholder="Default" (search)="onSearch($event)" />
+  <med-autocomplete [suggestions]="suggestions()" size="lg" placeholder="Large" (search)="onSearch($event)" />
+</div>

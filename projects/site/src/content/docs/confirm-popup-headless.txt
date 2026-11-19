@@ -1,0 +1,7 @@
+## Fully custom body
+
+`headlessTemplate` replaces the popup's entire body — icon, message, and the Accept/Reject
+buttons — with your own content, wired through `{ $implicit: data, onAccept, onReject }`. This
+adds `onAccept`/`onReject` to the context: this service returns a handle to subscribe to instead
+of taking callbacks, so a headless template needs its own way to resolve the popup. `contentTemplate` is
+the lighter-touch version — it only replaces the icon+message block, keeping the buttons.

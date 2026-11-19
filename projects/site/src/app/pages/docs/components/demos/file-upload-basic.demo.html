@@ -1,0 +1,5 @@
+<med-file-upload [(ngModel)]="files" multiple accept="image/*,.pdf" [maxFileSize]="maxFileSize" (rejected)="onRejected($event)" />
+<p class="mt-3 text-sm text-surface-500 dark:text-surface-400">{{ files.length }} file(s) selected. Max size 2 MB, images or PDFs only.</p>
+@if (lastRejection) {
+  <p class="mt-1 text-sm text-danger-600 dark:text-danger-400">Rejected: {{ lastRejection }}</p>
+}

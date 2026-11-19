@@ -1,0 +1,8 @@
+Accordion panels are real content children — `<med-accordion><med-accordion-tab
+header="...">...</med-accordion-tab></med-accordion>` — each one rendering its own header and
+body rather than the parent centrally rendering headers the way Tabs does, since multiple panels'
+content can be visible at once in `multiple` mode. `activeIndex` is a `model()` whose value shape
+depends on `multiple`: a single `number | null` normally, or `readonly number[]` when `multiple`
+is set. The keyboard model follows the WAI-ARIA APG Accordion pattern — every header keeps its
+normal Tab stop, with arrow keys/Home/End as an *additional* way to move between headers, not a
+replacement for Tab.

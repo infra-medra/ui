@@ -1,0 +1,10 @@
+InputNumber is a real `<input role="spinbutton">`: the accessible interaction is entirely
+keyboard-driven on the field itself — `ArrowUp`/`ArrowDown` step by `step`, `PageUp`/`PageDown`
+step by ten times that, `Home`/`End` jump straight to `min`/`max`. `showButtons` only adds pointer
+affordances that call that exact same stepping logic, never a second source of truth. What you
+type and the committed numeric value are tracked separately: a keystroke only commits (and updates
+the bound value) once it parses into a real number within `[min, max]`, so typing a lone `"-"` or
+a trailing `"."` is never silently coerced away mid-edit. Blur or `Enter` reformats the field from
+the last committed value, discarding any leftover unparseable text. `mode`, `currency`, `locale`,
+and the fraction-digit inputs are a thin pass-through to `Intl.NumberFormat`, so the same field
+renders as a plain number or as a fully localized currency amount.

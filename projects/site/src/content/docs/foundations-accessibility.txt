@@ -1,0 +1,22 @@
+# Accessibility
+
+MedraUi components are built with accessibility attributes and keyboard behavior in mind. This page lists what the library does for you and what stays your responsibility.
+
+## What the library handles
+
+- **Overlay triggers** reflect their state with `aria-expanded`, and declare the kind of panel they open with `aria-haspopup`, for example `listbox` for select-style fields, `tree` for the tree select and `menu` for menu-style components.
+- **Dismissal** with Escape and with an outside click is handled by the shared overlay service, not reimplemented in each component. See [Overlays](/docs/foundations/overlays).
+- **Focus** is trapped inside modal surfaces such as dialogs while they are open.
+- **Status messages** such as the inline message use `role="status"` with a polite live region, so assistive technology announces them without moving focus.
+- **Navigation landmarks** such as the paginator expose an accessible name through an `ariaLabel` input.
+
+## What you provide
+
+- A visible or programmatic label for every form field.
+- Text for any icon-only control, through an accessible name.
+- Translated accessible names when your UI is not in English. See [Internationalization](/docs/foundations/i18n).
+- A check that the color pair you choose keeps enough contrast in both the light and dark schemes.
+
+## Validation messages
+
+An inline message next to a field is announced through its live region, but the field does not reference it through `aria-describedby`. If a screen reader user needs the field itself to point at its hint, add that attribute in your template. See [Forms](/docs/foundations/forms).

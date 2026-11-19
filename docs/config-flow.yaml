@@ -1,0 +1,19 @@
+version: 1
+language: en
+integrations:
+  - claude
+  - antigravity
+testing:
+  mode: tdd
+  command: npm test
+  checks: []
+  paths:
+    - test/**
+    - "**/*.test.*"
+    - "**/*_test.*"
+    - tests/**
+learning:
+  max_active: 40
+  promote_after: 3
+  stale_after: 10
+  context_max: 10

@@ -1,0 +1,8 @@
+<med-autocomplete
+  [suggestions]="suggestions()"
+  [(ngModel)]="frameworks"
+  [multiple]="true"
+  [unique]="false"
+  placeholder="The same framework can be added twice"
+  (search)="onSearch($event)"
+/>

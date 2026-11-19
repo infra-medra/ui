@@ -1,0 +1,10 @@
+## Hidden items
+
+Set `visible: false` on a `MenuItem` to leave it out of the mega menu: the item, and any children it has,
+disappear from the screen and from keyboard navigation. A missing `visible` counts as `true`, and
+passing a new `items` array with `visible: true` shows the item again without recreating the component.
+Use the button to toggle the "Reports" item.
+
+`visible` is a UI hint, **not authorization**. The item is still in the data the client received and
+the route behind it stays reachable by URL, so protect the route with a guard and enforce access on
+the server.

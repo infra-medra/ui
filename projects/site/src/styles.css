@@ -1,0 +1,92 @@
+/*
+ * Reuses the library's own design tokens (brand/severity/surface colors,
+ * the `.dark` variant, radii, shadows, etc. — see
+ * projects/medra/ui/src/styles/tailwind-theme-medraui.css) so the site's
+ * chrome and its live `@medra/ui` component demos share one source of
+ * truth, instead of a second, drifting copy of the same palette.
+ */
+@import '../../medra/ui/src/styles/tailwind-theme-medraui.css';
+
+/* Same CDK overlay CSS + cascade-layer fix the lib's entry.css uses — see
+ * that file's comment for why it must be imported into the `base` layer
+ * (Dialog/Popover/etc. demos on the docs pages need this too). */
+@import '@angular/cdk/overlay-prebuilt.css' layer(base);
+
+@layer base {
+  .cdk-overlay-container {
+    color: var(--color-surface-900);
+  }
+  .dark .cdk-overlay-container {
+    color: var(--color-surface-50);
+  }
+}
+
+/*
+ * Marketing/docs-chrome-only typography (brand-identity.md): Space Grotesk
+ * for headings/logotype, IBM Plex Sans for body/interface text. Neither is
+ * used by `@medra/ui` itself — this site is where they're first wired up.
+ */
+@import '@fontsource/space-grotesk/500.css';
+@import '@fontsource/ibm-plex-sans/400.css';
+@import '@fontsource/ibm-plex-sans/500.css';
+@import '@fontsource/ibm-plex-sans/600.css';
+
+@theme {
+  --font-display: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+  --font-body: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+}
+
+body {
+  font-family: var(--font-body);
+}
+
+/* Minimal styling for `<analog-markdown classes="docs-prose">`-rendered
+ * component doc prose — no typography plugin for just a few short
+ * paragraphs per page. */
+@layer base {
+  .docs-prose p {
+    color: var(--color-surface-600);
+    line-height: 1.7;
+  }
+  .dark .docs-prose p {
+    color: var(--color-surface-400);
+  }
+  .docs-prose h2 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 1.125rem;
+    color: var(--color-surface-900);
+    margin-bottom: 0.5rem;
+  }
+  .dark .docs-prose h2 {
+    color: var(--color-surface-50);
+  }
+  .docs-prose code {
+    font-family: ui-monospace, monospace;
+    font-size: 0.875em;
+    background: var(--color-surface-100);
+    padding: 0.125rem 0.375rem;
+    border-radius: var(--radius-sm);
+  }
+  .dark .docs-prose code {
+    background: var(--color-surface-800);
+  }
+}
+
+/* Minimalist internal scrollbars: thin, transparent track, thumb from the
+ * surface tokens of the active theme. The page's own scrollbar (html) is left
+ * to the browser. Standard properties only. */
+@layer base {
+  :where(*:not(html)) {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-surface-300) transparent;
+  }
+  .dark :where(*:not(html)) {
+    scrollbar-color: var(--color-surface-700) transparent;
+  }
+}
+
+/* Scan the library's own source for utility classes used by live component
+ * demos, plus this app's own pages/layout. */
+@source '../../medra/ui/src/lib/**/*.{html,ts}';
+@source './app/**/*.{html,ts}';

@@ -1,0 +1,7 @@
+TabMenu renders visually the same tab bar as Tabs, with the same roving-tabindex "automatic
+activation" keyboard model, but it's driven by `items` (`MenuItem[]`, the same label/command/disabled
+shape Menu/SplitButton/ContextMenu/Dock already share) instead of owning projected `<med-tab>` content
+panels. It's pure navigation: each item's `command()` is responsible for whatever happens next —
+routing, swapping some other view — and TabMenu never renders a panel of its own. Use Tabs when the
+component itself should own and show the content per tab; use TabMenu when something else already
+owns the view and you just need a tab-styled way to switch between links or actions.

@@ -1,0 +1,5 @@
+<med-select [options]="cities" [(ngModel)]="city" placeholder="Pick a city" class="max-w-xs">
+  <ng-template #option let-option let-selected="selected">
+    <span data-testid="option-template" class="flex-1" [class.font-semibold]="selected">{{ option.label }} <span class="text-surface-400">· {{ option.value }}</span></span>
+  </ng-template>
+</med-select>

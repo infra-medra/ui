@@ -1,0 +1,7 @@
+## Multiple dates and month-only picking
+
+`selectionMode="multiple"` binds a `readonly Date[]` instead of a single `Date | null` — clicking a
+day toggles it in and out of the array, and the field becomes read-only the same way `range` mode
+already is. `view="month"` skips the day grid entirely: the panel terminates at the month grid,
+whose cells commit directly, and the resulting `Date` is always the 1st of the chosen month. Single
+mode only for both, same as `showTime`.

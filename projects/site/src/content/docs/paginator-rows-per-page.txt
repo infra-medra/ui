@@ -1,0 +1,5 @@
+## Rows-per-page options
+
+`rowsPerPageOptions` is opt-in and hidden by default — set it to render a page-size `<select>`
+alongside the navigation. Picking a new page size resets `first` back to `0`, the same way
+changing pages does when it would otherwise land past the end of the new, differently-sized set.

@@ -1,0 +1,18 @@
+<med-tree-table [value]="locations()" editMode="cell" ariaLabel="Storage locations by building" (editComplete)="onEditComplete($event)">
+  <med-table-column field="name" header="Location" width="180px" frozen />
+  <med-table-column field="itemCount" header="Items" align="right" width="100px" editable>
+    <ng-template let-row>{{ row.itemCount }}</ng-template>
+    <ng-template #editTemplate let-row let-onSave="onSave" let-onCancel="onCancel">
+      <input
+        medInputText
+        type="number"
+        class="h-7 w-16 text-sm"
+        [value]="row.itemCount"
+        (keydown.enter)="onSave($any($event.target).valueAsNumber)"
+        (blur)="onSave($any($event.target).valueAsNumber)"
+        (keydown.escape)="onCancel()"
+      />
+    </ng-template>
+  </med-table-column>
+  <med-table-column field="utilization" header="Utilization" width="120px" />
+</med-tree-table>

@@ -1,0 +1,2 @@
+<med-multi-select [options]="toppings" [(ngModel)]="selectedToppings" [selectionLimit]="3" placeholder="Choose up to 3 toppings" class="max-w-sm" />
+<p class="mt-2 text-sm text-surface-500 dark:text-surface-400">Selected: {{ selectedToppings.join(', ') || 'none' }}</p>

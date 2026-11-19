@@ -1,0 +1,7 @@
+## Sizes and states
+
+Three sizes (`sm`/`default`/`lg`), plus `indeterminate` and `invalid` as independent boolean
+inputs — both can be combined with any size or with each other. `disabled` also works the plain
+way (no forms wiring needed) if you just want a checkbox that can't be interacted with. `readonly`
+keeps the box focusable and visible but never toggles from a click or keypress — unlike `disabled`,
+there's no dimmed opacity.

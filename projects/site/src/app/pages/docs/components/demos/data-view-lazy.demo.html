@@ -1,0 +1,8 @@
+<med-data-view [value]="recipes()" [loading]="loading()" lazy [totalRecords]="23" paginator [rows]="5" (lazyLoad)="onLazyLoad($event)">
+  <ng-template #item let-recipe>
+    <div class="flex items-center justify-between gap-3 p-3">
+      <span class="font-display text-surface-900 dark:text-surface-50">{{ recipe.title }}</span>
+      <span class="text-sm text-surface-500 dark:text-surface-400">{{ recipe.minutes }} min</span>
+    </div>
+  </ng-template>
+</med-data-view>

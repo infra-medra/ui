@@ -1,0 +1,8 @@
+## Blocking an external element
+
+`target` blocks an element you already have a reference to instead of wrapping it in
+`<med-block-ui>` — pass an `HTMLElement` (from a template ref via `viewChild()`, say) and the mask
+is moved directly inside it via `Renderer2.appendChild()`. With `target` set, this component
+renders nothing of its own; there's no content to project since the target already holds it. The
+target gets a `position: relative` set on it while blocked (needed to anchor the mask), restored
+to whatever it had before once unblocked — untouched if it was already positioned.

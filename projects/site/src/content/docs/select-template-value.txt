@@ -1,0 +1,5 @@
+## Value template
+
+`#value` replaces how the chosen option shows in the field. The template gets the value as the
+implicit variable and the normalized option as `option`. It is ignored in `editable` mode, whose
+field is a real `<input>`. Pick an option below to see it.

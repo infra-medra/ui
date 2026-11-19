@@ -1,0 +1,21 @@
+# Theming
+
+MedraUi themes through CSS custom properties and one Tailwind variant. There is no runtime theme service: the color scheme is decided by a class on the root element.
+
+## Dark mode
+
+Dark mode is class-based. The theme file declares the `dark` variant so that it applies to the element carrying the `dark` class and everything inside it. Add the class to the root element to switch the page to the dark scheme:
+
+```ts
+document.documentElement.classList.toggle('dark', true);
+```
+
+Under the `dark` class, the `surface` scale switches from the Tailwind `slate` ramp to the `zinc` ramp. The `brand` ramp stays the same in both schemes. In your own markup, pair a light and a dark utility, for example `text-surface-900 dark:text-surface-50`.
+
+## How this site does it
+
+The header toggle flips the `dark` class on the root element and stores the choice in the browser so it survives a reload. The logo swaps to the inverted lockup in dark mode.
+
+## Customizing
+
+Because components read tokens, you can change their look by overriding the custom properties at the scope you want. For example, redefine the `brand` tokens to retint every primary component below that scope. Keep the full 50 to 950 range so every state of a component still resolves.

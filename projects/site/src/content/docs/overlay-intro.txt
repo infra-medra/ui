@@ -1,0 +1,2 @@
+OverlayService manages anchored and global CDK overlays with consistent focus trapping, Escape dismissal, and outside-click handling.
+Inject `OverlayService` and call `openAnchored(Component, anchor)` or `openGlobal(Component)` to receive a typed `OverlayHandle`.

@@ -1,0 +1,7 @@
+## Rich legend and toggle events
+
+Project a `<span medFieldsetLegend>` to fully replace the plain-string `legend` with an icon, badge,
+or any other markup — when present, it takes over rendering and `legend` becomes an unused
+fallback. `beforeToggle`/`afterToggle` emit around every toggle: `beforeToggle` fires with the
+*current* (pre-toggle) collapsed state, `afterToggle` with the *new* one — both only from a
+user-triggered toggle (the header click or toggle button), not an external `[(collapsed)]` write.

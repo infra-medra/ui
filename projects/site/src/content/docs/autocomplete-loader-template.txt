@@ -1,0 +1,1 @@
+Project `#loader` to replace the default loading state. The loader shows when `loading` turns on while the panel is open; this example turns it on for about 1.5 seconds each time the panel opens, simulating a refresh of the suggestions.

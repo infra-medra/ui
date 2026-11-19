@@ -1,0 +1,8 @@
+[
+  {
+    "name": "onLoad",
+    "kind": "output",
+    "type": "EventEmitter<void>",
+    "description": "Emits when the deferred template is instantiated upon entering the viewport."
+  }
+]

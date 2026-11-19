@@ -1,0 +1,5 @@
+InputText turns a native `<input>` into a MedraUi text field, the same attribute-directive
+approach Button uses. Autocomplete, IME composition, native `type` variants, and the `disabled`
+IDL property Reactive Forms expects all keep working exactly as they would on a plain `<input>` —
+nothing is reimplemented. It also implements `ControlValueAccessor`, so `[(ngModel)]` and reactive
+forms work directly on the native element.

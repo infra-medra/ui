@@ -1,0 +1,9 @@
+<div class="flex max-w-sm flex-col gap-4">
+  <med-panel header="Static panel">
+    <p>Always visible — no toggle button, since <code>toggleable</code> is off.</p>
+  </med-panel>
+
+  <med-panel header="Collapsible panel" toggleable [(collapsed)]="collapsed">
+    <p>Click the header or the chevron to toggle. Currently {{ collapsed() ? 'collapsed' : 'expanded' }}.</p>
+  </med-panel>
+</div>

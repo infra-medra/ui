@@ -1,0 +1,9 @@
+## 2. Add the styles
+
+MedraUi's own styling is built with Tailwind CSS v4, but the package ships the fully
+**compiled** CSS, not a Tailwind config for you to run yourself — `@medra/ui/styles.css`
+already contains every utility class the library's components use plus the design
+tokens (colors, fonts) as plain CSS custom properties, so no Tailwind setup of your own is
+required just to use the components as-is. It also already bundles `@angular/cdk`'s
+overlay CSS (with the cascade-layer fix MedraUi's own overlay-based components need) — one
+file covers both, so you don't wire up CDK's stylesheet separately.

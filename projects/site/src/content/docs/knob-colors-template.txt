@@ -1,0 +1,6 @@
+## Custom colors and value formatting
+
+`valueColor`/`rangeColor`/`textColor` override the value arc, background track, and displayed
+number's color respectively, independent of `severity`/`invalid` — any valid CSS color string.
+`valueTemplate` formats the displayed value text: a plain `(value: number) => string` function, not
+a `TemplateRef` — the label is always plain text, so a function is enough.

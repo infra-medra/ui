@@ -1,0 +1,5 @@
+<med-cascade-select [options]="catalog" [(ngModel)]="item" placeholder="Pick a product">
+  <ng-template #option let-option let-hasChildren="hasChildren">
+    <span data-testid="option-template" class="flex-1" [class.font-semibold]="hasChildren">{{ option.label }}</span>
+  </ng-template>
+</med-cascade-select>

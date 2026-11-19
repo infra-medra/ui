@@ -1,0 +1,6 @@
+## Active item
+
+An item with `routerLink` is marked while its route is active: it gets `aria-current="page"` and the active
+style. The match is by prefix by default, so `/docs/components/menu` stays active on a deeper route, and
+`routerLinkActiveOptions: { exact: true }` narrows it to an exact URL match ("Docs home" below is never
+active on these pages). The mark follows navigation: click another item and it moves.

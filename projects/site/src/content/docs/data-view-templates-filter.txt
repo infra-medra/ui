@@ -1,0 +1,8 @@
+## Templates, filtering, and page size options
+
+`filterPredicate` (a plain `(item, query) => boolean` function, unset by default) adds a search box
+above the items — the same function-over-field-name shape PickList's own `filterPredicate` uses,
+since `T` is fully generic here. `#header`/`#footer` render outside the item list, unstyled,
+consumer-owns-the-markup slots; `#empty` replaces the plain `emptyLabel` string for when `value` (or
+the current filter/page) has nothing to show. `rowsPerPageOptions` forwards straight to the built-in
+paginator, rendering a page-size `<select>` alongside it.

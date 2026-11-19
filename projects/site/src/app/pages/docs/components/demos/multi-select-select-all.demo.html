@@ -1,0 +1,2 @@
+<med-multi-select [options]="cities" [(ngModel)]="selectedCities" toggleAllLabel="All cities" placeholder="Pick cities" class="max-w-xs" (selectAllChanged)="lastToggle = $event.checked ? 'all selected' : 'all cleared'" />
+<p class="mt-2 text-sm text-surface-500 dark:text-surface-400">Last toggle-all: {{ lastToggle }}</p>

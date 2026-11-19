@@ -1,0 +1,5 @@
+## Loading state
+
+`loading` forwards straight through to the panel, same as `filterable` — it's the panel, not this
+trigger, that actually needs to show a spinner in place of the tree while options are still being
+fetched.

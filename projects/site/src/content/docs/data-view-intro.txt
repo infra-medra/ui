@@ -1,0 +1,10 @@
+DataView renders a `value` array in a `'list'` or `'grid'` layout, with item markup entirely
+supplied by the consumer through a single projected `<ng-template let-item>` — it has no fixed
+row shape to assume, unlike Select's `SelectOption<T>`. Pagination is opt-in via `paginator`, and
+when it's on, DataView renders its own `<med-paginator>` beneath the items and slices `value`
+against `first`/`rows` internally rather than making the consumer do it. Sorting works the same
+way: pass a plain `sortComparator: (a: T, b: T) => number` instead of a `sortField` string, since
+`T` is fully generic here and there's no field name to point at. What DataView deliberately doesn't
+ship is any sort-toggle or list/grid-switcher UI — it reacts to whatever `layout` or
+`sortComparator` your own controls drive, the same "primitive, not an opinion on the surrounding
+UI" stance this library takes with FileUpload and Toast.

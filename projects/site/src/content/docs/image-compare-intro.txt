@@ -1,0 +1,10 @@
+ImageCompare stacks two images and reveals the top one, `beforeSrc`, only up to `position` — a
+percentage `model()` — via `clip-path: inset(...)` rather than resizing an element's `width`, so
+dragging the divider never forces a layout reflow on every frame. The whole host is the drag
+surface, not just the thin handle: pointer listeners live on the container itself, so clicking
+anywhere on the image jumps the divider there immediately and dragging can continue without ever
+landing exactly on the handle first. The handle itself (`role="slider"`) is what carries keyboard
+support — Arrow keys move it by `step` (default `1`), Home/End jump to 0/100 — while the two
+`<img>` elements underneath are `aria-hidden` and `draggable="false"`, since there's nothing for a
+screen reader to usefully announce about two overlapping copies of the same photo. `class` sizes
+the host directly (e.g. `h-64 w-full`) — there's no separate wrapper element to size instead.

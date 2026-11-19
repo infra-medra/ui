@@ -1,0 +1,8 @@
+## Timing and touch
+
+`showDelay`/`hideDelay` (milliseconds, default `0`/`150`) debounce how quickly the tooltip
+appears and disappears — a short `hideDelay` keeps it from flickering shut while a pointer
+briefly crosses a gap. `tooltipDisabled` turns the directive off entirely without removing it
+from the template. On a touchscreen, a tap opens the tooltip and a second tap (on the trigger or
+anywhere else) closes it — there's no `mouseleave` to hide it, so hover's dismiss logic doesn't
+apply there.

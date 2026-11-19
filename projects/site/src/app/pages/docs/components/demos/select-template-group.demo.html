@@ -1,0 +1,5 @@
+<med-select [options]="cities" [(ngModel)]="city" placeholder="Pick a city" class="max-w-xs">
+  <ng-template #group let-label>
+    <span data-testid="group-template" class="font-semibold uppercase tracking-wide">{{ label }}</span>
+  </ng-template>
+</med-select>

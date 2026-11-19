@@ -1,0 +1,7 @@
+## Styling and states
+
+`severity`, `variant`, and `size` reuse Button's own CVA (`buttonVariants`) directly on both
+halves, so a future Button restyle applies here for free. `disabled` disables both the primary
+button and the toggle button at once; `buttonDisabled`/`menuButtonDisabled` disable either half
+independently, for when only one side should stop responding (e.g. the primary action needs a
+required field filled in first, but the menu of secondary actions shouldn't).

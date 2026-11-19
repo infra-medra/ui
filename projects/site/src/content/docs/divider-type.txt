@@ -1,0 +1,6 @@
+## Line style
+
+`type` (`'solid'`/`'dashed'`/`'dotted'`, default `'solid'`) picks the line style. `solid` uses a
+filled background — the same technique it already used before this option existed — while
+`dashed`/`dotted` switch to a `border`, the only CSS mechanism that can express either of those
+two styles.

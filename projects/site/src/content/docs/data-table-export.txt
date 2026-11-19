@@ -1,0 +1,8 @@
+## CSV export
+
+`exportCSV()` is a plain public method — grab a template reference (`<med-data-table #dt>`) and call
+`dt.exportCSV()` from a button of your own; the table never renders an export button itself, the
+same "consumer decides when to trigger this" split Dialog and Toast already use. It exports every
+currently sorted/filtered row across all pages, not just the visible page — pass `{ selectionOnly:
+true }` to export only the current selection instead. `exportFilename` sets the downloaded file's
+name (without the `.csv` extension).

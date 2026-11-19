@@ -1,0 +1,13 @@
+Listbox renders the same option-list panel that powers Select and MultiSelect,
+but inline inside a bordered box instead of behind a trigger and an overlay —
+useful whenever the list of choices should stay visible rather than hidden until
+clicked. Set `multiple` to switch between a single value and an array of values,
+and `filter` to add the same in-panel search box Select offers. In `multiple`
+mode, `showToggleAll` (default `true`, shown in the example above) adds a header
+checkbox that selects or clears every enabled option at once, tri-state depending
+on how many are currently selected. All the real behavior — keyboard navigation,
+row virtualization, selection indicators — comes from that shared panel unmodified.
+One gap worth knowing: `disabled` is enforced only at the value layer here
+(toggling a selection is rejected while disabled), not at the focus layer, since
+retracting DOM focusability would mean reaching into a shared panel none of its
+other three consumers need that for.

@@ -1,0 +1,4 @@
+## Empty template
+
+`#empty` replaces the empty-state text. Type something that matches no city, such as `zzz`, in the
+search box below to see it.

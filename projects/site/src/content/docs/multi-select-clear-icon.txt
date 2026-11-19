@@ -1,0 +1,4 @@
+## Clear icon
+
+`showClear` adds a button that resets the value to an empty array. The `#clearIcon` template
+replaces its icon.

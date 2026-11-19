@@ -1,0 +1,64 @@
+import { ChangeDetectionStrategy, Component, TemplateRef, booleanAttribute, contentChild, input } from '@angular/core';
+import { TableColumnAlign } from './data-table.types';
+
+/**
+ * Pure column *metadata*, declared as a content child of `<med-data-table>` (`<med-table-column
+ * field="name" header="Name" sortable />`) — same "children declared directly in the consumer's
+ * template" precedent Tabs/Accordion/SplitterPanel already established, rather than a `columns`
+ * data-array input. Renders nothing itself (`host: { class: 'hidden' }`, same convention
+ * Menu/Drawer use for a component that's only ever read by its parent, never displayed at its own
+ * declaration site): `DataTableComponent` reads the whole `contentChildren(TableColumnComponent)`
+ * list to drive its own `<thead>`/`<tbody>` entirely from its own template — there's no click or
+ * other event that needs to bubble back up from inside a column the way Accordion's header click
+ * does, so unlike `AccordionHost`, no DI coordinator is needed here at all.
+ *
+ * `field` is a plain `string` key into each row (`row[field]`), not
+ * `keyof T` — `DataTableComponent<T>` stays fully generic while this
+ * component itself isn't, so there's no generic parameter here to constrain
+ * against; the same relaxation this library already accepts for
+ * `DataViewComponent`'s `sortComparator` staying a plain function rather
+ * than a field-name API.
+ *
+ * An optional projected `<ng-template let-row let-rowIndex="rowIndex">`
+ * replaces the default `row[field]` text rendering for that column (a
+ * formatted currency value, a Tag/Badge, a row of action buttons, ...).
+ *
+ * **`editable` + a second named template (`#editTemplate`)**, for `DataTableComponent`'s
+ * `editMode="cell"`). `contentChild(TemplateRef)` alone only ever resolves the *first* matching
+ * `<ng-template>`, so telling the display template apart from the edit one needs a second,
+ * explicitly-named query (`contentChild('editTemplate', { read: TemplateRef })`) rather than a
+ * second bare `contentChild(TemplateRef)` — the consumer marks their own edit template with a
+ * `#editTemplate` reference variable (`<ng-template #editTemplate let-row let-onSave="onSave"
+ * let-onCancel="onCancel">`), the same plain Angular idiom this library otherwise doesn't need
+ * since every other component so far has only ever needed one projected template per content-child
+ * slot.
+ *
+ * **`frozen`/`alignFrozen`** only so far; `DataTableComponent` still documents "no frozen/sticky
+ * columns" as its own deliberate v1 cut, see that file's doc, so these two inputs are currently
+ * inert there). Deliberately **not** computed imperatively with pixel offsets (a `ResizeObserver`
+ * plus a window `resize` listener would recompute them, the shape behind the known "doesn't
+ * recompute when the layout changes" bug). `TreeTableComponent` instead derives each frozen
+ * column's `left`/`right` offset declaratively from its own existing `columnStyleWidth()` signal
+ * graph and applies plain CSS `position: sticky` — the browser handles during-scroll stickiness
+ * natively, no JS recomputation loop at all.
+ */
+@Component({
+  selector: 'med-table-column',
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { class: 'hidden' },
+  template: ``,
+})
+export class TableColumnComponent {
+  readonly field = input.required<string>();
+  readonly header = input('');
+  readonly sortable = input(false, { transform: booleanAttribute });
+  readonly align = input<TableColumnAlign>('left');
+  readonly width = input<string | null>(null);
+  readonly editable = input(false, { transform: booleanAttribute });
+  readonly frozen = input(false, { transform: booleanAttribute });
+  readonly alignFrozen = input<'left' | 'right'>('left');
+
+  readonly cellTemplate = contentChild(TemplateRef);
+  readonly editTemplate = contentChild('editTemplate', { read: TemplateRef });
+}

@@ -1,0 +1,5 @@
+## Icon templates
+
+`#triggerIcon` replaces the open (chevron) icon, `#clearIcon` replaces the icon of the clear button,
+and `#loadingIcon` replaces the loading indicator of the panel. Pick an option below to see the
+clear icon.

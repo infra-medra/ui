@@ -1,0 +1,8 @@
+<div class="flex flex-col gap-3">
+  <med-rating [(ngModel)]="score" ariaLabel="Rate this product" />
+  <p class="text-sm text-surface-500 dark:text-surface-400">Value: {{ score }}</p>
+  <div class="flex items-center gap-2 text-sm text-surface-500 dark:text-surface-400">
+    <med-rating [ngModel]="averageScore" readonly ariaLabel="Average rating" />
+    Average rating from other users
+  </div>
+</div>

@@ -1,0 +1,3 @@
+## Loading
+
+`loading` shows a loading indicator in the panel while the options are still on their way.

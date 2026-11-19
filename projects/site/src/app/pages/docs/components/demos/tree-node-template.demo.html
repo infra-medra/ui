@@ -1,0 +1,14 @@
+<med-tree [value]="files" class="max-w-xs">
+  <ng-template medTreeNodeTemplate="folder" let-node>
+    <span class="flex items-center gap-1.5">
+      <med-icon name="folder" variant="mini" class="size-4 text-brand-500" />
+      {{ node.label }}
+    </span>
+  </ng-template>
+  <ng-template medTreeNodeTemplate="file" let-node>
+    <span class="flex items-center gap-1.5">
+      <med-icon name="document-text" variant="mini" class="size-4 text-surface-400" />
+      {{ node.label }}
+    </span>
+  </ng-template>
+</med-tree>

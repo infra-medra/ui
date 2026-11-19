@@ -1,0 +1,15 @@
+OrganizationChart takes a single root node — `value` is one `OrgChartNode`, not an array, since
+a hierarchy only ever has one top box. Each node is shaped as `{ label, children?, expanded?,
+selectable?, class? }`, and the connector lines between a node and its children are drawn with a
+classic pure-CSS technique rather than SVG or a `<table>` layout, so the whole tree stays real,
+focusable HTML. Expand/collapse state lives locally on each node (seeded from `expanded`, default
+`true`) and is independent of the top-level `selection` model, which centralizes single- or
+multiple-node selection for the whole tree via `selectionMode`. Toggling a node emits
+`nodeExpand`/`nodeCollapse` with that node, for a consumer that wants to react beyond the local
+state itself — the state stays local either way, these are read-only notifications, not a
+`[(collapsedKeys)]`-style two-way binding. A node can opt out of selection
+entirely with `selectable: false` — useful for a vacant position that still needs to appear in the
+chart without being clickable. Because it's a recursively-nested component tree rather than a
+canvas or SVG chart, arrow-key navigation follows the chart's actual two-dimensional shape:
+`ArrowUp` moves to a node's parent, `ArrowDown` to its first child, and `ArrowLeft`/`ArrowRight`/
+`Home`/`End` move among the current node's siblings.

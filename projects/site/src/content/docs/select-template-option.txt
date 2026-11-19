@@ -1,0 +1,5 @@
+## Option template
+
+`#option` replaces the content of each row. The option is the implicit variable and `selected` tells
+whether it is the chosen one. Rows keep `role="option"` and the keyboard behavior. Open the field
+below to see the rows.

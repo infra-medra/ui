@@ -1,0 +1,7 @@
+## Scrolling to an index
+
+`scrollToIndex(index, behavior?)` is a direct passthrough to the underlying CDK viewport's own
+method — grab a template reference (`<med-virtual-scroller #vs>`) and call `vs.scrollToIndex(500)`
+from a button of your own, the same "consumer decides when to trigger this" pattern DataTable's
+`exportCSV()` uses. `scrollIndexChange` emits `{ first, last }` whenever the rendered range changes,
+whether from scrolling or a `scrollToIndex()` call.

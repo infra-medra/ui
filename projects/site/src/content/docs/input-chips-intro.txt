@@ -1,0 +1,10 @@
+InputChips turns typed text into a list of chips, bound as a plain `string[]` through
+`ControlValueAccessor`. `Enter` commits the current text as a new entry; set `addOnTab` to make
+`Tab` commit it too, right before moving focus away, instead of discarding whatever was still
+typed. There's no comma/semicolon splitting of pasted text into several chips at once, so pasting
+`a, b, c` produces one chip with that literal text, not three. `Backspace` on an empty field removes
+the last chip,
+and once a chip has focus (reachable via `ArrowLeft` from the input), `Delete`/`Backspace` removes
+whichever chip that is, not just the last one. By default a repeated exact entry is silently
+rejected and `Enter` becomes a no-op, so a duplicate never disappears without a trace; set
+`allowDuplicates` to change that. `max` caps the total chip count the same way once reached.

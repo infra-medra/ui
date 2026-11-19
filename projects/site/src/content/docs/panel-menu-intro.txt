@@ -1,0 +1,7 @@
+PanelMenu is an always-visible, inline expand/collapse navigation tree, taking the same recursive
+`TieredMenuItem[]` shape TieredMenu uses — reused directly rather than a second parallel type — and
+rendering it as nested disclosure lists instead of TieredMenu's cascading flyout overlays. Use
+PanelMenu for a persistent sidebar-style navigation tree; use TieredMenu for a transient popup menu
+triggered from a button. Each disclosure button is a plain `<button aria-expanded>`, not a full ARIA
+"tree view" with roving-tabindex and single-selection semantics — a navigation menu of links and
+actions doesn't really have a "selection" the way a tree of file-system nodes does.

@@ -1,0 +1,6 @@
+## Half-star selection
+
+`allowHalf` lets a star be half-filled by clicking or hovering its left half instead of always
+selecting the whole star, so values like `3.5` become reachable through the same pointer
+interaction. It's pointer/touch-only — arrow-key navigation still moves in whole-star steps, since a
+roving-tabindex radiogroup has no natural "half a step" to land keyboard focus on.

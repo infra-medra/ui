@@ -1,0 +1,5 @@
+## Inline mode
+
+`popup` defaults to `true` (a toggled overlay, the trigger button above). Set `popup="false"` to
+render the menu embedded directly in the page instead — an always-visible, non-popup tree with the
+same cascading-submenu behavior, no trigger button or `toggle()` involved.

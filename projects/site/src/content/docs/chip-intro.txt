@@ -1,0 +1,10 @@
+Chip is a small pill representing an entity — a tag, a filter, a selected item — with its label
+content projected rather than passed as a string input, the same convention Badge already uses.
+It can lead with either an `image` (avatar-style, bled flush to the pill's edge) or an `icon`; if
+both are set, `image` wins, the same image-over-label fallback priority Avatar applies to its own
+content. Setting `removable` adds a trailing remove button that emits `removed` on click — the
+chip itself isn't a focusable widget with its own key handling, only that button is interactive,
+so removing an entry is a plain Tab then Enter/Space away, no custom keyboard logic involved
+(Backspace on that same focused button also removes it, alongside the native Enter/Space it
+already gets for free). `removeLabel` sets the remove button's accessible name and defaults to
+`'Remove'`.

@@ -1,0 +1,4 @@
+## Basic
+
+Pass `options` as `{ label, value }` objects and bind the value with `ngModel`. Picking an option
+shows its label in the field, and `showClear` adds a button that resets the value to `null`.

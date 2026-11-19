@@ -1,0 +1,8 @@
+IftaLabel keeps the label small and pinned above the value at all times — unlike FloatLabel,
+nothing moves on focus or input, so there's no `:placeholder-shown`/`:focus` trick to wire up and
+no `peer` class to remember. The wrapper itself owns the field's single border, background, and
+focus ring (via `focus-within:*`, since the actual focusable element is the projected input, not
+the wrapper), so the input strips its own border, background, and focus ring through its own
+`class` — otherwise you'd end up with two nested boxes instead of one field. The label and input
+stack in a plain flex column, in source order, so put `<label medIftaLabelText>` before the input
+to get the label above it.

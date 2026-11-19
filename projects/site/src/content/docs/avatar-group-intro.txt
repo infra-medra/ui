@@ -1,0 +1,7 @@
+AvatarGroup is a thin flex wrapper that overlaps projected `med-avatar` children into a
+"stacked assignees" facepile — `<med-avatar-group><med-avatar .../><med-avatar .../></med-avatar-group>`.
+There's no built-in `max`/`+N` input: a "+2 more" tile is just a regular `med-avatar` with
+`label="+2"` placed as the last projected child. There's also no forced ring/border separator drawn automatically between
+overlapping avatars — add `class="ring-2 ring-surface-0 dark:ring-surface-900"` to each
+`med-avatar` yourself if you want one, shown below; a ring drawn by the wrapper couldn't safely
+match every avatar's own `shape` (`circle` vs `square`).

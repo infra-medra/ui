@@ -1,0 +1,6 @@
+## Clamping the other direction, and collapsing
+
+`maxSize` (a percentage, default `100`) clamps how far a drag can *grow* a panel — the same kind
+of clamp `minSize` already applies in the shrinking direction. `collapsible` (default `false`) lets
+a double-click on an adjacent gutter collapse that panel to 0 and restore it back to its prior
+size on a second double-click, instead of dragging it there by hand.

@@ -1,0 +1,10 @@
+<div class="flex max-w-sm flex-col gap-3">
+  <div #panelEl class="relative rounded-lg border border-surface-200 p-4 dark:border-surface-700">
+    <p class="text-sm text-surface-600 dark:text-surface-300">
+      This whole card — not a wrapper <code>med-block-ui</code> puts around it — gets blocked,
+      because <code>target</code> points straight at it.
+    </p>
+  </div>
+  <med-block-ui [blocked]="blocked()" [target]="panel().nativeElement" />
+  <button medButton type="button" variant="outlined" (click)="toggle()">{{ blocked() ? 'Unblock' : 'Block the card above' }}</button>
+</div>

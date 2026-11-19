@@ -1,0 +1,101 @@
+/*
+ * MedraUi — tema Tailwind interno (rascunho inicial)
+ * Tailwind v4, configuração CSS-first via @theme.
+ * Baseado na cobertura funcional descrita em catalogo-tokens-design.md.
+ * Paleta primitiva de cor: reutiliza a paleta padrão do Tailwind (não reconstruída).
+ */
+
+@import "tailwindcss";
+
+/* Dark mode por classe no elemento raiz, conforme decidido (Fase 2). */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* --- Cor de marca (brand/primary): Teal ---
+   * Escolhida por remeter a crescimento com um ar mais técnico/confiável,
+   * evitando a colisão direta que "emerald" teria com a marca do Supabase.
+   */
+  --color-brand-50: var(--color-teal-50);
+  --color-brand-100: var(--color-teal-100);
+  --color-brand-200: var(--color-teal-200);
+  --color-brand-300: var(--color-teal-300);
+  --color-brand-400: var(--color-teal-400);
+  --color-brand-500: var(--color-teal-500);
+  --color-brand-600: var(--color-teal-600);
+  --color-brand-700: var(--color-teal-700);
+  --color-brand-800: var(--color-teal-800);
+  --color-brand-900: var(--color-teal-900);
+  --color-brand-950: var(--color-teal-950);
+
+  /* --- Escala de superfície (light por padrão, redefinida em .dark abaixo) --- */
+  --color-surface-0: #ffffff;
+  --color-surface-50: var(--color-slate-50);
+  --color-surface-100: var(--color-slate-100);
+  --color-surface-200: var(--color-slate-200);
+  --color-surface-300: var(--color-slate-300);
+  --color-surface-400: var(--color-slate-400);
+  --color-surface-500: var(--color-slate-500);
+  --color-surface-600: var(--color-slate-600);
+  --color-surface-700: var(--color-slate-700);
+  --color-surface-800: var(--color-slate-800);
+  --color-surface-900: var(--color-slate-900);
+  --color-surface-950: var(--color-slate-950);
+
+  /* --- Radius --- */
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+
+  /* --- Foco (acessibilidade de teclado) --- */
+  --focus-ring-width: 1px;
+  --focus-ring-offset: 2px;
+
+  /* --- Desabilitado --- */
+  --opacity-disabled: 0.6;
+
+  /* --- Transição padrão --- */
+  --transition-duration-base: 0.2s;
+
+  /* --- Campo de formulário (base compartilhada por input/select/etc.) --- */
+  --spacing-field-x: 0.75rem;
+  --spacing-field-y: 0.5rem;
+  --spacing-field-sm-x: 0.625rem;
+  --spacing-field-sm-y: 0.375rem;
+  --spacing-field-lg-x: 0.875rem;
+  --spacing-field-lg-y: 0.625rem;
+  --text-field-sm: 0.875rem;
+  --text-field-base: 1rem;
+  --text-field-lg: 1.125rem;
+
+  /* --- Overlay (popover/modal/select) --- */
+  --shadow-overlay-sm: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-overlay-lg: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+}
+
+/* --- Redefinição da escala de superfície e cor de marca sob .dark --- */
+.dark {
+  --color-surface-0: #ffffff;
+  --color-surface-50: var(--color-zinc-50);
+  --color-surface-100: var(--color-zinc-100);
+  --color-surface-200: var(--color-zinc-200);
+  --color-surface-300: var(--color-zinc-300);
+  --color-surface-400: var(--color-zinc-400);
+  --color-surface-500: var(--color-zinc-500);
+  --color-surface-600: var(--color-zinc-600);
+  --color-surface-700: var(--color-zinc-700);
+  --color-surface-800: var(--color-zinc-800);
+  --color-surface-900: var(--color-zinc-900);
+  --color-surface-950: var(--color-zinc-950);
+}
+
+/*
+ * Observações:
+ * - Severidade (success/warn/danger/info/help/contrast), variantes de estilo
+ *   (filled/outlined/text/link) e tamanhos por componente NÃO entram aqui —
+ *   são resolvidos no CVA de cada componente (Fase 2, já decidido), que
+ *   consome estes tokens semânticos como base.
+ * - Este arquivo é ponto de partida; cresce conforme a auditoria por
+ *   componente (checklist de rastreio) revelar tokens adicionais necessários.
+ */

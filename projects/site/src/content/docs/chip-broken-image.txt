@@ -1,0 +1,5 @@
+## Broken image fallback
+
+If `image` fails to load, Chip falls back to `icon` (or nothing) instead of leaving the browser's
+broken-image glyph in place — the same self-clearing failure signal Avatar uses. Point the demo
+below at a URL that 404s to see it in action.

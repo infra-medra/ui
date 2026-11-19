@@ -1,0 +1,6 @@
+## First/last buttons and jump-to-page
+
+`showFirstLastIcon` (default `false` — kept off by default to
+avoid changing the keyboard layout of every existing roving-tabindex toolbar) adds buttons that jump
+straight to the first/last page. `showJumpToPageInput` adds a numeric field for typing a page number
+directly. There is no dropdown variant.

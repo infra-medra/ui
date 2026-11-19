@@ -1,0 +1,10 @@
+Card is a container with two named content-projection slots for structure beyond its own
+`title`/`subtitle` inputs: a `<div medCardHeader>` slot, meant for a full-bleed banner image and
+rendered with no padding of its own, and a `<div medCardFooter>` slot for an actions row. Both are
+plain attribute directives (`CardHeaderDirective`/`CardFooterDirective`) rather than fixed template
+regions, so nothing renders there unless a matching element is actually projected — there's no
+empty header gap or footer bar drawn on a card that doesn't use them. The footer's top border and
+padding specifically only appear once a `medCardFooter` element is present, detected via
+`contentChild()`, so a header-only or body-only card never ends up with a divider bar sitting above
+nothing. Everything not marked with either directive lands in the default body slot, below the
+title and subtitle.

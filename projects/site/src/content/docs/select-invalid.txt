@@ -1,0 +1,3 @@
+## Invalid
+
+`invalid` marks the field with the error style and `aria-invalid`.

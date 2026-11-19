@@ -1,0 +1,5 @@
+Divider is a simple separator line — the host element itself is the line, no wrapping markup.
+`orientation` (`horizontal`/`vertical`) picks which way it runs; a vertical divider needs an
+explicit height from its container (a flex row with items stretched, or an explicit `class="h-6"`)
+since there's no intrinsic height to fall back to. There's no inline label for v1 — common in
+other libraries, but not needed yet, and can be added later without breaking this API.

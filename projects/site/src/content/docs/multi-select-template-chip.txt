@@ -1,0 +1,4 @@
+## Chip template
+
+`#chip` replaces the label of each chip with `display="chip"`. The chosen option is the implicit
+variable, and the chip stays removable. Pick options below to see it.

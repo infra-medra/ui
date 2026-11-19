@@ -1,0 +1,12 @@
+<med-cascade-select
+  [options]="catalog"
+  [(ngModel)]="item"
+  showClear
+  placeholder="Pick a product"
+  (optionSelected)="log('optionSelected: ' + $event.path.join(' / '))"
+  (groupOpened)="log('groupOpened: ' + $event.path.join(' / '))"
+  (panelShow)="log('panelShow')"
+  (panelHide)="log('panelHide')"
+  (cleared)="log('cleared')"
+/>
+<p class="mt-2 text-sm text-surface-500 dark:text-surface-400" data-testid="last-event">Last event: {{ lastEvent }}</p>

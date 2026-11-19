@@ -1,0 +1,96 @@
+[
+  {
+    "name": "type",
+    "kind": "input",
+    "type": "ChartType ('bar' | 'line' | 'scatter' | 'bubble' | 'pie' | 'doughnut' | 'polarArea' | 'radar')",
+    "default": "'bar'",
+    "description": "Type of the Chart.js visualization to render inside <med-chart>."
+  },
+  {
+    "name": "data",
+    "kind": "input",
+    "type": "unknown",
+    "default": "undefined",
+    "description": "Chart.js data configuration object containing labels and datasets."
+  },
+  {
+    "name": "options",
+    "kind": "input",
+    "type": "unknown",
+    "default": "undefined",
+    "description": "Chart.js options configuration object for scales, plugins, and interactions."
+  },
+  {
+    "name": "plugins",
+    "kind": "input",
+    "type": "unknown[]",
+    "default": "[]",
+    "description": "Array of Chart.js plugins registered for this chart instance."
+  },
+  {
+    "name": "width",
+    "kind": "input",
+    "type": "string | undefined",
+    "default": "undefined",
+    "description": "Explicit CSS width applied to the chart container."
+  },
+  {
+    "name": "height",
+    "kind": "input",
+    "type": "string | undefined",
+    "default": "undefined",
+    "description": "Explicit CSS height applied to the chart container."
+  },
+  {
+    "name": "responsive",
+    "kind": "input",
+    "type": "boolean",
+    "default": "true",
+    "description": "Whether the chart resizes automatically when its container changes size."
+  },
+  {
+    "name": "ariaLabel",
+    "kind": "input",
+    "type": "string | undefined",
+    "default": "undefined",
+    "description": "Accessible label applied to the rendered canvas element."
+  },
+  {
+    "name": "ariaLabelledBy",
+    "kind": "input",
+    "type": "string | undefined",
+    "default": "undefined",
+    "description": "ID reference of an external element that labels the rendered canvas element."
+  },
+  {
+    "name": "styleClass",
+    "kind": "input",
+    "type": "string | undefined",
+    "default": "undefined",
+    "description": "Additional CSS classes applied to the host container."
+  },
+  {
+    "name": "onDataSelect",
+    "kind": "output",
+    "type": "ChartDataSelectEvent",
+    "description": "Emitted when a user clicks or selects an active element on the chart canvas."
+  },
+  {
+    "name": "refresh",
+    "kind": "method",
+    "signature": "refresh(): void",
+    "description": "Updates the existing Chart.js instance with the latest data and options."
+  },
+  {
+    "name": "reinit",
+    "kind": "method",
+    "signature": "reinit(): void",
+    "description": "Destroys and recreates the underlying Chart.js instance."
+  },
+  {
+    "name": "getBase64Image",
+    "kind": "method",
+    "signature": "getBase64Image(): string | undefined",
+    "description": "Returns the rendered chart canvas as a base64-encoded image data URL when available."
+  }
+]

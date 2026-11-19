@@ -1,0 +1,4 @@
+## Reactive Forms
+
+Use `formControl` or `formControlName`. The field marks the control as touched when it loses focus, so
+the `invalid` style can wait for that.

@@ -1,0 +1,6 @@
+## Rich header content
+
+`medAccordionTabHeader` projects rich markup — an icon, a badge, anything — in place of the
+plain-string `header` input. This library's Accordion combines header and
+body into one `<med-accordion-tab>`, so a marker directive is the projection slot here (same convention as Card's
+`medCardTitle`) rather than bare content projection.

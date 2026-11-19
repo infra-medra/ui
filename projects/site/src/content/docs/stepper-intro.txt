@@ -1,0 +1,7 @@
+Stepper is a wizard built on top of `<med-steps>`, reused unchanged for its own header row, plus
+Next/Back buttons and one content panel per step (`<med-step-panel label="...">`, the same
+declared-content-children shape `<med-tab>` uses inside `<med-tabs>`). `linear` maps onto each step's
+existing per-item `disabled`, not an all-or-nothing `readonly`: a linear wizard still lets you click
+back to an already-visited step's header, it only blocks jumping ahead of the current one. Next/Back
+never skip a `disabled` panel automatically — advancing by one step is exactly that, one step; a
+disabled panel only blocks jumping to it directly via the header.

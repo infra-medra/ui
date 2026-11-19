@@ -1,0 +1,28 @@
+O componente Icon renderiza ícones de três formas complementares no ecossistema Medra UI:
+
+1. **Ícones via CDN (CSS / Webfonts — 0 KB no bundle JS)**:
+Carregue qualquer biblioteca de fontes CSS via CDN no seu `index.html` ou `@import` no seu CSS global (ex.: Font Awesome, Remix Icon):
+
+```html
+<!-- No index.html -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+```
+Ou no seu `styles.css`:
+```css
+@import 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css';
+```
+
+Use diretamente via `fontIcon` ou na propriedade `name` / `icon`:
+```html
+<med-icon fontIcon="fa-solid fa-house" />
+<med-icon name="fa-solid fa-coffee" />
+<button medButton><med-icon name="fa-solid fa-download" /> Download</button>
+<med-tag icon="fa-solid fa-tag" value="Novidade" />
+```
+Essa abordagem não requer pacotes npm no `package.json` e resulta em 0 KB de impacto no seu bundle JavaScript.
+
+2. **Ícones SVG Registrados**:
+Registre conjuntos de ícones na inicialização da aplicação via `provideIcons(...)` e selecione as variantes `outline`, `solid`, `mini` ou `micro`.
+
+3. **Definições Diretas de Ícones SVG**:
+Passe definições SVG diretamente através do input `[icon]`.

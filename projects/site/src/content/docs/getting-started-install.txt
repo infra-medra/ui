@@ -1,0 +1,7 @@
+## 1. Install
+
+MedraUi requires Angular 21.2 or later (`@angular/core`, `@angular/common`,
+`@angular/platform-browser`) plus `@angular/cdk` 21.2+ — the library's overlay-based
+components (Select, Dialog, Menu, Tooltip, and others) are built directly on CDK's
+`Overlay`, not a reimplementation of it. `tailwindcss` itself is **not** a dependency you
+need to add — see the next step for why.

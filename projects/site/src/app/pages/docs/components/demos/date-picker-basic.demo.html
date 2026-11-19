@@ -1,0 +1,4 @@
+<med-date-picker [(ngModel)]="meetingDate" showClear class="max-w-xs" />
+<p class="mt-2 text-sm text-surface-500 dark:text-surface-400">
+  Selected: {{ meetingDate ? meetingDate.toLocaleDateString() : 'none' }}
+</p>

@@ -1,0 +1,7 @@
+Toolbar is a header/action bar with three named projection slots — `<div medToolbarStart>`,
+`medToolbarCenter`, `medToolbarEnd`. `start`/`end` are equal `flex-1` siblings around `center`,
+the classic "holy grail" layout trick, so `center` sits at true visual center regardless of how
+wide the other two are, without measuring anything in JS. The whole bar (and each slot on its own)
+wraps on narrow viewports instead of overflowing. `role="toolbar"` is applied as a semantic
+grouping label only — this doesn't implement the full WAI-ARIA APG roving-tabindex pattern, since
+projected content can be anything; normal Tab order between items already covers keyboard access.

@@ -1,0 +1,5 @@
+## Events
+
+The field emits `optionSelected`, `panelBeforeShow`, `panelShow`, `panelBeforeHide`, `panelHide`,
+`fieldClick`, `cleared`, `filtered`, `inputFocus` and `inputBlur`, besides `lazyLoad`. This example
+prints the last one it receives.

@@ -1,0 +1,8 @@
+## Vertical orientation, header/footer, and page events
+
+`orientation="vertical"` slides the track top-to-bottom instead of side-to-side; `showNavigators`
+(default `true`) toggles the prev/next arrows independently of `autoplayInterval` — a carousel can
+have neither, either, or both. `pageChange` emits the current page index (a plain `number`) on
+every navigation. Optional `#header`/`#footer` named templates
+render outside the sliding track, above and below it respectively — unstyled, consumer-owns-the-
+markup slots, the same idea as Card's own header/footer.

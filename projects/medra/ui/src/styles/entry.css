@@ -1,0 +1,56 @@
+/*
+ * Entry point compiled by the Tailwind CLI (separate from ng-packagr, as
+ * decided in roadmap/decisoes-produto.md — Phase 1, "Build pipeline"). Scans only
+ * the lib's own source code (templates + CVA strings), not the showcase
+ * app, so the distributed CSS doesn't load utility classes the end
+ * consumer will never use.
+ */
+@import './tailwind-theme-medraui.css';
+
+/*
+ * CDK Overlay structural CSS (layer positioning/stacking via
+ * cdk-overlay-container, cdk-overlay-pane, backdrop) — layout plumbing,
+ * doesn't conflict with the decision to not depend on utility CSS frameworks (which is
+ * about style utility classes, not the CDK's overlay mechanics). The
+ * backdrop/panel's visual style still comes from our own Tailwind (see
+ * OverlayService's own panelClass/backdropClass).
+ *
+ * Imported into the `base` CSS cascade layer (not left unlayered):
+ * Tailwind v4 wraps every utility class in its own `@layer utilities`, and
+ * per the CSS Cascade Layers spec, ANY unlayered rule beats ANY layered
+ * rule regardless of specificity or source order — so CDK's plain,
+ * unlayered `.cdk-overlay-pane { max-width: 100% }` was silently winning
+ * over `panelClass` utilities like `sm:max-w-lg` no matter what order the
+ * two files were `@import`ed in. Putting it in `base` (a layer Tailwind
+ * itself declares before `utilities`) restores the intended precedence:
+ * our utilities can override CDK's structural defaults again.
+ */
+@import '@angular/cdk/overlay-prebuilt.css' layer(base);
+
+/*
+ * Default text color for anything rendered inside an overlay (Dialog,
+ * Drawer, Popover, or arbitrary consumer content passed into Menu/Select/
+ * ...): `.cdk-overlay-container` is appended as a SIBLING of the
+ * consuming app's root element, not a descendant of it (confirmed via
+ * `document.querySelector('.cdk-overlay-container').parentElement ===
+ * document.body`) — so a consumer app that sets its own base text color
+ * on its root element (the common pattern, e.g. this showcase's own
+ * `<main class="text-surface-900 dark:text-surface-50">`) never has that
+ * color inherited by anything inside an overlay. Any overlay content that
+ * doesn't set its own explicit text-color utility silently falls back to
+ * the browser default (black) — unreadable against `dark:bg-surface-800`
+ * in dark mode. Found on Drawer's/Popover's own header text, which had no
+ * reason to expect it needed one. `@layer base` so an explicit `dark:text-*`
+ * utility on a specific component still wins (Tailwind's own `utilities`
+ * layer is declared after `base`).
+ */
+@layer base {
+  .cdk-overlay-container {
+    color: var(--color-surface-900);
+  }
+  .dark .cdk-overlay-container {
+    color: var(--color-surface-50);
+  }
+}
+
+@source '../lib/**/*.{html,ts}';

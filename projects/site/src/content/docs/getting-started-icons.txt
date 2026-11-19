@@ -1,0 +1,9 @@
+## 3. Register the icons you use
+
+Icons aren't bundled into the components themselves — `<med-icon>` (used internally by
+many components, e.g. Select's chevron, Checkbox's checkmark, Breadcrumb's separators)
+looks up its markup from whatever you've registered via `provideIcons()`, so your bundle
+only ever includes the icons you actually import (plain ESM tree-shaking), never the
+whole Heroicons catalog. Register whichever names the components you use need — an
+unregistered icon shows a visible dashed placeholder and a console warning naming it, so
+the fastest way to find what's missing is to just look at your own app.

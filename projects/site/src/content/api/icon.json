@@ -1,0 +1,44 @@
+[
+  {
+    "name": "name",
+    "kind": "input",
+    "type": "string",
+    "default": "''",
+    "description": "Registered icon name (e.g. 'academic-cap') or CSS font icon class string (e.g. 'fa-solid fa-house')."
+  },
+  {
+    "name": "variant",
+    "kind": "input",
+    "type": "'outline' | 'solid' | 'mini' | 'micro'",
+    "default": "'outline'",
+    "description": "Heroicons style variant used to resolve the SVG glyph."
+  },
+  {
+    "name": "class",
+    "kind": "input",
+    "type": "string",
+    "default": "''",
+    "description": "Extra CSS utility classes merged onto the host or icon element."
+  },
+  {
+    "name": "icon",
+    "kind": "input",
+    "type": "IconValue | null",
+    "default": "null",
+    "description": "Direct icon definition (FontAwesomeIconDefinition, CustomIconData, SVG string, or font class string)."
+  },
+  {
+    "name": "fontIcon",
+    "kind": "input",
+    "type": "string | null",
+    "default": "null",
+    "description": "Direct CSS font icon class string for CDN-based webfonts (e.g. 'fa-solid fa-coffee', 'pi pi-check')."
+  },
+  {
+    "name": "ariaLabel",
+    "kind": "input",
+    "type": "string | null",
+    "default": "null",
+    "description": "Accessible label for the icon. When omitted, the icon is marked decorative with aria-hidden='true'."
+  }
+]

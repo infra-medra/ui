@@ -1,0 +1,4 @@
+## Template Driven
+
+Use `ngModel` and `name`. The value is the array of the chosen option values, and it is empty when
+nothing is picked or the field is cleared.

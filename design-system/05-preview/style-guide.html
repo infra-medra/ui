@@ -1,0 +1,576 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>MedraUi Design System — Style Guide Preview</title>
+<style>
+  /* ============================================================
+     Token layer — transcribed verbatim from
+     projects/medra/ui/src/styles/tailwind-theme-medraui.css.
+     Hex values for the aliased Tailwind hues (teal/sky/green/amber/
+     purple/red/slate/zinc) are Tailwind's public default palette —
+     not invented, but not a literal Tailwind build either, so treat
+     this preview as "faithful to the tokens," not a pixel-identical
+     render of the compiled library CSS. See 00-audit-report.md.
+     ============================================================ */
+  :root {
+    --color-brand-50:#f0fdfa; --color-brand-100:#ccfbf1; --color-brand-200:#99f6e4; --color-brand-300:#5eead4;
+    --color-brand-400:#2dd4bf; --color-brand-500:#14b8a6; --color-brand-600:#0d9488; --color-brand-700:#0f766e;
+    --color-brand-800:#115e59; --color-brand-900:#134e4a; --color-brand-950:#042f2e;
+
+    --color-info-50:#f0f9ff; --color-info-100:#e0f2fe; --color-info-200:#bae6fd; --color-info-300:#7dd3fc;
+    --color-info-400:#38bdf8; --color-info-500:#0ea5e9; --color-info-600:#0284c7; --color-info-700:#0369a1;
+    --color-info-800:#075985; --color-info-900:#0c4a6e; --color-info-950:#082f49;
+
+    --color-success-50:#f0fdf4; --color-success-100:#dcfce7; --color-success-200:#bbf7d0; --color-success-300:#86efac;
+    --color-success-400:#4ade80; --color-success-500:#22c55e; --color-success-600:#16a34a; --color-success-700:#15803d;
+    --color-success-800:#166534; --color-success-900:#14532d; --color-success-950:#052e16;
+
+    --color-warn-50:#fffbeb; --color-warn-100:#fef3c7; --color-warn-200:#fde68a; --color-warn-300:#fcd34d;
+    --color-warn-400:#fbbf24; --color-warn-500:#f59e0b; --color-warn-600:#d97706; --color-warn-700:#b45309;
+    --color-warn-800:#92400e; --color-warn-900:#78350f; --color-warn-950:#451a03;
+
+    --color-help-50:#faf5ff; --color-help-100:#f3e8ff; --color-help-200:#e9d5ff; --color-help-300:#d8b4fe;
+    --color-help-400:#c084fc; --color-help-500:#a855f7; --color-help-600:#9333ea; --color-help-700:#7e22ce;
+    --color-help-800:#6b21a8; --color-help-900:#581c87; --color-help-950:#3b0764;
+
+    --color-danger-50:#fef2f2; --color-danger-100:#fee2e2; --color-danger-200:#fecaca; --color-danger-300:#fca5a5;
+    --color-danger-400:#f87171; --color-danger-500:#ef4444; --color-danger-600:#dc2626; --color-danger-700:#b91c1c;
+    --color-danger-800:#991b1b; --color-danger-900:#7f1d1d; --color-danger-950:#450a0a;
+
+    --color-surface-0:#ffffff; --color-surface-50:#f8fafc; --color-surface-100:#f1f5f9; --color-surface-200:#e2e8f0;
+    --color-surface-300:#cbd5e1; --color-surface-400:#94a3b8; --color-surface-500:#64748b; --color-surface-600:#475569;
+    --color-surface-700:#334155; --color-surface-800:#1e293b; --color-surface-900:#0f172a; --color-surface-950:#020617;
+
+    --radius-xs:2px; --radius-sm:4px; --radius-md:6px; --radius-lg:8px; --radius-xl:12px;
+    --focus-ring-width:1px; --focus-ring-offset:2px; --opacity-disabled:0.6;
+    --transition-duration-base:0.2s;
+    --spacing-field-x:0.75rem; --spacing-field-y:0.5rem;
+    --spacing-field-sm-x:0.625rem; --spacing-field-sm-y:0.375rem;
+    --spacing-field-lg-x:0.875rem; --spacing-field-lg-y:0.625rem;
+    --text-field-sm:0.875rem; --text-field-base:1rem; --text-field-lg:1.125rem;
+    --shadow-overlay-sm: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-overlay-md: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --shadow-overlay-lg: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+
+    --bg: var(--color-surface-0); --bg-alt: var(--color-surface-50); --fg: var(--color-surface-900);
+    --fg-muted: var(--color-surface-500); --border: var(--color-surface-200); --card-bg: var(--color-surface-0);
+    --link: var(--color-brand-600); --field-border: var(--color-surface-300);
+    --tag-info-bg: var(--color-info-100); --tag-info-fg: var(--color-info-700);
+    --tag-success-bg: var(--color-success-100); --tag-success-fg: var(--color-success-700);
+    --tag-warn-bg: var(--color-warn-100); --tag-warn-fg: var(--color-warn-700);
+    --tag-danger-bg: var(--color-danger-100); --tag-danger-fg: var(--color-danger-700);
+    --msg-warn-bg: var(--color-warn-50); --msg-warn-fg: var(--color-warn-800); --msg-warn-border: var(--color-warn-200);
+    --inline-danger-fg: var(--color-danger-600);
+    --track-bg: var(--color-surface-200); --spinner-active: var(--color-brand-500);
+    --skeleton-bg: var(--color-surface-200); --skeleton-shine: rgba(255,255,255,0.4);
+    --tab-active: var(--color-brand-600);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --color-surface-50:#fafafa; --color-surface-100:#f4f4f5; --color-surface-200:#e4e4e7; --color-surface-300:#d4d4d8;
+      --color-surface-400:#a1a1aa; --color-surface-500:#71717a; --color-surface-600:#52525b; --color-surface-700:#3f3f46;
+      --color-surface-800:#27272a; --color-surface-900:#18181b; --color-surface-950:#09090b;
+      --bg:#0f0f10; --bg-alt:#18181b; --fg:#f4f4f5; --fg-muted:#a1a1aa; --border:#3f3f46; --card-bg:#18181b;
+    }
+  }
+  :root[data-theme="dark"] {
+    --color-surface-50:#fafafa; --color-surface-100:#f4f4f5; --color-surface-200:#e4e4e7; --color-surface-300:#d4d4d8;
+    --color-surface-400:#a1a1aa; --color-surface-500:#71717a; --color-surface-600:#52525b; --color-surface-700:#3f3f46;
+    --color-surface-800:#27272a; --color-surface-900:#18181b; --color-surface-950:#09090b;
+    --bg:#0f0f10; --bg-alt:#18181b; --fg:#f4f4f5; --fg-muted:#a1a1aa; --border:#3f3f46; --card-bg:#18181b;
+    --link: var(--color-brand-400); --field-border: var(--color-surface-600);
+    --tag-info-bg: rgba(14,165,233,0.15); --tag-info-fg: var(--color-info-400);
+    --tag-success-bg: rgba(34,197,94,0.15); --tag-success-fg: var(--color-success-400);
+    --tag-warn-bg: rgba(245,158,11,0.15); --tag-warn-fg: var(--color-warn-400);
+    --tag-danger-bg: rgba(239,68,68,0.15); --tag-danger-fg: var(--color-danger-400);
+    --msg-warn-bg: rgba(245,158,11,0.1); --msg-warn-fg: var(--color-warn-300); --msg-warn-border: rgba(245,158,11,0.3);
+    --inline-danger-fg: var(--color-danger-400);
+    --track-bg: var(--color-surface-700); --spinner-active: var(--color-brand-400);
+    --skeleton-bg: var(--color-surface-700); --skeleton-shine: rgba(255,255,255,0.08);
+    --tab-active: var(--color-brand-400);
+  }
+  /* Kept for local file use outside the Artifact viewer, and to mirror the
+     library's own real dark-mode trigger (`.dark` class, per
+     tailwind-theme-medraui.css's `@custom-variant dark`) rather than a
+     bespoke one invented just for this preview. */
+  :root.dark {
+    --color-surface-50:#fafafa; --color-surface-100:#f4f4f5; --color-surface-200:#e4e4e7; --color-surface-300:#d4d4d8;
+    --color-surface-400:#a1a1aa; --color-surface-500:#71717a; --color-surface-600:#52525b; --color-surface-700:#3f3f46;
+    --color-surface-800:#27272a; --color-surface-900:#18181b; --color-surface-950:#09090b;
+    --bg:#0f0f10; --bg-alt:#18181b; --fg:#f4f4f5; --fg-muted:#a1a1aa; --border:#3f3f46; --card-bg:#18181b;
+    --link: var(--color-brand-400); --field-border: var(--color-surface-600);
+    --tag-info-bg: rgba(14,165,233,0.15); --tag-info-fg: var(--color-info-400);
+    --tag-success-bg: rgba(34,197,94,0.15); --tag-success-fg: var(--color-success-400);
+    --tag-warn-bg: rgba(245,158,11,0.15); --tag-warn-fg: var(--color-warn-400);
+    --tag-danger-bg: rgba(239,68,68,0.15); --tag-danger-fg: var(--color-danger-400);
+    --msg-warn-bg: rgba(245,158,11,0.1); --msg-warn-fg: var(--color-warn-300); --msg-warn-border: rgba(245,158,11,0.3);
+    --inline-danger-fg: var(--color-danger-400);
+    --track-bg: var(--color-surface-700); --spinner-active: var(--color-brand-400);
+    --skeleton-bg: var(--color-surface-700); --skeleton-shine: rgba(255,255,255,0.08);
+    --tab-active: var(--color-brand-400);
+  }
+  * { box-sizing: border-box; }
+  a:focus-visible, button:focus-visible {
+    outline: 2px solid var(--color-brand-500); outline-offset: 2px; border-radius: 3px;
+  }
+  body {
+    margin: 0; background: var(--bg); color: var(--fg);
+    font: 15px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  a { color: var(--link); }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem 6rem; }
+  header.top {
+    position: sticky; top: 0; z-index: 20; background: var(--bg); border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between; padding: 0.9rem 1.5rem;
+  }
+  header.top h1 { font-size: 1rem; margin: 0; font-weight: 600; }
+  header.top .sub { color: var(--fg-muted); font-size: 0.8rem; }
+  button.toggle {
+    border: 1px solid var(--border); background: var(--bg-alt); color: var(--fg);
+    border-radius: var(--radius-md); padding: 0.45rem 0.9rem; font-size: 0.85rem; cursor: pointer;
+  }
+  nav.toc { display: flex; flex-wrap: wrap; gap: 0.4rem 0.9rem; margin: 1.5rem 0 3rem; font-size: 0.85rem; }
+  nav.toc a { text-decoration: none; color: var(--fg-muted); }
+  nav.toc a:hover { color: var(--color-brand-600); }
+  h2.section-title {
+    font-size: 1.3rem; margin: 3.5rem 0 0.4rem; padding-top: 1.5rem; border-top: 1px solid var(--border);
+    scroll-margin-top: 5rem;
+  }
+  h2.section-title:first-of-type { border-top: none; padding-top: 0; }
+  p.section-note { color: var(--fg-muted); font-size: 0.88rem; max-width: 68ch; margin: 0 0 1.5rem; }
+  h3.sub-title { font-size: 1rem; margin: 2.2rem 0 0.8rem; color: var(--fg); }
+  code, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.85em; }
+  .token-code { background: var(--bg-alt); padding: 0.1rem 0.4rem; border-radius: 4px; }
+
+  .swatch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 0.6rem; }
+  .swatch { border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--border); }
+  .swatch .chip { height: 52px; }
+  .swatch .label { padding: 0.35rem 0.5rem; font-size: 0.72rem; background: var(--card-bg); }
+  .swatch .label .step { font-weight: 600; }
+  .swatch .label .hex { display: block; color: var(--fg-muted); }
+  .ramp-row { margin-bottom: 1.4rem; }
+  .ramp-row > .ramp-title { font-size: 0.85rem; font-weight: 600; margin-bottom: 0.4rem; }
+
+  .type-row { display: flex; align-items: baseline; gap: 1rem; padding: 0.6rem 0; border-bottom: 1px dashed var(--border); }
+  .type-row .tag { width: 130px; flex-shrink: 0; color: var(--fg-muted); font-size: 0.78rem; }
+  .type-row .sample { flex: 1; }
+
+  .spacing-row { display: flex; align-items: center; gap: 1rem; padding: 0.4rem 0; }
+  .spacing-row .tag { width: 220px; flex-shrink: 0; font-size: 0.8rem; color: var(--fg-muted); }
+  .spacing-bar { height: 14px; background: var(--color-brand-400); border-radius: 3px; }
+
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; }
+  .demo-card {
+    border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--card-bg);
+    padding: 1rem; display: flex; flex-direction: column; align-items: center; gap: 0.6rem;
+  }
+  .demo-card .box { width: 64px; height: 64px; background: var(--color-brand-500); }
+  .demo-card .lbl { font-size: 0.78rem; color: var(--fg-muted); text-align: center; }
+
+  .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; margin: 1rem 0 2rem; }
+  @media (max-width: 640px) { .compare-grid { grid-template-columns: 1fr; } }
+  .compare-panel { border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.2rem; background: var(--bg-alt); }
+  .compare-panel h4 { margin: 0 0 0.8rem; font-size: 0.85rem; }
+  .compare-panel h4.atual { color: var(--color-danger-600); }
+  .compare-panel h4.proposta { color: var(--color-success-600); }
+  .compare-panel p { font-size: 0.8rem; color: var(--fg-muted); margin: 0.8rem 0 0; }
+
+  .comp-block { margin-bottom: 3rem; }
+  .comp-block .comp-title { font-size: 1.05rem; margin-bottom: 0.2rem; }
+  .comp-block .comp-src { font-size: 0.75rem; color: var(--fg-muted); margin-bottom: 1rem; }
+  .row { display: flex; flex-wrap: wrap; gap: 0.7rem; align-items: center; margin-bottom: 0.7rem; }
+  .row-label { font-size: 0.75rem; color: var(--fg-muted); width: 100%; margin-bottom: 0.15rem; }
+
+  /* ---- Button (button.styles.ts, verbatim classes) ---- */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+    font-weight: 500; white-space: nowrap; border-radius: var(--radius-md);
+    padding: 0.625rem 1rem; font-size: 1rem; border: 1px solid transparent; cursor: pointer;
+    transition: background-color var(--transition-duration-base), color var(--transition-duration-base), border-color var(--transition-duration-base);
+  }
+  .btn.sm { padding: 0.375rem 0.75rem; font-size: 0.875rem; border-radius: var(--radius-sm); }
+  .btn.lg { padding: 0.625rem 1.25rem; font-size: 1.125rem; border-radius: var(--radius-lg); }
+  .btn.filled.primary { background: var(--color-brand-500); color: #fff; }
+  .btn.filled.secondary { background: var(--color-surface-100); color: var(--color-surface-900); }
+  .btn.filled.danger { background: var(--color-danger-500); color: #fff; }
+  .btn.outlined.primary { background: transparent; border-color: var(--color-brand-500); color: var(--color-brand-600); }
+  .btn.text.primary { background: transparent; color: var(--color-brand-600); }
+  .btn.link.primary { background: transparent; color: var(--color-brand-600); text-decoration: underline; text-underline-offset: 4px; padding: 0; }
+  .btn[disabled] { pointer-events: none; opacity: var(--opacity-disabled); }
+  .btn:focus-visible { outline: none; box-shadow: 0 0 0 var(--focus-ring-width) var(--color-brand-500); outline-offset: var(--focus-ring-offset); }
+
+  /* ---- form controls ---- */
+  .field-trigger {
+    display: inline-flex; align-items: center; justify-content: space-between; gap: 0.5rem;
+    min-width: 220px; border: 1px solid var(--field-border); border-radius: var(--radius-md);
+    padding: var(--spacing-field-y) var(--spacing-field-x); font-size: var(--text-field-base);
+    background: var(--card-bg); color: var(--fg);
+  }
+  .field-trigger.invalid { border-color: var(--color-danger-500); box-shadow: 0 0 0 1px var(--color-danger-500); }
+  .field-trigger.disabled { opacity: var(--opacity-disabled); }
+  .field-trigger .ph { color: var(--color-surface-400); }
+
+  input.demo-input {
+    border: 1px solid var(--field-border); border-radius: var(--radius-md); background: var(--card-bg); color: var(--fg);
+    padding: var(--spacing-field-y) var(--spacing-field-x); font-size: var(--text-field-base); width: 220px;
+  }
+  input.demo-input.invalid { border-color: var(--color-danger-500); }
+  input.demo-input:disabled { opacity: var(--opacity-disabled); }
+
+  .demo-checkbox, .demo-radio { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.9rem; }
+  .box-input { width: 18px; height: 18px; border: 1px solid var(--color-surface-400); display: inline-flex; align-items: center; justify-content: center; }
+  .box-input.checked { background: var(--color-brand-500); border-color: var(--color-brand-500); color: #fff; font-size: 0.7rem; }
+  .box-input.radio { border-radius: 50%; }
+  .box-input.check { border-radius: var(--radius-xs); }
+  .switch-track { width: 34px; height: 20px; border-radius: 999px; background: var(--color-surface-300); position: relative; display: inline-block; }
+  .switch-track.on { background: var(--color-brand-500); }
+  .switch-knob { position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff; box-shadow: var(--shadow-overlay-sm); transition: transform var(--transition-duration-base); }
+  .switch-track.on .switch-knob { transform: translateX(14px); }
+
+  .tag-pill { display: inline-flex; align-items: center; gap: 0.3rem; border-radius: 999px; padding: 0.15rem 0.6rem; font-size: 0.75rem; font-weight: 600; }
+  .tag-pill.info { background: var(--tag-info-bg); color: var(--tag-info-fg); }
+  .tag-pill.success { background: var(--tag-success-bg); color: var(--tag-success-fg); }
+  .tag-pill.warn { background: var(--tag-warn-bg); color: var(--tag-warn-fg); }
+  .tag-pill.danger { background: var(--tag-danger-bg); color: var(--tag-danger-fg); }
+
+  .badge-square { border-radius: var(--radius-sm); padding: 0.1rem 0.45rem; font-size: 0.7rem; font-weight: 600; background: var(--color-brand-500); color: #fff; display: inline-block; }
+
+  .demo-panel { border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--card-bg); overflow: hidden; max-width: 360px; }
+  .demo-panel .hd { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); font-weight: 600; font-size: 0.9rem; }
+  .demo-panel .bd { padding: 1rem; font-size: 0.85rem; color: var(--fg-muted); }
+
+  .demo-message { display: flex; gap: 0.6rem; align-items: flex-start; border-radius: var(--radius-md); padding: 0.75rem 1rem; font-size: 0.85rem; max-width: 420px; }
+  .demo-message.warn { background: var(--msg-warn-bg); color: var(--msg-warn-fg); border: 1px solid var(--msg-warn-border); }
+  .demo-inline-message { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; }
+  .demo-inline-message.danger { color: var(--inline-danger-fg); }
+
+  .demo-progress-track { width: 220px; height: 10px; border-radius: 999px; background: var(--track-bg); overflow: hidden; }
+  .demo-progress-fill { height: 100%; border-radius: 999px; background: var(--color-brand-500); width: 62%; transition: width var(--transition-duration-base); }
+  .demo-progress-fill.indeterminate { width: 33%; animation: med-progress-indeterminate 1.5s ease-in-out infinite; }
+  @keyframes med-progress-indeterminate { 0% { transform: translateX(-100%);} 60% { transform: translateX(200%);} 100% { transform: translateX(200%);} }
+
+  .spinner { width: 32px; height: 32px; border-radius: 50%; border: 3px solid var(--track-bg); border-top-color: var(--spinner-active); animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .demo-skeleton { position: relative; overflow: hidden; background: var(--skeleton-bg); border-radius: var(--radius-md); }
+  .demo-skeleton::after {
+    content: ""; position: absolute; inset: 0; transform: translateX(-100%);
+    background: linear-gradient(90deg, transparent, var(--skeleton-shine), transparent);
+    animation: skwave 1.5s ease-in-out infinite;
+  }
+  @keyframes skwave { to { transform: translateX(100%); } }
+
+  .tablist { display: flex; gap: 1.2rem; border-bottom: 1px solid var(--border); }
+  .tab-item { padding: 0.6rem 0.1rem; font-size: 0.88rem; color: var(--fg-muted); border-bottom: 2px solid transparent; cursor: default; }
+  .tab-item.active { color: var(--tab-active); border-color: var(--tab-active); font-weight: 600; }
+
+  footer.pf { margin-top: 4rem; padding-top: 1.5rem; border-top: 1px solid var(--border); color: var(--fg-muted); font-size: 0.8rem; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .demo-progress-fill.indeterminate, .demo-skeleton::after, .spinner, .switch-knob, .btn {
+      animation: none !important; transition: none !important;
+    }
+  }
+</style>
+</head>
+<body>
+<header class="top">
+  <div>
+    <h1>MedraUi — Design System Style Guide</h1>
+    <div class="sub">Read-only preview · tokens and components as they exist today · generated from source, no invention</div>
+  </div>
+  <button class="toggle" id="theme-toggle" onclick="toggleTheme()">Toggle dark mode</button>
+</header>
+
+<div class="wrap">
+  <p class="section-note" style="margin-top:1.5rem;">
+    This preview renders the <strong>current</strong> state of the token layer (<code>tailwind-theme-medraui.css</code>) and a representative
+    set of components, reconstructed directly from the exact utility-class strings found in each component's source (cited in
+    <code>02-components/</code>). The two token gaps this audit originally found (<code>shadow-overlay-md</code> undefined, inconsistent
+    radius spelling) were fixed in the library on 2026-08-19 — the "Before/After" call-outs below now show that applied fix, not an
+    open proposal. Colors for the underlying Tailwind hues (teal/sky/green/amber/purple/red/slate/zinc) use Tailwind's public default
+    palette values, since this file has no build step to compile the real utility CSS — treat this as faithful to the tokens, not a
+    pixel-identical capture of the compiled library.
+    This is a <strong>representative sample</strong>, not all 89 components — see <code>02-components/_index.md</code> for the full set.
+  </p>
+
+  <nav class="toc">
+    <a href="#colors">Colors</a><a href="#typography">Typography</a><a href="#spacing">Spacing</a>
+    <a href="#radius">Radius</a><a href="#shadows">Shadows</a><a href="#motion">Motion</a>
+    <a href="#buttons">Buttons</a><a href="#forms">Forms</a><a href="#feedback">Feedback</a>
+    <a href="#data-display">Data display</a><a href="#navigation">Navigation</a>
+  </nav>
+
+  <h2 class="section-title" id="colors">Foundations — Colors</h2>
+  <p class="section-note">Brand ramp + 5 semantic ramps, each an alias onto a Tailwind hue. Surface ramp is redefined per color scheme (slate in light, zinc in dark) — toggle dark mode above to see it shift. See <code>01-foundations/colors.md</code>.</p>
+
+  <div class="ramp-row">
+    <div class="ramp-title">Brand (teal) — <span class="mono token-code">--color-brand-*</span></div>
+    <div class="swatch-grid" id="ramp-brand"></div>
+  </div>
+  <div class="ramp-row"><div class="ramp-title">Info (sky)</div><div class="swatch-grid" id="ramp-info"></div></div>
+  <div class="ramp-row"><div class="ramp-title">Success (green)</div><div class="swatch-grid" id="ramp-success"></div></div>
+  <div class="ramp-row"><div class="ramp-title">Warn (amber)</div><div class="swatch-grid" id="ramp-warn"></div></div>
+  <div class="ramp-row"><div class="ramp-title">Help (purple)</div><div class="swatch-grid" id="ramp-help"></div></div>
+  <div class="ramp-row"><div class="ramp-title">Danger (red)</div><div class="swatch-grid" id="ramp-danger"></div></div>
+  <div class="ramp-row"><div class="ramp-title">Surface — <span class="mono token-code">--color-surface-*</span> (toggle dark mode)</div><div class="swatch-grid" id="ramp-surface"></div></div>
+
+  <h2 class="section-title" id="typography">Foundations — Typography</h2>
+  <p class="section-note">Only the form-field scale is tokenized (<code>--text-field-sm/base/lg</code>). Everything else below is Tailwind's default scale used ad hoc — shown here with its real usage counts from <code>01-foundations/typography.md</code>.</p>
+  <div class="type-row"><div class="tag">text-lg · 7 uses</div><div class="sample" style="font-size:1.125rem;">The quick brown fox jumps</div></div>
+  <div class="type-row"><div class="tag">text-base · 6 uses</div><div class="sample" style="font-size:1rem;">The quick brown fox jumps</div></div>
+  <div class="type-row"><div class="tag">text-sm · 60 uses (dominant)</div><div class="sample" style="font-size:0.875rem;">The quick brown fox jumps over the lazy dog</div></div>
+  <div class="type-row"><div class="tag">text-xs · 13 uses</div><div class="sample" style="font-size:0.75rem;">The quick brown fox jumps over the lazy dog</div></div>
+  <div class="type-row"><div class="tag">font-semibold · 14 uses</div><div class="sample" style="font-weight:600;">Section headings, panel titles</div></div>
+  <div class="type-row"><div class="tag">font-medium · 18 uses</div><div class="sample" style="font-weight:500;">Buttons, labels, emphasis</div></div>
+  <div class="type-row"><div class="tag">font-mono (Terminal only)</div><div class="sample" style="font-family:ui-monospace,monospace;">$ npm run build</div></div>
+
+  <h2 class="section-title" id="spacing">Foundations — Spacing</h2>
+  <p class="section-note">Tokenized only for form fields; general spacing (<code>gap-*</code>) stays on Tailwind's native 4px grid with no drift found. See <code>01-foundations/spacing.md</code>.</p>
+  <div class="spacing-row"><div class="tag">--spacing-field-sm-x/y (10px / 6px)</div><div class="spacing-bar" style="width:40px;"></div></div>
+  <div class="spacing-row"><div class="tag">--spacing-field-x/y (12px / 8px, default)</div><div class="spacing-bar" style="width:48px;"></div></div>
+  <div class="spacing-row"><div class="tag">--spacing-field-lg-x/y (14px / 10px)</div><div class="spacing-bar" style="width:56px;"></div></div>
+  <div class="spacing-row"><div class="tag">gap-1 (4px) · 23 uses</div><div class="spacing-bar" style="width:4px;"></div></div>
+  <div class="spacing-row"><div class="tag">gap-2 (8px) · 32 uses (dominant)</div><div class="spacing-bar" style="width:8px;"></div></div>
+  <div class="spacing-row"><div class="tag">gap-3 (12px) · 9 uses</div><div class="spacing-bar" style="width:12px;"></div></div>
+  <div class="spacing-row"><div class="tag">gap-4 (16px) · 5 uses</div><div class="spacing-bar" style="width:16px;"></div></div>
+  <div class="spacing-row"><div class="tag">gap-6 (24px) · 3 uses</div><div class="spacing-bar" style="width:24px;"></div></div>
+
+  <h2 class="section-title" id="radius">Foundations — Radius</h2>
+  <p class="section-note">5 named tokens. See <code>01-foundations/borders-radius.md</code>.</p>
+  <div class="card-grid">
+    <div class="demo-card"><div class="box" style="border-radius:var(--radius-xs)"></div><div class="lbl">--radius-xs<br>2px</div></div>
+    <div class="demo-card"><div class="box" style="border-radius:var(--radius-sm)"></div><div class="lbl">--radius-sm<br>4px</div></div>
+    <div class="demo-card"><div class="box" style="border-radius:var(--radius-md)"></div><div class="lbl">--radius-md<br>6px</div></div>
+    <div class="demo-card"><div class="box" style="border-radius:var(--radius-lg)"></div><div class="lbl">--radius-lg<br>8px</div></div>
+    <div class="demo-card"><div class="box" style="border-radius:var(--radius-xl)"></div><div class="lbl">--radius-xl<br>12px</div></div>
+  </div>
+
+  <h3 class="sub-title">Radius spelling — fixed 2026-08-19</h3>
+  <div class="compare-grid">
+    <div class="compare-panel">
+      <h4 class="atual">Before</h4>
+      <div class="demo-card" style="display:inline-flex;"><div class="box" style="width:48px;height:48px;border-radius:4px;"></div><div class="lbl">bare <code>rounded</code><br>18 call sites, no named token</div></div>
+      <p>Same 4px value as <code>--radius-sm</code>, spelled differently — untraceable to the token by name.</p>
+    </div>
+    <div class="compare-panel">
+      <h4 class="proposta">After (applied)</h4>
+      <div class="demo-card" style="display:inline-flex;"><div class="box" style="width:48px;height:48px;border-radius:var(--radius-sm);"></div><div class="lbl"><code>rounded-sm</code><br>same pixel value, now traceable to the token</div></div>
+      <p>Visually identical by design — all 18 real call sites (2 of the original "27" were false-positive comment matches) now use <code>rounded-sm</code>. See <code>00-audit-report.md</code>, action 2.</p>
+    </div>
+  </div>
+
+  <h2 class="section-title" id="shadows">Foundations — Shadows &amp; Elevation</h2>
+  <p class="section-note">Three levels as of 2026-08-19 (<code>-md</code> added to fix a bug — see below). See <code>01-foundations/shadows-elevation.md</code>.</p>
+  <div class="card-grid">
+    <div class="demo-card"><div class="box" style="background:var(--card-bg); box-shadow: var(--shadow-overlay-sm);"></div><div class="lbl">--shadow-overlay-sm<br>Card, Toast, ToggleSwitch knob</div></div>
+    <div class="demo-card"><div class="box" style="background:var(--card-bg); box-shadow: var(--shadow-overlay-md);"></div><div class="lbl">--shadow-overlay-md<br>ImageCompare's handle, SpeedDial's action buttons</div></div>
+    <div class="demo-card"><div class="box" style="background:var(--card-bg); box-shadow: var(--shadow-overlay-lg);"></div><div class="lbl">--shadow-overlay-lg<br>Dialog, Menu, Popover, Select</div></div>
+  </div>
+
+  <h3 class="sub-title">The missing <code>shadow-overlay-md</code> — fixed 2026-08-19</h3>
+  <div class="compare-grid">
+    <div class="compare-panel">
+      <h4 class="atual">Before</h4>
+      <div class="demo-card" style="display:inline-flex;"><div class="box" style="background:var(--card-bg); box-shadow:none;"></div><div class="lbl">ImageCompare's handle &amp; SpeedDial's action button referenced <code>shadow-overlay-md</code></div></div>
+      <p>The token didn't exist in <code>@theme</code> — Tailwind generated nothing, so both elements silently rendered with <strong>no shadow at all</strong>.</p>
+    </div>
+    <div class="compare-panel">
+      <h4 class="proposta">After (applied)</h4>
+      <div class="demo-card" style="display:inline-flex;"><div class="box" style="background:var(--card-bg); box-shadow: var(--shadow-overlay-md);"></div><div class="lbl"><code>--shadow-overlay-md</code>, now defined</div></div>
+      <p>Value interpolated between <code>-sm</code>/<code>-lg</code> following Tailwind's own default box-shadow progression, not a freehand pick. See <code>00-audit-report.md</code>, action 1.</p>
+    </div>
+  </div>
+
+  <h2 class="section-title" id="motion">Foundations — Motion</h2>
+  <p class="section-note">One shared duration token plus two named ambient animations. See <code>01-foundations/motion.md</code>.</p>
+  <div class="row"><div class="row-label">--transition-duration-base (0.2s) — hover a button below to feel it</div>
+    <button class="btn filled primary" onmouseover="this.style.background='var(--color-brand-600)'" onmouseout="this.style.background='var(--color-brand-500)'">Hover me</button>
+  </div>
+  <div class="row"><div class="row-label">--animate-progress-indeterminate (1.5s ease-in-out infinite)</div>
+    <div class="demo-progress-track"><div class="demo-progress-fill indeterminate"></div></div>
+  </div>
+  <div class="row"><div class="row-label">--animate-skeleton-wave (1.5s ease-in-out infinite)</div>
+    <div class="demo-skeleton" style="width:220px;height:16px;"></div>
+  </div>
+
+  <h2 class="section-title" id="buttons">Components — Buttons &amp; Actions</h2>
+  <p class="section-note">Full source: <code>02-components/buttons/</code>. Classes below are transcribed directly from <code>button.styles.ts</code>.</p>
+
+  <div class="comp-block">
+    <div class="comp-title">Button</div>
+    <div class="comp-src">lib/button/button.styles.ts — severity × variant × size</div>
+    <div class="row-label">Filled — all severities</div>
+    <div class="row">
+      <button class="btn filled primary">Primary</button>
+      <button class="btn filled secondary">Secondary</button>
+      <button class="btn" style="background:var(--color-info-500);color:#fff;">Info</button>
+      <button class="btn" style="background:var(--color-success-500);color:#fff;">Success</button>
+      <button class="btn" style="background:var(--color-warn-500);color:#fff;">Warn</button>
+      <button class="btn" style="background:var(--color-help-500);color:#fff;">Help</button>
+      <button class="btn filled danger">Danger</button>
+      <button class="btn" style="background:var(--color-surface-950);color:var(--color-surface-0);">Contrast</button>
+    </div>
+    <div class="row-label">Style variants (primary severity)</div>
+    <div class="row">
+      <button class="btn filled primary">Filled</button>
+      <button class="btn outlined primary">Outlined</button>
+      <button class="btn text primary">Text</button>
+      <button class="btn link primary">Link</button>
+    </div>
+    <div class="row-label">Sizes</div>
+    <div class="row">
+      <button class="btn filled primary sm">Small</button>
+      <button class="btn filled primary">Default</button>
+      <button class="btn filled primary lg">Large</button>
+    </div>
+    <div class="row-label">States</div>
+    <div class="row">
+      <button class="btn filled primary">Default</button>
+      <button class="btn filled primary" disabled>Disabled</button>
+      <button class="btn filled primary" style="border-radius:999px;">Pill</button>
+    </div>
+  </div>
+
+  <h2 class="section-title" id="forms">Components — Forms &amp; Inputs</h2>
+  <p class="section-note">Full source: <code>02-components/forms/</code>. 22 of 26 form components share the same danger-ring <code>invalid</code> convention shown below.</p>
+
+  <div class="comp-block">
+    <div class="comp-title">InputText</div>
+    <div class="comp-src">lib/input-text/</div>
+    <div class="row">
+      <input class="demo-input" placeholder="Default" />
+      <input class="demo-input invalid" placeholder="Invalid" value="bad@" />
+      <input class="demo-input" placeholder="Disabled" disabled />
+    </div>
+  </div>
+
+  <div class="comp-block">
+    <div class="comp-title">Checkbox / RadioButton / ToggleSwitch</div>
+    <div class="comp-src">lib/checkbox/, lib/radio-button/, lib/toggle-switch/</div>
+    <div class="row">
+      <label class="demo-checkbox"><span class="box-input check checked">✓</span> Checked</label>
+      <label class="demo-checkbox"><span class="box-input check"></span> Unchecked</label>
+      <label class="demo-radio"><span class="box-input radio checked"></span> Selected</label>
+      <label class="demo-radio"><span class="box-input radio"></span> Unselected</label>
+      <span class="switch-track on"><span class="switch-knob"></span></span>
+      <span class="switch-track"><span class="switch-knob"></span></span>
+    </div>
+  </div>
+
+  <div class="comp-block">
+    <div class="comp-title">Select-family trigger</div>
+    <div class="comp-src">Shared selectTriggerVariants — lib/select/select.styles.ts, reused unchanged by MultiSelect, CascadeSelect, TreeSelect</div>
+    <div class="row">
+      <div class="field-trigger"><span class="ph">Select an option</span><span>▾</span></div>
+      <div class="field-trigger invalid"><span>USA / California</span><span>▾</span></div>
+      <div class="field-trigger disabled"><span class="ph">Disabled</span><span>▾</span></div>
+    </div>
+  </div>
+
+  <h2 class="section-title" id="feedback">Components — Feedback &amp; Overlay</h2>
+  <p class="section-note">Full source: <code>02-components/feedback/</code>.</p>
+
+  <div class="comp-block">
+    <div class="comp-title">Message / InlineMessage</div>
+    <div class="comp-src">lib/message/, lib/inline-message/ — share MESSAGE_SEVERITY_ICON</div>
+    <div class="row"><div class="demo-message warn">⚠ Your subscription expires in 3 days.</div></div>
+    <div class="row">
+      <span class="demo-inline-message danger">⛔ Email is required</span>
+    </div>
+  </div>
+
+  <div class="comp-block">
+    <div class="comp-title">ProgressBar / ProgressSpinner / Skeleton</div>
+    <div class="comp-src">lib/progress-bar/, lib/progress-spinner/, lib/skeleton/</div>
+    <div class="row">
+      <div class="demo-progress-track"><div class="demo-progress-fill"></div></div>
+      <div class="spinner"></div>
+    </div>
+    <div class="row">
+      <div class="demo-skeleton" style="width:180px;height:14px;"></div>
+      <div class="demo-skeleton" style="width:44px;height:44px;border-radius:50%;"></div>
+    </div>
+  </div>
+
+  <h2 class="section-title" id="data-display">Components — Data Display</h2>
+  <p class="section-note">Full source: <code>02-components/data-display/</code>. Avatar/Badge/Tag/MeterGroup all reuse Button's own <code>ButtonSeverity</code> vocabulary — a real consistency win confirmed during the audit.</p>
+
+  <div class="comp-block">
+    <div class="comp-title">Tag / Badge / Chip severities</div>
+    <div class="comp-src">Reuse lib/button/button.styles.ts's ButtonSeverity — not a separate vocabulary</div>
+    <div class="row">
+      <span class="tag-pill info">Info</span>
+      <span class="tag-pill success">Success</span>
+      <span class="tag-pill warn">Warn</span>
+      <span class="tag-pill danger">Danger</span>
+      <span class="badge-square">3</span>
+    </div>
+  </div>
+
+  <div class="comp-block">
+    <div class="comp-title">Panel / Card</div>
+    <div class="comp-src">lib/panel/, lib/card/</div>
+    <div class="demo-panel">
+      <div class="hd"><span>Billing details</span><span>⌄</span></div>
+      <div class="bd">Toggleable panel content.</div>
+    </div>
+  </div>
+
+  <h2 class="section-title" id="navigation">Components — Navigation</h2>
+  <p class="section-note">Full source: <code>02-components/navigation/</code>.</p>
+  <div class="comp-block">
+    <div class="comp-title">Tabs</div>
+    <div class="comp-src">lib/tabs/ — ARIA APG "automatic activation" model, roving tabindex</div>
+    <div class="tablist">
+      <div class="tab-item active">Profile</div>
+      <div class="tab-item">Billing</div>
+      <div class="tab-item">Advanced</div>
+    </div>
+  </div>
+
+  <footer class="pf">
+    Generated from source only — every value here traces back to a file cited in <code>01-foundations/</code> and <code>02-components/</code>.
+    Phases 1–7 (this preview included) were read-only; the fixes shown as "applied" above were made afterward, on 2026-08-19, with explicit approval — see <code>00-audit-report.md</code> for the full list and which ones were deliberately deferred.
+    Full 89-component index: <code>02-components/_index.md</code>. Audit findings: <code>00-audit-report.md</code>.
+  </footer>
+</div>
+
+<script>
+  const ramps = {
+    'ramp-brand': ['--color-brand-50','--color-brand-100','--color-brand-200','--color-brand-300','--color-brand-400','--color-brand-500','--color-brand-600','--color-brand-700','--color-brand-800','--color-brand-900','--color-brand-950'],
+    'ramp-info': ['--color-info-50','--color-info-100','--color-info-200','--color-info-300','--color-info-400','--color-info-500','--color-info-600','--color-info-700','--color-info-800','--color-info-900','--color-info-950'],
+    'ramp-success': ['--color-success-50','--color-success-100','--color-success-200','--color-success-300','--color-success-400','--color-success-500','--color-success-600','--color-success-700','--color-success-800','--color-success-900','--color-success-950'],
+    'ramp-warn': ['--color-warn-50','--color-warn-100','--color-warn-200','--color-warn-300','--color-warn-400','--color-warn-500','--color-warn-600','--color-warn-700','--color-warn-800','--color-warn-900','--color-warn-950'],
+    'ramp-help': ['--color-help-50','--color-help-100','--color-help-200','--color-help-300','--color-help-400','--color-help-500','--color-help-600','--color-help-700','--color-help-800','--color-help-900','--color-help-950'],
+    'ramp-danger': ['--color-danger-50','--color-danger-100','--color-danger-200','--color-danger-300','--color-danger-400','--color-danger-500','--color-danger-600','--color-danger-700','--color-danger-800','--color-danger-900','--color-danger-950'],
+    'ramp-surface': ['--color-surface-0','--color-surface-50','--color-surface-100','--color-surface-200','--color-surface-300','--color-surface-400','--color-surface-500','--color-surface-600','--color-surface-700','--color-surface-800','--color-surface-900','--color-surface-950'],
+  };
+  function hexOf(varName) {
+    const v = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+    return v;
+  }
+  function render() {
+    for (const [id, tokens] of Object.entries(ramps)) {
+      const el = document.getElementById(id);
+      el.innerHTML = tokens.map(t => {
+        const step = t.split('-').pop();
+        const hex = hexOf(t);
+        const textColor = ['50','100','200','300'].includes(step) || t.endsWith('-0') ? '#111' : '#fff';
+        return `<div class="swatch"><div class="chip" style="background:var(${t});display:flex;align-items:flex-end;padding:4px;color:${textColor};font-size:10px;">${hex}</div><div class="label"><span class="step">${step}</span><span class="hex mono">${t}</span></div></div>`;
+      }).join('');
+    }
+  }
+  render();
+  new MutationObserver(render).observe(document.documentElement, { attributes: true, attributeFilter: ['class', 'data-theme'] });
+
+  function toggleTheme() {
+    const root = document.documentElement;
+    const goingDark = !root.classList.contains('dark');
+    root.classList.toggle('dark', goingDark);
+    root.setAttribute('data-theme', goingDark ? 'dark' : 'light');
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,2349 @@
+<main
+  class="flex min-h-screen flex-col gap-4 p-4 font-sans text-surface-900 bg-surface-0 dark:bg-surface-900 dark:text-surface-50 sm:gap-6 sm:p-8"
+>
+  <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+    <h1>MedraUi showcase (internal dev only)</h1>
+    <button medButton type="button" variant="outlined" severity="secondary" (click)="toggleDarkMode()">
+      {{ darkMode() ? 'Light mode' : 'Dark mode' }}
+    </button>
+  </div>
+
+  @for (variant of variants; track variant) {
+    <section class="flex flex-col gap-2">
+      <h2 class="capitalize">{{ variant }}</h2>
+      <div class="flex flex-wrap gap-3">
+        @for (severity of severities; track severity) {
+          <button medButton type="button" [severity]="severity" [variant]="variant">
+            {{ severity }}
+          </button>
+        }
+      </div>
+    </section>
+  }
+
+  <section class="flex flex-col gap-2">
+    <h2>Sizes &amp; states</h2>
+    <div class="flex flex-wrap items-center gap-3">
+      <button medButton type="button" size="sm">Small</button>
+      <button medButton type="button" size="default">Default</button>
+      <button medButton type="button" size="lg">Large</button>
+      <button medButton type="button" pill>Pill</button>
+      <button medButton type="button" iconOnly aria-label="Icon only">
+        <med-icon name="plus" ariaLabel="Add" />
+      </button>
+      <button medButton type="button" disabled>Disabled</button>
+      <button medButton type="button" raised>Raised</button>
+      <button medButton type="button" severity="danger" plain>Plain (danger, looks secondary)</button>
+    </div>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>Icon + text</h2>
+    <div class="flex flex-wrap items-center gap-3">
+      <button medButton type="button">
+        <med-icon name="check" />
+        Confirm
+      </button>
+      <button medButton type="button" variant="outlined" severity="danger">
+        <med-icon name="trash" />
+        Delete
+      </button>
+      <button medButton type="button" variant="text" severity="secondary">
+        Next
+        <med-icon name="arrow-right" />
+      </button>
+    </div>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>Checkbox</h2>
+    <div class="flex flex-wrap items-center gap-5">
+      <label class="flex items-center gap-2">
+        <med-checkbox [(ngModel)]="checkboxDemoValue" name="demo" />
+        Unchecked/checked ({{ checkboxDemoValue }})
+      </label>
+      <label class="flex items-center gap-2">
+        <med-checkbox indeterminate />
+        Indeterminate
+      </label>
+      <label class="flex items-center gap-2">
+        <med-checkbox invalid />
+        Invalid
+      </label>
+      <label class="flex items-center gap-2 opacity-60">
+        <med-checkbox disabled />
+        Disabled
+      </label>
+      <label class="flex items-center gap-2">
+        <med-checkbox size="sm" />
+        Small
+      </label>
+      <label class="flex items-center gap-2">
+        <med-checkbox size="lg" />
+        Large
+      </label>
+      <label class="flex items-center gap-2">
+        <med-checkbox [readonly]="true" [ngModel]="true" name="demo-readonly" />
+        Readonly (checked, click does nothing)
+      </label>
+      <label class="flex items-center gap-2">
+        <med-checkbox trueValue="yes" falseValue="no" [(ngModel)]="checkboxTrueFalseDemoValue" name="demo-truefalse" />
+        Custom trueValue/falseValue ({{ checkboxTrueFalseDemoValue }})
+      </label>
+    </div>
+    <div class="flex flex-wrap items-center gap-5">
+      <span class="text-sm text-surface-500">Group by array:</span>
+      @for (city of checkboxGroupCities; track city) {
+        <label class="flex items-center gap-2">
+          <med-checkbox [value]="city" [(ngModel)]="checkboxGroupDemoValue" name="demo-group" />
+          {{ city }}
+        </label>
+      }
+      <span>Selected: {{ checkboxGroupDemoValue.join(', ') || '(none)' }}</span>
+    </div>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>ToggleSwitch</h2>
+    <div class="flex flex-wrap items-center gap-5">
+      <label class="flex items-center gap-2">
+        <med-toggle-switch [(ngModel)]="toggleSwitchDemoValue" name="demo-toggle" />
+        Enabled ({{ toggleSwitchDemoValue }})
+      </label>
+      <label class="flex items-center gap-2">
+        <med-toggle-switch invalid />
+        Invalid
+      </label>
+      <label class="flex items-center gap-2 opacity-60">
+        <med-toggle-switch disabled />
+        Disabled
+      </label>
+      <label class="flex items-center gap-2">
+        <med-toggle-switch size="sm" [(ngModel)]="toggleSwitchSizeDemo" name="demo-toggle-sm" />
+        Small
+      </label>
+      <label class="flex items-center gap-2">
+        <med-toggle-switch size="lg" [(ngModel)]="toggleSwitchSizeDemo" name="demo-toggle-lg" />
+        Large
+      </label>
+    </div>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>ToggleButton</h2>
+    <div class="flex flex-wrap items-center gap-3">
+      <med-toggle-button [(ngModel)]="toggleButtonDemoValue" name="demo-toggle-button" />
+      <med-toggle-button onLabel="Public" offLabel="Private" [(ngModel)]="toggleButtonLockDemoValue" onIcon="lock-open" offIcon="lock-closed" name="demo-toggle-button-lock" />
+      <med-toggle-button invalid />
+      <med-toggle-button disabled />
+      <med-toggle-button size="sm" />
+      <med-toggle-button size="lg" />
+    </div>
+    <p>Value: {{ toggleButtonDemoValue }} / Visibility: {{ toggleButtonLockDemoValue ? 'Public' : 'Private' }}</p>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>InputText</h2>
+    <div class="flex max-w-[40rem] flex-wrap items-center gap-3">
+      <input medInputText type="text" size="sm" placeholder="Small" />
+      <input medInputText type="text" placeholder="Default" [(ngModel)]="inputDemoValue" name="demo-input" />
+      <input medInputText type="text" size="lg" placeholder="Large" />
+      <input medInputText type="text" invalid placeholder="Invalid" />
+      <input medInputText type="text" disabled placeholder="Disabled" value="Disabled" />
+    </div>
+    <p>Value: {{ inputDemoValue }}</p>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>InputGroup</h2>
+    <div class="flex max-w-[40rem] flex-wrap items-start gap-3">
+      <med-input-group class="w-48">
+        <span medInputGroupAddon class="rounded-r-none">$</span>
+        <input medInputText type="text" class="rounded-l-none" placeholder="0.00" />
+      </med-input-group>
+      <med-input-group class="w-56">
+        <span medInputGroupAddon class="rounded-r-none">@</span>
+        <input medInputText type="text" class="rounded-none" placeholder="username" />
+        <span medInputGroupAddon class="rounded-l-none">&#64;example.com</span>
+      </med-input-group>
+      <med-input-group class="w-56">
+        <input medInputText type="text" class="rounded-r-none" placeholder="Search..." />
+        <button medButton type="button" class="rounded-l-none">
+          <med-icon name="magnifying-glass" variant="mini" />
+        </button>
+      </med-input-group>
+    </div>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>IconField</h2>
+    <div class="flex max-w-[40rem] flex-wrap items-center gap-3">
+      <med-icon-field class="w-48">
+        <med-icon name="magnifying-glass" variant="mini" medIconFieldIcon class="size-4" />
+        <input medInputText type="text" class="pl-9" placeholder="Search..." />
+      </med-icon-field>
+      <med-icon-field class="w-48">
+        <input medInputText type="text" class="pr-9" placeholder="Amount" />
+        <med-icon name="check-circle" variant="solid" medIconFieldIcon position="right" class="size-4 text-success-500" />
+      </med-icon-field>
+    </div>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>FloatLabel</h2>
+    <div class="flex max-w-[48rem] flex-wrap items-start gap-4">
+      <med-float-label variant="on" class="w-48">
+        <input medInputText id="fl-username" placeholder=" " class="peer w-full" [(ngModel)]="floatLabelDemoValue" name="fl-username" />
+        <label medFloatLabelText for="fl-username">Username (on)</label>
+      </med-float-label>
+      <med-float-label variant="on" class="w-48">
+        <input medInputText id="fl-email" placeholder=" " class="peer w-full" value="prefilled@example.com" />
+        <label medFloatLabelText for="fl-email">Email (prefilled)</label>
+      </med-float-label>
+      <med-float-label variant="in" class="w-48">
+        <input medInputText id="fl-in" placeholder=" " class="peer w-full" value="Inside the field" />
+        <label medFloatLabelText for="fl-in">In</label>
+      </med-float-label>
+      <med-float-label variant="over" class="w-48">
+        <input medInputText id="fl-over" placeholder=" " class="peer w-full" value="Above the field" />
+        <label medFloatLabelText for="fl-over">Over (default)</label>
+      </med-float-label>
+    </div>
+    <p>Value: {{ floatLabelDemoValue }}</p>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>IftaLabel</h2>
+    <div class="flex max-w-[40rem] flex-wrap items-center gap-4">
+      <med-ifta-label class="w-48">
+        <label medIftaLabelText for="ifta-username">Username</label>
+        <input medInputText id="ifta-username" placeholder="Username" class="border-0 bg-transparent p-0 focus:ring-0 focus:outline-none" [(ngModel)]="iftaLabelDemoValue" name="ifta-username" />
+      </med-ifta-label>
+      <med-ifta-label class="w-48">
+        <label medIftaLabelText for="ifta-email">Email</label>
+        <input medInputText id="ifta-email" value="prefilled@example.com" class="border-0 bg-transparent p-0 focus:ring-0 focus:outline-none" />
+      </med-ifta-label>
+    </div>
+    <p>Value: {{ iftaLabelDemoValue }}</p>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>InputOtp</h2>
+    <div class="flex flex-col gap-4">
+      <div class="flex flex-col gap-1">
+        <span class="text-xs text-surface-500">Default (6 digits, paste a code to try it)</span>
+        <med-input-otp [(ngModel)]="inputOtpDemoValue" name="demo-otp" />
+        <p class="text-xs text-surface-500">Value: {{ inputOtpDemoValue || '(empty)' }}</p>
+      </div>
+      <div class="flex flex-col gap-1">
+        <span class="text-xs text-surface-500">Masked, 4 digits, small size</span>
+        <med-input-otp [length]="4" mask size="sm" [(ngModel)]="inputOtpMaskedDemoValue" name="demo-otp-masked" />
+        <p class="text-xs text-surface-500">Value: {{ inputOtpMaskedDemoValue || '(empty)' }}</p>
+      </div>
+      <div class="flex flex-wrap gap-4">
+        <med-input-otp invalid />
+        <med-input-otp disabled />
+      </div>
+    </div>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>InputNumber</h2>
+    <div class="flex max-w-[40rem] flex-wrap items-center gap-3">
+      <med-input-number [(ngModel)]="inputNumberDemoValue" name="demo-input-number" class="w-full sm:w-auto" />
+      <med-input-number [min]="0" [max]="10" showButtons [(ngModel)]="inputNumberButtonsDemoValue" name="demo-input-number-buttons" class="w-full sm:w-32" />
+      <med-input-number [step]="0.5" [min]="0" [max]="10" showButtons buttonLayout="horizontal" [(ngModel)]="inputNumberHorizontalDemoValue" name="demo-input-number-horizontal" class="w-full sm:w-40" />
+      <med-input-number mode="currency" currency="USD" showButtons [(ngModel)]="inputNumberCurrencyDemoValue" name="demo-input-number-currency" class="w-full sm:w-auto" />
+      <med-input-number size="sm" placeholder="Small" class="w-full sm:w-auto" />
+      <med-input-number invalid placeholder="Invalid" class="w-full sm:w-auto" />
+      <med-input-number disabled placeholder="Disabled" class="w-full sm:w-auto" />
+      <med-input-number [step]="0.5" [min]="0" [max]="10" showButtons buttonLayout="vertical" [(ngModel)]="inputNumberVerticalDemoValue" name="demo-input-number-vertical" class="w-full sm:w-32" />
+      <med-input-number showClear [(ngModel)]="inputNumberClearDemoValue" name="demo-input-number-clear" class="w-full sm:w-auto" />
+    </div>
+    <p>
+      Plain: {{ inputNumberDemoValue }} / Bounded 0-10 w/ stacked buttons: {{ inputNumberButtonsDemoValue }} / Step 0.5 w/ horizontal buttons:
+      {{ inputNumberHorizontalDemoValue }} / Currency: {{ inputNumberCurrencyDemoValue }}
+    </p>
+  </section>
+
+  <section class="flex flex-col gap-2" data-showcase-demo="password">
+    <h2>Password</h2>
+    <div class="flex max-w-[40rem] flex-wrap items-center gap-3">
+      <med-password toggleMask feedback placeholder="With toggle + strength feedback" class="w-full sm:w-64" [(ngModel)]="passwordDemoValue" name="demo-password" />
+      <med-password toggleMask placeholder="Toggle only" class="w-full sm:w-56" [(ngModel)]="passwordToggleDemoValue" name="demo-password-toggle" />
+      <med-password showClear placeholder="Clear only" class="w-full sm:w-56" [(ngModel)]="passwordClearDemoValue" name="demo-password-clear" />
+      <med-password toggleMask showClear placeholder="Toggle + clear" class="w-full sm:w-56" [(ngModel)]="passwordToggleClearDemoValue" name="demo-password-toggle-clear" />
+      <med-password placeholder="Plain" class="w-full sm:w-56" />
+      <med-password size="sm" placeholder="Small" class="w-full sm:w-40" />
+      <med-password invalid placeholder="Invalid" class="w-full sm:w-40" />
+      <med-password disabled placeholder="Disabled" class="w-full sm:w-40" />
+    </div>
+    <p>Value: {{ passwordDemoValue }}</p>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>Textarea</h2>
+    <div class="flex max-w-[40rem] flex-col gap-3">
+      <textarea medTextarea rows="3" placeholder="Tell us more..." [(ngModel)]="textareaDemoValue" name="demo-textarea" class="w-full"></textarea>
+      <div class="flex flex-col gap-1">
+        <span class="text-xs text-surface-500">autoResize — grows with content, no resize handle</span>
+        <textarea medTextarea autoResize rows="1" placeholder="Starts at one line, grows as you type..." [(ngModel)]="textareaAutoResizeDemoValue" name="demo-textarea-auto-resize" class="w-full"></textarea>
+      </div>
+    </div>
+    <p>Value: {{ textareaDemoValue }}</p>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>RadioButton</h2>
+    <div class="flex flex-wrap gap-5">
+      <label class="flex items-center gap-2">
+        <med-radio-button name="plan" value="free" [(ngModel)]="radioPlan" />
+        Free
+      </label>
+      <label class="flex items-center gap-2">
+        <med-radio-button name="plan" value="pro" [(ngModel)]="radioPlan" />
+        Pro
+      </label>
+      <label class="flex items-center gap-2 opacity-60">
+        <med-radio-button name="plan" value="disabled-option" disabled [(ngModel)]="radioPlan" />
+        Disabled
+      </label>
+      <label class="flex items-center gap-2">
+        <med-radio-button name="plan-size" value="sm" size="sm" [(ngModel)]="radioSizeDemo" />
+        Small
+      </label>
+      <label class="flex items-center gap-2">
+        <med-radio-button name="plan-size" value="lg" size="lg" [(ngModel)]="radioSizeDemo" />
+        Large
+      </label>
+    </div>
+    <p>Selected plan: {{ radioPlan }}</p>
+  </section>
+
+  <section class="flex flex-col gap-2" data-showcase-demo="select">
+    <h2>Select</h2>
+    <div class="flex max-w-[40rem] flex-wrap gap-3">
+      <med-select [options]="fruitOptions" placeholder="Choose a fruit" class="w-full sm:w-auto sm:min-w-[14rem]" [(ngModel)]="selectDemoValue" name="demo-select" />
+      <med-select [options]="fruitOptions" placeholder="Filterable + clearable" filter showClear class="w-full sm:w-auto sm:min-w-[14rem]" [(ngModel)]="selectFilterDemoValue" name="demo-select-filter" />
+      <med-select [options]="fruitOptions" placeholder="Disabled" disabled class="w-full sm:w-auto sm:min-w-[14rem]" />
+      <med-select [options]="fruitOptions" placeholder="Invalid" invalid class="w-full sm:w-auto sm:min-w-[14rem]" />
+      <med-select [options]="groupedFoodOptions" placeholder="Grouped options" class="w-full sm:w-auto sm:min-w-[14rem]" name="demo-select-grouped" />
+      <med-select [options]="fruitOptions" placeholder="Loading" [loading]="selectLoadingDemo()" class="w-full sm:w-auto sm:min-w-[14rem]" />
+      <button medButton type="button" variant="outlined" size="sm" (click)="selectLoadingDemo.set(!selectLoadingDemo())">Toggle loading demo</button>
+    </div>
+    <p>Selected: {{ selectDemoValue }}</p>
+    <div class="flex max-w-[40rem] flex-wrap items-start gap-3">
+      <div class="flex w-full flex-col gap-1 sm:w-56">
+        <span class="text-xs text-surface-500">editable — type any value, or pick a real option</span>
+        <med-select [options]="fruitOptions" editable showClear placeholder="Type or pick a fruit" [(ngModel)]="selectEditableDemoValue" name="demo-select-editable" />
+      </div>
+      <div class="flex w-full flex-col gap-1 sm:w-56">
+        <span class="text-xs text-surface-500">lazy — starts with 20 of 12k, loads 20 more near the end on scroll</span>
+        <med-select
+          [options]="lazySelectOptions()"
+          lazy
+          placeholder="Scroll to load more"
+          [(ngModel)]="selectLazyDemoValue"
+          name="demo-select-lazy"
+          (lazyLoad)="onSelectLazyLoad($event)"
+        />
+        <p class="text-xs text-surface-500">Loaded so far: {{ lazySelectOptions().length }}</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>Listbox</h2>
+    <div class="flex flex-wrap items-start gap-4">
+      <div class="flex flex-col gap-1">
+        <span class="text-xs text-surface-500">Single</span>
+        <med-listbox [options]="fruitOptions" class="w-48" [(ngModel)]="listboxDemoValue" name="demo-listbox" />
+        <p class="text-xs text-surface-500">Selected: {{ listboxDemoValue ?? '(none)' }}</p>
+      </div>
+      <div class="flex flex-col gap-1">
+        <span class="text-xs text-surface-500">Multiple + filter</span>
+        <med-listbox [options]="fruitOptions" multiple filter class="w-48" [(ngModel)]="listboxMultipleDemoValue" name="demo-listbox-multi" />
+        <p class="text-xs text-surface-500">Selected: {{ listboxMultipleDemoValue.join(', ') || '(none)' }}</p>
+      </div>
+      <div class="flex flex-col gap-1">
+        <span class="text-xs text-surface-500">Invalid / Disabled</span>
+        <med-listbox [options]="fruitOptions" invalid class="w-48" />
+        <med-listbox [options]="fruitOptions" disabled class="mt-2 w-48" />
+      </div>
+      <div class="flex flex-col gap-1">
+        <span class="text-xs text-surface-500">Multiple, showToggleAll (default true)</span>
+        <med-listbox [options]="fruitOptions" multiple class="w-48" [(ngModel)]="listboxToggleAllDemoValue" name="demo-listbox-toggle-all" />
+        <p class="text-xs text-surface-500">Selected: {{ listboxToggleAllDemoValue.join(', ') || '(none)' }}</p>
+      </div>
+      <div class="flex flex-col gap-1">
+        <span class="text-xs text-surface-500">dragdrop — drag the handle to reorder</span>
+        <med-listbox [options]="listboxDragDropOptions()" dragdrop class="w-48" name="demo-listbox-dragdrop" (reorder)="onListboxReorder($event)" />
+        <p class="text-xs text-surface-500">Order: {{ listboxDragDropOrderLabel() }}</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="flex flex-col gap-2" data-showcase-demo="cascade-select">
+    <h2>CascadeSelect</h2>
+    <div class="flex max-w-[40rem] flex-wrap gap-3">
+      <med-cascade-select [options]="cascadeOptions" placeholder="Choose a city" class="w-full sm:w-auto sm:min-w-[16rem]" [(ngModel)]="cascadeDemoValue" name="demo-cascade" />
+      <med-cascade-select showClear [options]="cascadeOptions" placeholder="showClear" class="w-full sm:w-auto sm:min-w-[16rem]" [(ngModel)]="cascadeClearDemoValue" name="demo-cascade-clear" />
+      <med-cascade-select
+        [breakpoint]="'2000px'"
+        [options]="cascadeOptions"
+        placeholder="breakpoint=2000px (forces stacked submenus here)"
+        class="w-full sm:w-auto sm:min-w-[16rem]"
+        [(ngModel)]="cascadeMobileDemoValue"
+        name="demo-cascade-mobile"
+      />
+      <med-cascade-select [options]="cascadeOptions" placeholder="Disabled" disabled class="w-full sm:w-auto sm:min-w-[16rem]" />
+      <med-cascade-select [options]="cascadeOptions" placeholder="Invalid" invalid class="w-full sm:w-auto sm:min-w-[16rem]" />
+    </div>
+    <p>Selected: {{ cascadeDemoValue }}</p>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>SelectButton</h2>
+    <div class="flex flex-col gap-4">
+      <div class="flex flex-col gap-1">
+        <span class="text-xs text-surface-500">Single (radiogroup), one option disabled</span>
+        <med-select-button [options]="sizeOptions" ariaLabel="Size" [(ngModel)]="selectButtonDemoValue" name="demo-select-button" />
+        <p class="text-xs text-surface-500">Selected: {{ selectButtonDemoValue ?? '(none)' }}</p>
+      </div>
+      <div class="flex flex-col gap-1">
+        <span class="text-xs text-surface-500">Multiple</span>
+        <med-select-button multiple [options]="sizeOptions" ariaLabel="Sizes" [(ngModel)]="selectButtonMultipleDemoValue" name="demo-select-button-multiple" />
+        <p class="text-xs text-surface-500">Selected: {{ selectButtonMultipleDemoValue.join(', ') || '(none)' }}</p>
+      </div>
+      <div class="flex flex-col gap-1">
+        <span class="text-xs text-surface-500">Single, allowEmpty=false (can't deselect down to none)</span>
+        <med-select-button
+          [options]="sizeOptions"
+          [allowEmpty]="false"
+          ariaLabel="Size, cannot be cleared"
+          [(ngModel)]="selectButtonNoEmptyDemoValue"
+          name="demo-select-button-no-empty"
+        />
+        <p class="text-xs text-surface-500">Selected: {{ selectButtonNoEmptyDemoValue ?? '(none)' }}</p>
+      </div>
+      <div class="flex flex-wrap gap-4">
+        <med-select-button [options]="sizeOptions" invalid ariaLabel="Invalid example" />
+        <med-select-button [options]="sizeOptions" disabled ariaLabel="Disabled example" />
+      </div>
+    </div>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>Rating</h2>
+    <div class="flex flex-col gap-4">
+      <div class="flex flex-col gap-1">
+        <span class="text-xs text-surface-500">Default</span>
+        <med-rating [cancel]="false" ariaLabel="Rate this product" [(ngModel)]="ratingDemoValue" name="demo-rating" />
+        <p class="text-xs text-surface-500">Value: {{ ratingDemoValue ?? '(none)' }}</p>
+      </div>
+      <div class="flex flex-col gap-1">
+        <span class="text-xs text-surface-500">10 stars, small size</span>
+        <med-rating [cancel]="false" [stars]="10" size="sm" ariaLabel="Rate out of 10" [(ngModel)]="ratingNoCancelDemoValue" name="demo-rating-10" />
+        <p class="text-xs text-surface-500">Value: {{ ratingNoCancelDemoValue ?? '(none)' }}</p>
+      </div>
+      <div class="flex flex-col gap-1">
+        <span class="text-xs text-surface-500">Readonly summary, large size</span>
+        <med-rating readonly size="lg" [(ngModel)]="ratingReadonlyDemoValue" name="demo-rating-readonly" />
+      </div>
+      <div class="flex flex-col gap-1">
+        <span class="text-xs text-surface-500">allowHalf — click a star's left half for a .5 value</span>
+        <med-rating [cancel]="false" allowHalf ariaLabel="Rate with half stars" [(ngModel)]="ratingHalfDemoValue" name="demo-rating-half" />
+        <p class="text-xs text-surface-500">Value: {{ ratingHalfDemoValue ?? '(none)' }}</p>
+      </div>
+      <div class="flex flex-col gap-1">
+        <span class="text-xs text-surface-500">Readonly half-star average (allowHalf not needed for display)</span>
+        <med-rating readonly [(ngModel)]="ratingHalfReadonlyDemoValue" name="demo-rating-half-readonly" />
+      </div>
+      <div class="flex flex-wrap gap-4">
+        <med-rating disabled ariaLabel="Disabled example" />
+      </div>
+    </div>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>Slider</h2>
+    <div class="flex flex-col gap-6">
+      <div class="flex max-w-[24rem] flex-col gap-1">
+        <span class="text-xs text-surface-500">Default</span>
+        <med-slider ariaLabel="Volume" [(ngModel)]="sliderDemoValue" name="demo-slider" />
+        <p class="text-xs text-surface-500">Value: {{ sliderDemoValue }}</p>
+      </div>
+      <div class="flex max-w-[24rem] flex-col gap-1">
+        <span class="text-xs text-surface-500">Step 10, small size</span>
+        <med-slider [step]="10" size="sm" ariaLabel="Step of 10" [(ngModel)]="sliderStepDemoValue" name="demo-slider-step" />
+        <p class="text-xs text-surface-500">Value: {{ sliderStepDemoValue }}</p>
+      </div>
+      <div class="flex max-w-[24rem] flex-col gap-1">
+        <span class="text-xs text-surface-500">Range, large size</span>
+        <med-slider range size="lg" startLabel="From" endLabel="To" [(ngModel)]="sliderRangeDemoValue" name="demo-slider-range" />
+        <p class="text-xs text-surface-500">Value: {{ sliderRangeDemoValue.start }} - {{ sliderRangeDemoValue.end }}</p>
+      </div>
+      <div class="flex max-w-[24rem] flex-col gap-1">
+        <span class="text-xs text-surface-500">Range, minStepsBetweenHandles=20 (can't get closer than that)</span>
+        <med-slider range [minStepsBetweenHandles]="20" startLabel="From" endLabel="To" [(ngModel)]="sliderMinGapDemoValue" name="demo-slider-min-gap" />
+        <p class="text-xs text-surface-500">Value: {{ sliderMinGapDemoValue.start }} - {{ sliderMinGapDemoValue.end }}</p>
+      </div>
+      <div class="flex max-w-[24rem] flex-col gap-1">
+        <span class="text-xs text-surface-500">Range, disabledMinHandle (start locked at 20)</span>
+        <med-slider range disabledMinHandle startLabel="From" endLabel="To" [(ngModel)]="sliderDisabledMinDemoValue" name="demo-slider-disabled-min" />
+        <p class="text-xs text-surface-500">Value: {{ sliderDisabledMinDemoValue.start }} - {{ sliderDisabledMinDemoValue.end }}</p>
+      </div>
+      <div class="flex max-w-[24rem] flex-col gap-3">
+        <med-slider invalid ariaLabel="Invalid example" />
+        <med-slider disabled ariaLabel="Disabled example" />
+      </div>
+    </div>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>SplitButton</h2>
+    <div class="flex flex-wrap items-center gap-4">
+      <med-split-button label="Save" [items]="splitButtonItems" (buttonClick)="splitButtonLog.set('Primary action clicked')" (itemSelect)="splitButtonLog.set('Selected: ' + $event.label)" />
+      <med-split-button label="Download" icon="arrow-down-tray" severity="secondary" variant="outlined" [items]="splitButtonItems" />
+      <med-split-button label="Small" size="sm" severity="danger" [items]="splitButtonItems" />
+      <med-split-button label="Disabled" disabled [items]="splitButtonItems" />
+      <med-split-button label="Button disabled" buttonDisabled [items]="splitButtonItems" />
+      <med-split-button label="Menu disabled" menuButtonDisabled [items]="splitButtonItems" />
+    </div>
+    <p>Last action: {{ splitButtonLog() }}</p>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>MultiSelect</h2>
+    <div class="flex max-w-[40rem] flex-wrap gap-3">
+      <med-multi-select
+        [options]="fruitOptions"
+        placeholder="Choose fruits"
+        filter
+        showClear
+        class="w-full sm:w-auto sm:min-w-[16rem]"
+        [(ngModel)]="multiSelectDemoValue"
+        name="demo-multi-select"
+      />
+    </div>
+    <p>Selected: {{ multiSelectDemoValue.join(', ') || '(none)' }}</p>
+    <div class="flex max-w-[40rem] flex-col gap-1">
+      <span class="text-xs text-surface-500">display="chip"</span>
+      <med-multi-select
+        [options]="fruitOptions"
+        placeholder="Choose fruits"
+        display="chip"
+        showClear
+        class="w-full sm:w-auto sm:min-w-[16rem]"
+        [(ngModel)]="multiSelectChipDemoValue"
+        name="demo-multi-select-chip"
+      />
+    </div>
+    <div class="flex max-w-[40rem] flex-col gap-1">
+      <span class="text-xs text-surface-500">selectionLimit=2 (showToggleAll auto-hidden)</span>
+      <med-multi-select
+        [options]="fruitOptions"
+        placeholder="Pick up to 2"
+        [selectionLimit]="2"
+        showClear
+        class="w-full sm:w-auto sm:min-w-[16rem]"
+        [(ngModel)]="multiSelectLimitDemoValue"
+        name="demo-multi-select-limit"
+      />
+    </div>
+  </section>
+
+  <section class="flex flex-col gap-2" data-showcase-demo="autocomplete">
+    <h2>Autocomplete</h2>
+    <div class="flex max-w-[40rem] flex-wrap gap-3">
+      <med-autocomplete
+        [suggestions]="autocompleteSuggestions"
+        [loading]="autocompleteLoading()"
+        placeholder="Search a fruit (simulated 400ms server delay)"
+        showClear
+        class="w-full sm:w-auto sm:min-w-[20rem]"
+        [(ngModel)]="autocompleteDemoValue"
+        name="demo-autocomplete"
+        (search)="onFruitSearch($event)"
+      />
+      <med-autocomplete placeholder="Disabled" disabled class="w-full sm:w-auto sm:min-w-[16rem]" />
+      <med-autocomplete placeholder="Invalid" invalid class="w-full sm:w-auto sm:min-w-[16rem]" />
+    </div>
+    <p>Selected: {{ autocompleteDemoValue?.label ?? '(none)' }}</p>
+    <div class="flex max-w-[40rem] flex-col gap-1">
+      <span class="text-xs text-surface-500">dropdown — click the chevron to see all suggestions without typing</span>
+      <med-autocomplete
+        [suggestions]="autocompleteSuggestions"
+        [loading]="autocompleteLoading()"
+        dropdown
+        showClear
+        placeholder="Click the dropdown, or search a fruit"
+        [(ngModel)]="autocompleteDropdownDemoValue"
+        name="demo-autocomplete-dropdown"
+        (search)="onFruitSearch($event)"
+      />
+    </div>
+    <div class="flex max-w-[40rem] flex-col gap-1">
+      <span class="text-xs text-surface-500">multiple — picked suggestions become removable chips</span>
+      <med-autocomplete
+        [suggestions]="autocompleteSuggestions"
+        [loading]="autocompleteLoading()"
+        multiple
+        placeholder="Search fruits to add"
+        showClear
+        [(ngModel)]="autocompleteMultiDemoValue"
+        name="demo-autocomplete-multiple"
+        (search)="onFruitSearch($event)"
+      />
+    </div>
+  </section>
+
+  <section class="flex flex-col gap-2" data-showcase-demo="data-view">
+    <h2>DataView</h2>
+    <div class="flex flex-col gap-3">
+      <div class="flex gap-2">
+        <button medButton type="button" size="sm" [variant]="dataViewLayout === 'list' ? 'filled' : 'outlined'" (click)="dataViewLayout = 'list'">List</button>
+        <button medButton type="button" size="sm" [variant]="dataViewLayout === 'grid' ? 'filled' : 'outlined'" (click)="dataViewLayout = 'grid'">Grid</button>
+        <button medButton type="button" size="sm" variant="outlined" (click)="dataViewLoading = !dataViewLoading">Toggle loading</button>
+      </div>
+      <med-data-view
+        [value]="dataViewProducts"
+        [layout]="dataViewLayout"
+        paginator
+        [rows]="3"
+        [sortComparator]="dataViewSortByPrice"
+        [filterPredicate]="dataViewFilterByName"
+        [loading]="dataViewLoading"
+        class="max-w-[36rem]"
+      >
+        <ng-template #header let-items>
+          <p class="text-sm text-surface-500">{{ items.length }} products</p>
+        </ng-template>
+        <ng-template #item let-product>
+          <div class="flex items-center justify-between py-2">
+            <span>{{ product.name }}</span>
+            <span class="text-surface-500">{{ '$' + product.price }}</span>
+          </div>
+        </ng-template>
+        <ng-template #footer>
+          <p class="text-sm text-surface-400">End of list</p>
+        </ng-template>
+        <ng-template #empty>
+          <p class="text-sm italic text-surface-400">No products match your search</p>
+        </ng-template>
+      </med-data-view>
+    </div>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>Carousel</h2>
+    <div class="flex flex-col gap-6">
+      <div class="max-w-[28rem]">
+        <span class="text-xs text-surface-500">1 visible, autoplay every 2.5s</span>
+        <med-carousel [value]="carouselImages" [numVisible]="1" [autoplayInterval]="2500">
+          <ng-template #item let-slide>
+            <div class="flex h-40 items-center justify-center rounded-lg text-lg font-semibold text-white" [style.backgroundColor]="slide.color">
+              {{ slide.label }}
+            </div>
+          </ng-template>
+        </med-carousel>
+      </div>
+      <div class="max-w-[28rem]">
+        <span class="text-xs text-surface-500">3 visible, scroll 1 at a time, no autoplay</span>
+        <med-carousel [value]="carouselImages" [numVisible]="3" [numScroll]="1">
+          <ng-template #item let-slide>
+            <div class="mx-1 flex h-24 items-center justify-center rounded-lg text-sm font-semibold text-white" [style.backgroundColor]="slide.color">
+              {{ slide.label }}
+            </div>
+          </ng-template>
+        </med-carousel>
+      </div>
+      <div class="max-w-[36rem]">
+        <span class="text-xs text-surface-500">responsiveOptions — resize the window to see numVisible change (4 by default, 3/2/1 at narrower breakpoints)</span>
+        <med-carousel [value]="carouselImages" [numVisible]="4" [responsiveOptions]="carouselResponsiveOptions">
+          <ng-template #item let-slide>
+            <div class="mx-1 flex h-24 items-center justify-center rounded-lg text-sm font-semibold text-white" [style.backgroundColor]="slide.color">
+              {{ slide.label }}
+            </div>
+          </ng-template>
+        </med-carousel>
+      </div>
+      <div class="max-w-[16rem]">
+        <span class="text-xs text-surface-500">orientation="vertical", showNavigators=false, header/footer templates, pageChange — page {{ carouselVerticalPage() + 1 }}</span>
+        <med-carousel
+          [value]="carouselImages"
+          orientation="vertical"
+          verticalViewPortHeight="180px"
+          [showNavigators]="false"
+          (pageChange)="carouselVerticalPage.set($event)"
+        >
+          <ng-template #header>
+            <p class="mb-2 text-xs font-semibold text-surface-500">Featured slides</p>
+          </ng-template>
+          <ng-template #item let-slide>
+            <div class="mx-1 flex h-20 items-center justify-center rounded-lg text-sm font-semibold text-white" [style.backgroundColor]="slide.color">
+              {{ slide.label }}
+            </div>
+          </ng-template>
+          <ng-template #footer>
+            <p class="mt-2 text-xs text-surface-500">Swipe or use the dots — the arrow buttons are hidden here.</p>
+          </ng-template>
+        </med-carousel>
+      </div>
+      <div class="max-w-[28rem]">
+        <span class="text-xs text-surface-500">#previousicon/#nexticon — custom nav icons instead of the default chevrons</span>
+        <med-carousel [value]="carouselImages" [numVisible]="1">
+          <ng-template #previousicon>
+            <med-icon name="arrow-left-circle" variant="solid" class="size-5" />
+          </ng-template>
+          <ng-template #nexticon>
+            <med-icon name="arrow-right-circle" variant="solid" class="size-5" />
+          </ng-template>
+          <ng-template #item let-slide>
+            <div class="flex h-32 items-center justify-center rounded-lg text-lg font-semibold text-white" [style.backgroundColor]="slide.color">
+              {{ slide.label }}
+            </div>
+          </ng-template>
+        </med-carousel>
+      </div>
+    </div>
+  </section>
+
+  <section class="flex flex-col gap-2" data-showcase-demo="image">
+    <h2>Image</h2>
+    <div class="flex flex-wrap items-start gap-6">
+      <div class="flex flex-col gap-1">
+        <span class="text-xs text-surface-500">Plain</span>
+        <med-image [src]="imageDemoSrc" alt="Demo graphic" class="rounded-lg" />
+      </div>
+      <div class="flex flex-col gap-1">
+        <span class="text-xs text-surface-500">Preview (click to open, zoom/rotate in the overlay) — {{ imagePreviewStatus() }}</span>
+        <med-image
+          [src]="imageDemoSrc"
+          alt="Demo graphic"
+          preview
+          class="rounded-lg"
+          (opened)="imagePreviewStatus.set('open')"
+          (closed)="imagePreviewStatus.set('closed')"
+        />
+      </div>
+      <div class="flex flex-col gap-1">
+        <span class="text-xs text-surface-500">Broken src (fallback) — imageError: {{ imageErrorStatus() }}</span>
+        <med-image [src]="imageBrokenSrc" alt="Broken" class="size-32 rounded-lg" (imageError)="imageErrorStatus.set('fired')" />
+      </div>
+      <div class="flex flex-col gap-1">
+        <span class="text-xs text-surface-500">width/height (reserves layout space before load)</span>
+        <med-image [src]="imageDemoSrc" alt="Demo graphic" [width]="200" [height]="120" class="rounded-lg" />
+      </div>
+    </div>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>Steps</h2>
+    <med-steps [items]="checkoutSteps" [(activeIndex)]="stepsActiveIndex" class="max-w-[36rem]" />
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>Stepper</h2>
+    <med-stepper linear (completed)="onStepperCompleted()" class="block max-w-[36rem]">
+      <med-step-panel label="Cart">
+        <p class="text-sm text-surface-700 dark:text-surface-200">Review your cart items.</p>
+      </med-step-panel>
+      <med-step-panel label="Shipping">
+        <p class="text-sm text-surface-700 dark:text-surface-200">Enter your shipping address.</p>
+      </med-step-panel>
+      <med-step-panel label="Payment">
+        <p class="text-sm text-surface-700 dark:text-surface-200">Enter your payment details.</p>
+      </med-step-panel>
+    </med-stepper>
+    <p>Result: {{ stepperResult() }}</p>
+    <span class="text-xs text-surface-500">orientation="vertical"</span>
+    <med-stepper orientation="vertical" class="block max-w-[36rem]">
+      <med-step-panel label="Cart">
+        <p class="text-sm text-surface-700 dark:text-surface-200">Review your cart items.</p>
+      </med-step-panel>
+      <med-step-panel label="Shipping">
+        <p class="text-sm text-surface-700 dark:text-surface-200">Enter your shipping address.</p>
+      </med-step-panel>
+      <med-step-panel label="Payment">
+        <p class="text-sm text-surface-700 dark:text-surface-200">Enter your payment details.</p>
+      </med-step-panel>
+    </med-stepper>
+  </section>
+
+  <section class="flex flex-col gap-2" data-showcase-demo="date-picker">
+    <h2>DatePicker</h2>
+    <div class="flex max-w-[46rem] flex-wrap gap-4">
+      <div class="flex w-full flex-col gap-1 sm:w-[12rem]">
+        <span class="text-xs text-surface-500">Single date</span>
+        <med-date-picker showClear [(ngModel)]="datePickerDemoValue" name="demo-date-picker" />
+      </div>
+      <div class="flex w-full flex-col gap-1 sm:w-[16rem]">
+        <span class="text-xs text-surface-500">Range (defaults to 2 months side by side)</span>
+        <med-date-picker selectionMode="range" showClear [(ngModel)]="datePickerRangeDemoValue" name="demo-date-picker-range" />
+      </div>
+      <div class="flex w-full flex-col gap-1 sm:w-[16rem]">
+        <span class="text-xs text-surface-500">Range, numberOfMonths=3</span>
+        <med-date-picker selectionMode="range" [numberOfMonths]="3" showClear [(ngModel)]="datePickerRangeThreeMonthDemoValue" name="demo-date-picker-range-3-month" />
+      </div>
+      <div class="flex w-full flex-col gap-1 sm:w-[14rem]">
+        <span class="text-xs text-surface-500">Drilldown navigation (year -&gt; month -&gt; day) — still typeable, placeholder shows the format</span>
+        <med-date-picker navigation="drilldown" showClear [(ngModel)]="datePickerDrilldownDemoValue" name="demo-date-picker-drilldown" />
+      </div>
+      <div class="flex w-full flex-col gap-1 sm:w-[16rem]">
+        <span class="text-xs text-surface-500">Drilldown + range (read-only, calendar-only entry)</span>
+        <med-date-picker navigation="drilldown" selectionMode="range" showClear [(ngModel)]="datePickerDrilldownRangeDemoValue" name="demo-date-picker-drilldown-range" />
+      </div>
+      <div class="flex w-full flex-col gap-1 sm:w-[14rem]">
+        <span class="text-xs text-surface-500">Bounded +/-1-2 months</span>
+        <med-date-picker [minDate]="datePickerMinDate" [maxDate]="datePickerMaxDate" name="demo-date-picker-bounded" />
+      </div>
+      <div class="flex w-full flex-col gap-1 sm:w-[14rem]">
+        <span class="text-xs text-surface-500">No weekends + 2 specific "holiday" dates</span>
+        <med-date-picker
+          [disabledDates]="datePickerDisabledDates"
+          [disabledDays]="datePickerDisabledDays"
+          showClear
+          [(ngModel)]="datePickerDisabledDaysDemoValue"
+          name="demo-date-picker-disabled-days"
+        />
+      </div>
+      <div class="flex w-full flex-col gap-1 sm:w-[12rem]">
+        <span class="text-xs text-surface-500">No Mondays (a single weekday, not just weekends)</span>
+        <med-date-picker [disabledDays]="datePickerNoMondaysDisabledDays" showClear [(ngModel)]="datePickerNoMondaysDemoValue" name="demo-date-picker-no-mondays" />
+      </div>
+      <div class="flex w-full flex-col gap-1 sm:w-[14rem]">
+        <span class="text-xs text-surface-500">showTime, 24-hour</span>
+        <med-date-picker showTime showClear [(ngModel)]="datePickerTimeDemoValue" name="demo-date-picker-time-24" />
+      </div>
+      <div class="flex w-full flex-col gap-1 sm:w-[14rem]">
+        <span class="text-xs text-surface-500">showTime, 12-hour (stepMinute=15)</span>
+        <med-date-picker showTime hourFormat="12" [stepMinute]="15" showClear [(ngModel)]="datePickerTime12DemoValue" name="demo-date-picker-time-12" />
+      </div>
+      <div class="flex w-full flex-col gap-1 sm:w-[12rem]">
+        <span class="text-xs text-surface-500">Default placeholder (none specified)</span>
+        <med-date-picker name="demo-date-picker-default-placeholder" />
+      </div>
+      <div class="flex w-full flex-col gap-1 sm:w-[14rem]">
+        <span class="text-xs text-surface-500">Multiple dates</span>
+        <med-date-picker selectionMode="multiple" showClear [(ngModel)]="datePickerMultipleDemoValue" name="demo-date-picker-multiple" />
+      </div>
+      <div class="flex w-full flex-col gap-1 sm:w-[12rem]">
+        <span class="text-xs text-surface-500">view=month, calendar navigation (year chevrons)</span>
+        <med-date-picker view="month" showClear [(ngModel)]="datePickerMonthViewDemoValue" name="demo-date-picker-month-view" />
+      </div>
+      <div class="flex w-full flex-col gap-1 sm:w-[12rem]">
+        <span class="text-xs text-surface-500">view=month, drilldown navigation (year list -&gt; month grid)</span>
+        <med-date-picker view="month" navigation="drilldown" showClear [(ngModel)]="datePickerMonthViewDrilldownDemoValue" name="demo-date-picker-month-view-drilldown" />
+      </div>
+      <div class="flex w-full flex-col gap-1 sm:w-[12rem]">
+        <span class="text-xs text-surface-500">Disabled</span>
+        <med-date-picker disabled />
+      </div>
+      <div class="flex w-full flex-col gap-1 sm:w-[12rem]">
+        <span class="text-xs text-surface-500">Invalid</span>
+        <med-date-picker invalid />
+      </div>
+    </div>
+    <p>No weekends/holidays: {{ datePickerDisabledDaysDemoValue }}</p>
+    <p>No Mondays: {{ datePickerNoMondaysDemoValue }}</p>
+    <p>Selected: {{ datePickerDemoValue }} / Range: {{ datePickerRangeDemoValue.start }} - {{ datePickerRangeDemoValue.end }}</p>
+    <p>Drilldown: {{ datePickerDrilldownDemoValue }} / Drilldown range: {{ datePickerDrilldownRangeDemoValue.start }} - {{ datePickerDrilldownRangeDemoValue.end }}</p>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>Select / MultiSelect — 12,000 options (virtual scroll perf check)</h2>
+    <div class="flex max-w-[40rem] flex-wrap gap-3">
+      <med-select [options]="bigListOptions" placeholder="Pick from 12k options" filter class="w-full sm:w-auto sm:min-w-[16rem]" [(ngModel)]="bigSelectDemoValue" name="demo-big-select" />
+      <med-multi-select [options]="bigListOptions" placeholder="Pick multiple from 12k" filter class="w-full sm:w-auto sm:min-w-[16rem]" [(ngModel)]="bigMultiSelectDemoValue" name="demo-big-multi-select" />
+    </div>
+    <p>Selected: {{ bigSelectDemoValue }} / {{ bigMultiSelectDemoValue.length }} in multi</p>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>Dialog</h2>
+    <div class="flex flex-wrap items-center gap-3">
+      <button medButton type="button" severity="danger" variant="outlined" (click)="openConfirmDialog()">
+        <med-icon name="trash" />
+        Delete item&hellip;
+      </button>
+      <button medButton type="button" variant="outlined" (click)="openDraggableResizableDialog()">
+        draggable/resizable/maximizable
+      </button>
+      <button medButton type="button" variant="outlined" (click)="openBottomLeftDialog()">position: bottom-left</button>
+      <button medButton type="button" variant="outlined" (click)="openStrictBreakpointDialog()">
+        closeOnEscape/dismissableMask=false + breakpoints
+      </button>
+      <p>Result: {{ dialogResult() }}</p>
+    </div>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>ConfirmDialog</h2>
+    <div class="flex flex-wrap items-center gap-3">
+      <button medButton type="button" severity="danger" variant="outlined" (click)="openConfirmDialogDelete()">
+        <med-icon name="trash" />
+        Delete (danger severity)&hellip;
+      </button>
+      <button medButton type="button" variant="outlined" (click)="openConfirmDialogLogout()">
+        Log out (default severity)&hellip;
+      </button>
+      <button medButton type="button" variant="outlined" (click)="openConfirmDialogAcknowledge()">
+        rejectVisible=false, defaultFocus="close", position/draggable
+      </button>
+      <button medButton type="button" variant="outlined" (click)="openConfirmDialogHeadless()">headlessTemplate — fully custom body</button>
+      <p>Result: {{ confirmDialogResult() }}</p>
+    </div>
+    <ng-template #confirmDialogHeadlessTpl let-data let-onAccept="onAccept" let-onReject="onReject">
+      <div class="flex flex-col items-center gap-3 text-center">
+        <med-icon name="star" variant="solid" class="size-10 text-yellow-500" />
+        <p class="text-sm font-semibold text-surface-900 dark:text-surface-50">{{ data.message }}</p>
+        <div class="flex gap-2">
+          <button medButton type="button" variant="outlined" (click)="onReject()">Maybe later</button>
+          <button medButton type="button" (click)="onAccept()">Rate now</button>
+        </div>
+      </div>
+    </ng-template>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>ConfirmPopup</h2>
+    <div class="flex flex-wrap items-center gap-3">
+      <button medButton type="button" severity="danger" variant="outlined" (click)="openConfirmPopupDelete($event)">
+        <med-icon name="trash" />
+        Delete row&hellip;
+      </button>
+      <button medButton type="button" variant="outlined" (click)="openConfirmPopupAcknowledge($event)">
+        rejectVisible=false, defaultFocus="accept"
+      </button>
+      <button medButton type="button" variant="outlined" (click)="openConfirmPopupHeadless($event)">
+        headlessTemplate — fully custom body
+      </button>
+      <p>Result: {{ confirmPopupResult() }}</p>
+    </div>
+    <ng-template #confirmPopupHeadlessTpl let-data let-onAccept="onAccept" let-onReject="onReject">
+      <div class="flex flex-col gap-2">
+        <p class="text-sm font-semibold text-surface-900 dark:text-surface-50">Move this to Archive?</p>
+        <p class="text-xs text-surface-500">{{ data.message }}</p>
+        <div class="flex justify-end gap-2">
+          <button medButton type="button" size="sm" variant="text" (click)="onReject()">Cancel</button>
+          <button medButton type="button" size="sm" (click)="onAccept()">Archive</button>
+        </div>
+      </div>
+    </ng-template>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>Message (inline, static)</h2>
+    <div class="flex max-w-lg flex-col gap-2">
+      @if (!messageClosed) {
+        <med-message severity="warn" closable (closed)="messageClosed = true">
+          Your subscription expires in 3 days.
+        </med-message>
+      }
+      <med-message severity="success">Payment received, thank you!</med-message>
+      <med-message severity="info" icon="star">icon="star" — overrides the default severity icon</med-message>
+      <med-message severity="info" size="sm">size="sm"</med-message>
+      <med-message severity="info" size="lg">size="lg"</med-message>
+      @if (messageLifeVisible) {
+        <med-message severity="warn" [life]="2000" (closed)="messageLifeVisible = false">
+          life="2000" — auto-closes in 2s
+        </med-message>
+      } @else {
+        <button medButton type="button" variant="outlined" size="sm" class="w-fit" (click)="messageLifeVisible = true">
+          Show auto-closing message again
+        </button>
+      }
+    </div>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>InlineMessage</h2>
+    <div class="flex max-w-lg flex-col items-start gap-2">
+      <med-inline-message severity="danger">Email is required</med-inline-message>
+      <med-inline-message severity="warn">Password is weak</med-inline-message>
+      <med-inline-message severity="success">Username is available</med-inline-message>
+      <med-inline-message severity="info">We'll never share your email</med-inline-message>
+    </div>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>Toast (ephemeral, imperative)</h2>
+    <div class="flex flex-wrap gap-3">
+      <button medButton type="button" severity="info" (click)="showToast('info')">Info toast</button>
+      <button medButton type="button" severity="success" (click)="showToast('success')">Success toast</button>
+      <button medButton type="button" severity="warn" (click)="showToast('warn')">Warn toast</button>
+      <button medButton type="button" severity="danger" (click)="showToast('danger')">Error toast</button>
+    </div>
+    <div class="flex flex-col gap-1">
+      <span class="text-xs text-surface-500">position — moves the whole (shared) stack in place</span>
+      <div class="flex flex-wrap gap-3">
+        <button medButton type="button" variant="outlined" (click)="showToastAt('top-left')">top-left</button>
+        <button medButton type="button" variant="outlined" (click)="showToastAt('bottom-left')">bottom-left</button>
+        <button medButton type="button" variant="outlined" (click)="showToastAt('bottom-right')">bottom-right</button>
+      </div>
+    </div>
+    <div class="flex flex-col gap-1">
+      <span class="text-xs text-surface-500">headlessTemplate — fully custom toast, no med-message chrome</span>
+      <button medButton type="button" variant="outlined" class="w-fit" (click)="showToastHeadless()">Headless toast</button>
+    </div>
+    <ng-template #toastHeadlessTpl let-message let-onClose="onClose">
+      <div class="pointer-events-auto flex items-center gap-3 rounded-full bg-surface-900 px-4 py-2 text-sm text-white shadow-overlay-lg dark:bg-surface-700">
+        <med-icon name="check-circle" variant="solid" class="size-4 text-success-400" />
+        {{ message.detail }}
+        <button type="button" class="text-surface-400 hover:text-white" (click)="onClose()">
+          <med-icon name="x-mark" class="size-4" />
+        </button>
+      </div>
+    </ng-template>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>Tag &amp; Badge</h2>
+    <div class="flex flex-wrap items-center gap-3">
+      <med-tag severity="success" icon="check-circle">Active</med-tag>
+      <med-tag severity="danger">Failed</med-tag>
+      <med-tag severity="info" pill icon="plus">New</med-tag>
+      <med-tag severity="secondary" value="From value input" />
+      <span class="inline-flex items-center gap-1">
+        Messages <med-badge severity="danger">5</med-badge>
+      </span>
+      <span class="inline-flex items-center gap-1">
+        Online <med-badge severity="success" dot />
+      </span>
+      <span class="inline-flex items-center gap-1">
+        XL <med-badge severity="info" size="xl">99+</med-badge>
+      </span>
+      <span class="inline-flex items-center gap-1">
+        badgeDisabled (hidden, not greyed out) <med-badge severity="danger" [badgeDisabled]="true">0</med-badge>
+      </span>
+    </div>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>Divider</h2>
+    <p>Section above</p>
+    <med-divider />
+    <p>Section below</p>
+    <div class="flex h-6 items-center gap-2">
+      <span>Left</span>
+      <med-divider orientation="vertical" />
+      <span>Right</span>
+      <med-divider orientation="vertical" type="dashed" />
+      <span>Dashed</span>
+      <med-divider orientation="vertical" type="dotted" />
+      <span>Dotted</span>
+    </div>
+    <p>type="dashed"</p>
+    <med-divider type="dashed" />
+    <p>type="dotted"</p>
+    <med-divider type="dotted" />
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>ProgressBar</h2>
+    <div class="flex max-w-sm flex-col gap-3">
+      <med-progress-bar [value]="progressDemoValue" showValue />
+      <med-progress-bar [value]="progressDemoValue" severity="success" size="sm" />
+      <med-progress-bar [value]="progressDemoValue" severity="danger" size="lg" />
+      <med-progress-bar mode="indeterminate" ariaLabel="Uploading" />
+      <med-progress-bar [value]="progressDemoValue" showValue unit=" MB" severity="secondary" />
+      <med-progress-bar [value]="progressDemoValue" showValue severity="info">
+        <ng-template #content let-value>
+          <span class="font-semibold">{{ value }}/100 done</span>
+        </ng-template>
+      </med-progress-bar>
+      <div class="flex gap-2">
+        <button medButton type="button" variant="outlined" size="sm" (click)="progressDemoValue = progressDemoValue - 10">-10</button>
+        <button medButton type="button" variant="outlined" size="sm" (click)="progressDemoValue = progressDemoValue + 10">+10</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>ProgressSpinner</h2>
+    <div class="flex flex-wrap items-center gap-6">
+      <med-progress-spinner size="sm" />
+      <med-progress-spinner />
+      <med-progress-spinner size="lg" severity="success" />
+      <med-progress-spinner severity="danger" />
+    </div>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>Avatar</h2>
+    <div class="flex flex-wrap items-center gap-3">
+      <med-avatar label="Jane Doe" />
+      <med-avatar label="Ada Lovelace" severity="info" shape="square" />
+      <med-avatar />
+      <med-avatar size="lg" severity="success" label="OK" />
+      <med-avatar size="xl" image="https://broken-image-url.example/none.png" label="Fallback" />
+    </div>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>AvatarGroup</h2>
+    <med-avatar-group>
+      <med-avatar image="https://i.pravatar.cc/128?img=47" alt="Camila Reis" class="ring-2 ring-surface-0 dark:ring-surface-900" />
+      <med-avatar image="https://i.pravatar.cc/128?img=12" alt="Diego Nakamura" class="ring-2 ring-surface-0 dark:ring-surface-900" />
+      <med-avatar label="Beatriz Lima" severity="info" class="ring-2 ring-surface-0 dark:ring-surface-900" />
+      <med-avatar label="+ 3" severity="secondary" class="ring-2 ring-surface-0 dark:ring-surface-900" />
+    </med-avatar-group>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>Card</h2>
+    <div class="flex flex-wrap gap-4">
+      <med-card title="Plan: Pro" subtitle="Renews on Aug 1" class="w-full sm:w-72">
+        <p>Unlimited projects, priority support, and advanced analytics.</p>
+        <div medCardFooter class="flex justify-end gap-2">
+          <button medButton type="button" variant="text" severity="secondary" size="sm">Cancel</button>
+          <button medButton type="button" size="sm">Manage</button>
+        </div>
+      </med-card>
+      <med-card title="No footer" class="w-full sm:w-72">
+        <p>A card with just a title and body — no divider bar underneath.</p>
+      </med-card>
+      <med-card class="w-full sm:w-72">
+        <div medCardTitle class="flex items-center gap-2 text-lg font-semibold text-surface-900 dark:text-surface-50">
+          <med-icon name="star" variant="solid" class="size-5 text-brand-600 dark:text-brand-400" />
+          Launch plan
+          <med-badge severity="success" size="sm">New</med-badge>
+        </div>
+        <div medCardSubtitle class="mt-1 text-sm">
+          <a href="#" class="text-brand-600 hover:underline dark:text-brand-400">View pricing details</a>
+        </div>
+        <p>medCardTitle/medCardSubtitle project rich content (icon, badge, link) instead of plain strings.</p>
+      </med-card>
+    </div>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>Panel</h2>
+    <div class="flex max-w-md flex-col gap-3">
+      <med-panel header="Billing details" toggleable [(collapsed)]="panelCollapsed">
+        <p>Card ending in 4242, expires 12/28.</p>
+      </med-panel>
+      <med-panel header="Always open (not toggleable)">
+        <p>No chevron button — this panel can't be collapsed.</p>
+      </med-panel>
+      <med-panel header="toggler=icon — header click does nothing" toggleable toggler="icon">
+        <p>Only the chevron button toggles this one; clicking the title/header row doesn't.</p>
+      </med-panel>
+      <med-panel header="iconPos=start" toggleable iconPos="start">
+        <p>The chevron button renders before the title.</p>
+      </med-panel>
+      <med-panel header="iconPos=center" toggleable iconPos="center">
+        <p>Title and button sit together, centered in the header row.</p>
+      </med-panel>
+      <med-panel header="showHeader=false — not visible" [showHeader]="false">
+        <p>No header row at all — just this body content.</p>
+      </med-panel>
+    </div>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>Fieldset</h2>
+    <div class="flex max-w-md flex-col gap-3">
+      <med-fieldset legend="Shipping address" toggleable [(collapsed)]="fieldsetCollapsed">
+        <div class="flex flex-col gap-2">
+          <input medInputText type="text" placeholder="Street" />
+          <input medInputText type="text" placeholder="City" />
+        </div>
+      </med-fieldset>
+      <med-fieldset legend="Not toggleable">
+        <p>No chevron button — this fieldset can't be collapsed.</p>
+      </med-fieldset>
+      <med-fieldset legend="Disabled — every field below is inert" [disabled]="true">
+        <div class="flex flex-col gap-2">
+          <input medInputText type="text" placeholder="Card number" />
+          <button medButton type="button" size="sm">Save card</button>
+        </div>
+      </med-fieldset>
+      <med-fieldset toggleable>
+        <span medFieldsetLegend class="flex items-center gap-1">
+          <med-icon name="star" class="size-4 text-yellow-500" />
+          Rich legend (medFieldsetLegend)
+        </span>
+        <p>The legend above is projected content, not the plain-string <code>legend</code> input.</p>
+      </med-fieldset>
+      <med-fieldset
+        legend="beforeToggle / afterToggle"
+        toggleable
+        [(collapsed)]="fieldsetEventsCollapsed"
+        (beforeToggle)="logFieldsetBeforeToggle($event)"
+        (afterToggle)="logFieldsetAfterToggle($event)"
+      >
+        <ul class="flex flex-col gap-0.5 text-xs text-surface-500">
+          @for (line of fieldsetEventsLog; track $index) {
+            <li>{{ line }}</li>
+          }
+        </ul>
+      </med-fieldset>
+    </div>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>Drawer</h2>
+    <div class="flex flex-wrap items-center gap-3">
+      <button medButton type="button" variant="outlined" (click)="drawerLeftOpen = true">Left</button>
+      <button medButton type="button" variant="outlined" (click)="drawerRightOpen = true">Right</button>
+      <button medButton type="button" variant="outlined" (click)="drawerTopOpen = true">Top</button>
+      <button medButton type="button" variant="outlined" (click)="drawerBottomOpen = true">Bottom</button>
+      <button medButton type="button" variant="outlined" (click)="drawerNonModalOpen = true">Non-modal (right)</button>
+      <button medButton type="button" variant="outlined" (click)="drawerFullScreenOpen = true">
+        fullScreen + blockScroll + closeOnEscape=false
+      </button>
+      <button medButton type="button" variant="outlined" (click)="drawerHeaderFooterOpen = true">#header/#footer templates</button>
+      <button medButton type="button" variant="outlined" (click)="drawerHeadlessOpen = true">#headless — fully custom panel</button>
+    </div>
+
+    <med-drawer [(visible)]="drawerLeftOpen" position="left" header="Navigation">
+      <nav class="flex flex-col gap-1">
+        <button medButton type="button" variant="text" class="justify-start">Dashboard</button>
+        <button medButton type="button" variant="text" class="justify-start">Projects</button>
+        <button medButton type="button" variant="text" class="justify-start">Settings</button>
+      </nav>
+    </med-drawer>
+
+    <med-drawer [(visible)]="drawerRightOpen" position="right" header="Filters">
+      <div class="flex flex-col gap-3">
+        <p>Filter controls would go here.</p>
+      </div>
+    </med-drawer>
+
+    <med-drawer [(visible)]="drawerTopOpen" position="top" header="Announcement">
+      <p>A top drawer: full width, capped height (same 85vh cap as Dialog).</p>
+    </med-drawer>
+
+    <med-drawer [(visible)]="drawerBottomOpen" position="bottom" header="Cart">
+      <p>A bottom drawer — the usual shape for a mobile-style sheet.</p>
+    </med-drawer>
+
+    <med-drawer [(visible)]="drawerNonModalOpen" position="right" [modal]="false" header="Non-modal">
+      <p>No backdrop, doesn't trap focus — closes on Escape or a click outside the panel.</p>
+    </med-drawer>
+
+    <med-drawer [(visible)]="drawerFullScreenOpen" fullScreen [blockScroll]="true" [closeOnEscape]="false" header="Full screen">
+      <p>Covers the whole viewport, blocks background scroll, and Escape is disabled — close via the header button.</p>
+    </med-drawer>
+
+    <med-drawer [(visible)]="drawerHeaderFooterOpen" position="right" header="Cart">
+      <ng-template #header>
+        <med-icon name="star" variant="solid" class="size-5 text-yellow-500" />
+      </ng-template>
+      <p>3 items in your cart.</p>
+      <ng-template #footer>
+        <button medButton type="button" class="w-full justify-center">Checkout</button>
+      </ng-template>
+    </med-drawer>
+
+    <med-drawer [(visible)]="drawerHeadlessOpen" position="right">
+      <ng-template #headless>
+        <div class="flex h-full flex-col items-center justify-center gap-3 bg-brand-600 p-6 text-center text-white">
+          <med-icon name="star" variant="solid" class="size-10" />
+          <p class="text-lg font-semibold">Fully custom panel</p>
+          <p class="text-sm text-brand-100">No default header, close button, or padding — this is #headless.</p>
+          <button medButton type="button" variant="outlined" class="border-white text-white" (click)="drawerHeadlessOpen = false">Close</button>
+        </div>
+      </ng-template>
+    </med-drawer>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>Popover</h2>
+    <div class="flex flex-wrap items-center gap-3">
+      <button #infoTrigger medButton type="button" variant="outlined" (click)="infoPopover.toggle(infoTrigger)">Show info</button>
+      <med-popover #infoPopover>
+        <div class="flex w-64 flex-col gap-2">
+          <h3 class="font-semibold">Storage usage</h3>
+          <p class="text-sm text-surface-600 dark:text-surface-300">3.2 GB of 5 GB used.</p>
+          <med-progress-bar [value]="64" />
+        </div>
+      </med-popover>
+
+      <button #quickAddTrigger medButton type="button" variant="outlined" (click)="quickAddPopover.toggle(quickAddTrigger)">Quick add</button>
+      <med-popover #quickAddPopover>
+        <form class="flex w-72 flex-col gap-3" (submit)="$event.preventDefault(); quickAddPopover.close()">
+          <input medInputText type="text" placeholder="Task name" />
+          <div class="flex justify-end gap-2">
+            <button medButton type="button" variant="text" severity="secondary" (click)="quickAddPopover.close()">Cancel</button>
+            <button medButton type="submit">Add</button>
+          </div>
+        </form>
+      </med-popover>
+
+      <button #stickyTrigger medButton type="button" variant="outlined" (click)="stickyPopover.toggle(stickyTrigger)">
+        class + dismissable=false + ariaLabelledBy
+      </button>
+      <med-popover #stickyPopover class="border-2 border-brand-500" [dismissable]="false" ariaLabelledBy="sticky-popover-heading">
+        <div class="flex w-64 flex-col gap-2">
+          <h3 id="sticky-popover-heading" class="font-semibold">Sticky panel</h3>
+          <p class="text-sm text-surface-600 dark:text-surface-300">Clicking outside won't close this — use the button below.</p>
+          <button medButton type="button" size="sm" (click)="stickyPopover.close()">Close</button>
+        </div>
+      </med-popover>
+    </div>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>Skeleton</h2>
+    <div class="flex flex-wrap items-center gap-6">
+      <div class="flex flex-col gap-2">
+        <med-skeleton width="12rem" />
+        <med-skeleton width="8rem" height="0.75rem" />
+      </div>
+      <med-skeleton shape="circle" size="3rem" />
+      <med-skeleton width="6rem" height="6rem" animation="none" />
+    </div>
+
+    <button medButton type="button" variant="outlined" class="w-fit" (click)="skeletonLoading = !skeletonLoading">
+      {{ skeletonLoading ? 'Show loaded content' : 'Show loading state' }}
+    </button>
+    <div class="flex max-w-sm items-center gap-3 rounded-lg border border-surface-200 p-4 dark:border-surface-700">
+      @if (skeletonLoading) {
+        <med-skeleton shape="circle" size="3rem" />
+        <div class="flex flex-1 flex-col gap-2">
+          <med-skeleton width="70%" />
+          <med-skeleton width="40%" height="0.75rem" />
+        </div>
+      } @else {
+        <med-avatar label="Jane Doe" />
+        <div class="flex flex-1 flex-col">
+          <span class="font-semibold">Jane Doe</span>
+          <span class="text-sm text-surface-600 dark:text-surface-300">Product designer</span>
+        </div>
+      }
+    </div>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>ContextMenu</h2>
+    <div
+      class="flex h-32 w-full max-w-sm items-center justify-center rounded-lg border border-dashed border-surface-300 text-sm text-surface-500 dark:border-surface-600 dark:text-surface-400"
+      [medContextMenu]="contextMenuItems"
+      (itemSelect)="contextMenuLog.set($event.label + ' clicked')"
+    >
+      Right-click this area
+    </div>
+    <p class="text-sm text-surface-600 dark:text-surface-300">Last action: {{ contextMenuLog() }}</p>
+    <span class="text-xs text-surface-500">Type while the menu is open for typeahead (e.g. "d" jumps to Delete)</span>
+    <div class="flex items-center gap-2">
+      <button medButton type="button" variant="outlined" size="sm" (click)="contextMenuGlobal.set(!contextMenuGlobal())">
+        global: {{ contextMenuGlobal() }}
+      </button>
+      <span class="text-xs text-surface-500">right-click anywhere on the page (not just the box) when on</span>
+    </div>
+    <div [medContextMenu]="contextMenuItems" [global]="contextMenuGlobal()" (itemSelect)="contextMenuLog.set($event.label + ' clicked (global)')"></div>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>Tooltip</h2>
+    <div class="flex flex-wrap items-center gap-6">
+      <button medButton type="button" variant="outlined" medTooltip="Saves your current draft" tooltipPosition="top">Top</button>
+      <button medButton type="button" variant="outlined" medTooltip="Appears below the button" tooltipPosition="bottom">Bottom</button>
+      <button medButton type="button" variant="outlined" medTooltip="Appears to the left" tooltipPosition="left">Left</button>
+      <button medButton type="button" variant="outlined" medTooltip="Appears to the right" tooltipPosition="right">Right</button>
+      <button medButton type="button" variant="outlined" [medTooltip]="'This one has a longer showDelay'" [showDelay]="500">Delayed (500ms)</button>
+      <button medButton type="button" variant="outlined" medTooltip="Auto-hides after 2s, even if you keep hovering" [life]="2000">life=2000ms</button>
+      <span
+        class="block w-32 truncate rounded-md border border-surface-300 px-2 py-1.5 text-sm dark:border-surface-600"
+        medTooltip="This label is truncated, so the tooltip only shows because of showOnEllipsis"
+        showOnEllipsis
+      >
+        A very long label that gets cut off
+      </span>
+      <span class="block w-32 truncate rounded-md border border-surface-300 px-2 py-1.5 text-sm dark:border-surface-600" medTooltip="Short label" showOnEllipsis> Short </span>
+    </div>
+    <p class="text-xs text-surface-500">Press Escape while a tooltip is open to dismiss it (hideOnEscape, WCAG 1.4.13)</p>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>Breadcrumb</h2>
+    <span class="text-xs text-surface-500">home icon-only leading crumb, one hidden item (visible=false), an external link (target="_blank"), custom separator</span>
+    <med-breadcrumb [items]="breadcrumbItems" [home]="breadcrumbHome">
+      <ng-template #separator>
+        <span class="text-surface-300 dark:text-surface-600">/</span>
+      </ng-template>
+    </med-breadcrumb>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>Paginator</h2>
+    <med-paginator [totalRecords]="87" [(rows)]="paginatorRows" [rowsPerPageOptions]="[10, 20, 50]" [(first)]="paginatorFirst" class="max-w-lg" />
+    <p>first = {{ paginatorFirst }}, rows = {{ paginatorRows }}</p>
+    <span class="text-xs text-surface-500">showFirstLastIcon + showJumpToPageInput</span>
+    <med-paginator [totalRecords]="215" showFirstLastIcon showJumpToPageInput [(first)]="paginatorFirst2" class="max-w-lg" />
+  </section>
+
+  <section class="flex flex-col gap-2" data-showcase-demo="menu">
+    <h2>Menu</h2>
+    <div class="flex flex-wrap items-center gap-3">
+      <button #fileMenuTrigger medButton type="button" variant="outlined" (click)="fileMenu.toggle(fileMenuTrigger)">
+        Actions
+        <med-icon name="chevron-down" variant="mini" />
+      </button>
+      <med-menu #menu [items]="fileMenuItems" (itemSelect)="menuLog.set('Selected: ' + $event.label)" />
+      <p>{{ menuLog() }}</p>
+    </div>
+    <span class="text-xs text-surface-500">popup=false (inline) + grouped items</span>
+    <med-menu
+      [items]="groupedMenuItems"
+      [popup]="false"
+      (itemSelect)="menuLog.set('Selected: ' + $event.label)"
+      class="max-w-56 rounded-lg border border-surface-200 bg-surface-0 shadow-overlay-sm dark:border-surface-700 dark:bg-surface-800"
+    />
+  </section>
+
+  <section class="flex flex-col gap-2" data-showcase-demo="tiered-menu">
+    <h2>TieredMenu</h2>
+    <div class="flex flex-wrap items-center gap-3">
+      <button #tieredMenuTrigger medButton type="button" variant="outlined" (click)="tieredMenu.toggle(tieredMenuTrigger)">
+        Menu
+        <med-icon name="chevron-down" variant="mini" />
+      </button>
+      <med-tiered-menu #tieredMenu [items]="tieredMenuItems" (itemSelect)="tieredMenuLog.set('Selected: ' + $event.label)" />
+      <p>{{ tieredMenuLog() }}</p>
+    </div>
+    <div class="flex flex-col gap-1">
+      <span class="text-xs text-surface-500">popup=false — always-visible inline menu; submenus still fly out</span>
+      <med-tiered-menu [items]="tieredMenuItems" [popup]="false" (itemSelect)="tieredMenuLog.set('Selected: ' + $event.label)" class="max-w-56 rounded-lg border border-surface-200 bg-surface-0 shadow-overlay-sm dark:border-surface-700 dark:bg-surface-800" />
+    </div>
+  </section>
+
+  <section class="flex flex-col gap-2" data-showcase-demo="mega-menu">
+    <h2>MegaMenu</h2>
+    <med-mega-menu [items]="megaMenuItems" (itemSelect)="megaMenuLog.set('Selected: ' + $event.label)" />
+    <p>{{ megaMenuLog() }}</p>
+
+    <span class="text-xs text-surface-500">#item/#start/#end — logo before the row, bold labels, a search icon after</span>
+    <med-mega-menu [items]="megaMenuItems">
+      <ng-template #start>
+        <span class="mr-2 flex items-center font-bold text-brand-600 dark:text-brand-400">MedraUi</span>
+      </ng-template>
+      <ng-template #item let-menuItem>
+        <span class="font-bold">{{ menuItem.label }}</span>
+      </ng-template>
+      <ng-template #end>
+        <med-icon name="magnifying-glass" variant="mini" class="ml-2 size-4 text-surface-500" />
+      </ng-template>
+    </med-mega-menu>
+  </section>
+
+  <section class="flex flex-col gap-2" data-showcase-demo="panel-menu">
+    <h2>PanelMenu</h2>
+    <div class="flex flex-wrap gap-3">
+      <button medButton type="button" variant="outlined" size="sm" (click)="panelMenu.expandAll()">Expand all</button>
+      <button medButton type="button" variant="outlined" size="sm" (click)="panelMenu.collapseAll()">Collapse all</button>
+    </div>
+    <med-panel-menu #panelMenu [items]="panelMenuItems" ariaLabel="Sidebar navigation" (itemSelect)="panelMenuLog.set('Selected: ' + $event.label)" class="max-w-xs" />
+    <p>{{ panelMenuLog() }}</p>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>SpeedDial</h2>
+    <div class="flex flex-wrap items-center gap-8">
+      <med-speed-dial [items]="speedDialItems" direction="up" (itemSelect)="speedDialLog.set('Selected: ' + $event.label)" />
+      <med-speed-dial [items]="speedDialItems" direction="right" severity="help" (itemSelect)="speedDialLog.set('Selected: ' + $event.label)" />
+      <med-speed-dial [items]="speedDialItems" direction="up" mask [transitionDelay]="60" (itemSelect)="speedDialLog.set('Selected: ' + $event.label)" />
+    </div>
+    <p>{{ speedDialLog() }}</p>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>Menubar</h2>
+    <med-menubar [items]="menubarItems" (itemSelect)="menubarLog.set('Selected: ' + $event.label)" />
+    <p>{{ menubarLog() }}</p>
+  </section>
+
+  <section class="flex flex-col gap-2" data-showcase-demo="toolbar">
+    <h2>Toolbar</h2>
+    <div class="flex flex-col gap-3">
+      <med-toolbar ariaLabel="Document actions">
+        <div medToolbarStart class="flex items-center gap-2">
+          <button medButton type="button" variant="text" severity="secondary" iconOnly aria-label="Menu">
+            <med-icon name="ellipsis-horizontal" variant="mini" />
+          </button>
+          <strong class="text-sm">invoice-042.pdf</strong>
+        </div>
+        <div medToolbarCenter>
+          <input medInputText type="search" size="sm" placeholder="Search in document..." class="w-48" />
+        </div>
+        <div medToolbarEnd class="flex items-center gap-2">
+          <button medButton type="button" variant="outlined" severity="secondary" size="sm">Share</button>
+          <button medButton type="button" severity="danger" size="sm">
+            <med-icon name="trash" variant="mini" />
+            Delete
+          </button>
+        </div>
+      </med-toolbar>
+      <med-toolbar ariaLabel="Start and end only, no center">
+        <div medToolbarStart><strong class="text-sm">Just start + end</strong></div>
+        <div medToolbarEnd>
+          <button medButton type="button" size="sm">Action</button>
+        </div>
+      </med-toolbar>
+    </div>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>Accordion</h2>
+    <div class="flex flex-col gap-4">
+      <div class="flex flex-col gap-1">
+        <span class="text-xs text-surface-500">Single mode (default) — expanding one collapses the others</span>
+        <med-accordion [(activeIndex)]="accordionActiveIndex" class="max-w-lg" ariaLabel="FAQ">
+          <med-accordion-tab header="What is MedraUi?">
+            <p>A from-scratch Angular component library, styled with Tailwind.</p>
+          </med-accordion-tab>
+          <med-accordion-tab header="Is it disabled?" [disabled]="true">
+            <p>You should never see this.</p>
+          </med-accordion-tab>
+          <med-accordion-tab header="Can I expand more than one at once?">
+            <p>Only in <code>multiple</code> mode — see the example below.</p>
+          </med-accordion-tab>
+        </med-accordion>
+        <p>activeIndex = {{ accordionActiveIndex }}</p>
+      </div>
+      <div class="flex flex-col gap-1">
+        <span class="text-xs text-surface-500">Multiple mode</span>
+        <med-accordion multiple [(activeIndex)]="accordionMultipleActiveIndices" class="max-w-lg" ariaLabel="Settings sections">
+          <med-accordion-tab header="Profile">
+            <p>Name, email, avatar.</p>
+          </med-accordion-tab>
+          <med-accordion-tab header="Notifications">
+            <p>Email, push, digest frequency.</p>
+          </med-accordion-tab>
+          <med-accordion-tab header="Billing">
+            <p>Plan, payment method, invoices.</p>
+          </med-accordion-tab>
+        </med-accordion>
+        <p>activeIndex = {{ accordionMultipleActiveIndices.join(', ') || '(none)' }}</p>
+      </div>
+      <div class="flex flex-col gap-1">
+        <span class="text-xs text-surface-500">expandIcon/collapseIcon (plus/minus) + opened/closed events</span>
+        <med-accordion
+          expandIcon="plus"
+          collapseIcon="minus"
+          class="max-w-lg"
+          (opened)="accordionEventsLog = [...accordionEventsLog, 'opened: ' + $event]"
+          (closed)="accordionEventsLog = [...accordionEventsLog, 'closed: ' + $event]"
+        >
+          <med-accordion-tab header="Shipping">
+            <p>Standard, 3-5 business days.</p>
+          </med-accordion-tab>
+          <med-accordion-tab header="Returns">
+            <p>30-day return window.</p>
+          </med-accordion-tab>
+        </med-accordion>
+        <ul class="flex flex-col gap-0.5 text-xs text-surface-500">
+          @for (line of accordionEventsLog; track $index) {
+            <li>{{ line }}</li>
+          }
+        </ul>
+      </div>
+      <div class="flex flex-col gap-1">
+        <span class="text-xs text-surface-500">medAccordionTabHeader — rich header instead of the plain-string header</span>
+        <med-accordion class="max-w-lg">
+          <med-accordion-tab>
+            <span medAccordionTabHeader class="flex items-center gap-2">
+              <med-icon name="star" variant="solid" class="size-4 text-yellow-500" />
+              Featured
+              <span class="rounded-full bg-brand-100 px-1.5 py-0.5 text-xs font-medium text-brand-700 dark:bg-brand-900 dark:text-brand-200">New</span>
+            </span>
+            <p>Header above is projected content — an icon, plain text, and a badge — not the plain-string header input.</p>
+          </med-accordion-tab>
+        </med-accordion>
+      </div>
+    </div>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>Chip</h2>
+    <div class="flex flex-col gap-4">
+      <div class="flex flex-wrap items-center gap-2">
+        <med-chip>Angular</med-chip>
+        <med-chip icon="calendar">Due Friday</med-chip>
+        <med-chip [image]="chipAvatarImage" imageAlt="Jane Doe">Jane Doe</med-chip>
+        <med-chip image="https://broken.example/does-not-exist.png" icon="user" imageAlt="Broken image, falls back to icon">Broken image</med-chip>
+      </div>
+      <div class="flex flex-col gap-1">
+        <span class="text-xs text-surface-500">Removable</span>
+        <div class="flex flex-wrap items-center gap-2">
+          @for (skill of chipSkills; track skill) {
+            <med-chip removable (removed)="removeChipSkill(skill)">{{ skill }}</med-chip>
+          } @empty {
+            <span class="text-sm text-surface-500">(none left)</span>
+          }
+        </div>
+      </div>
+      <div class="flex flex-col gap-1">
+        <span class="text-xs text-surface-500">#removeicon — custom remove icon instead of the default x-mark</span>
+        <div class="flex flex-wrap items-center gap-2">
+          <med-chip removable>
+            Custom icon
+            <ng-template #removeicon>
+              <med-icon name="trash" variant="mini" class="size-3.5" />
+            </ng-template>
+          </med-chip>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>InputChips</h2>
+    <div class="flex flex-col gap-4">
+      <div class="flex max-w-[24rem] flex-col gap-1">
+        <span class="text-xs text-surface-500">Default (duplicates rejected)</span>
+        <med-input-chips placeholder="Add a tag..." ariaLabel="Tags" [(ngModel)]="inputChipsDemoValue" name="demo-input-chips" />
+        <p class="text-xs text-surface-500">Value: {{ inputChipsDemoValue.join(', ') || '(none)' }}</p>
+      </div>
+      <div class="flex max-w-[24rem] flex-col gap-1">
+        <span class="text-xs text-surface-500">Max 3, small size</span>
+        <med-input-chips [max]="3" size="sm" placeholder="Up to 3..." ariaLabel="Up to 3 tags" [(ngModel)]="inputChipsMaxDemoValue" name="demo-input-chips-max" />
+        <p class="text-xs text-surface-500">Value: {{ inputChipsMaxDemoValue.join(', ') || '(none)' }}</p>
+      </div>
+      <div class="flex max-w-[24rem] flex-wrap gap-4">
+        <med-input-chips invalid ariaLabel="Invalid example" />
+        <med-input-chips disabled ariaLabel="Disabled example" />
+      </div>
+      <div class="flex max-w-[24rem] flex-col gap-1">
+        <span class="text-xs text-surface-500">addOnTab (Tab also commits, then moves focus on)</span>
+        <med-input-chips addOnTab placeholder="Type then press Tab..." ariaLabel="Tags, Tab to add" [(ngModel)]="inputChipsAddOnTabDemoValue" name="demo-input-chips-tab" />
+        <p class="text-xs text-surface-500">Value: {{ inputChipsAddOnTabDemoValue.join(', ') || '(none)' }}</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>FileUpload</h2>
+    <div class="flex flex-col gap-4">
+      <div class="flex max-w-md flex-col gap-1">
+        <span class="text-xs text-surface-500">Multiple, any file type</span>
+        <med-file-upload multiple [(ngModel)]="fileUploadDemoValue" name="demo-file-upload" />
+        <p class="text-xs text-surface-500">{{ fileUploadDemoValue.length }} file(s) pending</p>
+      </div>
+      <div class="flex max-w-md flex-col gap-1">
+        <span class="text-xs text-surface-500">Images only, max 2 MB, single file</span>
+        <med-file-upload accept="image/*" [maxFileSize]="2 * 1024 * 1024" [(ngModel)]="fileUploadImagesDemoValue" name="demo-file-upload-images" />
+      </div>
+      <div class="flex max-w-md flex-col gap-1">
+        <span class="text-xs text-surface-500">Disabled</span>
+        <med-file-upload disabled />
+      </div>
+      <div class="flex max-w-md flex-col gap-1">
+        <span class="text-xs text-surface-500"
+          >Real HTTP upload — points at a demo endpoint that doesn't exist, so uploads land on the "Failed" status; point `url` at your own backend to see it succeed</span
+        >
+        <med-file-upload multiple url="/api/upload-demo" [(ngModel)]="fileUploadRealDemoValue" name="demo-file-upload-real" />
+      </div>
+    </div>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>Tabs</h2>
+    <med-tabs class="max-w-lg">
+      <med-tab header="Profile">
+        <p>Profile settings go here.</p>
+      </med-tab>
+      <med-tab header="Billing">
+        <p>Billing details go here.</p>
+      </med-tab>
+      <med-tab header="Disabled" [disabled]="true">
+        <p>You should never see this.</p>
+      </med-tab>
+      <med-tab header="Advanced">
+        <p>Advanced settings go here.</p>
+      </med-tab>
+      <med-tab header="Lazy">
+        <ng-template>
+          <app-lazy-tab-content />
+        </ng-template>
+      </med-tab>
+    </med-tabs>
+    <span class="text-xs text-surface-500">showNavigators (narrowed so tabs overflow)</span>
+    <med-tabs showNavigators class="max-w-[16rem]">
+      <med-tab header="Overview"><p>Overview content.</p></med-tab>
+      <med-tab header="Analytics"><p>Analytics content.</p></med-tab>
+      <med-tab header="Reports"><p>Reports content.</p></med-tab>
+      <med-tab header="Notifications"><p>Notifications content.</p></med-tab>
+      <med-tab header="Integrations"><p>Integrations content.</p></med-tab>
+      <med-tab header="Security"><p>Security content.</p></med-tab>
+    </med-tabs>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>ScrollPanel</h2>
+    <div class="flex flex-col gap-2">
+      <med-scroll-panel
+        #scrollPanelDemo
+        ariaLabel="Changelog"
+        class="max-w-sm max-h-40 rounded-lg border border-surface-200 p-3 dark:border-surface-700"
+      >
+        <ul class="flex flex-col gap-2 text-sm">
+          @for (line of scrollPanelLines; track line) {
+            <li>{{ line }}</li>
+          }
+        </ul>
+      </med-scroll-panel>
+      <span class="text-xs text-surface-500">scrollTop() — public method</span>
+      <div class="flex gap-2">
+        <button medButton type="button" variant="outlined" size="sm" (click)="scrollPanelDemo.scrollTop(0)">Scroll to top</button>
+        <button medButton type="button" variant="outlined" size="sm" (click)="scrollPanelDemo.scrollTop(9999)">
+          Scroll to bottom
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>Splitter</h2>
+    <med-splitter class="h-48 max-w-lg rounded-lg border border-surface-200 dark:border-surface-700" [(sizes)]="splitterSizes">
+      <med-splitter-panel [minSize]="15" class="flex items-center justify-center text-sm text-surface-600 dark:text-surface-300">Panel A</med-splitter-panel>
+      <med-splitter-gutter ariaLabel="Resize panels" />
+      <med-splitter-panel [minSize]="15" class="flex items-center justify-center text-sm text-surface-600 dark:text-surface-300">Panel B</med-splitter-panel>
+    </med-splitter>
+    <p class="text-xs text-surface-500">sizes = {{ splitterSizes?.join(', ') ?? '(equal split)' }}</p>
+
+    <med-splitter orientation="vertical" class="h-56 max-w-lg rounded-lg border border-surface-200 dark:border-surface-700">
+      <med-splitter-panel class="flex items-center justify-center text-sm text-surface-600 dark:text-surface-300">Top</med-splitter-panel>
+      <med-splitter-gutter ariaLabel="Resize panels vertically" />
+      <med-splitter-panel class="flex items-center justify-center text-sm text-surface-600 dark:text-surface-300">Bottom</med-splitter-panel>
+    </med-splitter>
+
+    <span class="text-xs text-surface-500">
+      maxSize + collapsible (double-click the gutter to collapse/restore the sidebar) — an extra feature
+    </span>
+    <med-splitter [sizes]="[25, 75]" class="h-48 max-w-lg rounded-lg border border-surface-200 dark:border-surface-700">
+      <med-splitter-panel
+        [minSize]="10"
+        [maxSize]="50"
+        collapsible
+        class="flex items-center justify-center bg-surface-50 text-sm text-surface-600 dark:bg-surface-700/50 dark:text-surface-300"
+      >
+        Sidebar
+      </med-splitter-panel>
+      <med-splitter-gutter ariaLabel="Resize or double-click to collapse the sidebar" />
+      <med-splitter-panel class="flex items-center justify-center text-sm text-surface-600 dark:text-surface-300">Main content</med-splitter-panel>
+    </med-splitter>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>BlockUI</h2>
+    <med-block-ui [blocked]="blockUiBlocked()" class="max-w-sm rounded-lg border border-surface-200 p-4 dark:border-surface-700">
+      <div class="flex flex-col gap-2">
+        <label class="text-sm font-medium" for="blockui-demo-name">Name</label>
+        <input medInputText type="text" id="blockui-demo-name" placeholder="Jane Doe" />
+        <button medButton type="button" class="w-fit">Save</button>
+      </div>
+    </med-block-ui>
+    <button medButton type="button" variant="outlined" class="w-fit" (click)="toggleBlockUi()">
+      {{ blockUiBlocked() ? 'Unblock' : 'Block for 1.5s' }}
+    </button>
+
+    <span class="text-xs text-surface-500">target — blocks an external element instead of wrapped content</span>
+    <div #blockUiTarget class="max-w-sm rounded-lg border border-surface-200 p-4 dark:border-surface-700">
+      <div class="flex flex-col gap-2">
+        <label class="text-sm font-medium" for="blockui-target-demo-name">Card title</label>
+        <input medInputText type="text" id="blockui-target-demo-name" placeholder="Untitled" />
+        <button medButton type="button" class="w-fit">Save</button>
+      </div>
+    </div>
+    <med-block-ui [blocked]="blockUiTargetBlocked()" [target]="blockUiTarget" />
+    <button medButton type="button" variant="outlined" class="w-fit" (click)="toggleBlockUiTarget()">
+      {{ blockUiTargetBlocked() ? 'Unblock' : 'Block target for 1.5s' }}
+    </button>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>Inplace</h2>
+    <div class="flex flex-col gap-4">
+      <div class="flex flex-col gap-1">
+        <span class="text-xs text-surface-500">Click to edit</span>
+        <med-inplace>
+          <span medInplaceDisplay>{{ inplaceDemoValue || '(click to add a name)' }}</span>
+          <input medInplaceContent medInputText type="text" [(ngModel)]="inplaceDemoValue" name="demo-inplace" class="max-w-64" />
+        </med-inplace>
+      </div>
+      <div class="flex flex-col gap-1">
+        <span class="text-xs text-surface-500">Closable</span>
+        <med-inplace closable>
+          <span medInplaceDisplay>{{ inplaceClosableDemoValue }}</span>
+          <textarea medInplaceContent medTextarea [(ngModel)]="inplaceClosableDemoValue" name="demo-inplace-closable" class="max-w-64" rows="2"></textarea>
+        </med-inplace>
+      </div>
+      <div class="flex flex-col gap-1">
+        <span class="text-xs text-surface-500">Disabled</span>
+        <med-inplace disabled>
+          <span medInplaceDisplay>Cannot edit this</span>
+          <input medInplaceContent medInputText type="text" class="max-w-64" />
+        </med-inplace>
+      </div>
+    </div>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>MeterGroup</h2>
+    <med-meter-group [value]="meterGroupItems" [max]="256" unit=" GB" class="max-w-lg" />
+
+    <span class="mt-2 text-xs text-surface-500">orientation="vertical", labelPosition="start", min=10, #start/#end/#icon</span>
+    <med-meter-group [value]="meterGroupItems" [min]="10" [max]="256" unit=" GB" orientation="vertical" labelPosition="start" verticalHeight="140px">
+      <ng-template #start>
+        <p class="mb-1 text-xs font-medium text-surface-500">Storage breakdown</p>
+      </ng-template>
+      <ng-template #icon let-item>
+        <med-icon [name]="item.icon ?? 'folder'" variant="mini" class="size-3.5 shrink-0 text-brand-500 dark:text-brand-400" />
+      </ng-template>
+      <ng-template #end>
+        <p class="mt-1 text-xs text-surface-500">256 GB total</p>
+      </ng-template>
+    </med-meter-group>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>DataTable</h2>
+    <div class="flex flex-col gap-4">
+      <div class="flex flex-col gap-1">
+        <span class="text-xs text-surface-500">Sortable, filterable, paginated, multiple selection</span>
+        <med-data-table
+          [value]="dataTableProducts"
+          selectionMode="multiple"
+          [(selection)]="dataTableSelection"
+          paginator
+          [rows]="5"
+          filterable
+          ariaLabel="Products"
+        >
+          <med-table-column field="name" header="Name" sortable />
+          <med-table-column field="category" header="Category" sortable />
+          <med-table-column field="price" header="Price" sortable align="right">
+            <ng-template let-row>{{ '$' + row.price.toFixed(2) }}</ng-template>
+          </med-table-column>
+          <med-table-column field="stock" header="Stock" sortable align="right">
+            <ng-template let-row>
+              <med-tag [severity]="row.stock === 0 ? 'danger' : row.stock < 10 ? 'warn' : 'success'">{{ row.stock === 0 ? 'Out of stock' : row.stock }}</med-tag>
+            </ng-template>
+          </med-table-column>
+        </med-data-table>
+        <p class="text-xs text-surface-500">Selected: {{ dataTableSelection.length }} row(s)</p>
+      </div>
+      <div class="flex flex-col gap-1">
+        <span class="text-xs text-surface-500">Single selection, no paginator/filter</span>
+        <med-data-table [value]="dataTableProducts.slice(0, 4)" selectionMode="single" [(selection)]="dataTableSingleSelection" ariaLabel="Products (single select)">
+          <med-table-column field="name" header="Name" sortable />
+          <med-table-column field="category" header="Category" />
+          <med-table-column field="price" header="Price" align="right">
+            <ng-template let-row>{{ '$' + row.price.toFixed(2) }}</ng-template>
+          </med-table-column>
+        </med-data-table>
+        <p class="text-xs text-surface-500">Selected: {{ dataTableSingleSelection?.name ?? '(none)' }}</p>
+      </div>
+      <div class="flex flex-col gap-1">
+        <span class="text-xs text-surface-500"
+          >sortMode="multiple" (Shift+click a header to add a sort key) + editMode="cell" (double-click Name/Price) + loading + exportCSV()</span
+        >
+        <div class="mb-1 flex gap-2">
+          <button medButton type="button" variant="outlined" size="sm" (click)="simulateDataTableLoading()">Simulate reload</button>
+          <button medButton type="button" variant="outlined" size="sm" (click)="dt.exportCSV()">Export CSV</button>
+        </div>
+        <med-data-table
+          #dt
+          [value]="dataTableEditableProducts()"
+          [loading]="dataTableLoading()"
+          sortMode="multiple"
+          [(multiSortMeta)]="dataTableMultiSortMeta"
+          selectionMode="multiple"
+          [(selection)]="dataTableEditableSelection"
+          editMode="cell"
+          (editComplete)="onDataTableEditComplete($event)"
+          ariaLabel="Editable products"
+        >
+          <med-table-column field="name" header="Name" sortable editable>
+            <ng-template let-row>{{ row.name }}</ng-template>
+            <ng-template #editTemplate let-row let-onSave="onSave" let-onCancel="onCancel">
+              <input medInputText class="h-7 text-sm" [value]="row.name" (keydown.enter)="onSave($any($event.target).value)" (blur)="onSave($any($event.target).value)" (keydown.escape)="onCancel()" />
+            </ng-template>
+          </med-table-column>
+          <med-table-column field="category" header="Category" sortable />
+          <med-table-column field="price" header="Price" sortable align="right" editable>
+            <ng-template let-row>{{ '$' + row.price.toFixed(2) }}</ng-template>
+            <ng-template #editTemplate let-row let-onSave="onSave" let-onCancel="onCancel">
+              <input
+                medInputText
+                type="number"
+                step="0.01"
+                class="h-7 w-20 text-sm"
+                [value]="row.price"
+                (keydown.enter)="onSave($any($event.target).valueAsNumber)"
+                (blur)="onSave($any($event.target).valueAsNumber)"
+                (keydown.escape)="onCancel()"
+              />
+            </ng-template>
+          </med-table-column>
+        </med-data-table>
+      </div>
+      <div class="flex flex-col gap-1">
+        <span class="text-xs text-surface-500">lazy + totalRecords — value() is only ever the current page, fetched on demand (400ms simulated delay)</span>
+        <med-data-table
+          [value]="dataTableLazyRows()"
+          [loading]="dataTableLazyLoading()"
+          lazy
+          [totalRecords]="83"
+          paginator
+          [rows]="5"
+          (lazyLoad)="onDataTableLazyLoad($event)"
+          ariaLabel="Customers (server-paged)"
+        >
+          <med-table-column field="name" header="Name" sortable />
+          <med-table-column field="plan" header="Plan" sortable />
+        </med-data-table>
+      </div>
+      <div class="flex flex-col gap-1">
+        <span class="text-xs text-surface-500">rowGroupMode="subheader" + groupRowsBy="category" (custom #groupHeader template)</span>
+        <med-data-table [value]="dataTableGroupedProducts" rowGroupMode="subheader" groupRowsBy="category" ariaLabel="Products grouped by category">
+          <med-table-column field="name" header="Name" />
+          <med-table-column field="price" header="Price" align="right">
+            <ng-template let-row>{{ '$' + row.price.toFixed(2) }}</ng-template>
+          </med-table-column>
+          <med-table-column field="stock" header="Stock" align="right" />
+          <ng-template #groupHeader let-row>{{ row.category }} ({{ dataTableGroupedProducts.length }} total products)</ng-template>
+        </med-data-table>
+      </div>
+      <div class="flex flex-col gap-1">
+        <span class="text-xs text-surface-500">reorderable (drag the handle) + dataKey="name" + rowsPerPageOptions — selection survives "Reload" swapping in new row references</span>
+        <div class="mb-1 flex items-center gap-2">
+          <button medButton type="button" variant="outlined" size="sm" (click)="reloadDataTableReorderRows()">Reload rows</button>
+          <span class="text-xs text-surface-500">Last reorder: {{ dataTableLastReorder }}</span>
+        </div>
+        <med-data-table
+          [value]="dataTableReorderRows()"
+          reorderable
+          dataKey="name"
+          selectionMode="multiple"
+          [(selection)]="dataTableReorderSelection"
+          paginator
+          [rows]="5"
+          [rowsPerPageOptions]="[5, 10, 25]"
+          (rowReorder)="onDataTableRowReorder($event)"
+          ariaLabel="Products (reorderable)"
+        >
+          <med-table-column field="name" header="Name" />
+          <med-table-column field="category" header="Category" />
+          <med-table-column field="price" header="Price" align="right">
+            <ng-template let-row>{{ '$' + row.price.toFixed(2) }}</ng-template>
+          </med-table-column>
+        </med-data-table>
+        <p class="text-xs text-surface-500">Selected: {{ dataTableReorderSelection.length }} row(s)</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="flex flex-col gap-2" data-showcase-demo="organization-chart">
+    <h2>OrganizationChart</h2>
+    <med-organization-chart
+      [value]="orgChartValue"
+      selectionMode="single"
+      [(selection)]="orgChartSelection"
+      (nodeExpand)="onOrgChartNodeExpand($event)"
+      (nodeCollapse)="onOrgChartNodeCollapse($event)"
+    />
+    <p class="text-xs text-surface-500">Selected: {{ orgChartSelection?.label ?? '(none)' }} — last toggle: {{ orgChartLastToggle() }}</p>
+    <span class="mt-2 text-xs text-surface-500">selectionMode="checkbox" — cascades to descendants, indeterminate for a partially-checked branch</span>
+    <med-organization-chart [value]="orgChartValue" selectionMode="checkbox" [(selection)]="orgChartCheckboxSelection" />
+    <p class="text-xs text-surface-500">Checked: {{ orgChartCheckboxSelection.length }} node(s)</p>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>Knob</h2>
+    <div class="flex flex-wrap items-center gap-8">
+      <med-knob ariaLabel="Volume" [(ngModel)]="knobDemoValue" name="demo-knob" />
+      <med-knob ariaLabel="Brightness" severity="warn" [min]="0" [max]="10" [step]="1" [(ngModel)]="knobBrightnessDemoValue" name="demo-knob-warn" />
+      <med-knob ariaLabel="Read-only example" readonly [(ngModel)]="knobReadonlyDemoValue" name="demo-knob-readonly" />
+      <med-knob ariaLabel="Disabled example" disabled [(ngModel)]="knobDisabledDemoValue" name="demo-knob-disabled" [size]="80" />
+      <med-knob ariaLabel="Custom colors" valueColor="#ec4899" rangeColor="#fce7f3" textColor="#ec4899" [(ngModel)]="knobCustomColorDemoValue" name="demo-knob-colors" />
+      <med-knob ariaLabel="Percent template" [valueTemplate]="knobPercentTemplate" [(ngModel)]="knobTemplateDemoValue" name="demo-knob-template" />
+    </div>
+    <p class="text-xs text-surface-500">Volume: {{ knobDemoValue }}</p>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>Terminal</h2>
+    <med-terminal #terminal welcomeMessage="MedraUi Terminal v1.0 — type 'help' to get started." class="max-w-xl" (commandSubmitted)="onTerminalCommand($event, terminal)" />
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>Dock</h2>
+    <div class="flex justify-center rounded-lg bg-surface-100 p-8 dark:bg-surface-900">
+      <med-dock [items]="dockItems" />
+    </div>
+    <p class="text-xs text-surface-500">Last launched: {{ dockLog() }}</p>
+
+    <span class="text-xs text-surface-500">#item — rich per-item content (icon + a notification dot), not just an icon swap</span>
+    <div class="flex justify-center rounded-lg bg-surface-100 p-8 dark:bg-surface-900">
+      <med-dock [items]="dockItems">
+        <ng-template #item let-menuItem>
+          <span class="relative">
+            <med-icon [name]="menuItem.icon" class="size-6" />
+            @if (menuItem.label === 'Notifications') {
+              <span class="absolute -right-0.5 -top-0.5 size-2 rounded-full bg-danger-500"></span>
+            }
+          </span>
+        </ng-template>
+      </med-dock>
+    </div>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>ImageCompare</h2>
+    <med-image-compare
+      [beforeSrc]="imageCompareBeforeSrc"
+      [afterSrc]="imageCompareAfterSrc"
+      beforeAlt="Before"
+      afterAlt="After"
+      [(position)]="imageCompareDemoPosition"
+      class="h-64 w-full max-w-md rounded-lg"
+    />
+    <p class="text-xs text-surface-500">position = {{ imageCompareDemoPosition }}</p>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>Galleria</h2>
+    <span class="text-xs text-surface-500">circular, autoPlay, showIndicators, numVisible=2</span>
+    <med-galleria [items]="galleriaItems" circular autoPlay showIndicators [numVisible]="2" class="h-64 max-w-md" />
+
+    <span class="mt-2 text-xs text-surface-500">thumbnailsPosition="left"</span>
+    <med-galleria [items]="galleriaItems" thumbnailsPosition="left" class="h-64 max-w-md" />
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>VirtualScroller</h2>
+    <button medButton type="button" variant="outlined" size="sm" class="w-fit" (click)="scrollVirtualScrollerToRow500()">scrollToIndex(500, 'smooth')</button>
+    <med-virtual-scroller
+      [items]="virtualScrollerItems"
+      [itemSize]="36"
+      (scrollIndexChange)="virtualScrollerRange.set($event.first + '–' + $event.last)"
+      class="h-72 max-w-sm rounded-lg border border-surface-200 dark:border-surface-700"
+    >
+      <ng-template let-item let-i="index">
+        <div class="flex items-center justify-between border-b border-surface-100 px-3 py-2 text-sm dark:border-surface-800">
+          <span>{{ item.name }}</span>
+          <span class="text-surface-500">#{{ i }}</span>
+        </div>
+      </ng-template>
+    </med-virtual-scroller>
+    <p class="text-xs text-surface-500">
+      {{ virtualScrollerItems.length }} rows, only the visible ones are ever in the DOM. scrollIndexChange range: {{ virtualScrollerRange() }}
+    </p>
+
+    <span class="mt-2 text-xs text-surface-500">lazyLoad — starts at 40 rows, fetches 500ms-delayed pages as you scroll near the end (caps at 500)</span>
+    <med-virtual-scroller
+      [items]="lazyScrollItems()"
+      [itemSize]="36"
+      [loading]="lazyScrollLoading()"
+      (lazyLoad)="onLazyScrollerLoad($event)"
+      class="h-72 max-w-sm rounded-lg border border-surface-200 dark:border-surface-700"
+    >
+      <ng-template let-item let-i="index">
+        <div class="flex items-center justify-between border-b border-surface-100 px-3 py-2 text-sm dark:border-surface-800">
+          <span>{{ item.name }}</span>
+          <span class="text-surface-500">#{{ i }}</span>
+        </div>
+      </ng-template>
+    </med-virtual-scroller>
+    <p class="text-xs text-surface-500">{{ lazyScrollItems().length }} rows loaded so far{{ lazyScrollLoading() ? ' — loading more…' : '' }}</p>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>Tree</h2>
+    <div class="flex flex-col gap-4">
+      <div class="flex flex-col gap-1">
+        <span class="text-xs text-surface-500">Single selection</span>
+        <med-tree [value]="treeNodes" selectionMode="single" [(selection)]="treeSingleSelection" class="max-w-sm" />
+        <p class="text-xs text-surface-500">Selected: {{ treeSingleSelection?.label ?? '(none)' }}</p>
+      </div>
+      <div class="flex flex-col gap-1">
+        <span class="text-xs text-surface-500">Checkbox selection</span>
+        <med-tree [value]="treeNodes" selectionMode="checkbox" [(selection)]="treeCheckboxSelection" class="max-w-sm" />
+        <p class="text-xs text-surface-500">Selected: {{ treeCheckboxSelection.length }} node(s)</p>
+      </div>
+      <div class="flex flex-col gap-1">
+        <span class="text-xs text-surface-500">filterable — try "pdf" or "beach"</span>
+        <med-tree [value]="treeNodes" filterable selectionMode="single" [(selection)]="treeFilterableSelection" class="max-w-sm" />
+      </div>
+      <div class="flex flex-col gap-1">
+        <span class="text-xs text-surface-500">virtualScroll — 5,000 flat nodes</span>
+        <med-tree [value]="treeVirtualScrollNodes" virtualScroll selectionMode="single" [(selection)]="treeVirtualScrollSelection" class="max-w-sm" />
+      </div>
+      <div class="flex flex-col gap-1">
+        <span class="text-xs text-surface-500">per-node/per-type templates (Badge + per-row action)</span>
+        <med-tree [value]="treeTypedNodes" class="max-w-sm">
+          <ng-template medTreeNodeTemplate="folder" let-node>
+            <span class="flex flex-1 items-center gap-1.5">
+              <med-icon name="folder" variant="mini" class="size-4 shrink-0 text-brand-500 dark:text-brand-400" />
+              <span class="truncate">{{ node.label }}</span>
+              <med-badge severity="secondary" size="sm">{{ node.children?.length }}</med-badge>
+            </span>
+          </ng-template>
+          <ng-template medTreeNodeTemplate="file" let-node>
+            <span class="flex flex-1 items-center justify-between gap-1.5">
+              <span class="flex items-center gap-1.5 truncate">
+                <med-icon name="document-duplicate" variant="mini" class="size-4 shrink-0 text-surface-500 dark:text-surface-400" />
+                <span class="truncate">{{ node.label }}</span>
+              </span>
+              <button medButton type="button" variant="text" severity="secondary" size="sm" (click)="$event.stopPropagation()">Download</button>
+            </span>
+          </ng-template>
+        </med-tree>
+      </div>
+    </div>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>TreeTable</h2>
+    <span class="text-xs text-surface-500">columnResizable — drag a column's right edge</span>
+    <med-tree-table [value]="treeTableValue" ariaLabel="Company org" columnResizable class="max-w-lg">
+      <med-table-column field="name" header="Name" />
+      <med-table-column field="role" header="Role" />
+    </med-tree-table>
+    <span class="mt-2 text-xs text-surface-500">virtualScroll — 3,000 flat rows</span>
+    <med-tree-table [value]="treeTableVirtualValue" ariaLabel="Staff" virtualScroll class="max-w-lg">
+      <med-table-column field="name" header="Name" />
+      <med-table-column field="role" header="Role" />
+    </med-tree-table>
+
+    <span class="mt-2 text-xs text-surface-500">
+      editMode="cell" (double-click Role) + frozen columns (Name left, Actions right) — scroll horizontally. Last edit: {{ treeTableLastEdit() }}
+    </span>
+    <med-tree-table [value]="treeTableEditableValue" ariaLabel="Company org (editable, frozen)" editMode="cell" (editComplete)="onTreeTableEditComplete($event)" class="max-w-md">
+      <med-table-column field="name" header="Name" width="140px" frozen />
+      <med-table-column field="role" header="Role" width="140px" editable>
+        <ng-template let-row>{{ row.role }}</ng-template>
+        <ng-template #editTemplate let-row let-onSave="onSave" let-onCancel="onCancel">
+          <input medInputText size="sm" class="w-full" [value]="row.role" (blur)="onSave($any($event.target).value)" (keydown.escape)="onCancel()" (keydown.enter)="onSave($any($event.target).value)" />
+        </ng-template>
+      </med-table-column>
+      <med-table-column field="department" header="Department" width="140px" />
+      <med-table-column field="location" header="Location" width="140px" />
+      <med-table-column field="actions" header="Actions" width="90px" alignFrozen="right" frozen>
+        <ng-template let-row>
+          <button medButton type="button" variant="text" severity="secondary" size="sm">Edit</button>
+        </ng-template>
+      </med-table-column>
+    </med-tree-table>
+  </section>
+
+  <section class="flex flex-col gap-2" data-showcase-demo="tree-select">
+    <h2>TreeSelect</h2>
+    <med-tree-select [options]="treeNodes" filterable showClear [(ngModel)]="treeSelectDemoValue" name="demo-tree-select" class="max-w-sm" />
+    <p class="text-xs text-surface-500">Selected: {{ treeSelectDemoValue?.label ?? '(none)' }}</p>
+
+    <span class="mt-2 text-xs text-surface-500">loading</span>
+    <med-tree-select [options]="treeNodes" loading class="max-w-sm" />
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>TabMenu</h2>
+    <med-tab-menu [items]="tabMenuItems" [(activeIndex)]="tabMenuActiveIndex" class="max-w-lg" />
+    <p class="text-xs text-surface-500">Active: {{ tabMenuItems[tabMenuActiveIndex].label }}</p>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>PickList</h2>
+    <span class="text-xs text-surface-500">Drag within a list to reorder, or between lists to transfer — buttons on each side do the same</span>
+    <med-pick-list [(source)]="pickListSource" [(target)]="pickListTarget" sourceHeader="Available" targetHeader="Chosen" class="max-w-lg">
+      <ng-template let-item>{{ item }}</ng-template>
+    </med-pick-list>
+    <p class="text-xs text-surface-500">Chosen: {{ pickListTarget.join(', ') || '(none)' }}</p>
+
+    <span class="mt-2 text-xs text-surface-500">
+      filterPredicate + itemDisabled ("locked" item) + keepSelection — last event: {{ pickListLastEvent() }}
+    </span>
+    <med-pick-list
+      [(source)]="pickListExtSource"
+      [(target)]="pickListExtTarget"
+      [filterPredicate]="pickListFilterPredicate"
+      [itemDisabled]="pickListItemDisabled"
+      keepSelection
+      sourceHeader="Available"
+      targetHeader="Chosen"
+      class="max-w-lg"
+      (moveToTarget)="onPickListMoveToTarget($event)"
+      (moveAllToTarget)="onPickListMoveAllToTarget($event)"
+      (moveToSource)="onPickListMoveToSource($event)"
+      (moveAllToSource)="onPickListMoveAllToSource($event)"
+    >
+      <ng-template let-item>{{ item }}</ng-template>
+    </med-pick-list>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>OrderList</h2>
+    <span class="text-xs text-surface-500">Drag a row onto another to move it there, or select + use the buttons</span>
+    <label class="flex w-fit items-center gap-2 text-sm">
+      <med-toggle-switch [(ngModel)]="orderListDisabled" name="order-list-disabled" />
+      disabled
+    </label>
+    <med-order-list [(value)]="orderListValue" [(selection)]="orderListSelection" [disabled]="orderListDisabled" header="Fruits" class="max-w-sm">
+      <ng-template let-item>{{ item }}</ng-template>
+    </med-order-list>
+    <p class="text-xs text-surface-500">Order: {{ orderListValue.join(', ') }} — selection: {{ orderListSelection.join(', ') || '(none)' }}</p>
+  </section>
+
+  <section class="flex flex-col gap-2" data-showcase-demo="color-picker">
+    <h2>ColorPicker</h2>
+    <div class="flex items-center gap-3">
+      <med-color-picker [(ngModel)]="colorPickerValue" />
+      <med-color-picker [(ngModel)]="colorPickerValue" size="sm" />
+      <med-color-picker [(ngModel)]="colorPickerValue" size="lg" />
+      <med-color-picker [(ngModel)]="colorPickerDisabledValue" disabled />
+      <med-color-picker format="rgb" [(ngModel)]="colorPickerRgbValue" />
+      <span class="text-sm text-surface-600 dark:text-surface-300">{{ colorPickerValue }} / rgb: {{ colorPickerRgbValue }}</span>
+    </div>
+    <div class="flex items-center gap-3">
+      <span class="text-sm text-surface-500">Inline:</span>
+      <med-color-picker inline [(ngModel)]="colorPickerInlineValue" />
+      <span class="text-sm text-surface-600 dark:text-surface-300">{{ colorPickerInlineValue }}</span>
+    </div>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>OverlayBadge</h2>
+    <div class="flex flex-wrap items-center gap-10 py-1">
+      <med-overlay-badge value="5" badgeAriaLabel="5 unread notifications">
+        <med-icon name="bell" class="size-6 text-surface-600 dark:text-surface-300" />
+      </med-overlay-badge>
+      <med-overlay-badge dot severity="success">
+        <med-avatar label="Jane Doe" />
+      </med-overlay-badge>
+      <med-overlay-badge value="99+" severity="info">
+        <med-icon name="star" variant="solid" class="size-6 text-warn-500" />
+      </med-overlay-badge>
+      <med-overlay-badge [value]="0" [hidden]="true">
+        <med-icon name="bell" class="size-6 text-surface-600 dark:text-surface-300" />
+      </med-overlay-badge>
+    </div>
+  </section>
+
+  <section class="flex flex-col gap-2" data-showcase-demo="editor">
+    <h2>Editor</h2>
+    <span class="text-xs text-surface-500">Toolbar now includes a heading format dropdown and link insertion (select text, click the link icon)</span>
+    <med-editor [(ngModel)]="editorValue" placeholder="Write something..." class="max-w-xl" />
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2>Timeline</h2>
+    <med-timeline [value]="timelineEvents" class="max-w-md">
+      <ng-template #content let-event>
+        <p class="text-sm font-medium text-surface-900 dark:text-surface-50">{{ event.title }}</p>
+        <p class="text-xs text-surface-500">{{ event.date }}</p>
+        <p class="mt-1 text-sm text-surface-600 dark:text-surface-300">{{ event.description }}</p>
+      </ng-template>
+    </med-timeline>
+
+    <span class="text-xs text-surface-500">#marker + #opposite</span>
+    <med-timeline [value]="timelineEvents" class="max-w-md">
+      <ng-template #opposite let-event>
+        <span class="text-xs text-surface-500">{{ event.date }}</span>
+      </ng-template>
+      <ng-template #marker>
+        <span class="mt-1 flex size-5 shrink-0 items-center justify-center rounded-full bg-brand-500 text-white dark:bg-brand-400">
+          <med-icon name="check" variant="mini" class="size-3" />
+        </span>
+      </ng-template>
+      <ng-template #content let-event>
+        <p class="text-sm font-medium text-surface-900 dark:text-surface-50">{{ event.title }}</p>
+        <p class="mt-1 text-sm text-surface-600 dark:text-surface-300">{{ event.description }}</p>
+      </ng-template>
+    </med-timeline>
+  </section>
+
+  <section class="flex flex-col gap-3" data-showcase-demo="buttons">
+    <h2>Buttons Wave 1 Parity</h2>
+    <div class="flex flex-wrap items-center gap-3">
+      <button medButton type="button" badge="4" badgeSeverity="danger">Notifications</button>
+      <button medButton type="button" fluid severity="secondary" class="max-w-xs">Fluid Button</button>
+      <med-split-button
+        label="Save"
+        rounded
+        dropdownIcon="ellipsis-vertical"
+        [items]="splitButtonItems"
+        (dropdownClick)="splitDropdownCount.set(splitDropdownCount() + 1)"
+      >
+        <ng-template #content>
+          <span class="inline-flex items-center gap-1.5 font-medium">Custom Save ({{ splitDropdownCount() }})</span>
+        </ng-template>
+      </med-split-button>
+      <med-toggle-button
+        [(ngModel)]="toggleReadonlyValue"
+        onLabel="Locked"
+        offLabel="Unlocked"
+        onIcon="lock-closed"
+        iconPos="right"
+        [readonly]="true"
+      />
+      <med-toggle-button
+        [(ngModel)]="toggleNoEmptyValue"
+        onLabel="Required On"
+        offLabel="Off"
+        [allowEmpty]="false"
+      />
+      <med-select-button
+        [(ngModel)]="selectButtonPlan"
+        [options]="selectButtonPlans"
+        optionLabel="name"
+        optionValue="code"
+        optionDisabled="inactive"
+      />
+    </div>
+    <div class="flex min-h-36 items-center justify-center">
+      <med-speed-dial
+        [items]="speedDialItems"
+        type="circle"
+        [radius]="56"
+        showIcon="plus"
+        hideIcon="x-mark"
+        [(visible)]="speedDialRadialVisible"
+      />
+    </div>
+  </section>
+
+  <section class="flex flex-col gap-2" data-showcase-demo="ripple">
+    <h2>Ripple</h2>
+    <div class="flex flex-wrap items-center gap-3">
+      <div
+        medRipple
+        tabindex="0"
+        class="cursor-pointer select-none rounded-md border border-surface-300 px-4 py-3 text-sm font-medium dark:border-surface-700"
+      >
+        Click or tap for Ripple effect
+      </div>
+    </div>
+  </section>
+
+  <section class="flex flex-col gap-2" data-showcase-demo="overlay">
+    <h2>Overlay</h2>
+    <div class="flex flex-wrap items-center gap-3">
+      <button medButton type="button" variant="outlined" (click)="openOverlayDemo($event)">
+        Toggle Anchored Overlay ({{ overlayOpenCount() }})
+      </button>
+    </div>
+  </section>
+
+  <section class="flex flex-col gap-4" data-showcase-demo="cdn-icons">
+    <h2>CDN Font Icons (Font Awesome CDN / Zero-Bundle)</h2>
+    <div class="flex flex-wrap items-center gap-4">
+      <button medButton data-showcase-cdn="button" type="button" variant="outlined">
+        <med-icon name="fa-solid fa-house" />
+        Home
+      </button>
+      <med-tag data-showcase-cdn="tag" value="Featured" icon="fa-solid fa-tag" severity="info" />
+      <div data-showcase-cdn="input" class="relative inline-flex items-center">
+        <med-icon name="fa-solid fa-magnifying-glass" class="absolute left-3 text-surface-400" />
+        <input medInput placeholder="Search with CDN icon..." class="pl-9" />
+      </div>
+      <div data-showcase-cdn="menu" class="w-48">
+        <med-menu [items]="cdnMenuItems" [popup]="false" />
+      </div>
+    </div>
+  </section>
+</main>

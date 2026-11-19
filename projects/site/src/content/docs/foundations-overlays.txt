@@ -1,0 +1,26 @@
+# Overlays
+
+Floating panels in MedraUi, such as select lists, menus, popovers, dialogs and toasts, share one service built on the Angular CDK overlay. A component does not position or dismiss its own panel; it asks the service to open one.
+
+## Two kinds of overlay
+
+| Kind | Positioned | Used by |
+|---|---|---|
+| Connected | Relative to a trigger element or a viewport point | Select, multi select, auto complete, date picker, menus, popover, tooltip, context menu |
+| Global | At the viewport level, not tied to a trigger | Dialog, confirm dialog, drawer, toast, image preview |
+
+A connected overlay follows its trigger. A context menu is anchored to a bare point, the cursor position, instead of an element.
+
+## Shared behavior
+
+- Escape and an outside click close the panel, handled once by the service.
+- Modal surfaces trap focus while they are open.
+- Triggers reflect their state with `aria-expanded`. See [Accessibility](/docs/foundations/accessibility).
+
+## Stacking
+
+Because panels render through the CDK overlay container, they stack above the page content in the order they were opened. You do not set a z-index on a component to make it appear above your layout. If a layout of your own must sit above a panel, give it an explicit stacking context and test it with the panel open.
+
+## Building a new overlay component
+
+Follow the same split instead of adding a third variant: use a connected overlay when the panel belongs to a trigger, and a global overlay when it does not.

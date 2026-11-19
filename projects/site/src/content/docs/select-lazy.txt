@@ -1,0 +1,6 @@
+## Lazy loading
+
+`lazy` forwards the panel's own scroll-position-triggered range as `lazyLoad`, so a consumer can
+append more `options` as the user scrolls near the end of what's loaded — updates to `options` push
+straight into an already-open panel while `lazy` is on, unlike the normal snapshot-at-open-time
+behavior. This demo starts with 20 items and appends 20 more each time you scroll to the bottom.

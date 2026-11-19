@@ -1,0 +1,4 @@
+<div class="flex items-center gap-3">
+  <button medButton variant="outlined" #trigger (click)="menu.toggle(trigger)">Help</button>
+  <med-menu #menu [items]="items" />
+</div>

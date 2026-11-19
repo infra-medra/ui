@@ -1,0 +1,13 @@
+<med-breadcrumb [home]="home" [items]="items">
+  <ng-template #item let-crumb>
+    <span class="flex items-center gap-1">
+      @if (crumb.icon) {
+        <med-icon [name]="crumb.icon" variant="mini" class="size-4" />
+      }
+      {{ crumb.label }}
+      @if (crumb.target === '_blank') {
+        <med-icon name="arrow-up-tray" variant="mini" class="size-3 text-surface-400" />
+      }
+    </span>
+  </ng-template>
+</med-breadcrumb>

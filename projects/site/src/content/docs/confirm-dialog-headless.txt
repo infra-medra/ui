@@ -1,0 +1,8 @@
+## Fully custom body
+
+`headlessTemplate` replaces the dialog's entire body — icon, message, and the Accept/Reject
+buttons — with your own content. Grab a `TemplateRef` from your own component and pass it to
+`confirm()`; the context (`{ $implicit: data, onAccept, onReject }`) gives you the resolved
+`ConfirmDialogData` plus callbacks that resolve the dialog the same way the built-in buttons
+would. `messageTemplate` is the lighter-touch version — it only replaces the message text,
+keeping the icon and buttons as-is.

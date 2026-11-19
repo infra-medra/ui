@@ -1,0 +1,23 @@
+[
+  {
+    "name": "openAnchored",
+    "kind": "method",
+    "type": "(component: Type<T>, anchor: HTMLElement, options?: OverlayOptions) => OverlayHandle<T, R>",
+    "default": "-",
+    "description": "Opens a CDK overlay anchored to a trigger element with automatic outside-click and Escape dismissal."
+  },
+  {
+    "name": "openGlobal",
+    "kind": "method",
+    "type": "(component: Type<T>, options?: GlobalOverlayOptions) => OverlayHandle<T, R>",
+    "default": "-",
+    "description": "Opens a globally positioned overlay centered or corner-anchored in the viewport."
+  },
+  {
+    "name": "close",
+    "kind": "method",
+    "type": "(result?: R) => void",
+    "default": "-",
+    "description": "Closes an active OverlayHandle and emits the optional result on closed$."
+  }
+]

@@ -1,0 +1,5 @@
+<div class="flex flex-col gap-3">
+  <med-autocomplete [suggestions]="suggestions()" [disabled]="true" placeholder="Disabled" (search)="onSearch($event)" />
+  <med-autocomplete [suggestions]="suggestions()" [invalid]="true" placeholder="Invalid" (search)="onSearch($event)" />
+  <med-autocomplete [suggestions]="suggestions()" [loading]="true" placeholder="Loading" (search)="onSearch($event)" />
+</div>

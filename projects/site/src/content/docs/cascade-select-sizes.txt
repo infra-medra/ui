@@ -1,0 +1,3 @@
+## Sizes
+
+`size` accepts `sm`, `default` and `lg`, with the same field tokens as Select.

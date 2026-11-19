@@ -1,0 +1,8 @@
+SpeedDial is a circular main button that reveals a row (or column) of smaller action buttons —
+a FAB (floating action button) pattern for a handful of related actions that don't need their own
+permanent toolbar space. `items` reuses the same plain shape Menu/Menubar/SplitButton already use
+(`label`/`icon`/`disabled`/`command`); picking one calls its `command()`, emits `itemSelect`, and
+closes the dial. Item buttons stay in the DOM the whole time and animate between two built-in
+states instead of being added/removed, so the reveal is a real transition rather than a pop-in.
+Keyboard support comes for free once open: arrow keys move between items, Home/End jump to the
+first/last enabled one, and Escape closes the dial.

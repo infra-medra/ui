@@ -1,0 +1,6 @@
+## Toast
+
+`info`/`success`/`warn`/`error` are convenience wrappers around `show()` for each severity —
+call whichever matches, passing the detail text. Toasts auto-dismiss after `life` milliseconds
+(3000 by default) unless you pass `life: 0` for a sticky one; `dismiss(id)` closes one early using
+the id any of these methods returns.

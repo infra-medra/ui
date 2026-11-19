@@ -1,0 +1,10 @@
+## Data model
+
+The options are a tree. Each option that has sub-options carries that list in a field called
+`children`, and only the leaves carry a `value`: picking a leaf is the only thing that resolves the
+control, so the levels above it exist just to narrow the choice down.
+
+When your data uses other field names, you do not have to reshape it. `optionLabel` reads the
+label from another field, `optionValue` reads the leaf value from another field, and
+`optionGroupChildren` reads the sub-list from another field (one name for every level, or one name
+per level). The example below keeps its own fields, `name`, `code` and `items`, across three levels.

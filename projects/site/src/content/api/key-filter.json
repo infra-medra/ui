@@ -1,0 +1,22 @@
+[
+  {
+    "name": "medKeyFilter",
+    "kind": "input",
+    "type": "KeyFilterPattern | RegExp",
+    "default": "'alphanum'",
+    "description": "Named preset or custom RegExp used to filter keystrokes and pasted input. Client-side UX convenience only; never a substitute for server-side validation."
+  },
+  {
+    "name": "validateOnly",
+    "kind": "input",
+    "type": "boolean",
+    "default": "false",
+    "description": "When true, avoids blocking keystrokes and relies on the validate method for UX feedback. Client-side UX control only; always enforce server-side validation."
+  },
+  {
+    "name": "validate",
+    "kind": "method",
+    "signature": "validate(value: string): boolean",
+    "description": "Tests whether the provided string matches the configured filter pattern for client-side UX validation (not a replacement for server-side validation)."
+  }
+]

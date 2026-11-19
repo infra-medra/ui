@@ -1,0 +1,1 @@
+Set `virtualScroll` to render only the visible rows of a long list; rows have a fixed height set by `virtualScrollItemSize` (default 36 px). With `lazy`, the `lazyLoad` event reports the visible range when the list scrolls near its end, so you can append the next page of suggestions. Home and End jump to the first and last suggestion.

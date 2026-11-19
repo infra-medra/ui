@@ -1,0 +1,19 @@
+<med-data-table
+  [value]="tracks()"
+  reorderable
+  dataKey="id"
+  selectionMode="multiple"
+  [(selection)]="selection"
+  [globalFilterFields]="['title', 'artist']"
+  [filterDelay]="500"
+  filterable
+  filterPlaceholder="Search title or artist"
+  ariaLabel="Playlist"
+  (rowReorder)="onReorder($event)"
+  (rowSelect)="onRowSelect($event)"
+  (rowUnselect)="onRowUnselect($event)"
+>
+  <med-table-column field="title" header="Title" />
+  <med-table-column field="artist" header="Artist" />
+</med-data-table>
+<p class="mt-2 text-sm text-surface-500 dark:text-surface-400">{{ lastEvent() }}</p>

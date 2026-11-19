@@ -1,0 +1,2 @@
+<med-multi-select [options]="cities" [(ngModel)]="selectedCities" [filter]="true" placeholder="Choose cities" class="max-w-xs" />
+<p class="mt-2 text-sm text-surface-500 dark:text-surface-400">Selected: {{ selectedCities.join(', ') || 'none' }}</p>

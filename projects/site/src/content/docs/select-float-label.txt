@@ -1,0 +1,6 @@
+## Float Label
+
+Wrap the field in `med-float-label` with `variant="over"` and give the label `medFloatLabelText`. The
+floating label depends on an `<input>` sibling that reports an empty or filled state, and the Select
+trigger is not an `<input>` (it is a `<div role="combobox">`), so the label stays floated all the time
+instead of dropping into the field when it is empty. With `editable`, the field is a real `<input>`.

@@ -1,0 +1,6 @@
+Popover is declared once, inline, and toggled imperatively — `<med-popover #pop>...content...
+</med-popover>`, then `<button (click)="pop.toggle($event.currentTarget)">`. Unlike Menu, its
+content is arbitrary and consumer-authored, not a fixed `items` list, and unlike Dialog/Drawer it
+has no built-in header or close button — the projected content decides its own chrome, including
+calling `pop.close()` itself if it wants one. It's non-modal: no backdrop, and it closes on Escape
+or a click outside the panel.

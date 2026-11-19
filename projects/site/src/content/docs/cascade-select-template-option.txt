@@ -1,0 +1,5 @@
+## Option template
+
+The `#option` template renders each row of the panel. Its context gives the node as the implicit variable,
+the labels of its ancestors in `path` and whether it has children in `hasChildren`. Rows keep their
+`role="option"`, so keyboard navigation and screen readers are unchanged.

@@ -1,0 +1,15 @@
+<div class="flex max-w-sm flex-col gap-4">
+  <med-fieldset legend="Shipping address" toggleable [(collapsed)]="collapsed">
+    <div class="flex flex-col gap-2">
+      <input medInputText placeholder="Street" />
+      <input medInputText placeholder="City" />
+    </div>
+  </med-fieldset>
+
+  <med-fieldset legend="Locked while saving" [disabled]="true">
+    <div class="flex flex-col gap-2">
+      <input medInputText placeholder="This input is disabled" />
+      <button medButton type="button">This button too</button>
+    </div>
+  </med-fieldset>
+</div>

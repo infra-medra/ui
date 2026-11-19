@@ -1,0 +1,6 @@
+## Programmatic expand/collapse
+
+`expandedItems` is a `model<ReadonlySet<TieredMenuItem>>` — every currently-expanded node with
+children, by object reference. Bind `[(expandedItems)]` to drive it from your own state, or call the
+component's `expandAll()`/`collapseAll()` methods through a template reference, as the buttons below
+do.

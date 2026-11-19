@@ -1,0 +1,7 @@
+## Toggle target, icon position, and hiding the header
+
+`toggler` (`'header'`/`'icon'`, default `'header'`) narrows the clickable toggle target from the
+whole header row down to just the chevron button; the default is `'header'`, which keeps a larger click target. `iconPos`
+(`'start'`/`'end'`/`'center'`, default `'end'`) repositions the toggle button within the header.
+`showHeader` (default `true`) hides the header row — title and toggle button both — while leaving
+the body untouched, useful when a panel's "title" is really supplied by whatever wraps it.

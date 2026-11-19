@@ -1,0 +1,4 @@
+## Multiple mode
+
+With `multiple`, more than one panel can stay expanded at once — `activeIndex` becomes an array of
+open indexes instead of a single one.

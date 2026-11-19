@@ -1,0 +1,9 @@
+[
+  {
+    "name": "medClassNames",
+    "kind": "input",
+    "type": "ClassNamesValue (string | string[] | Record<string, boolean | null | undefined> | null | undefined)",
+    "default": "undefined",
+    "description": "Reactive class expression applied to the host element via [medClassNames] using mergeClasses."
+  }
+]

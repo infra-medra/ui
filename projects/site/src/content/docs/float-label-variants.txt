@@ -1,0 +1,7 @@
+## Variants
+
+`variant` (default `'over'`) lives on `<med-float-label>`, not the label itself: `'on'` rests the
+floated label right on the field's border; `'over'` clears above the field entirely, needing a
+little extra top margin the wrapper reserves for you; `'in'` floats up inside the field's own box,
+which needs (and gets, automatically) extra top padding on the projected input so the resting text
+doesn't sit underneath it.

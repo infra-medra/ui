@@ -1,0 +1,79 @@
+[
+  {
+    "name": "medStyleClass",
+    "kind": "input",
+    "type": "string | undefined",
+    "default": "undefined",
+    "description": "Target selector (@next, @prev, @parent, @grandparent, or CSS selector) controlled by [medStyleClass]."
+  },
+  {
+    "name": "enterFromClass",
+    "kind": "input",
+    "type": "string | undefined",
+    "default": "undefined",
+    "description": "CSS class added before the enter transition starts."
+  },
+  {
+    "name": "enterActiveClass",
+    "kind": "input",
+    "type": "string | undefined",
+    "default": "undefined",
+    "description": "CSS class applied during the active enter transition."
+  },
+  {
+    "name": "enterToClass",
+    "kind": "input",
+    "type": "string | undefined",
+    "default": "undefined",
+    "description": "CSS class applied when the enter transition finishes."
+  },
+  {
+    "name": "leaveFromClass",
+    "kind": "input",
+    "type": "string | undefined",
+    "default": "undefined",
+    "description": "CSS class added before the leave transition starts."
+  },
+  {
+    "name": "leaveActiveClass",
+    "kind": "input",
+    "type": "string | undefined",
+    "default": "undefined",
+    "description": "CSS class applied during the active leave transition."
+  },
+  {
+    "name": "leaveToClass",
+    "kind": "input",
+    "type": "string | undefined",
+    "default": "undefined",
+    "description": "CSS class applied when the leave transition finishes."
+  },
+  {
+    "name": "hideOnOutsideClick",
+    "kind": "input",
+    "type": "boolean",
+    "default": "false",
+    "description": "Automatically hides or leaves the target element when clicking outside it."
+  },
+  {
+    "name": "hideOnEscape",
+    "kind": "input",
+    "type": "boolean",
+    "default": "false",
+    "description": "Automatically hides or leaves the target element when pressing Escape."
+  },
+  {
+    "name": "toggleClass",
+    "kind": "input",
+    "type": "string | undefined",
+    "default": "undefined",
+    "description": "CSS class toggled on the target element instead of enter/leave transitions."
+  },
+  {
+    "name": "trigger",
+    "kind": "input",
+    "type": "'click' | 'hover'",
+    "default": "'click'",
+    "description": "DOM interaction event that triggers the style class transition or toggle."
+  }
+]

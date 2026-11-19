@@ -1,0 +1,8 @@
+## Multi-value mode
+
+`multiple` swaps the value from a single `SelectOption<T> | null` to a `SelectOption<T>[]`.
+Selections render as removable `<med-chip>`s inline with the search input, the same
+"chips + input in one field" shape `InputChips` already established. Picking a suggestion appends
+it to the array (skipping one already selected); typing further never clears an existing chip the
+way it clears a single selection in the default mode, since the chips are separate committed
+picks, unrelated to whatever's still being typed in the query.

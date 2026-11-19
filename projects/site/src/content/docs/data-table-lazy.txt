@@ -1,0 +1,12 @@
+## Loading and server-side (lazy) mode
+
+`loading` is purely presentational — a dimmed table with a centered spinner overlay, rows kept in
+place underneath rather than cleared, so nothing jumps around while a fetch is in flight.
+
+`lazy` reinterprets `value` as "the current page only, already filtered/sorted by the server" — the
+paginator's total comes from a separate `totalRecords` input instead of counting `value` itself.
+Whenever the page, sort, or filter actually changes (including once on initial mount), `lazyLoad`
+emits everything a server-side data source needs (`first`/`rows`/`sortField`/`sortOrder`/
+`multiSortMeta`/`filter`) so a consumer can fetch exactly that slice — changing the page size via
+`rowsPerPageOptions` triggers a `lazyLoad` the same way changing pages does. This demo simulates a
+400ms server round-trip over a synthetic 83-row dataset.

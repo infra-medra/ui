@@ -1,0 +1,6 @@
+<button medButton type="button" variant="outlined" (click)="show()">Custom message toast</button>
+
+<ng-template #messageTpl let-message>
+  <span class="font-semibold">New comment</span>
+  <span class="text-surface-500 dark:text-surface-400"> — someone replied to your review.</span>
+</ng-template>

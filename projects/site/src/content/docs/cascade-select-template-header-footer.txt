@@ -1,0 +1,4 @@
+## Header and footer templates
+
+`#header` and `#footer` add content above and below the first-level list of the panel, for a title,
+a hint or an action.

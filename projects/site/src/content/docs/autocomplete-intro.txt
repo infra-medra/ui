@@ -1,0 +1,12 @@
+Autocomplete puts `role="combobox"` directly on a real `<input>`, since the user
+types free text into it — unlike Select, where the trigger is a non-editable
+`<div>`. It doesn't filter anything itself: typing emits `(search)`, debounced by
+`searchDelay` once the query reaches `minLength` characters, and the consumer
+answers by setting `[suggestions]` — the same shape whether that's a local
+in-memory filter or a real network request behind `loading`. The panel never
+opens with a "searching…" placeholder; the input's own spinner is the only
+loading affordance, and the dropdown only appears once real results (or "no
+results") are ready to show. Its value is a whole `{ label, value }` option, not
+a bare value, because there's no always-available option list to resolve a label
+from when a bound value is set programmatically. For v1, picking a suggestion is
+the only way to produce a value — there's no "commit whatever was typed" mode.

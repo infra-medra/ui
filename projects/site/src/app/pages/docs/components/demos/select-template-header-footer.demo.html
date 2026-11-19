@@ -1,0 +1,8 @@
+<med-select [options]="cities" [(ngModel)]="city" placeholder="Pick a city" class="max-w-xs">
+  <ng-template #header>
+    <div data-testid="header-template" class="px-3 py-2 text-sm font-medium">Pick one city</div>
+  </ng-template>
+  <ng-template #footer>
+    <div data-testid="footer-template" class="px-3 py-2 text-xs text-surface-500">{{ cities.length }} cities available</div>
+  </ng-template>
+</med-select>

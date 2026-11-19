@@ -1,0 +1,4 @@
+## Disabled
+
+`disabled` blocks every interaction with the list and exposes the state to assistive technology.
+To disable single options, use `optionDisabled`.

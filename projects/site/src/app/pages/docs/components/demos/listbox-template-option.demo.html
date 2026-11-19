@@ -1,0 +1,5 @@
+<med-listbox [options]="cities" [(ngModel)]="selectedCities" [multiple]="true" class="max-w-xs" ariaLabel="Cities">
+  <ng-template #option let-option let-selected="selected">
+    <span data-testid="option-template" class="flex-1" [class.font-semibold]="selected">{{ option.label }} <span class="text-surface-400">· {{ option.value }}</span></span>
+  </ng-template>
+</med-listbox>

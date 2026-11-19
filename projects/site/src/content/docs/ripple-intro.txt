@@ -1,0 +1,2 @@
+Ripple adds a subtle pointerdown ink wave animation to interactive elements using the `medRipple` attribute directive.
+Disable it conditionally with `[medRippleDisabled]="true"` when a host control is disabled or readonly.

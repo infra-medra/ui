@@ -1,0 +1,5 @@
+## Events
+
+The list emits `selectionChanged`, `selectAllChanged`, `optionClicked`, `optionDoubleClicked`,
+`filtered`, `listFocus`, `listBlur` and, with `dragdrop`, `reorder`. This example prints the last one
+it receives.

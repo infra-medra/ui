@@ -1,0 +1,5 @@
+The Icon component renders icons in three complementary ways.
+
+1. **CDN icon fonts (CSS webfonts, 0 KB in the JS bundle).** Load any CSS icon font from a CDN in your `index.html` or global CSS (for example Font Awesome or Remix Icon), then reference it through `fontIcon` or the `name` / `icon` inputs. No npm package is needed.
+2. **Registered SVG icons.** Register icon sets at startup with `provideIcons(...)` and pick the `outline`, `solid`, `mini` or `micro` variant.
+3. **Direct SVG definitions.** Pass an SVG definition straight to the `[icon]` input.

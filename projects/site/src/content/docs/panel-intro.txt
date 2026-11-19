@@ -1,0 +1,6 @@
+Panel is a titled container — a header row plus a body, optionally collapsible. `toggleable`
+makes the whole header clickable (not just the chevron) and adds the expand/collapse button;
+`[(collapsed)]` is a two-way `model()`, local UI state rather than a form value, so you can read
+or drive it from outside just as easily as letting the user click the header themselves. There's
+no expand/collapse animation for now — content toggles via the `hidden` attribute, staying in the
+DOM either way so `aria-controls` always points at something real.

@@ -1,0 +1,8 @@
+## Vertical orientation
+
+`orientation="vertical"` renders its own vertical step column — a separate implementation from the
+default horizontal one, not a rotated reuse of `<med-steps>` (which stays horizontal-only by its own
+design, since it doubles as a plain progress indicator elsewhere in this library). This one
+keeps the same single shared content area every `<med-step-panel>` already projects into — only the
+current step's panel shows, positioned below the whole column instead of below a header row. Every
+existing consumer's markup (one flat list of sibling `<med-step-panel>`s) keeps working unchanged.

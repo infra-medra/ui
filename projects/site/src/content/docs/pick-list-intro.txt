@@ -1,0 +1,22 @@
+PickList moves items between two independent arrays — `source` and `target` — both exposed as
+`model()`s you bind with `[(source)]`/`[(target)]`. Each list keeps its own multi-select (click, or
+Enter/Space on the focused row) and its own roving-tabindex keyboard navigation, so arrow keys and
+Home/End move focus inside whichever list you're in without touching the other. Four buttons
+between the lists move the current selection one way, or move every item at once regardless of
+selection — the "move all" buttons ignore what's selected entirely. Double-clicking a single item
+transfers just that item immediately, independent of any multi-selection already in place, which is
+worth knowing since it bypasses the buttons altogether. Each list also has its own Move Up/Down/
+Top/Bottom button column for reordering within that list alone — identical mechanics to OrderList's,
+just scoped to whichever list the click came from. `dragdrop` (default `true`) layers native HTML5
+drag-and-drop on top of all of it, a mouse/touch-only enhancement, never a replacement: dropping
+inside a list's own bounds reorders it, dropping in the other list transfers the item, inserted at
+the drop position rather than always appended at the end. Transferring items clears that side's
+selection afterward by default; set `keepSelection` to carry the same items' selected state over to
+wherever they landed instead. `filterPredicate` (a plain `(item, query) => boolean` function, unset
+by default) adds a per-list search box — `showSourceFilter`/`showTargetFilter` (both default
+`true`) hide either side's box independently once a predicate is set. `itemDisabled` (a
+`(item) => boolean` function) opts individual rows out of every interaction — selection, double-click
+transfer, drag — without touching the rest of the list. Beyond the `source`/`target` models
+themselves, `moveToTarget`/`moveAllToTarget`/`moveToSource`/`moveAllToSource` fire with exactly the
+items that just moved, for a consumer that wants to react to a transfer without diffing the arrays
+itself. A shared `<ng-template let-item>` renders each row in both lists.

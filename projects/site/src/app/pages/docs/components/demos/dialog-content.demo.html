@@ -1,0 +1,7 @@
+<p class="text-sm text-surface-600 dark:text-surface-400">
+  Deleting a project removes it for every member of your team. This can't be undone.
+</p>
+<div class="mt-4 flex justify-end gap-2">
+  <button medButton variant="text" severity="secondary" (click)="dialogRef.close(false)">Cancel</button>
+  <button medButton severity="danger" (click)="dialogRef.close(true)">Delete project</button>
+</div>

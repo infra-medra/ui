@@ -1,0 +1,8 @@
+<med-cascade-select [options]="catalog" [(ngModel)]="item" placeholder="Pick a product">
+  <ng-template #header>
+    <div data-testid="header-template" class="border-b border-surface-200 px-3 py-2 text-xs font-semibold uppercase text-surface-500 dark:border-surface-700">Catalog</div>
+  </ng-template>
+  <ng-template #footer>
+    <div data-testid="footer-template" class="border-t border-surface-200 px-3 py-2 text-xs text-surface-500 dark:border-surface-700">Pick a leaf to confirm</div>
+  </ng-template>
+</med-cascade-select>

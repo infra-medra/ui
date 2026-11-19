@@ -1,0 +1,6 @@
+## Position
+
+`position` picks which viewport corner (or edge) the toast stack anchors to — `'center'`, `'top'`,
+`'top-right'` (the default), `'top-left'`, `'bottom'`, `'bottom-right'`, `'bottom-left'`. It's set
+per call; the first call ever made picks the stack's starting position, and a later call with a
+different `position` moves the whole existing stack there.

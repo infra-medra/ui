@@ -1,0 +1,1 @@
+Use `scrollHeight` to cap the height of the suggestion list. It takes any CSS length and defaults to `15rem`. A longer list scrolls inside the panel.

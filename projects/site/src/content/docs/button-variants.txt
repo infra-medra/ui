@@ -1,0 +1,5 @@
+## Variants
+
+`variant` controls the style, independently of severity: `filled` for the strongest emphasis,
+`outlined` and `text` for lighter-weight actions, and `link` when a button needs to read as
+inline text rather than a distinct control.

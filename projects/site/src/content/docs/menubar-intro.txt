@@ -1,0 +1,12 @@
+Menubar is a horizontal row of top-level commands, where any item with a non-empty `items` array
+opens a one-level-deep dropdown — the same internal panel Menu uses — while a leaf item runs its own
+`command()` directly on click. Submenus are capped at one level for v1 — an item's `items` are
+always a flat list, never nested further.
+
+Between top-level items, `ArrowLeft`/`ArrowRight` move a roving tabindex (wrapping at both ends,
+disabled items skipped) and `Home`/`End` jump to the first/last enabled one — the ARIA APG
+"Menubar" keyboard pattern. Arrow keys only move focus; opening a dropdown is still Enter, Space,
+or click. Once a dropdown *is* open, arrow-key navigation inside it is that shared panel's own,
+unrelated to the roving tabindex on the row itself. Below the `sm` breakpoint the row collapses
+behind a hamburger toggle button (try shrinking the window) — the same top-level items render
+either way, just stacked instead of inline.

@@ -1,0 +1,13 @@
+## Inline editing and frozen columns
+
+`editMode="cell"` mirrors DataTable's own inline editing exactly, just keyed by node identity
+instead of row identity: add `editable` to a `<med-table-column>` plus a second, named
+`#editTemplate`, double-click a cell to swap it in, and the template's own input decides when to
+call `onSave(value)`/`onCancel()`. The first column's indent/expand-toggle chrome stays in place
+either way — only the value portion swaps.
+
+`frozen` pins a column to the left or right edge (`alignFrozen`, default `'left'`) via `position:
+sticky`, so it stays visible while the rest of the table scrolls horizontally — useful for keeping
+the location column in view on a wide table. Any frozen column forces the table into a fixed
+layout, since an auto-layout table shrinking a column below its declared width would desync the
+sticky offset from what's actually rendered.

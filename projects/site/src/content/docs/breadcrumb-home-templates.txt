@@ -1,0 +1,10 @@
+## Home crumb, templates, and per-item options
+
+`home` is a separate leading item (`BreadcrumbHomeItem` — same shape as a regular item but `label`
+is optional, since a home crumb is usually icon-only) rather than something you fold into `items`
+yourself; its separator only renders when both `home` and at least one visible item exist.
+`itemTemplate` (`<ng-template #item let-item>`) replaces an item's icon+label content, not its
+`<a>`/`<span>` wrapper — the link/`aria-current`/`aria-disabled` semantics stay under the
+component's own control either way. Each item also accepts `target` (forwarded straight to the
+anchor) and `visible` (default `true` — `false` hides the item and its separator entirely, useful
+for a step that only sometimes applies without restructuring the array).

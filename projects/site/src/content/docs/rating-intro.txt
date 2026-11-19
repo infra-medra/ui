@@ -1,0 +1,9 @@
+Rating is a row of stars acting as one discrete value (`number | null`, 1-based) — internally a
+`role="radiogroup"` of `role="radio"` stars with roving tabindex and arrow-key navigation, the same
+model this library already uses for SelectButton's single-select mode. Clicking the already-selected
+star is a no-op; it never toggles back to `null` on its own. That's what `cancel` (on by default) is
+for: it adds one extra option before the first star — a small clear affordance — so there's still a
+way to reach "no rating" without breaking that click-to-select semantics. `stars` controls how many
+stars are rendered (default 5), and `readonly` swaps the interactive button row for a static,
+non-interactive summary with a text-equivalent `aria-label` (e.g. "4 out of 5 stars"), meant for
+displaying a rating nobody can edit rather than a row of buttons nobody can activate.

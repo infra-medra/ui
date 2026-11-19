@@ -1,0 +1,7 @@
+Paginator exposes `first` — the 0-based index of the current page's first record — as a `model()`
+for `[(first)]` two-way binding; `(pageChange)` additionally emits `{ first, rows, page, pageCount }`
+for handlers that want the full context in one place. The page-number window is a plain contiguous
+range centered on the current page, clamped at the edges — no pinned first/last page plus ellipsis.
+Previous, every page number, and Next together form a single `role="toolbar"` with one shared Tab
+stop: ArrowLeft/Right move the roving stop with wraparound, Home/End jump to the first/last enabled
+control, and a disabled Prev/Next is skipped rather than being a dead stop.

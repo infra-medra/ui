@@ -1,0 +1,7 @@
+## Hiding a button, and where focus lands
+
+`acceptVisible`/`rejectVisible` (both default `true`) hide either button entirely — useful for a
+plain acknowledgement popup that only needs one action. `defaultFocus` (`'accept'`/`'reject'`/
+`'none'`) picks which control receives focus when the popup opens; it defaults to `'reject'`,
+since dismissal is the safer default for a two-button
+confirm — set it explicitly to `'accept'` for a single-button notice like this one.

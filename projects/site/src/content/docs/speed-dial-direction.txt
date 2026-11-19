@@ -1,0 +1,6 @@
+## Direction
+
+`direction` (`up`/`down`/`left`/`right`) sets which way the items stack away from the main
+button — array order becomes visual order, with the first item always closest to the main
+button. Only these four linear layouts are supported; there's no circular or quarter-circle
+arrangement.

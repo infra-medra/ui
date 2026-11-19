@@ -1,0 +1,8 @@
+## Checkbox selection
+
+`selectionMode="checkbox"` cascades: checking a node checks every selectable descendant too, and an
+ancestor only joins `selection` once *all* of its own selectable children are checked. A branch
+with only some descendants checked reads as indeterminate without being added to `selection` itself
+— no separate tri-state bookkeeping, just that one rule. `selection`'s shape is unchanged from
+`'multiple'` mode (`readonly OrgChartNode[]`): reading it back gives exactly the nodes whose
+checkbox is fully — not partially — checked, parents included.

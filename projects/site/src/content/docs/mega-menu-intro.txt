@@ -1,0 +1,11 @@
+MegaMenu is a horizontal row of top-level commands, same shape as Menubar, but an item that opens a
+panel does so as side-by-side columns (`MegaMenuItem.columns`) rather than Menubar's single flat
+dropdown list. It's a deliberately separate component from Menubar rather than a generalization of
+it, so adding columns never risks Menubar's own already-shipped behavior. The keyboard model inside
+an open panel is genuinely two-dimensional — ArrowUp/Down move within the current column, ArrowLeft/
+Right jump to the nearest row in the neighboring column — since a plain single-axis model doesn't
+describe a grid of columns. Each column is a flat `items` list; deeper nesting belongs to TieredMenu. Unlike Menubar, there's no
+`ArrowLeft`/`ArrowRight` roving focus between top-level buttons — plain Tab order already reaches
+each one, so a second keyboard model over the same row would be redundant. Below the `sm` breakpoint
+the row collapses behind a hamburger toggle button (try shrinking the window), the same technique
+Menubar uses.

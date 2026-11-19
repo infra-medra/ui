@@ -1,0 +1,7 @@
+## Scroll navigators
+
+`showNavigators` (default `false`) adds scroll-left/scroll-right buttons over the same
+horizontally-scrollable tab row — a complementary, opt-in affordance for pointer/keyboard users who'd
+rather click an arrow than drag, not a reversal of this component's "no overflow menu" decision. Each
+button only renders when that direction is actually scrollable right now, kept in sync as the row
+scrolls or resizes.

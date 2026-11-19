@@ -1,0 +1,10 @@
+Splitter renders resizable panes from content you declare directly: `<med-splitter><med-splitter-
+panel>A</med-splitter-panel><med-splitter-gutter /><med-splitter-panel>B</med-splitter-panel>
+</med-splitter>`. Gutters are explicit, consumer-authored elements rather than auto-inserted
+between panels — you're trusted to alternate panel/gutter/panel correctly, the same trust boundary
+Tabs/Accordion already place on their own content-child ordering. `[(sizes)]` is a two-way
+`model()` of percentages per panel (`[sizes]="[30, 70]"` for a custom initial split, or leave it
+unset for an equal one) that stays in sync as the user drags a gutter. The host itself is the flex
+container, and you're expected to size it (e.g. `class="h-96"`) — there's no sane default height
+for an arbitrary pane layout. Each `med-splitter-panel`'s `minSize` (a percentage, default `5`)
+clamps how far a drag can shrink it.

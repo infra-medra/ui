@@ -1,0 +1,15 @@
+<div class="flex flex-col items-start gap-3">
+  <button medButton variant="outlined" (click)="confirmHeadless()">Rate MedraUi</button>
+  <p class="text-sm text-surface-500 dark:text-surface-400">{{ result() }}</p>
+</div>
+
+<ng-template #headlessTpl let-data let-onAccept="onAccept" let-onReject="onReject">
+  <div class="flex flex-col items-center gap-3 text-center">
+    <med-icon name="star" variant="solid" class="size-10 text-yellow-500" />
+    <p class="text-sm font-semibold text-surface-900 dark:text-surface-50">{{ data.message }}</p>
+    <div class="flex gap-2">
+      <button medButton type="button" variant="outlined" (click)="onReject()">Maybe later</button>
+      <button medButton type="button" (click)="onAccept()">Rate now</button>
+    </div>
+  </div>
+</ng-template>

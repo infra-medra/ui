@@ -1,0 +1,1 @@
+In `multiple` mode `unique` is on by default and ignores a repeated pick. Set it to `false` to allow the same value more than once.

@@ -1,0 +1,10 @@
+## Autoplay, indicators, and layout
+
+`autoPlay` advances through `items` on a timer (`transitionInterval`, default `4000`ms), always
+wrapping back to the first image regardless of `circular` — a looping slideshow, not a stop at the
+end. It ships with its own pause/play toggle button, since auto-advancing content needs a stop
+mechanism reachable by every input method (WCAG 2.2.2). `showIndicators` adds a row of dots below
+the main image, one per item; `thumbnailsPosition`/`indicatorsPosition` (`'bottom'`/`'top'`/
+`'left'`/`'right'`, default `'bottom'`) move the thumbnail strip and dots independently.
+`numVisible`/`responsiveOptions` size the thumbnail strip itself, the same breakpoint-tier shape
+Carousel's own `responsiveOptions` uses.

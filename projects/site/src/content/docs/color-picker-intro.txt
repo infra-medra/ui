@@ -1,0 +1,12 @@
+ColorPicker renders a small swatch button; clicking it opens a panel with a saturation/brightness
+square and a hue track for picking a color, plus a hex input. The bound value is a plain string —
+never a structured HSB or RGB object — but `format` (default `'hex'`) governs which string
+grammar it's read and written in: `#3b82f6`, or `rgb(r, g, b)`/`hsb(h, s%, b%)` when set to
+`'rgb'`/`'hsb'`. Internally the picker always drags/derives in hex/HSB regardless of `format` —
+only the value crossing the `ControlValueAccessor` boundary changes shape. Unlike most of this
+library's overlay pickers, the panel never closes after a selection: dragging inside it updates the
+form value continuously, frame by frame, so the swatch (and anything bound to it) live-previews the
+color as the user drags, and only Escape or an outside click actually dismisses the panel. There's
+no `null` value — a swatch always shows *some* color, so an unwritten value defaults to `#000000`
+instead of rendering blank. It implements `ControlValueAccessor`, so bind it with `[(ngModel)]` or a
+reactive `formControl` like any other MedraUi input.

@@ -1,0 +1,17 @@
+<div class="flex max-w-md flex-col gap-3">
+  <med-accordion [(activeIndex)]="activeIndex" expandIcon="plus" collapseIcon="minus" (opened)="onOpened($event)" (closed)="onClosed($event)">
+    <med-accordion-tab header="Billing">
+      <p>Custom expand/collapse icons stay fixed per state instead of rotating a single chevron.</p>
+    </med-accordion-tab>
+    <med-accordion-tab header="Shipping">
+      <p>Opening this one closes the other, in single mode — watch the log below.</p>
+    </med-accordion-tab>
+  </med-accordion>
+  @if (log().length) {
+    <ul class="space-y-1 text-sm text-surface-500 dark:text-surface-400">
+      @for (line of log(); track $index) {
+        <li>{{ line }}</li>
+      }
+    </ul>
+  }
+</div>

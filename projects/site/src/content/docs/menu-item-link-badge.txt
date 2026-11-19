@@ -1,0 +1,7 @@
+## Links and badges
+
+`MenuItem` isn't limited to `command()` callbacks: setting `url` renders the item's label inside a
+real `<a [href]>` — Ctrl/Cmd+click, middle-click-to-new-tab, and "copy link" all come free from the
+browser — with `target` passed straight through to the anchor. `badge` renders a small trailing
+label (a count, "New", etc.) next to the item's own label. Every item type across the menu family
+(Menu, Menubar, MegaMenu, PanelMenu, TieredMenu, TabMenu) shares this same `MenuItem` shape.

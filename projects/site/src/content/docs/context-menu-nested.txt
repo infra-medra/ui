@@ -1,0 +1,5 @@
+## Nested submenus
+
+`medContextMenu` isn't limited to a flat `MenuItem[]` — it accepts `TieredMenuItem[]`, so any item
+can carry its own nested `items` and open a cascading flyout submenu on hover/focus, the same
+cascading behavior TieredMenu's own popup uses.

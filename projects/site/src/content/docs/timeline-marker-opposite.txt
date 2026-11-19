@@ -1,0 +1,5 @@
+## Custom marker and opposite content
+
+`#marker` replaces the default dot for events that need a status icon instead. `#opposite` renders
+its own column before the marker/connector, typically for a timestamp, and reserves that column's layout space only once it's actually
+projected, so a timeline that never uses it keeps today's simpler two-column layout.

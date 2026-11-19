@@ -1,0 +1,1 @@
+`autoHighlight` is on by default: the first enabled suggestion is active when the panel opens, so Enter picks it. Turn it off to require an explicit arrow key or pointer move first.

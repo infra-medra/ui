@@ -1,0 +1,6 @@
+## Custom header, footer, and headless content
+
+`#header`/`#footer`/`#headless` are named projection slots. `#header` is additive alongside the plain-string `header` input (the
+template renders first, the string title next to it); `#footer` renders in a new row below the
+body, only when projected; `#headless` replaces the header row, body, and footer entirely, giving
+you full control over the panel.

@@ -1,0 +1,7 @@
+## Custom styling, dismissal, and labeling
+
+`class` merges onto the panel's own default classes (via the same `mergeClasses()` helper other
+components use), so you can widen the panel or tweak its border without fighting the defaults.
+`dismissable` (default `true`) controls only the outside-click close — Escape always closes the
+panel regardless. `ariaLabelledBy` points `aria-labelledby` at an element already inside the
+panel (a heading, say) instead of duplicating that text into a separate `ariaLabel` string.

@@ -1,0 +1,7 @@
+Steps is a horizontal progress/navigation indicator — numbered circles connected by a line, each with
+a label — with `activeIndex` as a `model()` for `[(activeIndex)]`, the same two-way-bindable convention
+Tabs uses. Every enabled step, plus the whole row, forms a single `role="toolbar"` with one Tab stop:
+ArrowLeft/Right move the roving stop between enabled steps with wraparound, Home/End jump to the
+first/last enabled one. Arrow keys only move focus — they don't activate a step the way a radiogroup's
+arrow keys would; clicking (or Enter/Space on the focused button) is what changes `activeIndex`.
+`readonly` turns every step into a plain, non-interactive indicator for read-only progress display.

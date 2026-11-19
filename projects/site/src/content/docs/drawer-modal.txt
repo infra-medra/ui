@@ -1,0 +1,7 @@
+## Modal and header
+
+`modal` (default `true`) controls the backdrop: a modal drawer dims the page behind it, traps
+focus inside, and closes on a backdrop click; a non-modal one (`modal="false"`) has no backdrop
+and closes on an outside click instead. `header` renders a title bar, and `closable` (default
+`true`) adds a close button inside it — both are optional if your projected content brings its
+own chrome.

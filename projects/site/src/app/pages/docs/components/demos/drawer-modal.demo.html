@@ -1,0 +1,8 @@
+<button medButton variant="outlined" (click)="visible.set(true)">Open non-modal drawer</button>
+
+<med-drawer [(visible)]="visible" position="bottom" modal="false" header="Quick filters" closeLabel="Dismiss">
+  <p class="text-sm text-surface-600 dark:text-surface-300">
+    No backdrop here — the page behind stays interactive, and clicking outside the panel
+    closes it.
+  </p>
+</med-drawer>

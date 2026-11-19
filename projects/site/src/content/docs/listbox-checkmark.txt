@@ -1,0 +1,3 @@
+## Checkmark
+
+`checkmark` shows a check icon on each chosen option instead of only highlighting its row.

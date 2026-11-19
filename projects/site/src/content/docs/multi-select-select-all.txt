@@ -1,0 +1,5 @@
+## Select all
+
+`showToggleAll` (on by default) adds a header checkbox that selects or clears every enabled option
+that is currently shown, and `toggleAllLabel` sets its text. `selectAllChanged` reports whether the
+checkbox marked or cleared the options.

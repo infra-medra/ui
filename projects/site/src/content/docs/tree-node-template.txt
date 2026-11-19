@@ -1,0 +1,8 @@
+## Per-node/per-type templates
+
+`[medTreeNodeTemplate]` marks a projected `<ng-template>` as the content for nodes whose own `type`
+matches its value — `<ng-template medTreeNodeTemplate="folder" let-node>` — falling back to a
+value-less `<ng-template medTreeNodeTemplate let-node>` for any node whose `type` is unset or
+doesn't match a registered one. A directive on the template itself, not a named slot per type,
+since the set of `type` values is open-ended and consumer-defined. Works identically whether
+`virtualScroll` is on or off.

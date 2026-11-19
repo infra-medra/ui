@@ -1,0 +1,8 @@
+<div class="flex flex-col gap-3">
+  <med-message severity="info">A new version of your app is available.</med-message>
+  <med-message severity="success">Changes saved.</med-message>
+  <med-message severity="warn">Your license expires in 3 days.</med-message>
+  @if (visible()) {
+    <med-message severity="danger" closable (closed)="visible.set(false)">Deploy failed — check the build log.</med-message>
+  }
+</div>

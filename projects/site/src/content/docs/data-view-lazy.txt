@@ -1,0 +1,7 @@
+## Loading and server-side (lazy) mode
+
+`loading` is purely presentational, the same overlay-spinner-over-existing-content treatment
+DataTable's own `loading` uses. `lazy` reinterprets `value` as "the current page only" — the
+paginator's total comes from `totalRecords` instead of `value.length` — and `lazyLoad` emits
+`{ first, rows }` whenever the page changes, including once on initial mount (`lazyLoadOnInit`,
+default `true`). This demo simulates a 500ms server round-trip over a synthetic 23-item dataset.

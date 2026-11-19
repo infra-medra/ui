@@ -1,0 +1,6 @@
+<div class="flex flex-wrap items-center gap-2">
+  @for (tag of tags; track tag) {
+    <med-chip icon="tag" removable (removed)="removeTag(tag)">{{ tag }}</med-chip>
+  }
+  <med-chip image="https://i.pravatar.cc/64?img=5" imageAlt="Beatriz Nunes">Beatriz Nunes</med-chip>
+</div>

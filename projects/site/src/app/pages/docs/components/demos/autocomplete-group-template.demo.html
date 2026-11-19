@@ -1,0 +1,11 @@
+<med-autocomplete
+  [suggestions]="suggestions()"
+  [(ngModel)]="framework"
+  placeholder="Search a framework"
+  (search)="onSearch($event)"
+  class="max-w-sm"
+>
+  <ng-template #group let-label>
+    <div data-testid="group-template" class="px-3 py-1 text-xs font-semibold uppercase tracking-wide">▸ {{ label }}</div>
+  </ng-template>
+</med-autocomplete>

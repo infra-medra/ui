@@ -1,0 +1,11 @@
+<button medButton type="button" variant="outlined" (click)="showHeadless()">Headless toast</button>
+
+<ng-template #headlessTpl let-message let-onClose="onClose">
+  <div class="pointer-events-auto flex items-center gap-3 rounded-full bg-surface-900 px-4 py-2 text-sm text-white shadow-overlay-lg dark:bg-surface-700">
+    <med-icon name="check-circle" variant="solid" class="size-4 text-success-400" />
+    {{ message.detail }}
+    <button type="button" class="text-surface-400 hover:text-white" (click)="onClose()">
+      <med-icon name="x-mark" class="size-4" />
+    </button>
+  </div>
+</ng-template>

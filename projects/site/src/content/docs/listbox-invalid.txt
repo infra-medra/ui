@@ -1,0 +1,3 @@
+## Invalid
+
+`invalid` marks the list as failing validation: it gets the error border and `aria-invalid`.

@@ -1,0 +1,7 @@
+## Custom icon+message only
+
+`contentTemplate` is the lighter-touch sibling of `headlessTemplate` — it replaces only the
+icon+message block, keeping the built-in Accept/Reject buttons. Context: `{ $implicit: data }`
+(the resolved `ConfirmPopupData`). Reach for this for richer message content (an icon that isn't
+one of the built-in severities, multi-line text) without rebuilding the button row yourself the
+way `headlessTemplate` requires.

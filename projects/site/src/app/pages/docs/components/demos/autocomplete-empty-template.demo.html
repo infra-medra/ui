@@ -1,0 +1,9 @@
+<med-autocomplete
+  [suggestions]="suggestions()"
+  [(ngModel)]="framework"
+  placeholder="Type something that matches nothing"
+  (search)="onSearch($event)"
+  class="max-w-sm"
+>
+  <ng-template #empty><p data-testid="empty-template" class="px-3 py-2 text-sm">Nothing matches your search.</p></ng-template>
+</med-autocomplete>

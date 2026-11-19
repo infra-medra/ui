@@ -1,0 +1,5 @@
+## Meta key selection
+
+With `metaKeySelection` in `multiple` mode, a plain click selects only the clicked option and
+replaces the previous selection. Hold Ctrl (or Cmd on macOS) to add or remove options, as in a
+file manager. Without it, every click toggles its option.

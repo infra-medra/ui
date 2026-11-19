@@ -1,0 +1,4 @@
+<div class="flex flex-col items-start gap-3">
+  <med-split-button label="Save" icon="check" [items]="items" (buttonClick)="onSave()" (itemSelect)="onSelect($event)" />
+  <p class="text-sm text-surface-500 dark:text-surface-400">{{ lastAction() }}</p>
+</div>

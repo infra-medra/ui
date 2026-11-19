@@ -1,0 +1,4 @@
+<med-inplace closable>
+  <span medInplaceDisplay class="cursor-pointer">{{ name() || 'Click to set a name' }}</span>
+  <input medInplaceContent [ngModel]="name()" (ngModelChange)="name.set($event)" />
+</med-inplace>

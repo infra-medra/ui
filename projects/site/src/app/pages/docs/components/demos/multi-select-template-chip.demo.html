@@ -1,0 +1,5 @@
+<med-multi-select [options]="cities" [(ngModel)]="selectedCities" display="chip" placeholder="Pick cities" class="max-w-sm">
+  <ng-template #chip let-option>
+    <span data-testid="chip-template" class="font-medium">{{ option.label }} <span class="text-surface-400">({{ option.value }})</span></span>
+  </ng-template>
+</med-multi-select>

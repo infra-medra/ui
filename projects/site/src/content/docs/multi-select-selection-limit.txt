@@ -1,0 +1,6 @@
+## Selection limit
+
+`selectionLimit` caps how many options can be selected at once — once reached, every not-yet-selected
+option becomes disabled (already-selected ones stay clickable, so the user can still deselect down
+from the cap). `showToggleAll` is force-hidden whenever `selectionLimit` is set, since a bulk
+select-all would trivially blow past the cap.

@@ -1,0 +1,6 @@
+## Filter
+
+`filter` adds a search box inside the panel. `filterBy` picks the fields to match, `filterMatchMode`
+sets how (`contains`, `startsWith`, `endsWith`, `equals`, ...), `resetFilterOnHide` clears the text
+when the panel closes (by default the text is kept between openings), and `filtered` reports each
+change.

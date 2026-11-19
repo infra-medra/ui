@@ -1,0 +1,5 @@
+## Value template
+
+`#value` replaces the summary in the field while options are chosen, with `display="comma"`. The
+template gets the array of values as the implicit variable and the chosen options as `options`.
+Pick options below to see it.

@@ -1,0 +1,6 @@
+## Custom value content
+
+`#content` replaces the value label entirely with your own content, receiving the raw numeric
+value as context (`let-value`). It stays
+gated by `showValue`, matching this component's own existing "the value label as a whole is
+opt-in" convention.

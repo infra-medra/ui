@@ -1,0 +1,10 @@
+<button medButton variant="outlined" #trigger (click)="pop.toggle(trigger)">Filter</button>
+
+<med-popover #pop class="w-72 border-primary-300 dark:border-primary-700" ariaLabelledBy="popover-customized-heading" dismissable="false">
+  <h3 id="popover-customized-heading" class="text-sm font-medium text-surface-700 dark:text-surface-200">Filter results</h3>
+  <p class="mt-1 text-sm text-surface-500 dark:text-surface-400">
+    <code>dismissable="false"</code> disables the outside-click close — Escape and the button
+    below still work. <code>class</code> widened this panel and tinted its border.
+  </p>
+  <button medButton type="button" size="sm" class="mt-3" (click)="pop.close()">Apply</button>
+</med-popover>

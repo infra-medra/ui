@@ -1,0 +1,7 @@
+Dock is a macOS-style row of icon launchers that magnify near the pointer. Magnification is
+index-distance based rather than pixel-distance: each button reports its own index on `pointerenter`,
+and every button scales off `|its index - hovered index|` through a small discrete falloff table — a
+simpler approximation than a continuous, physically-accurate wave, with no `getBoundingClientRect()`
+or container-wide `pointermove` listener needed. `items` reuses the same `MenuItem` shape as
+Menu/SplitButton/ContextMenu. The whole row is a single `role="toolbar"` with roving tabindex —
+one shared Tab stop, ArrowLeft/Right (or Up/Down) move between items, Home/End jump to the ends.
