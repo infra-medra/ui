@@ -135,8 +135,9 @@ Repository **Settings** → **Rules** → **Rulesets**, targeting `main` and
 ### Code owners
 
 `.github/CODEOWNERS` assigns `.github/`, `tools/release/`, `.changeset/config.json`
-and `projects/medra/ui/package.json` to `@infra-medra/maintainers`. That team must
-exist in the GitHub organization and have write access, or the rule protects nothing.
+and `projects/medra/ui/package.json` to `@infra-medra`, a user account (there is no GitHub organization yet). The owner must
+have write access, or the rule protects nothing. When an organization and a
+maintainers team exist, replace the handle with the team.
 
 ### Actions policy
 
