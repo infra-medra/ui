@@ -1,0 +1,34 @@
+# Checks for pull requests. Runs untrusted code, so it has read-only access and uses no credentials.
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - main
+      - 'release/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      # actions/checkout v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      # actions/setup-node v7.1.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: '22.14'
+          cache: npm
+      - run: npm ci
+      - name: Changeset check
+        run: node tools/release/check.mjs changeset
+      - name: Version policy check
+        run: node tools/release/check.mjs policy
+      - run: npm test
+      - run: npm run build

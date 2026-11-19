@@ -1,0 +1,6 @@
+# Pipeline files need review from the release owners (release hardening, M-04).
+# Owners must be GitHub users or teams with write access; update when an organization team exists.
+/.github/                          @infra-medra
+/tools/release/                    @infra-medra
+/.changeset/config.json            @infra-medra
+/projects/medra/ui/package.json    @infra-medra

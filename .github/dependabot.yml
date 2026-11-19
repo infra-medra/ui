@@ -1,0 +1,7 @@
+# Keeps the commit-SHA pins of GitHub Actions up to date (release hardening, M-06).
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
