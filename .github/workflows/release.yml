@@ -69,7 +69,7 @@ jobs:
       # The build ran in the read-only verify job; this job only publishes its output, so no
       # build tooling executes while the publishing identity is available.
       # actions/download-artifact v7.0.0
-      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
         with:
           name: medra-ui-dist
           path: dist/medra/ui
