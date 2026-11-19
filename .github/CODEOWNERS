@@ -1,0 +1,6 @@
+# Pipeline files need review from the release owners (release hardening, M-04).
+# The team handle below must exist in the GitHub organization; see RELEASING.md.
+/.github/                          @infra-medra/maintainers
+/tools/release/                    @infra-medra/maintainers
+/.changeset/config.json            @infra-medra/maintainers
+/projects/medra/ui/package.json    @infra-medra/maintainers

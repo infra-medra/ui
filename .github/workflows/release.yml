@@ -1,0 +1,89 @@
+# Publishes @medra/ui. Runs only on pushes to protected branches, and alone holds the
+# publishing identity. Renaming this file requires re-registering the npm trusted publisher.
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+      - 'release/**'
+
+# Deny everything by default; each job asks for what it needs.
+permissions: {}
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      # actions/checkout v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      # actions/setup-node v7.1.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: '22.14'
+          cache: npm
+      - run: npm ci
+      - name: Version policy check
+        run: node tools/release/check.mjs policy
+      - run: npm test
+      - run: npm run build
+      # actions/upload-artifact v7.0.2
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: medra-ui-dist
+          path: dist/medra/ui
+          if-no-files-found: error
+
+  release:
+    needs: verify
+    runs-on: ubuntu-latest
+    environment: npm-publish
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: write
+      id-token: write
+    steps:
+      # actions/checkout v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+      # actions/setup-node v7.1.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: '22.14'
+          registry-url: 'https://registry.npmjs.org'
+      # Trusted Publishing needs npm 11.5.1 or later.
+      - run: npm install --global npm@11.5.1
+      # Dependency lifecycle scripts never run in the job that holds the publishing identity.
+      - run: npm ci --ignore-scripts
+      # The build ran in the read-only verify job; this job only publishes its output, so no
+      # build tooling executes while the publishing identity is available.
+      # actions/download-artifact v7.0.0
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131
+        with:
+          name: medra-ui-dist
+          path: dist/medra/ui
+      # changesets/action v2.1.2
+      - id: changesets
+        uses: changesets/action@ae32849d5ba541f9ae29e40e22a623bc13562f51
+        with:
+          version-script: npm run version
+          publish-script: node tools/release/publish.mjs
+      # Pushes made with the workflow token do not trigger pull request checks, so run
+      # them explicitly on the version branch.
+      - name: Run checks on the version branch
+        if: steps.changesets.outputs.has-changesets == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BASE_BRANCH: ${{ github.ref_name }}
+        run: gh workflow run ci.yml --ref "changeset-release/$BASE_BRANCH"

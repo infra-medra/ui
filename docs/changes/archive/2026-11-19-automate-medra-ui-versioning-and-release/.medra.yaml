@@ -1,0 +1,63 @@
+change: automate-medra-ui-versioning-and-release
+created: 2026-11-19
+track: full
+phase: archived
+diff_base: none
+gates:
+  proposal:
+    status: approved
+    by: Tiago Cavalli
+    at: 2026-11-19T21:29:28Z
+    hash: 14592487d6ab6ca83ff7173c5d4d506224d52f86d38d5a2d34d6e77b6c02c60d
+    note: null
+  plan:
+    status: approved
+    by: Tiago Cavalli
+    at: 2026-11-19T21:36:42Z
+    hash: 194f7b2d1f30612a824d5bc83ccc3c5b3245d473ef8a9094be201af7ce2beb4a
+    note: null
+  tasks:
+    status: approved
+    by: Tiago Cavalli
+    at: 2026-11-19T21:38:26Z
+    hash: 27e763ea03719f22a88eb2b5f5746b59e6247ea7e300cf19f522137147c7043e
+    note: null
+  verify:
+    status: approved
+    by: Tiago Cavalli
+    at: 2026-11-19T22:29:23Z
+    hash: c9a485efb27b439f19503ec10dae80b7a0c4ebe865262e641429c78d9b1a9129
+    note: null
+gate_notes:
+  - gate: verify
+    by: Tiago Cavalli
+    at: 2026-11-19T22:25:20Z
+    note: "Fix F-04: exempt changeset-release/* head branches from the changeset check, with a unit test"
+reviews: []
+track_history: []
+blockers: []
+last_task_done_at: 2026-11-19T22:17:00Z
+test_hashes:
+  T004:
+    tests/release/baseline.test.ts: 1f9d36f70accd9f48f2a8395e9e110ff293ae1cc3987e8509b24b92888a186b6
+  T006:
+    tests/release/policy.test.ts: 7cb297fa3e563bb475aece4d573b7c7f35bdaebe4a253ca1dfd5d4a3adb8c20d
+  T008:
+    tests/release/policy.test.ts: d9e8cf90cb51fd0a3a78fc7b574896e6b083bbaa85c1e1f999f8017f43fc46e3
+  T010:
+    tests/release/policy.test.ts: 1039003eecc777e981e081ab0031c230cdde549d10ffcfe7e6f99d2435b9ff18
+  T012:
+    tests/release/policy.test.ts: bd6e5d87df632ad63a05e9de12cb2ae3ac7a4df4f6f8a14e75f0b168bfd2c6fe
+  T014:
+    tests/release/changeset-required.test.ts: bf0b48d79a3dbdbda31c4f8fb7679119caf8d2d1ec5eab597744334726c54d3f
+  T017:
+    tests/release/workflows.test.ts: 16e1ceb24fce4d96d1005c4b17728aa4d2133c0585a6575a312e36c4c468cba9
+suite:
+  at: 2026-11-19T22:27:21Z
+  exit: 0
+  commands:
+    - npm test
+  fingerprint: null
+archived:
+  at: 2026-11-19
+  sequence: 1
