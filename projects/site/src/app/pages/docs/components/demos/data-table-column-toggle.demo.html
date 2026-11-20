@@ -1,0 +1,7 @@
+<med-multi-select [options]="columnOptions" [(ngModel)]="visibleFields" placeholder="Choose columns" class="mb-3 max-w-sm" />
+<med-data-table [value]="equipment" ariaLabel="Lab equipment inventory (column toggle)">
+  <med-table-column field="name" header="Name" [visible]="visibleFields.includes('name')" />
+  <med-table-column field="category" header="Category" [visible]="visibleFields.includes('category')" />
+  <med-table-column field="quantity" header="Quantity" align="right" [visible]="visibleFields.includes('quantity')" />
+  <med-table-column field="status" header="Status" [visible]="visibleFields.includes('status')" />
+</med-data-table>

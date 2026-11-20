@@ -1,0 +1,3 @@
+## Column resize in expand mode
+
+Set `columnResizeMode="expand"` to change only the dragged column. The table grows or shrinks by the same amount, so it can become wider than its container and scroll horizontally. A column never shrinks below 40px, and every column, including the last one, has a handle. Give the columns a pixel `width` so the starting layout is predictable.

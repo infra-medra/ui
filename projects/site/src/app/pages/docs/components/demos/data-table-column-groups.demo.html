@@ -1,0 +1,19 @@
+<med-data-table [value]="equipment" ariaLabel="Lab equipment inventory (column groups)">
+  <ng-template #headerGroup>
+    <tr>
+      <th colspan="2" class="px-3 py-2 text-center font-semibold">Item</th>
+      <th colspan="2" class="px-3 py-2 text-center font-semibold">Availability</th>
+    </tr>
+  </ng-template>
+  <med-table-column field="name" header="Name" sortable />
+  <med-table-column field="category" header="Category" />
+  <med-table-column field="quantity" header="Quantity" align="right" />
+  <med-table-column field="status" header="Status" />
+  <ng-template #footerGroup>
+    <tr>
+      <td colspan="2" class="px-3 py-2 font-semibold">Total items</td>
+      <td class="px-3 py-2 text-right font-semibold">{{ totalQuantity }}</td>
+      <td class="px-3 py-2"></td>
+    </tr>
+  </ng-template>
+</med-data-table>

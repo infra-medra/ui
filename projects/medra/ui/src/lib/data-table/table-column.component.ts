@@ -56,6 +56,12 @@ export class TableColumnComponent {
   readonly editable = input(false, { transform: booleanAttribute });
   readonly frozen = input(false, { transform: booleanAttribute });
   readonly alignFrozen = input<'left' | 'right'>('left');
+  /**
+   * Shows or hides the column. While `false` the table renders no header, body or footer cell for it and leaves it out of
+   * column spans, frozen offsets and CSV export; its sort state, filter matching and resized width are kept, so setting it
+   * back to `true` restores the column as it was.
+   */
+  readonly visible = input(true, { transform: booleanAttribute });
 
   readonly cellTemplate = contentChild(TemplateRef);
   readonly editTemplate = contentChild('editTemplate', { read: TemplateRef });

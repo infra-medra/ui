@@ -1,0 +1,8 @@
+<med-data-table [value]="equipment" reorderable selectionMode="multiple" dataKey="id" [(selection)]="selected" ariaLabel="Lab equipment inventory (frozen column with reorder and selection columns)">
+  <med-table-column field="name" header="Name" width="200px" [frozen]="true" />
+  <med-table-column field="category" header="Category" width="180px" />
+  <med-table-column field="location" header="Location" width="160px" />
+  <med-table-column field="supplier" header="Supplier" width="180px" />
+  <med-table-column field="serial" header="Serial number" width="180px" />
+  <med-table-column field="quantity" header="Quantity" width="140px" align="right" />
+</med-data-table>

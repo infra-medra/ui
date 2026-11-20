@@ -14,6 +14,9 @@ const ROW_LABELS_AND_IDENTITY = ['row-aria-label', 'row-track-by'];
 /** The examples DAT-024.S6 adds for frozen columns, frozen rows and scrolling, by slug. */
 const FROZEN_AND_SCROLL = ['frozen-columns', 'frozen-columns-both', 'frozen-rows', 'scroll-horizontal', 'scroll-flexible'];
 
+/** The examples DAT-024.S7 covers for the fit and expand resize modes, the column toggle and column groups, by slug. */
+const RESIZE_TOGGLE_GROUPS = ['column-resize', 'column-resize-expand', 'column-toggle', 'column-groups'];
+
 interface SectionReport {
   id: string;
   proseLength: number;
@@ -116,6 +119,20 @@ test.describe('DataTable docs page', () => {
   test('DAT-024.S6: frozen and scroll features each have a section with prose, a demo and a code block', async ({ page }) => {
     const { anchorIds, sections } = await readPage(page);
     for (const slug of FROZEN_AND_SCROLL) {
+      expect(anchorIds, `no section for "${slug}"`).toContain(`example-${slug}`);
+      const section = sections.find((s) => s.id === `example-${slug}`)!;
+      expect(section.proseLength, `no prose for "${slug}"`).toBeGreaterThan(0);
+      expect(section.demos, `no demo for "${slug}"`).toBe(1);
+      expect(section.codeBlocks, `no code block for "${slug}"`).toBeGreaterThanOrEqual(1);
+    }
+  });
+
+  // DAT-024.S7
+  test('DAT-024.S7: the fit and expand resize modes, the column toggle and column groups each have a section with prose, a demo and a code block', async ({
+    page,
+  }) => {
+    const { anchorIds, sections } = await readPage(page);
+    for (const slug of RESIZE_TOGGLE_GROUPS) {
       expect(anchorIds, `no section for "${slug}"`).toContain(`example-${slug}`);
       const section = sections.find((s) => s.id === `example-${slug}`)!;
       expect(section.proseLength, `no prose for "${slug}"`).toBeGreaterThan(0);
