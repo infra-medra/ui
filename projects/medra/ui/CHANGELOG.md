@@ -1,5 +1,11 @@
 # @medra.dev/ui
 
+## 21.0.1
+
+### Patch Changes
+
+- 9c0df3f: Replace the placeholder package README with installation, usage and versioning notes.
+
 ## 21.0.0
 
 ### Minor Changes
