@@ -1,0 +1,5 @@
+## Row labels
+
+By default the checkbox or radio button of each row is announced as "Select row", so a screen reader user cannot tell the rows apart. Set `rowAriaLabel` to a function that receives a row and returns its label, such as `Select ${row.name}`, and each selection control is named after its row.
+
+The label applies to the checkbox column of `selectionMode="multiple"` and to the radio column of `selectionMode="radio"`. The select-all checkbox in the header keeps `selectAllLabel`.

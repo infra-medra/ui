@@ -1,0 +1,13 @@
+<med-data-table
+  [value]="equipment"
+  selectionMode="multiple"
+  dataKey="id"
+  [rowAriaLabel]="rowLabel"
+  [(selection)]="selected"
+  ariaLabel="Lab equipment inventory (row labels)"
+>
+  <med-table-column field="name" header="Name" />
+  <med-table-column field="category" header="Category" />
+  <med-table-column field="quantity" header="Quantity" align="right" />
+</med-data-table>
+<p class="mt-2 text-sm text-surface-500 dark:text-surface-400">Selected: {{ selectedCount }} of {{ equipment.length }}.</p>

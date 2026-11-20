@@ -19,6 +19,8 @@ import { DataTableScrollVerticalDemo } from './demos/data-table-scroll-vertical.
 import { DataTableRowExpansionDemo } from './demos/data-table-row-expansion.demo';
 import { DataTableRowGroupSubheaderDemo } from './demos/data-table-row-group-subheader.demo';
 import { DataTableSelectionRadioDemo } from './demos/data-table-selection-radio.demo';
+import { DataTableRowAriaLabelDemo } from './demos/data-table-row-aria-label.demo';
+import { DataTableRowTrackByDemo } from './demos/data-table-row-track-by.demo';
 import { DataTableKeyboardNavigationDemo } from './demos/data-table-keyboard-navigation.demo';
 import { DataTableSizeDemo } from './demos/data-table-size.demo';
 import { DataTableGridLinesDemo } from './demos/data-table-grid-lines.demo';
@@ -48,6 +50,8 @@ import scrollVerticalCode from './demos/data-table-scroll-vertical.demo.html?raw
 import rowExpansionCode from './demos/data-table-row-expansion.demo.html?raw';
 import rowGroupSubheaderCode from './demos/data-table-row-group-subheader.demo.html?raw';
 import selectionRadioCode from './demos/data-table-selection-radio.demo.html?raw';
+import rowAriaLabelCode from './demos/data-table-row-aria-label.demo.html?raw';
+import rowTrackByCode from './demos/data-table-row-track-by.demo.html?raw';
 import keyboardNavigationCode from './demos/data-table-keyboard-navigation.demo.html?raw';
 import sizeCode from './demos/data-table-size.demo.html?raw';
 import gridLinesCode from './demos/data-table-grid-lines.demo.html?raw';
@@ -78,6 +82,8 @@ import scrollVerticalContent from '../../../../content/docs/data-table-scroll-ve
 import rowExpansionContent from '../../../../content/docs/data-table-row-expansion.txt?raw';
 import rowGroupSubheaderContent from '../../../../content/docs/data-table-row-group-subheader.txt?raw';
 import selectionRadioContent from '../../../../content/docs/data-table-selection-radio.txt?raw';
+import rowAriaLabelContent from '../../../../content/docs/data-table-row-aria-label.txt?raw';
+import rowTrackByContent from '../../../../content/docs/data-table-row-track-by.txt?raw';
 import keyboardNavigationContent from '../../../../content/docs/data-table-keyboard-navigation.txt?raw';
 import sizeContent from '../../../../content/docs/data-table-size.txt?raw';
 import gridLinesContent from '../../../../content/docs/data-table-grid-lines.txt?raw';
@@ -131,6 +137,8 @@ const EXAMPLES = [
   { id: 'example-export-csv', label: 'CSV export' },
   { id: 'example-row-reorder-events', label: 'Row reorder and events' },
   { id: 'example-selection-radio', label: 'Radio selection' },
+  { id: 'example-row-aria-label', label: 'Row labels' },
+  { id: 'example-row-track-by', label: 'Row identity' },
   { id: 'example-keyboard-navigation', label: 'Keyboard navigation' },
   { id: 'example-size', label: 'Size' },
   { id: 'example-grid-lines', label: 'Grid lines' },
@@ -168,6 +176,8 @@ const EXAMPLES = [
     DataTableExportCsvDemo,
     DataTableRowReorderEventsDemo,
     DataTableSelectionRadioDemo,
+    DataTableRowAriaLabelDemo,
+    DataTableRowTrackByDemo,
     DataTableKeyboardNavigationDemo,
     DataTableSizeDemo,
     DataTableGridLinesDemo,
@@ -372,6 +382,22 @@ const EXAMPLES = [
         </div>
       </section>
 
+      <section id="example-row-aria-label" class="mt-10 scroll-mt-24">
+        <app-prose class="block" [content]="rowAriaLabelContent" />
+        <div class="mt-4">
+          <app-data-table-row-aria-label-demo />
+          <div class="mt-3"><app-code-block [code]="rowAriaLabelCode" /></div>
+        </div>
+      </section>
+
+      <section id="example-row-track-by" class="mt-10 scroll-mt-24">
+        <app-prose class="block" [content]="rowTrackByContent" />
+        <div class="mt-4">
+          <app-data-table-row-track-by-demo />
+          <div class="mt-3"><app-code-block [code]="rowTrackByCode" /></div>
+        </div>
+      </section>
+
       <section id="example-keyboard-navigation" class="mt-10 scroll-mt-24">
         <app-prose class="block" [content]="keyboardNavigationContent" />
         <div class="mt-4">
@@ -461,6 +487,10 @@ export default class DocsDataTable {
   protected readonly rowReorderEventsCode = rowReorderEventsCode;
   protected readonly selectionRadioContent = selectionRadioContent;
   protected readonly selectionRadioCode = selectionRadioCode;
+  protected readonly rowAriaLabelContent = rowAriaLabelContent;
+  protected readonly rowAriaLabelCode = rowAriaLabelCode;
+  protected readonly rowTrackByContent = rowTrackByContent;
+  protected readonly rowTrackByCode = rowTrackByCode;
   protected readonly keyboardNavigationContent = keyboardNavigationContent;
   protected readonly keyboardNavigationCode = keyboardNavigationCode;
   protected readonly sizeContent = sizeContent;

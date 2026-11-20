@@ -1339,4 +1339,146 @@ describe('DataTableComponent', () => {
       expect(saved.sortOrder).toBe('asc');
     });
   });
+
+  describe('row identity and row labels', () => {
+    interface Item {
+      id: number;
+      name: string;
+    }
+
+    @Component({
+      standalone: true,
+      imports: [DataTableComponent, TableColumnComponent],
+      template: `
+        <med-data-table
+          [value]="items()"
+          [selectionMode]="selectionMode"
+          [rowAriaLabel]="rowAriaLabel"
+          [rowTrackBy]="rowTrackBy"
+          [expandedRowKeys]="expandedRowKeys"
+        >
+          <med-table-column field="name" header="Name" />
+          <ng-template #rowexpansion let-row>
+            <div class="expanded-detail">Detail: {{ row.name }}</div>
+          </ng-template>
+        </med-data-table>
+      `,
+    })
+    class RowIdentityHostComponent {
+      items = signal<Item[]>([
+        { id: 1, name: 'Widget' },
+        { id: 2, name: 'Gadget' },
+        { id: 3, name: 'Gizmo' },
+      ]);
+      selectionMode: 'multiple' | 'radio' | null = 'multiple';
+      rowAriaLabel: ((row: Item) => string) | null = null;
+      rowTrackBy: (row: Item, index: number) => unknown = (_row, index) => index;
+      expandedRowKeys: Record<string, boolean> = {};
+    }
+
+    const byRowLabel = (row: Item) => `Select ${row.name}`;
+    const byId = (row: Item) => row.id;
+
+    function bodyControls(fixture: { nativeElement: HTMLElement }, type: 'checkbox' | 'radio'): HTMLInputElement[] {
+      return Array.from(fixture.nativeElement.querySelectorAll<HTMLInputElement>(`tbody input[type="${type}"]`));
+    }
+
+    function create() {
+      const fixture = TestBed.createComponent(RowIdentityHostComponent);
+      return fixture;
+    }
+
+    // DAT-027.S1
+    it('DAT-027.S1: rowAriaLabel names the checkbox of each row', () => {
+      const fixture = create();
+      fixture.componentInstance.rowAriaLabel = byRowLabel;
+      fixture.detectChanges();
+
+      expect(bodyControls(fixture, 'checkbox').map((c) => c.getAttribute('aria-label'))).toEqual(['Select Widget', 'Select Gadget', 'Select Gizmo']);
+    });
+
+    // DAT-027.S2
+    it('DAT-027.S2: without rowAriaLabel every checkbox and radio is named "Select row"', () => {
+      const multiple = create();
+      multiple.detectChanges();
+      expect(bodyControls(multiple, 'checkbox').map((c) => c.getAttribute('aria-label'))).toEqual(['Select row', 'Select row', 'Select row']);
+
+      const radio = create();
+      radio.componentInstance.selectionMode = 'radio';
+      radio.detectChanges();
+      expect(bodyControls(radio, 'radio').map((c) => c.getAttribute('aria-label'))).toEqual(['Select row', 'Select row', 'Select row']);
+    });
+
+    // DAT-027.S3
+    it('DAT-027.S3: rowAriaLabel names the radio of each row', () => {
+      const fixture = create();
+      fixture.componentInstance.selectionMode = 'radio';
+      fixture.componentInstance.rowAriaLabel = byRowLabel;
+      fixture.detectChanges();
+
+      expect(bodyControls(fixture, 'radio').map((c) => c.getAttribute('aria-label'))).toEqual(['Select Widget', 'Select Gadget', 'Select Gizmo']);
+    });
+
+    // DAT-027.S4
+    it('DAT-027.S4: rowTrackBy keeps each row element when value is replaced with new objects of the same ids', () => {
+      const fixture = create();
+      fixture.componentInstance.selectionMode = null;
+      fixture.componentInstance.rowTrackBy = byId;
+      fixture.detectChanges();
+      const before = bodyRows(fixture);
+      const elementOf = (id: number) => before[id - 1];
+
+      fixture.componentInstance.items.set([
+        { id: 3, name: 'Gizmo' },
+        { id: 2, name: 'Gadget' },
+        { id: 1, name: 'Widget' },
+      ]);
+      fixture.detectChanges();
+
+      const after = bodyRows(fixture);
+      expect(after.map((r) => cellText(r)[0])).toEqual(['Gizmo', 'Gadget', 'Widget']);
+      // Ids 1 and 3 swap places, so index-based tracking would reuse the elements by position and fail here.
+      expect(after[0]).toBe(elementOf(3));
+      expect(after[1]).toBe(elementOf(2));
+      expect(after[2]).toBe(elementOf(1));
+    });
+
+    // DAT-027.S4 (default): index identity
+    it('DAT-027.S4: by default a row element is reused by position, not by record', () => {
+      const fixture = create();
+      fixture.componentInstance.selectionMode = null;
+      fixture.detectChanges();
+      const before = bodyRows(fixture);
+
+      fixture.componentInstance.items.set([
+        { id: 3, name: 'Gizmo' },
+        { id: 2, name: 'Gadget' },
+        { id: 1, name: 'Widget' },
+      ]);
+      fixture.detectChanges();
+
+      const after = bodyRows(fixture);
+      expect(after.map((r) => cellText(r)[0])).toEqual(['Gizmo', 'Gadget', 'Widget']);
+      expect(after[0]).toBe(before[0]);
+      expect(after[2]).toBe(before[2]);
+    });
+
+    // DAT-027.S5
+    it('DAT-027.S5: without dataKey the expansion key is the rowTrackBy identity as text', () => {
+      const fixture = create();
+      fixture.componentInstance.selectionMode = null;
+      fixture.componentInstance.rowTrackBy = byId;
+      fixture.componentInstance.expandedRowKeys = { '2': true };
+      fixture.componentInstance.items.set([
+        { id: 3, name: 'Gizmo' },
+        { id: 2, name: 'Gadget' },
+        { id: 1, name: 'Widget' },
+      ]);
+      fixture.detectChanges();
+
+      const details = Array.from(fixture.nativeElement.querySelectorAll('.expanded-detail')) as HTMLElement[];
+      expect(details).toHaveLength(1);
+      expect(details[0].textContent).toContain('Detail: Gadget');
+    });
+  });
 });

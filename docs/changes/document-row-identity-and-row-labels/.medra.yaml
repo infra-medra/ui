@@ -1,0 +1,90 @@
+change: document-row-identity-and-row-labels
+created: 2026-11-20
+track: fast
+phase: verified
+diff_base: c4e0e5a
+gates:
+  proposal:
+    status: approved
+    by: Tiago Cavalli
+    at: 2026-11-20T13:44:44Z
+    hash: ced5f1ca2fc03dd5322b76ec4c82638c2aa2d20526ee0d64d1be266e98169750
+    note: null
+  plan:
+    status: pending
+  tasks:
+    status: pending
+  verify:
+    status: approved
+    by: Tiago Cavalli
+    at: 2026-11-20T14:06:11Z
+    hash: 1e9a65243c06db6f7cd74405357db548878703aacac98b1e88046ad052280d0f
+    note: null
+gate_notes:
+  - gate: verify
+    by: Tiago Cavalli
+    at: 2026-11-20T14:05:18Z
+    note: "Split out unrelated work: removableSort / sorting-and-pagination files in the diff are out of scope for this change; note it and re-check."
+reviews: []
+track_history: []
+blockers:
+  - task: T001
+    at: 2026-11-20T13:41:09Z
+    note: tdd needs red evidence, but DAT-027 characterizes behavior that already works; rewrite T001 in tasks.md via /medra:propose. Tests are already written in data-table.component.spec.ts (6 pass).
+    resolved: true
+    resolved_at: 2026-11-20T13:52:47Z
+test_hashes:
+  T002:
+    e2e/site/data-table-docs.spec.ts: 7d66bacb91aed172162d842575901858b75fd4f02aa0f7fcad27b8e2da3e2cae
+    projects/medra/ui/src/lib/data-table/data-table.component.spec.ts: 18bd53ffbada176c80921e146b56a9c77343ae68b0295671cafd7f6718b90a1d
+last_task_done_at: 2026-11-20T13:59:54Z
+suite:
+  at: 2026-11-20T14:03:39Z
+  exit: 0
+  commands:
+    - npm test
+  fingerprint: 8625fe4969f7e0789e11971824f061fd05bad9f7b83a6d215b558e37d6dfae7c
+handoff_snapshots:
+  check:
+    "1":
+      .changeset/data-table-removable-sort.md: 885707a57707000d8db46afd75bb1e01be93aca8d1be6e7884b097f0cb549f89
+      e2e/site/data-table-docs.spec.ts: 7d66bacb91aed172162d842575901858b75fd4f02aa0f7fcad27b8e2da3e2cae
+      projects/medra/ui/src/lib/data-table/data-table.component.spec.ts: 18bd53ffbada176c80921e146b56a9c77343ae68b0295671cafd7f6718b90a1d
+      projects/medra/ui/src/lib/data-table/data-table.component.ts: d71d9a013c985cd41379cc2a66beee4bdf7dae16d290f7e369db74795357877d
+      projects/site/src/app/pages/docs/components/data-table.page.ts: 7232a1f64398414e293a81bba28c7d463c3cda674db40f14b16a6b98f9152199
+      projects/site/src/app/pages/docs/components/demos/data-table-presort.demo.html: cb2043d7af95c3834836215c608af6d5b9b71cfb1d305a7371cc2786e0a8961b
+      projects/site/src/app/pages/docs/components/demos/data-table-presort.demo.ts: 44cff6e48927380e63773f8626ee62c20e441b2a14c277477c9299b4beb0af5f
+      projects/site/src/app/pages/docs/components/demos/data-table-programmatic-pagination.demo.html: 8e6b3abb9ab5bdb93de9a256996cb75f1d2480e247a8dc801c7e5646992a81b9
+      projects/site/src/app/pages/docs/components/demos/data-table-programmatic-pagination.demo.ts: 6b786951fa70e3172f319e7c4e4020d74640fc9cad09d6ab9142047858c82af0
+      projects/site/src/app/pages/docs/components/demos/data-table-removable-sort.demo.html: 0c4b517fb307b4e9627eb773c867b657da4113bd6ebc1a93490e4a6b0d851526
+      projects/site/src/app/pages/docs/components/demos/data-table-removable-sort.demo.ts: 3c18b8ddb5f578ce61ec7d7aa61307a8b1d65ed5b21317886c5d19f592dba2e4
+      projects/site/src/app/pages/docs/components/demos/data-table-row-aria-label.demo.html: 96f6fb39e5a68b3f9dbdf06b2fea0c46e76fcb9e6f5367613815f691d9b6d151
+      projects/site/src/app/pages/docs/components/demos/data-table-row-aria-label.demo.ts: e1cf113f6605bf5c2b9a32dd78e08c3b194d8d9c512a0232d9210ba71b0a4a6c
+      projects/site/src/app/pages/docs/components/demos/data-table-row-track-by.demo.html: 56a58d4d127e833676ecd28d77a51bbc509576599b5a99902c1aa70a25009bf2
+      projects/site/src/app/pages/docs/components/demos/data-table-row-track-by.demo.ts: b9cc2a9ad2d6adf44f3d412a8975b4baa255509ab07291a7bb7ea0ae476afdd5
+      projects/site/src/content/docs/data-table-presort.txt: 8fb4eae93dd02d164a7f0119aa0dc0b85ff34efca49fb2b2d2137f3361fe5131
+      projects/site/src/content/docs/data-table-programmatic-pagination.txt: 2d51415fc7cf468d88e5f4c01739e2bb63ec10f1dc98d04b517663241741dbc7
+      projects/site/src/content/docs/data-table-removable-sort.txt: 37aa568b9d6863b60b08cac6814ece2d74d5528ecb8b1bc845bc4793b6783759
+      projects/site/src/content/docs/data-table-row-aria-label.txt: 6129fe8d8fa7937a7388e1ddeeaeda8f3ba20b180a1b27a083717041cde65eb5
+      projects/site/src/content/docs/data-table-row-track-by.txt: b137ea3d2143e7e8074e9652c9a4b0127deb48cee22e52e93bedbebc04b5970b
+    "2":
+      .changeset/data-table-removable-sort.md: 885707a57707000d8db46afd75bb1e01be93aca8d1be6e7884b097f0cb549f89
+      e2e/site/data-table-docs.spec.ts: 7d66bacb91aed172162d842575901858b75fd4f02aa0f7fcad27b8e2da3e2cae
+      projects/medra/ui/src/lib/data-table/data-table.component.spec.ts: 18bd53ffbada176c80921e146b56a9c77343ae68b0295671cafd7f6718b90a1d
+      projects/medra/ui/src/lib/data-table/data-table.component.ts: d71d9a013c985cd41379cc2a66beee4bdf7dae16d290f7e369db74795357877d
+      projects/site/src/app/pages/docs/components/data-table.page.ts: 7232a1f64398414e293a81bba28c7d463c3cda674db40f14b16a6b98f9152199
+      projects/site/src/app/pages/docs/components/demos/data-table-presort.demo.html: cb2043d7af95c3834836215c608af6d5b9b71cfb1d305a7371cc2786e0a8961b
+      projects/site/src/app/pages/docs/components/demos/data-table-presort.demo.ts: 44cff6e48927380e63773f8626ee62c20e441b2a14c277477c9299b4beb0af5f
+      projects/site/src/app/pages/docs/components/demos/data-table-programmatic-pagination.demo.html: 8e6b3abb9ab5bdb93de9a256996cb75f1d2480e247a8dc801c7e5646992a81b9
+      projects/site/src/app/pages/docs/components/demos/data-table-programmatic-pagination.demo.ts: 6b786951fa70e3172f319e7c4e4020d74640fc9cad09d6ab9142047858c82af0
+      projects/site/src/app/pages/docs/components/demos/data-table-removable-sort.demo.html: 0c4b517fb307b4e9627eb773c867b657da4113bd6ebc1a93490e4a6b0d851526
+      projects/site/src/app/pages/docs/components/demos/data-table-removable-sort.demo.ts: 3c18b8ddb5f578ce61ec7d7aa61307a8b1d65ed5b21317886c5d19f592dba2e4
+      projects/site/src/app/pages/docs/components/demos/data-table-row-aria-label.demo.html: 96f6fb39e5a68b3f9dbdf06b2fea0c46e76fcb9e6f5367613815f691d9b6d151
+      projects/site/src/app/pages/docs/components/demos/data-table-row-aria-label.demo.ts: e1cf113f6605bf5c2b9a32dd78e08c3b194d8d9c512a0232d9210ba71b0a4a6c
+      projects/site/src/app/pages/docs/components/demos/data-table-row-track-by.demo.html: 56a58d4d127e833676ecd28d77a51bbc509576599b5a99902c1aa70a25009bf2
+      projects/site/src/app/pages/docs/components/demos/data-table-row-track-by.demo.ts: b9cc2a9ad2d6adf44f3d412a8975b4baa255509ab07291a7bb7ea0ae476afdd5
+      projects/site/src/content/docs/data-table-presort.txt: 8fb4eae93dd02d164a7f0119aa0dc0b85ff34efca49fb2b2d2137f3361fe5131
+      projects/site/src/content/docs/data-table-programmatic-pagination.txt: 2d51415fc7cf468d88e5f4c01739e2bb63ec10f1dc98d04b517663241741dbc7
+      projects/site/src/content/docs/data-table-removable-sort.txt: 37aa568b9d6863b60b08cac6814ece2d74d5528ecb8b1bc845bc4793b6783759
+      projects/site/src/content/docs/data-table-row-aria-label.txt: 6129fe8d8fa7937a7388e1ddeeaeda8f3ba20b180a1b27a083717041cde65eb5
+      projects/site/src/content/docs/data-table-row-track-by.txt: b137ea3d2143e7e8074e9652c9a4b0127deb48cee22e52e93bedbebc04b5970b
