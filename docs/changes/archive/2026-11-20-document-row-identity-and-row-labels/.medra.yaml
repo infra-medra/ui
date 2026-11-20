@@ -1,7 +1,7 @@
 change: document-row-identity-and-row-labels
 created: 2026-11-20
 track: fast
-phase: verified
+phase: archived
 diff_base: c4e0e5a
 gates:
   proposal:
@@ -88,3 +88,6 @@ handoff_snapshots:
       projects/site/src/content/docs/data-table-removable-sort.txt: 37aa568b9d6863b60b08cac6814ece2d74d5528ecb8b1bc845bc4793b6783759
       projects/site/src/content/docs/data-table-row-aria-label.txt: 6129fe8d8fa7937a7388e1ddeeaeda8f3ba20b180a1b27a083717041cde65eb5
       projects/site/src/content/docs/data-table-row-track-by.txt: b137ea3d2143e7e8074e9652c9a4b0127deb48cee22e52e93bedbebc04b5970b
+archived:
+  at: 2026-11-20
+  sequence: 6

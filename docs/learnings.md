@@ -18,6 +18,22 @@
 **Occurrences:** 1
 **Last seen:** 5
 
+### L-003 [lesson] Characterization tasks of existing behavior cannot show red evidence
+
+**Statement:** When a change only documents and tests behavior that already works, write its test tasks so they do not require a red run, or the first apply stops on a blocker. State in tasks.md that the tests are expected green from the start.
+**Scope:** capabilities: data-display · stages: tasks, apply
+**Evidence:** document-row-identity-and-row-labels
+**Occurrences:** 1
+**Last seen:** 6
+
+### L-004 [preference] Commit the previous change before verifying the next one
+
+**Statement:** Commit or archive the previous change's working-tree files before running verify, so the diff against diff_base holds only the current change's files.
+**Scope:** stages: verify
+**Evidence:** document-row-identity-and-row-labels
+**Occurrences:** 1
+**Last seen:** 6
+
 ## Promoted
 
 ## Retired
