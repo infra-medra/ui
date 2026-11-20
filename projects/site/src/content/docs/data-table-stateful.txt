@@ -1,0 +1,3 @@
+## Persisted state
+
+Set `stateKey` to save the table state (the sort, the current page and the expanded rows) in the browser storage under that key and restore it on the next visit. `stateStorage` chooses `'session'` (the default, cleared when the tab closes) or `'local'` (kept across sessions). Use a different key for each table.

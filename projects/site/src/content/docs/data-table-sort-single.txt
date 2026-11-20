@@ -1,0 +1,3 @@
+## Single-column sort
+
+Mark a column `sortable` and click its header to cycle ascending, descending and unsorted. `sortField` and `sortOrder` (`'asc'`, `'desc'` or `null`) set the initial sort and can be bound two-way. The `sort` output emits the field, the order and the sorted rows each time the user changes the sort.

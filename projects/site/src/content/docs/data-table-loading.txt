@@ -1,0 +1,3 @@
+## Loading
+
+`loading` overlays the table with a spinner while data is on its way. `loadingLabel` sets the accessible name announced for the spinner (the default is "Loading").

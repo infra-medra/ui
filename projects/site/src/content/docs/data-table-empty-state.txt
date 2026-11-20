@@ -1,0 +1,3 @@
+## Empty state
+
+When there are no rows to show, whether `value` is empty or a filter matches nothing, the table renders a single message across all columns. `emptyLabel` replaces the default "No results found" text.

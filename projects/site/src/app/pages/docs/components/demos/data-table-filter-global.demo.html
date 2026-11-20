@@ -1,0 +1,15 @@
+<med-data-table
+  [value]="equipment"
+  [filterable]="true"
+  [globalFilterFields]="['name', 'category']"
+  [filterDelay]="200"
+  filterPlaceholder="Search name or category"
+  ariaLabel="Lab equipment inventory (global filter)"
+>
+  <med-table-column field="name" header="Name" />
+  <med-table-column field="category" header="Category" />
+  <med-table-column field="status" header="Status" />
+</med-data-table>
+<p class="mt-2 text-sm text-surface-500 dark:text-surface-400">
+  The search box matches only the Name and Category columns, so typing "stock" finds nothing.
+</p>

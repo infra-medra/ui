@@ -8,11 +8,11 @@ interface EquipmentItem {
 }
 
 @Component({
-  selector: 'app-data-table-multi-sort-edit-demo',
+  selector: 'app-data-table-edit-cell-demo',
   imports: [DataTableComponent, TableColumnComponent, InputTextDirective],
-  templateUrl: './data-table-multi-sort-edit.demo.html',
+  templateUrl: './data-table-edit-cell.demo.html',
 })
-export class DataTableMultiSortEditDemo {
+export class DataTableEditCellDemo {
   protected readonly equipment = signal<EquipmentItem[]>([
     { name: 'Oscilloscope', category: 'Test equipment', quantity: 4 },
     { name: 'Soldering station', category: 'Workbench tools', quantity: 12 },

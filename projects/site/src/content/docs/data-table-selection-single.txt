@@ -1,0 +1,5 @@
+## Single selection
+
+`selectionMode="single"` lets one row be selected at a time. Bind it with two-way `[(selection)]`, which holds the selected row or `null`. Set `dataKey` to a unique field such as `id` so the selection is matched by that key instead of by row reference, and it survives the `value` array being replaced.
+
+Rows are keyboard operable: focus a row and press Enter or Space to select it. The `rowSelect` and `rowUnselect` outputs emit the affected row.

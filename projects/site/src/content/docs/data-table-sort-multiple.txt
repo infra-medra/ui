@@ -1,0 +1,6 @@
+## Multi-column sort
+
+`sortMode="multiple"` layers `multiSortMeta` on top of the existing single-column sort: a plain
+click on a header replaces the whole multi-sort with just that column, Shift+click adds or cycles
+that column within the existing array while keeping the others — the same convention spreadsheets
+already use, so there's no extra input needed to configure the modifier key.

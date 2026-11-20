@@ -1,0 +1,3 @@
+## Row expansion
+
+Add an `<ng-template #rowexpansion let-row>` to render extra content under an expanded row. The table does not draw a toggle itself: call `toggleRowExpansion(row)` from a control of your own, using a template reference to the table. Set `dataKey` so each expanded row is tracked by a stable key. `expandedRowKeys` holds the expanded keys and can be bound two-way, and the `rowExpand` and `rowCollapse` outputs emit the row.

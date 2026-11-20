@@ -1,0 +1,8 @@
+<med-data-table [value]="equipment" sortMode="multiple" ariaLabel="Lab equipment inventory (multi-sort)">
+  <med-table-column field="name" header="Name" sortable />
+  <med-table-column field="category" header="Category" sortable />
+  <med-table-column field="quantity" header="Quantity" align="right" sortable />
+</med-data-table>
+<p class="mt-2 text-sm text-surface-500 dark:text-surface-400">
+  Click a header to sort by it alone, then Shift+click another header to add it as a secondary sort key.
+</p>

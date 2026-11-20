@@ -1,0 +1,3 @@
+## Vertical scroll
+
+`scrollable` with a `scrollHeight` such as `"240px"` caps the height of the table body and scrolls the rows inside it. The header row is sticky, so the column titles stay visible while the rows scroll underneath.

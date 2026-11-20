@@ -1,0 +1,3 @@
+## Conditional row style
+
+`rowClass` takes a function that receives a row and returns the CSS classes to add to its `<tr>`. Return an empty string for rows that need no extra style. Pass a function property rather than a method call so the input keeps a stable reference.

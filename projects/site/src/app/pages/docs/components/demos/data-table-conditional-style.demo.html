@@ -1,0 +1,6 @@
+<med-data-table [value]="equipment" [rowClass]="rowClass" ariaLabel="Lab equipment inventory (conditional row style)">
+  <med-table-column field="name" header="Name" />
+  <med-table-column field="category" header="Category" />
+  <med-table-column field="quantity" header="Quantity" align="right" />
+</med-data-table>
+<p class="mt-2 text-sm text-surface-500 dark:text-surface-400">Rows with no stock left are highlighted.</p>

@@ -1,0 +1,3 @@
+## Column resize
+
+`resizableColumns` adds a drag handle to each header border so users can change column widths. The `colResize` output emits the resized header element and the width change in pixels once the drag ends.

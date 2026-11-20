@@ -1,0 +1,19 @@
+<med-data-table [value]="equipment" ariaLabel="Lab equipment inventory (column templates)">
+  <med-table-column field="name" header="Name">
+    <ng-template let-row>
+      <span class="font-medium">{{ row.name }}</span>
+      <span class="ml-2 text-xs text-surface-500 dark:text-surface-400">#{{ row.id }}</span>
+    </ng-template>
+  </med-table-column>
+  <med-table-column field="quantity" header="Quantity" align="right">
+    <ng-template let-row>{{ row.quantity }} pcs</ng-template>
+  </med-table-column>
+  <med-table-column field="status" header="Status">
+    <ng-template let-row>
+      <span
+        [class]="row.status === 'In stock' ? 'text-green-700 dark:text-green-400' : row.status === 'Low stock' ? 'text-amber-700 dark:text-amber-400' : 'text-red-700 dark:text-red-400'"
+        >{{ row.status }}</span
+      >
+    </ng-template>
+  </med-table-column>
+</med-data-table>
