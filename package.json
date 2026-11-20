@@ -47,7 +47,7 @@
     "@angular/build": "21.2.23",
     "@angular/cli": "21.2.23",
     "@angular/compiler-cli": "21.2.25",
-    "@changesets/cli": "^2.31.0",
+    "@changesets/cli": "^3.0.3",
     "@playwright/test": "^1.61.1",
     "@tailwindcss/cli": "^4.3.2",
     "@testing-library/angular": "^19.4.1",
