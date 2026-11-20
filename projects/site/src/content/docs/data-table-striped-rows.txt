@@ -1,0 +1,3 @@
+## Striped rows
+
+`stripedRows` gives every second body row a different background, which helps the eye follow a row across wide tables. A selected row keeps its selection color, so stripes never hide the selection. The input is off by default.

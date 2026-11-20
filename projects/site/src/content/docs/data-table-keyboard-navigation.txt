@@ -1,0 +1,3 @@
+## Keyboard navigation
+
+Rows of a selectable table are focusable and can be navigated from the keyboard. ArrowDown and ArrowUp move focus to the next and previous row, Home moves to the first row and End to the last. Enter or Space selects the focused row, so a table can be driven without a pointer.

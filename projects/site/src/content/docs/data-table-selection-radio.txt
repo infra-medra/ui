@@ -1,0 +1,5 @@
+## Radio selection
+
+`selectionMode="radio"` selects one row at a time, like `single`, and adds a radio button column so the choice is visible and clickable. Bind it with two-way `[(selection)]`, which holds the selected row or `null`. Set `dataKey` to a unique field such as `id` to match the selection by key.
+
+Clicking a row or its radio button selects it, and choosing another row replaces the previous choice. The `rowSelect` output emits the selected row.

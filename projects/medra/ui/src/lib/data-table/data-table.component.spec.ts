@@ -66,7 +66,7 @@ const PRODUCTS: Product[] = [
 })
 class HostComponent {
   products: Product[] = PRODUCTS;
-  selectionMode: 'single' | 'multiple' | null = null;
+  selectionMode: 'single' | 'multiple' | 'radio' | null = null;
   selection: Product | readonly Product[] | null = null;
   paginator = false;
   rows = 10;
@@ -333,6 +333,184 @@ describe('DataTableComponent', () => {
     });
   });
 
+  describe('radio selection', () => {
+    function radios(fixture: { nativeElement: HTMLElement }): HTMLInputElement[] {
+      return Array.from(fixture.nativeElement.querySelectorAll('tbody input[type="radio"]'));
+    }
+
+    // DAT-006.S3
+    it('DAT-006.S3: choosing a row radio selects the row, checks only that radio and emits rowSelect once', () => {
+      const fixture = create((h) => (h.selectionMode = 'radio'));
+      const inputs = radios(fixture);
+      expect(inputs).toHaveLength(PRODUCTS.length);
+
+      inputs[1].click();
+      fixture.detectChanges();
+
+      expect(fixture.componentInstance.selection).toBe(PRODUCTS[1]);
+      expect(radios(fixture).map((r) => r.checked)).toEqual([false, true, false]);
+      expect(bodyRows(fixture)[1].getAttribute('aria-selected')).toBe('true');
+      expect(fixture.componentInstance.onRowSelect).toHaveBeenCalledTimes(1);
+      expect(fixture.componentInstance.onRowSelect).toHaveBeenCalledWith(PRODUCTS[1]);
+    });
+
+    // DAT-006.S3
+    it('DAT-006.S3: the checked radio follows an external selection', () => {
+      const fixture = create((h) => {
+        h.selectionMode = 'radio';
+        h.selection = PRODUCTS[2];
+      });
+      expect(radios(fixture).map((r) => r.checked)).toEqual([false, false, true]);
+    });
+
+    // DAT-006.S3
+    it('DAT-006.S3: renders no select-all control and an empty header cell for the radio column', () => {
+      const fixture = create((h) => (h.selectionMode = 'radio'));
+      expect(fixture.nativeElement.querySelector('thead input')).toBeNull();
+      const cells = headerCells(fixture);
+      expect(cells).toHaveLength(4);
+      expect(cells[0].textContent?.trim()).toBe('');
+    });
+
+    // DAT-006.S3
+    it('DAT-006.S3: the radio column is counted in the empty-state colspan', () => {
+      const fixture = create((h) => {
+        h.selectionMode = 'radio';
+        h.products = [];
+      });
+      expect(bodyRows(fixture)[0].querySelector('td')!.getAttribute('colspan')).toBe('4');
+    });
+
+    // DAT-006.S3
+    it('DAT-006.S3: keeps the single-mode behavior: row click selects, re-click is a no-op, rows are focusable', () => {
+      const fixture = create((h) => (h.selectionMode = 'radio'));
+      expect(bodyRows(fixture)[0].getAttribute('tabindex')).toBe('0');
+
+      bodyRows(fixture)[0].click();
+      fixture.detectChanges();
+      expect(fixture.componentInstance.selection).toBe(PRODUCTS[0]);
+      expect(radios(fixture)[0].checked).toBe(true);
+
+      bodyRows(fixture)[0].click();
+      fixture.detectChanges();
+      expect(fixture.componentInstance.onRowSelect).toHaveBeenCalledTimes(1);
+    });
+
+    // DAT-006.S3
+    it('DAT-006.S3: gives each radio an accessible name and a shared group name', () => {
+      const fixture = create((h) => (h.selectionMode = 'radio'));
+      const inputs = radios(fixture);
+      expect(inputs.every((r) => !!r.getAttribute('aria-label'))).toBe(true);
+      expect(new Set(inputs.map((r) => r.name)).size).toBe(1);
+    });
+  });
+
+  describe('row keyboard navigation', () => {
+    function attached(configure: (h: HostComponent) => void) {
+      const fixture = create(configure);
+      document.body.appendChild(fixture.nativeElement);
+      return fixture;
+    }
+
+    function press(row: HTMLElement, key: string): KeyboardEvent {
+      const event = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true });
+      row.dispatchEvent(event);
+      return event;
+    }
+
+    afterEach(() => {
+      document.body.innerHTML = '';
+    });
+
+    // DAT-026.S1
+    it('DAT-026.S1: ArrowDown moves focus to the next row and keeps the selection', () => {
+      const fixture = attached((h) => {
+        h.selectionMode = 'single';
+        h.selection = PRODUCTS[0];
+      });
+      const rows = bodyRows(fixture);
+      rows[1].focus();
+
+      const event = press(rows[1], 'ArrowDown');
+      fixture.detectChanges();
+
+      expect(document.activeElement).toBe(rows[2]);
+      expect(event.defaultPrevented).toBe(true);
+      expect(fixture.componentInstance.selection).toBe(PRODUCTS[0]);
+      expect(fixture.componentInstance.onRowSelect).not.toHaveBeenCalled();
+    });
+
+    // DAT-026.S1
+    it('DAT-026.S1: ArrowUp moves focus to the previous row', () => {
+      const fixture = attached((h) => (h.selectionMode = 'single'));
+      const rows = bodyRows(fixture);
+      rows[2].focus();
+      press(rows[2], 'ArrowUp');
+      expect(document.activeElement).toBe(rows[1]);
+      expect(fixture.componentInstance.selection).toBeNull();
+    });
+
+    // DAT-026.S2
+    it('DAT-026.S2: Home then End move focus to the first then the last row in radio mode', () => {
+      const fixture = attached((h) => (h.selectionMode = 'radio'));
+      const rows = bodyRows(fixture);
+      rows[1].focus();
+
+      press(rows[1], 'Home');
+      expect(document.activeElement).toBe(rows[0]);
+
+      press(rows[0], 'End');
+      expect(document.activeElement).toBe(rows[2]);
+      expect(fixture.componentInstance.selection).toBeNull();
+    });
+
+    // DAT-026.S3
+    it('DAT-026.S3: ArrowUp on the first row and ArrowDown on the last row keep focus in place, without wrapping', () => {
+      const fixture = attached((h) => (h.selectionMode = 'single'));
+      const rows = bodyRows(fixture);
+      rows[0].focus();
+      press(rows[0], 'ArrowUp');
+      expect(document.activeElement).toBe(rows[0]);
+
+      rows[2].focus();
+      press(rows[2], 'ArrowDown');
+      expect(document.activeElement).toBe(rows[2]);
+    });
+
+    // DAT-026.S3
+    it('DAT-026.S3: multiple mode and no selection mode do not handle the keys', () => {
+      for (const mode of ['multiple', null] as const) {
+        const fixture = attached((h) => (h.selectionMode = mode));
+        const rows = bodyRows(fixture);
+        rows[0].focus();
+        const event = press(rows[0], 'ArrowDown');
+        expect(event.defaultPrevented).toBe(false);
+        expect(document.activeElement).not.toBe(rows[1]);
+        fixture.destroy();
+      }
+    });
+
+    // DAT-026.S1
+    it('DAT-026.S1: skips group header rows and moves between data rows only', () => {
+      const grouped = [
+        { name: 'Widget', price: 30, stock: 5, category: 'Hardware' },
+        { name: 'Gadget', price: 10, stock: 0, category: 'Hardware' },
+        { name: 'Gizmo', price: 20, stock: 12, category: 'Software' },
+      ];
+      const fixture = attached((h) => {
+        h.products = grouped;
+        h.selectionMode = 'single';
+        h.rowGroupMode = 'subheader';
+        h.groupRowsBy = 'category';
+      });
+      const dataRows = bodyRows(fixture).filter((tr) => tr.hasAttribute('tabindex'));
+      expect(dataRows).toHaveLength(3);
+      dataRows[1].focus();
+      press(dataRows[1], 'ArrowDown');
+      expect(document.activeElement).toBe(dataRows[2]);
+    });
+  });
+
   describe('multiple selection', () => {
     function checkbox(row: HTMLElement): HTMLInputElement {
       return row.querySelector('input[type="checkbox"]') as HTMLInputElement;
@@ -352,7 +530,8 @@ describe('DataTableComponent', () => {
       expect(fixture.componentInstance.selection).toEqual([]);
     });
 
-    it('the header select-all checkbox selects/deselects every row', () => {
+    // DAT-006.S1
+    it('DAT-006.S1: the header select-all checkbox selects/deselects every row', () => {
       const fixture = create((h) => (h.selectionMode = 'multiple'));
       const headerCheckbox = headerCells(fixture)[0].querySelector('input[type="checkbox"]') as HTMLInputElement;
 
@@ -731,7 +910,8 @@ describe('DataTableComponent', () => {
       expect(bodyRows(fixture).some((row) => row.getAttribute('aria-selected') === 'true')).toBe(false);
     });
 
-    it('with dataKey, selection matches by key value across different references', () => {
+    // DAT-006.S2
+    it('DAT-006.S2: with dataKey, selection matches by key value across different references', () => {
       const fixture = create((h) => {
         h.selectionMode = 'single';
         h.dataKey = 'name';
@@ -741,7 +921,8 @@ describe('DataTableComponent', () => {
       expect(bodyRows(fixture)[1].getAttribute('aria-selected')).toBe('true');
     });
 
-    it('with dataKey, multiple-mode selection matches a different reference sharing the same key', () => {
+    // DAT-006.S2
+    it('DAT-006.S2: with dataKey, multiple-mode selection matches a different reference sharing the same key', () => {
       const fixture = create((h) => {
         h.selectionMode = 'multiple';
         h.dataKey = 'name';

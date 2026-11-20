@@ -1,0 +1,3 @@
+## Grid lines
+
+`showGridlines` draws a border between cells, on top of the row dividers every table already has. It is off by default and is independent of `size`, `stripedRows` and the selection mode.

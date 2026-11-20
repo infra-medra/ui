@@ -5,6 +5,9 @@ const PAGE = '/docs/components/data-table';
 /** The features the page documented before DAT-024, by slug of the example that now shows each one. */
 const PRE_EXISTING = ['basic', 'sort-multiple', 'edit-cell', 'export-csv', 'lazy', 'row-group-subheader', 'row-reorder-events'];
 
+/** The examples DAT-024.S4 adds, by slug. */
+const NEW_APPEARANCE_AND_SELECTION = ['selection-radio', 'keyboard-navigation', 'size', 'grid-lines', 'striped-rows'];
+
 interface SectionReport {
   id: string;
   proseLength: number;
@@ -75,6 +78,17 @@ test.describe('DataTable docs page', () => {
   test('DAT-024.S3: the previously documented features still have a section with a demo', async ({ page }) => {
     const { anchorIds, sections } = await readPage(page);
     for (const slug of PRE_EXISTING) {
+      expect(anchorIds, `no section for "${slug}"`).toContain(`example-${slug}`);
+      expect(sections.find((s) => s.id === `example-${slug}`)!.demos, `no demo for "${slug}"`).toBe(1);
+    }
+  });
+
+  // DAT-024.S4
+  test('DAT-024.S4: radio selection, size, grid lines, striped rows and keyboard navigation each have a section with a demo', async ({
+    page,
+  }) => {
+    const { anchorIds, sections } = await readPage(page);
+    for (const slug of NEW_APPEARANCE_AND_SELECTION) {
       expect(anchorIds, `no section for "${slug}"`).toContain(`example-${slug}`);
       expect(sections.find((s) => s.id === `example-${slug}`)!.demos, `no demo for "${slug}"`).toBe(1);
     }

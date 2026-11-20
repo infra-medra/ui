@@ -1,0 +1,3 @@
+## Size
+
+`size` controls the cell padding and the text size of the whole table. It accepts `sm` for dense tables, `default`, and `lg` for roomier ones. The padding applies to header, body, group and expansion cells alike, and the input works with every selection mode.

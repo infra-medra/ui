@@ -15,6 +15,11 @@ import { DataTablePaginationDemo } from './demos/data-table-pagination.demo';
 import { DataTableScrollVerticalDemo } from './demos/data-table-scroll-vertical.demo';
 import { DataTableRowExpansionDemo } from './demos/data-table-row-expansion.demo';
 import { DataTableRowGroupSubheaderDemo } from './demos/data-table-row-group-subheader.demo';
+import { DataTableSelectionRadioDemo } from './demos/data-table-selection-radio.demo';
+import { DataTableKeyboardNavigationDemo } from './demos/data-table-keyboard-navigation.demo';
+import { DataTableSizeDemo } from './demos/data-table-size.demo';
+import { DataTableGridLinesDemo } from './demos/data-table-grid-lines.demo';
+import { DataTableStripedRowsDemo } from './demos/data-table-striped-rows.demo';
 import { DataTableColumnResizeDemo } from './demos/data-table-column-resize.demo';
 import { DataTableEditCellDemo } from './demos/data-table-edit-cell.demo';
 import { DataTableLoadingDemo } from './demos/data-table-loading.demo';
@@ -36,6 +41,11 @@ import paginationCode from './demos/data-table-pagination.demo.html?raw';
 import scrollVerticalCode from './demos/data-table-scroll-vertical.demo.html?raw';
 import rowExpansionCode from './demos/data-table-row-expansion.demo.html?raw';
 import rowGroupSubheaderCode from './demos/data-table-row-group-subheader.demo.html?raw';
+import selectionRadioCode from './demos/data-table-selection-radio.demo.html?raw';
+import keyboardNavigationCode from './demos/data-table-keyboard-navigation.demo.html?raw';
+import sizeCode from './demos/data-table-size.demo.html?raw';
+import gridLinesCode from './demos/data-table-grid-lines.demo.html?raw';
+import stripedRowsCode from './demos/data-table-striped-rows.demo.html?raw';
 import columnResizeCode from './demos/data-table-column-resize.demo.html?raw';
 import editCellCode from './demos/data-table-edit-cell.demo.html?raw';
 import loadingCode from './demos/data-table-loading.demo.html?raw';
@@ -58,6 +68,11 @@ import paginationContent from '../../../../content/docs/data-table-pagination.tx
 import scrollVerticalContent from '../../../../content/docs/data-table-scroll-vertical.txt?raw';
 import rowExpansionContent from '../../../../content/docs/data-table-row-expansion.txt?raw';
 import rowGroupSubheaderContent from '../../../../content/docs/data-table-row-group-subheader.txt?raw';
+import selectionRadioContent from '../../../../content/docs/data-table-selection-radio.txt?raw';
+import keyboardNavigationContent from '../../../../content/docs/data-table-keyboard-navigation.txt?raw';
+import sizeContent from '../../../../content/docs/data-table-size.txt?raw';
+import gridLinesContent from '../../../../content/docs/data-table-grid-lines.txt?raw';
+import stripedRowsContent from '../../../../content/docs/data-table-striped-rows.txt?raw';
 import columnResizeContent from '../../../../content/docs/data-table-column-resize.txt?raw';
 import editCellContent from '../../../../content/docs/data-table-edit-cell.txt?raw';
 import loadingContent from '../../../../content/docs/data-table-loading.txt?raw';
@@ -103,6 +118,11 @@ const EXAMPLES = [
   { id: 'example-stateful', label: 'Persisted state' },
   { id: 'example-export-csv', label: 'CSV export' },
   { id: 'example-row-reorder-events', label: 'Row reorder and events' },
+  { id: 'example-selection-radio', label: 'Radio selection' },
+  { id: 'example-keyboard-navigation', label: 'Keyboard navigation' },
+  { id: 'example-size', label: 'Size' },
+  { id: 'example-grid-lines', label: 'Grid lines' },
+  { id: 'example-striped-rows', label: 'Striped rows' },
 ] as const;
 
 @Component({
@@ -132,6 +152,11 @@ const EXAMPLES = [
     DataTableStatefulDemo,
     DataTableExportCsvDemo,
     DataTableRowReorderEventsDemo,
+    DataTableSelectionRadioDemo,
+    DataTableKeyboardNavigationDemo,
+    DataTableSizeDemo,
+    DataTableGridLinesDemo,
+    DataTableStripedRowsDemo,
   ],
   template: `
     <app-component-doc title="DataTable" slug="data-table" [examples]="examples">
@@ -300,6 +325,46 @@ const EXAMPLES = [
         </div>
       </section>
 
+      <section id="example-selection-radio" class="mt-10 scroll-mt-24">
+        <app-prose class="block" [content]="selectionRadioContent" />
+        <div class="mt-4">
+          <app-data-table-selection-radio-demo />
+          <div class="mt-3"><app-code-block [code]="selectionRadioCode" /></div>
+        </div>
+      </section>
+
+      <section id="example-keyboard-navigation" class="mt-10 scroll-mt-24">
+        <app-prose class="block" [content]="keyboardNavigationContent" />
+        <div class="mt-4">
+          <app-data-table-keyboard-navigation-demo />
+          <div class="mt-3"><app-code-block [code]="keyboardNavigationCode" /></div>
+        </div>
+      </section>
+
+      <section id="example-size" class="mt-10 scroll-mt-24">
+        <app-prose class="block" [content]="sizeContent" />
+        <div class="mt-4">
+          <app-data-table-size-demo />
+          <div class="mt-3"><app-code-block [code]="sizeCode" /></div>
+        </div>
+      </section>
+
+      <section id="example-grid-lines" class="mt-10 scroll-mt-24">
+        <app-prose class="block" [content]="gridLinesContent" />
+        <div class="mt-4">
+          <app-data-table-grid-lines-demo />
+          <div class="mt-3"><app-code-block [code]="gridLinesCode" /></div>
+        </div>
+      </section>
+
+      <section id="example-striped-rows" class="mt-10 scroll-mt-24">
+        <app-prose class="block" [content]="stripedRowsContent" />
+        <div class="mt-4">
+          <app-data-table-striped-rows-demo />
+          <div class="mt-3"><app-code-block [code]="stripedRowsCode" /></div>
+        </div>
+      </section>
+
       <app-api-table api [entries]="apiEntries" />
     </app-component-doc>
   `,
@@ -349,4 +414,14 @@ export default class DocsDataTable {
   protected readonly exportCsvCode = exportCsvCode;
   protected readonly rowReorderEventsContent = rowReorderEventsContent;
   protected readonly rowReorderEventsCode = rowReorderEventsCode;
+  protected readonly selectionRadioContent = selectionRadioContent;
+  protected readonly selectionRadioCode = selectionRadioCode;
+  protected readonly keyboardNavigationContent = keyboardNavigationContent;
+  protected readonly keyboardNavigationCode = keyboardNavigationCode;
+  protected readonly sizeContent = sizeContent;
+  protected readonly sizeCode = sizeCode;
+  protected readonly gridLinesContent = gridLinesContent;
+  protected readonly gridLinesCode = gridLinesCode;
+  protected readonly stripedRowsContent = stripedRowsContent;
+  protected readonly stripedRowsCode = stripedRowsCode;
 }
