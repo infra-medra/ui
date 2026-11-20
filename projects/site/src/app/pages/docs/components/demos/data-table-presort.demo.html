@@ -1,0 +1,10 @@
+<div class="mb-3 flex gap-2">
+  <button type="button" class="rounded border border-surface-300 px-3 py-1 text-sm dark:border-surface-700" (click)="sortByName()">Sort by name</button>
+  <button type="button" class="rounded border border-surface-300 px-3 py-1 text-sm dark:border-surface-700" (click)="resetSort()">Reset to quantity (desc)</button>
+</div>
+<med-data-table [value]="equipment" [(sortField)]="sortField" [(sortOrder)]="sortOrder" ariaLabel="Lab equipment inventory (presorted)">
+  <med-table-column field="name" header="Name" sortable />
+  <med-table-column field="category" header="Category" sortable />
+  <med-table-column field="quantity" header="Quantity" align="right" sortable />
+</med-data-table>
+<p class="mt-2 text-sm text-surface-500 dark:text-surface-400">Sorted by: {{ sortField ?? 'none' }} ({{ sortOrder ?? 'none' }})</p>

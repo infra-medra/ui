@@ -1,0 +1,77 @@
+change: extend-data-table-sorting-and-pagination
+created: 2026-11-20
+track: full
+phase: archived
+diff_base: c4e0e5a
+gates:
+  proposal:
+    status: approved
+    by: Tiago Cavalli
+    at: 2026-11-20T12:59:56Z
+    hash: 7739737042da1330c3dcf813f35120e030fbf32ea396c8f393ae50917cfb5cee
+    note: null
+  plan:
+    status: approved
+    by: Tiago Cavalli
+    at: 2026-11-20T13:04:56Z
+    hash: c9f5c3f3e82d15e1341ad517137b309237ba5eff516de003a1b1a0e8a9d5ccb5
+    note: null
+  tasks:
+    status: approved
+    by: Tiago Cavalli
+    at: 2026-11-20T13:07:02Z
+    hash: 55eb4a0d47eca9e0b9853dfd2fe236b89cd7d0ac4aa73e143a541b0834c16589
+    note: null
+  verify:
+    status: approved
+    by: Tiago Cavalli
+    at: 2026-11-20T13:20:57Z
+    hash: 539fc85e17349234d04bd84227500a6866127aa1f0586272c2550ce916cc0bac
+    note: null
+gate_notes: []
+reviews: []
+track_history: []
+blockers: []
+test_hashes:
+  T001:
+    projects/medra/ui/src/lib/data-table/data-table.component.spec.ts: b1a8208664ea35048ab98bc8ae4780c8e42c90d43081e36f6eb46488e4721c9a
+last_task_done_at: 2026-11-20T13:12:48Z
+suite:
+  at: 2026-11-20T13:17:48Z
+  exit: 0
+  commands:
+    - npm test
+  fingerprint: 190cd6809b23449ad6aa398e629f18ee5e67f05de0044f10269434157de37a06
+handoff_snapshots:
+  check:
+    "1":
+      .changeset/data-table-removable-sort.md: 885707a57707000d8db46afd75bb1e01be93aca8d1be6e7884b097f0cb549f89
+      projects/medra/ui/src/lib/data-table/data-table.component.spec.ts: b1a8208664ea35048ab98bc8ae4780c8e42c90d43081e36f6eb46488e4721c9a
+      projects/medra/ui/src/lib/data-table/data-table.component.ts: d71d9a013c985cd41379cc2a66beee4bdf7dae16d290f7e369db74795357877d
+      projects/site/src/app/pages/docs/components/data-table.page.ts: 1fbaae74f97d27ca6a8147c405b5d6f8da1cb781030f39aa26e6f60594015d32
+      projects/site/src/app/pages/docs/components/demos/data-table-presort.demo.html: e20b5402dd8e3d91a7765b03be54e17233177e8bba18b734d8fe1a238b5560d3
+      projects/site/src/app/pages/docs/components/demos/data-table-presort.demo.ts: ca2214b1ba4dfec343815d1fbad3d6e03459ecdcc8ea96e9fffb9c954c5971c3
+      projects/site/src/app/pages/docs/components/demos/data-table-programmatic-pagination.demo.html: 8e6b3abb9ab5bdb93de9a256996cb75f1d2480e247a8dc801c7e5646992a81b9
+      projects/site/src/app/pages/docs/components/demos/data-table-programmatic-pagination.demo.ts: 6b786951fa70e3172f319e7c4e4020d74640fc9cad09d6ab9142047858c82af0
+      projects/site/src/app/pages/docs/components/demos/data-table-removable-sort.demo.html: 0c4b517fb307b4e9627eb773c867b657da4113bd6ebc1a93490e4a6b0d851526
+      projects/site/src/app/pages/docs/components/demos/data-table-removable-sort.demo.ts: 3c18b8ddb5f578ce61ec7d7aa61307a8b1d65ed5b21317886c5d19f592dba2e4
+      projects/site/src/content/docs/data-table-presort.txt: 8fb4eae93dd02d164a7f0119aa0dc0b85ff34efca49fb2b2d2137f3361fe5131
+      projects/site/src/content/docs/data-table-programmatic-pagination.txt: 2d51415fc7cf468d88e5f4c01739e2bb63ec10f1dc98d04b517663241741dbc7
+      projects/site/src/content/docs/data-table-removable-sort.txt: 37aa568b9d6863b60b08cac6814ece2d74d5528ecb8b1bc845bc4793b6783759
+    "2":
+      .changeset/data-table-removable-sort.md: 885707a57707000d8db46afd75bb1e01be93aca8d1be6e7884b097f0cb549f89
+      projects/medra/ui/src/lib/data-table/data-table.component.spec.ts: 666a38a8e120be853a2fb957d2e1686579f83fd19071b1e617dd2a4d81f69aba
+      projects/medra/ui/src/lib/data-table/data-table.component.ts: d71d9a013c985cd41379cc2a66beee4bdf7dae16d290f7e369db74795357877d
+      projects/site/src/app/pages/docs/components/data-table.page.ts: 1fbaae74f97d27ca6a8147c405b5d6f8da1cb781030f39aa26e6f60594015d32
+      projects/site/src/app/pages/docs/components/demos/data-table-presort.demo.html: cb2043d7af95c3834836215c608af6d5b9b71cfb1d305a7371cc2786e0a8961b
+      projects/site/src/app/pages/docs/components/demos/data-table-presort.demo.ts: 44cff6e48927380e63773f8626ee62c20e441b2a14c277477c9299b4beb0af5f
+      projects/site/src/app/pages/docs/components/demos/data-table-programmatic-pagination.demo.html: 8e6b3abb9ab5bdb93de9a256996cb75f1d2480e247a8dc801c7e5646992a81b9
+      projects/site/src/app/pages/docs/components/demos/data-table-programmatic-pagination.demo.ts: 6b786951fa70e3172f319e7c4e4020d74640fc9cad09d6ab9142047858c82af0
+      projects/site/src/app/pages/docs/components/demos/data-table-removable-sort.demo.html: 0c4b517fb307b4e9627eb773c867b657da4113bd6ebc1a93490e4a6b0d851526
+      projects/site/src/app/pages/docs/components/demos/data-table-removable-sort.demo.ts: 3c18b8ddb5f578ce61ec7d7aa61307a8b1d65ed5b21317886c5d19f592dba2e4
+      projects/site/src/content/docs/data-table-presort.txt: 8fb4eae93dd02d164a7f0119aa0dc0b85ff34efca49fb2b2d2137f3361fe5131
+      projects/site/src/content/docs/data-table-programmatic-pagination.txt: 2d51415fc7cf468d88e5f4c01739e2bb63ec10f1dc98d04b517663241741dbc7
+      projects/site/src/content/docs/data-table-removable-sort.txt: 37aa568b9d6863b60b08cac6814ece2d74d5528ecb8b1bc845bc4793b6783759
+archived:
+  at: 2026-11-20
+  sequence: 5

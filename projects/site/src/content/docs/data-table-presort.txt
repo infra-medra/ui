@@ -1,0 +1,3 @@
+## Presort
+
+Set `sortField` and `sortOrder` (`'asc'` or `'desc'`) to render the table already sorted. The header of the sorted column reports the order to assistive technology, and the user can still change the sort from there.

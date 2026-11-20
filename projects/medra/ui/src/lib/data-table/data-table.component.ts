@@ -426,6 +426,8 @@ export class DataTableComponent<T> {
   readonly dataKey = input<string | null>(null);
   readonly sortField = model<string | null>(null);
   readonly sortOrder = model<TableSortOrder>(null);
+  /** When `false`, a sorted column only alternates between ascending and descending instead of returning to unsorted on the third click. Ignored in `sortMode="multiple"`. */
+  readonly removableSort = input(true, { transform: booleanAttribute });
   /** `'multiple'` layers `multiSortMeta` on top — `sortField`/`sortOrder` stay exactly as-is for `'single'` consumers. */
   readonly sortMode = input<TableSortMode>('single');
   readonly multiSortMeta = model<readonly TableSortMeta[]>([]);
@@ -802,7 +804,7 @@ export class DataTableComponent<T> {
       this.sortField.set(field);
       this.sortOrder.set('asc');
     } else {
-      const next: TableSortOrder = this.sortOrder() === 'asc' ? 'desc' : this.sortOrder() === 'desc' ? null : 'asc';
+      const next: TableSortOrder = this.sortOrder() === 'asc' ? 'desc' : this.sortOrder() === 'desc' && this.removableSort() ? null : 'asc';
       this.sortOrder.set(next);
       if (next === null) {
         this.sortField.set(null);

@@ -10,6 +10,14 @@
 **Occurrences:** 1
 **Last seen:** 1
 
+### L-002 [lesson] Assert every Then clause when retagging a test with a scenario ID
+
+**Statement:** When retagging an existing test with a scenario ID, check that it asserts each Given and Then clause of the scenario, not only the first. Coverage only matches the tag, so an unasserted clause passes it silently.
+**Scope:** capabilities: data-display · stages: tasks, apply, verify
+**Evidence:** extend-data-table-sorting-and-pagination
+**Occurrences:** 1
+**Last seen:** 5
+
 ## Promoted
 
 ## Retired

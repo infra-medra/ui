@@ -1,0 +1,3 @@
+## Programmatic pagination
+
+Bind `first` two-way to read and set the page from code. Setting it shows the page that contains that row, and a page change by the user writes the new value back. Choosing a size in the rows per page select returns to the first page.
