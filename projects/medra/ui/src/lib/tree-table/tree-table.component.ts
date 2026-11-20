@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ElementRef, booleanAttribute, computed, contentChildren, input, model, numberAttribute, output, signal, viewChild, viewChildren } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, booleanAttribute, computed, contentChildren, input, linkedSignal, model, numberAttribute, output, signal, viewChild, viewChildren } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { CdkFixedSizeVirtualScroll, CdkVirtualForOf, CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
 import { IconComponent } from '../icon/icon.component';
@@ -288,7 +288,7 @@ const DEFAULT_GRID_COLUMN_WIDTH = 'minmax(120px, 1fr)';
         </table>
       </div>
       @if (paginator() && visibleRows().length > 0) {
-        <med-paginator class="mt-3 block" [totalRecords]="visibleRows().length" [rows]="rows()" [rowsPerPageOptions]="rowsPerPageOptions()" [(first)]="first" />
+        <med-paginator class="mt-3 block" [totalRecords]="visibleRows().length" [(rows)]="pageSize" [rowsPerPageOptions]="rowsPerPageOptions()" [(first)]="first" />
       }
     }
   `,
@@ -315,6 +315,8 @@ export class TreeTableComponent<T> {
   readonly multiSortMeta = model<readonly TableSortMeta[]>([]);
   readonly paginator = input(false, { transform: booleanAttribute });
   readonly rows = input(10, { transform: numberAttribute });
+  /** The page size in effect: follows `rows()`, and the paginator's "rows per page" select writes to it, so the visible slice follows the user's choice. */
+  protected readonly pageSize = linkedSignal(() => this.rows());
   readonly rowsPerPageOptions = input<readonly number[] | null>(null);
   readonly first = model(0);
   readonly class = input('', { alias: 'class' });
@@ -404,7 +406,7 @@ export class TreeTableComponent<T> {
       return rows;
     }
     const start = Math.max(0, this.first());
-    return rows.slice(start, start + Math.max(1, this.rows()));
+    return rows.slice(start, start + Math.max(1, this.pageSize()));
   });
 
   protected isSelected(node: TreeTableNode<T>): boolean {
