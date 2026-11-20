@@ -1,64 +1,52 @@
-# Ui
+# @medra.dev/ui
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.0.
+Angular UI components built with signals and standalone APIs. No NgModules and no
+zone.js requirement. Styling uses design tokens and Tailwind CSS, with a dark theme
+under the `dark` class.
 
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## Install
 
 ```bash
-ng generate --help
+npm install @medra.dev/ui @angular/cdk
 ```
 
-## Building
+Add the stylesheet to your application's styles in `angular.json`:
 
-To build the library, run:
-
-```bash
-ng build ui
+```json
+"styles": [
+  "node_modules/@medra.dev/ui/styles.css",
+  "src/styles.css"
+]
 ```
 
-This command will compile your project, and the build artifacts will be placed in the `dist/` directory.
+## Use
 
-### Publishing the Library
+Components and directives are standalone: import what you use.
 
-Once the project is built, you can publish your library by following these steps:
+```ts
+import { Component } from '@angular/core';
+import { ButtonDirective } from '@medra.dev/ui';
 
-1. Navigate to the `dist` directory:
-
-   ```bash
-   cd dist/ui
-   ```
-
-2. Run the `npm publish` command to publish your library to the npm registry:
-   ```bash
-   npm publish
-   ```
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
+@Component({
+  selector: 'app-example',
+  imports: [ButtonDirective],
+  template: `<button medButton>Save</button>`,
+})
+export class Example {}
 ```
 
-## Running end-to-end tests
+## Versioning
 
-For end-to-end (e2e) testing, run:
+The major version of `@medra.dev/ui` always equals the Angular major it supports, so
+`21.x` targets Angular 21. Older Angular lines are maintained on `release/<major>`
+branches. Release notes are in [CHANGELOG.md](CHANGELOG.md).
 
-```bash
-ng e2e
-```
+## Peer dependencies
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+Required: `@angular/core`, `@angular/common`, `@angular/platform-browser` and
+`@angular/cdk` (`^21.2.0`). Optional: `@angular/router` (router-aware menu links) and
+`chart.js` (the chart component).
 
-## Additional Resources
+## License
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+[MIT](LICENSE)
