@@ -14,9 +14,9 @@
 
 **Statement:** When retagging an existing test with a scenario ID, check that it asserts each Given and Then clause of the scenario, not only the first. Coverage only matches the tag, so an unasserted clause passes it silently.
 **Scope:** capabilities: data-display · stages: tasks, apply, verify
-**Evidence:** extend-data-table-sorting-and-pagination
-**Occurrences:** 1
-**Last seen:** 5
+**Evidence:** extend-data-table-sorting-and-pagination, add-data-table-resize-modes-visibility-groups
+**Occurrences:** 2
+**Last seen:** 8
 
 ### L-003 [lesson] Characterization tasks of existing behavior cannot show red evidence
 
@@ -33,6 +33,14 @@
 **Evidence:** document-row-identity-and-row-labels
 **Occurrences:** 1
 **Last seen:** 6
+
+### L-005 [lesson] Record green evidence with the task's own verify command
+
+**Statement:** Run the exact command named in a task's verify (for example the Playwright spec, not a Jest subset) when running medra task done. A done task cannot be reopened or have its evidence re-recorded.
+**Scope:** stages: apply, verify
+**Evidence:** add-data-table-resize-modes-visibility-groups
+**Occurrences:** 1
+**Last seen:** 8
 
 ## Promoted
 

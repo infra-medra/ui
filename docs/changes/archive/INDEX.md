@@ -9,3 +9,4 @@
 | 5 | 2026-11-20 | extend-data-table-sorting-and-pagination | data-display | ~DAT-002 ~DAT-005 | People building a `med-data-table` cannot tell from the docs that a table can start sorted or that its page can be se... |
 | 6 | 2026-11-20 | document-row-identity-and-row-labels | data-display | +DAT-027 ~DAT-024 | Developers building a `med-data-table` cannot learn from the docs or the spec that rows can be named for screen reade... |
 | 7 | 2026-11-20 | add-data-table-frozen-columns-rows-and-scroll | data-display | +DAT-028 +DAT-029 +DAT-030 ~DAT-024 | People building wide or tall tables with `med-data-table` cannot keep a key column or a summary row in view while the... |
+| 8 | 2026-11-20 | add-data-table-resize-modes-visibility-groups | data-display | +DAT-031 +DAT-032 +DAT-033 ~DAT-001 ~DAT-009 ~DAT-010 ~DAT-024 | People building tables with `med-data-table` cannot choose how a column resize affects the rest of the table, cannot ... |
