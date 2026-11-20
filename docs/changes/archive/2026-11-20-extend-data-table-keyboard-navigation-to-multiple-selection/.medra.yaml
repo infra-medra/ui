@@ -1,0 +1,55 @@
+change: extend-data-table-keyboard-navigation-to-multiple-selection
+created: 2026-11-20
+track: fast
+phase: archived
+diff_base: 020f47f
+gates:
+  proposal:
+    status: approved
+    by: Tiago Cavalli
+    at: 2026-11-20T11:55:00Z
+    hash: 457cd86e2caa723bc35fa47802651135fd95b3a1009ab688b278e5ac056db821
+    note: null
+  plan:
+    status: pending
+  tasks:
+    status: pending
+  verify:
+    status: approved
+    by: Tiago Cavalli
+    at: 2026-11-20T12:06:47Z
+    hash: 9b5c894b22c6be1cd0f27327379a8afa5aa391483104cd593a974df9091a18d3
+    note: null
+gate_notes: []
+reviews: []
+track_history: []
+blockers: []
+test_hashes:
+  T001:
+    projects/medra/ui/src/lib/data-table/data-table.component.spec.ts: 8cf85aa59d17a85c10f16f4ef816ab55204c9974821ba4e216a99222041a1502
+last_task_done_at: 2026-11-20T11:59:38Z
+suite:
+  at: 2026-11-20T12:06:05Z
+  exit: 0
+  commands:
+    - npm test
+  fingerprint: 81b027cfa29117edc79b6add29be1ffb9696b02361bdb07c8e4490cfc5e712df
+handoff_snapshots:
+  check:
+    "1":
+      .changeset/data-table-multiple-keyboard-navigation.md: 9fa319b3a4d8e87f0ab2c56cadbe8c13af6d5a789212186599a8517540e7cd46
+      projects/medra/ui/src/lib/data-table/data-table.component.spec.ts: 8cf85aa59d17a85c10f16f4ef816ab55204c9974821ba4e216a99222041a1502
+      projects/medra/ui/src/lib/data-table/data-table.component.ts: 3481dd7a0643ad6204478fbc873a7c71c99bf8dae9f90853884c34abf7afe9d4
+      projects/site/src/app/pages/docs/components/demos/data-table-keyboard-navigation.demo.html: 02aa1e2c504cada2de790ea91d12ea0c5733c087186d19fa4084f10bc7c7e7b8
+      projects/site/src/app/pages/docs/components/demos/data-table-keyboard-navigation.demo.ts: a71b38b1741daf7ea2a9a839c895c7cb1b4e1d689d5fc426696632da6d09e8f8
+      projects/site/src/content/docs/data-table-keyboard-navigation.txt: b2152c9b82f95cb955196a7cdbce285dbe5b7effb12bf079de82ff23073b7cd5
+    "2":
+      .changeset/data-table-multiple-keyboard-navigation.md: 9fa319b3a4d8e87f0ab2c56cadbe8c13af6d5a789212186599a8517540e7cd46
+      projects/medra/ui/src/lib/data-table/data-table.component.spec.ts: 7aea7453c7a4c56772d26530c568bb0343abdb177abb295720d8c75b4f84e856
+      projects/medra/ui/src/lib/data-table/data-table.component.ts: 3481dd7a0643ad6204478fbc873a7c71c99bf8dae9f90853884c34abf7afe9d4
+      projects/site/src/app/pages/docs/components/demos/data-table-keyboard-navigation.demo.html: 02aa1e2c504cada2de790ea91d12ea0c5733c087186d19fa4084f10bc7c7e7b8
+      projects/site/src/app/pages/docs/components/demos/data-table-keyboard-navigation.demo.ts: a71b38b1741daf7ea2a9a839c895c7cb1b4e1d689d5fc426696632da6d09e8f8
+      projects/site/src/content/docs/data-table-keyboard-navigation.txt: b2152c9b82f95cb955196a7cdbce285dbe5b7effb12bf079de82ff23073b7cd5
+archived:
+  at: 2026-11-20
+  sequence: 4

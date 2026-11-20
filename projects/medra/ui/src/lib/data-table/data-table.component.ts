@@ -319,7 +319,7 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
             <tr
               [class]="rowClassFor(row, i)"
               [attr.aria-selected]="selectionMode() ? isSelected(row) : null"
-              [attr.tabindex]="isSingleLike() ? 0 : null"
+              [attr.tabindex]="selectionMode() ? 0 : null"
               [draggable]="reorderable()"
               (click)="onRowClick(row)"
               (keydown)="onRowKeydown($event, row)"
@@ -857,12 +857,21 @@ export class DataTableComponent<T> {
   }
 
   protected onRowKeydown(event: KeyboardEvent, row: T): void {
-    if (!this.isSingleLike()) {
+    const mode = this.selectionMode();
+    if (!mode) {
+      return;
+    }
+    // In `multiple` mode the row holds a checkbox that handles Space natively, so only keys pressed on the row itself count.
+    if (mode === 'multiple' && event.target !== event.currentTarget) {
       return;
     }
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
-      this.selectSingle(row);
+      if (mode === 'multiple') {
+        this.toggleRow(row);
+      } else {
+        this.selectSingle(row);
+      }
       return;
     }
     if (event.key === 'ArrowDown' || event.key === 'ArrowUp' || event.key === 'Home' || event.key === 'End') {
