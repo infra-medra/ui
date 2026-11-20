@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, PLATFORM_ID, TemplateRef, afterNextRender, booleanAttribute, computed, contentChild, contentChildren, effect, ElementRef, inject, input, linkedSignal, model, numberAttribute, output, signal, untracked, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, Injector, PLATFORM_ID, TemplateRef, afterNextRender, booleanAttribute, computed, contentChild, contentChildren, effect, ElementRef, inject, input, linkedSignal, model, numberAttribute, output, signal, untracked, viewChild } from '@angular/core';
 import { NgTemplateOutlet, isPlatformBrowser } from '@angular/common';
 import { IconComponent } from '../icon/icon.component';
 import { InputTextDirective } from '../input-text/input-text.directive';
@@ -8,7 +8,7 @@ import { checkboxBoxVariants } from '../checkbox/checkbox.styles';
 import { DOT_SIZE_CLASS, radioRingVariants } from '../radio-button/radio-button.styles';
 import { mergeClasses } from '../utils/merge-classes';
 import { TableColumnComponent } from './table-column.component';
-import { TableColumnAlign, TableLazyLoadEvent, TableRowReorderEvent, TableSelectionMode, TableSize, TableSortMeta, TableSortMode, TableSortOrder } from './data-table.types';
+import { TableColumnAlign, TableColumnReorderEvent, TableLazyLoadEvent, TableRowReorderEvent, TableSelectionMode, TableSize, TableSortMeta, TableSortMode, TableSortOrder } from './data-table.types';
 
 let nextRadioGroupId = 0;
 
@@ -220,6 +220,17 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
  * visually confusing (the drop position you see may not match where the row lands once the
  * consumer's reorder is applied and the existing sort/filter re-runs on top of it) — an inherent
  * tension of reordering a sorted/filtered view, not something to solve here.
+ *
+ * **`reorderableColumns`** lets the user move a column by dragging its header onto another header
+ * or, with a header focused, with Alt+ArrowLeft/Right (hidden columns are skipped). The order covers
+ * every declared column, hidden ones included, so a hidden column returns to its place when shown.
+ * A frozen column only swaps places with a column frozen on the same edge, and a column whose
+ * `reorderable` is `false` can neither be dragged nor dropped onto. `colReorder` emits `dragIndex`,
+ * `dropIndex` (positions in the full order) and `columns` (the fields in the new order); the table
+ * keeps the order itself and does not persist it. Keyboard moves keep focus on the header and
+ * announce the new position through a polite live region whose text `columnMoveAnnouncement`
+ * builds (English by default). Header and footer group rows are application-written, so the
+ * application owns their `colspan` after a move.
  */
 @Component({
   selector: 'med-data-table',
@@ -228,6 +239,9 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'block min-w-0', '[class.flex]': 'flexHeight()', '[class.flex-col]': 'flexHeight()', '[class.h-full]': 'flexHeight()' },
   template: `
+    @if (reorderableColumns()) {
+      <span class="sr-only" role="status" aria-live="polite">{{ columnAnnouncement() }}</span>
+    }
     @if (filterable()) {
       <div class="mb-3 flex justify-end">
         <input
@@ -315,7 +329,13 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
                 [class]="headerCellClass(col)"
                 [class.relative]="resizableColumns()"
                 [attr.aria-sort]="ariaSortFor(col)"
-                [attr.tabindex]="col.sortable() ? 0 : null"
+                [attr.tabindex]="col.sortable() || isColumnDraggable(col) ? 0 : null"
+                [attr.draggable]="isColumnDraggable(col) ? 'true' : null"
+                (dragstart)="onColDragStart($event, col)"
+                (dragover)="onColDragOver($event, col)"
+                (dragleave)="onColDragLeave(col)"
+                (drop)="onColDrop($event, col)"
+                (dragend)="onColDragEnd()"
                 (click)="onHeaderClick(col, $event)"
                 (keydown)="onHeaderKeydown($event, col)"
               >
@@ -496,6 +516,10 @@ export class DataTableComponent<T> {
   readonly groupRowsBy = input<string | null>(null);
   readonly reorderable = input(false, { transform: booleanAttribute });
   readonly resizableColumns = input(false, { transform: booleanAttribute });
+  /** Lets the user move columns by dragging a header onto another or with Alt+ArrowLeft/Right on a focused header; each column opts out with `reorderable` false. */
+  readonly reorderableColumns = input(false, { transform: booleanAttribute });
+  /** Builds the live-region text announced after a keyboard move; `position` counts visible columns. Override it to translate the message. */
+  readonly columnMoveAnnouncement = input<(header: string, position: number, total: number) => string>((header, position, total) => `${header} moved to position ${position} of ${total}`);
   /**
    * How `resizableColumns` resizes: `fit` (default) keeps the table width and trades width between the dragged column and
    * the next visible column, so the last visible column has no handle; `expand` changes only the dragged column and the table
@@ -536,13 +560,27 @@ export class DataTableComponent<T> {
   readonly sort = output<{ readonly field: string | null; readonly order: TableSortOrder; readonly multiSortMeta: readonly TableSortMeta[]; readonly data: readonly T[] }>();
   readonly filter = output<{ readonly value: string; readonly data: readonly T[] }>();
   readonly rowReorder = output<TableRowReorderEvent>();
+  /** Emitted when the user moves a column; indices are positions in the full column order, hidden columns included. */
+  readonly colReorder = output<TableColumnReorderEvent>();
   readonly rowExpand = output<T>();
   readonly rowCollapse = output<T>();
   readonly colResize = output<{ readonly element: HTMLElement; readonly delta: number }>();
 
   protected readonly columns = contentChildren(TableColumnComponent);
+  /** Field names in the user's column order; empty until the first move, and columns it does not list keep their declaration order after the listed ones. */
+  protected readonly columnOrder = signal<readonly string[]>([]);
+  /** Every declared column (hidden ones included) in the user's order, so a hidden column keeps its place and returns to it when shown. */
+  protected readonly orderedColumns = computed(() => {
+    const cols = this.columns();
+    const order = this.columnOrder();
+    if (order.length === 0) {
+      return cols;
+    }
+    const rank = new Map(order.map((field, index) => [field, index]));
+    return [...cols].sort((a, b) => (rank.get(a.field()) ?? order.length) - (rank.get(b.field()) ?? order.length));
+  });
   /** The columns with `visible` on, in declaration order: what renders, spans, freezes and exports. Sorting and the default global-filter fields keep reading `columns()`, so a hidden column keeps its state. */
-  protected readonly visibleColumns = computed(() => this.columns().filter((col) => col.visible()));
+  protected readonly visibleColumns = computed(() => this.orderedColumns().filter((col) => col.visible()));
   /** Application-written `<tr>` rows rendered in `<thead>` above the column header row. */
   protected readonly headerGroupTemplate = contentChild('headerGroup', { read: TemplateRef });
   /** Application-written `<tr>` rows rendered in a `<tfoot>` after the body; no footer renders without it. */
@@ -551,6 +589,8 @@ export class DataTableComponent<T> {
   protected readonly rowExpansionTemplate = contentChild('rowexpansion', { read: TemplateRef });
   private readonly platformId = inject(PLATFORM_ID);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly injector = inject(Injector);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   protected readonly checkboxBoxClass = checkboxBoxVariants({ size: 'sm' });
   protected readonly radioRingClass = radioRingVariants({ size: 'sm' });
   protected readonly radioDotClass = `${DOT_SIZE_CLASS.sm} rounded-full bg-brand-500 dark:bg-brand-400`;
@@ -900,8 +940,9 @@ export class DataTableComponent<T> {
       'font-semibold text-surface-700 select-none dark:text-surface-200',
       ALIGN_CLASS[col.align()],
       this.frozenCellClass(col, null, 0),
-      col.sortable()
-        ? 'cursor-pointer focus-visible:outline-none focus-visible:ring-(--focus-ring-width) focus-visible:ring-offset-(--focus-ring-offset) focus-visible:ring-brand-500 dark:focus-visible:ring-brand-400'
+      this.dropTargetField() === col.field() ? 'bg-brand-50 dark:bg-brand-900/30' : '',
+      col.sortable() || this.isColumnDraggable(col)
+        ? (col.sortable() ? 'cursor-pointer ' : '') + 'focus-visible:outline-none focus-visible:ring-(--focus-ring-width) focus-visible:ring-offset-(--focus-ring-offset) focus-visible:ring-brand-500 dark:focus-visible:ring-brand-400'
         : '',
     );
   }
@@ -966,6 +1007,11 @@ export class DataTableComponent<T> {
    * mirrors Shift+click for adding a sort key in `sortMode="multiple"`.
    */
   protected onHeaderKeydown(event: KeyboardEvent, col: TableColumnComponent): void {
+    if (event.altKey && (event.key === 'ArrowLeft' || event.key === 'ArrowRight') && this.isColumnDraggable(col)) {
+      event.preventDefault();
+      this.moveColumnByKey(col, event.key === 'ArrowLeft' ? -1 : 1);
+      return;
+    }
     if (!col.sortable()) {
       return;
     }
@@ -973,6 +1019,113 @@ export class DataTableComponent<T> {
       event.preventDefault();
       this.toggleSort(col.field(), event.shiftKey);
     }
+  }
+
+  /** Text of the visually hidden live region; set after each keyboard move. */
+  protected readonly columnAnnouncement = signal('');
+
+  /** Moves `col` one visible position toward the start (`-1`) or end (`1`), skipping hidden columns, then restores focus to its header. */
+  private moveColumnByKey(col: TableColumnComponent, direction: -1 | 1): void {
+    const ordered = this.orderedColumns();
+    const neighbor = (direction === -1 ? ordered.slice(0, ordered.indexOf(col)).reverse() : ordered.slice(ordered.indexOf(col) + 1)).find((c) => c.visible());
+    if (!neighbor || !this.moveColumn(col.field(), neighbor.field())) {
+      return;
+    }
+    const visible = this.visibleColumns();
+    this.columnAnnouncement.set(this.columnMoveAnnouncement()(col.header(), visible.indexOf(col) + 1, visible.length));
+    const field = col.field();
+    afterNextRender(
+      () => {
+        const headers = Array.from(this.host.nativeElement.querySelectorAll<HTMLElement>('thead tr:last-child th[scope="col"]'));
+        headers[this.visibleColumns().findIndex((c) => c.field() === field)]?.focus();
+      },
+      { injector: this.injector },
+    );
+  }
+
+  /** Field of the header being dragged, or `null`; a plain field because only the handlers read it. */
+  private draggedColumnField: string | null = null;
+  /** Field of the header under the drag when it is a valid drop target, for the highlight. */
+  protected readonly dropTargetField = signal<string | null>(null);
+
+  protected isColumnDraggable(col: TableColumnComponent): boolean {
+    return this.reorderableColumns() && col.reorderable();
+  }
+
+  protected onColDragStart(event: DragEvent, col: TableColumnComponent): void {
+    if (!this.isColumnDraggable(col)) {
+      return;
+    }
+    if (this.colResizeState) {
+      // The resize handle sits inside the draggable header: a native drag would cancel the resize.
+      event.preventDefault();
+      return;
+    }
+    this.draggedColumnField = col.field();
+    if (event.dataTransfer) {
+      event.dataTransfer.effectAllowed = 'move';
+      event.dataTransfer.setData('text/plain', col.field());
+    }
+  }
+
+  protected onColDragOver(event: DragEvent, col: TableColumnComponent): void {
+    const from = this.draggedColumnField === null ? undefined : this.columns().find((c) => c.field() === this.draggedColumnField);
+    if (!from || !this.canMoveColumn(from, col)) {
+      return;
+    }
+    event.preventDefault();
+    this.dropTargetField.set(col.field());
+  }
+
+  protected onColDragLeave(col: TableColumnComponent): void {
+    if (this.dropTargetField() === col.field()) {
+      this.dropTargetField.set(null);
+    }
+  }
+
+  protected onColDrop(event: DragEvent, col: TableColumnComponent): void {
+    const from = this.draggedColumnField;
+    this.dropTargetField.set(null);
+    if (from === null) {
+      return;
+    }
+    event.preventDefault();
+    this.moveColumn(from, col.field());
+  }
+
+  protected onColDragEnd(): void {
+    this.draggedColumnField = null;
+    this.dropTargetField.set(null);
+  }
+
+  /** Whether `from` may take the position of `to`: both reorderable and frozen on the same edge (or both free), so a move never changes a frozen state. */
+  protected canMoveColumn(from: TableColumnComponent, to: TableColumnComponent): boolean {
+    if (from === to || !from.reorderable() || !to.reorderable()) {
+      return false;
+    }
+    if (from.frozen() !== to.frozen()) {
+      return false;
+    }
+    return !from.frozen() || from.alignFrozen() === to.alignFrozen();
+  }
+
+  /** Places the column `fromField` at the position of `toField` in the full column order and emits `colReorder`; returns whether anything moved. */
+  protected moveColumn(fromField: string, toField: string): boolean {
+    if (!this.reorderableColumns()) {
+      return false;
+    }
+    const ordered = this.orderedColumns();
+    const dragIndex = ordered.findIndex((col) => col.field() === fromField);
+    const dropIndex = ordered.findIndex((col) => col.field() === toField);
+    if (dragIndex < 0 || dropIndex < 0 || !this.canMoveColumn(ordered[dragIndex], ordered[dropIndex])) {
+      return false;
+    }
+    const fields = ordered.map((col) => col.field());
+    const [moved] = fields.splice(dragIndex, 1);
+    fields.splice(dropIndex, 0, moved);
+    this.columnOrder.set(fields);
+    this.colReorder.emit({ dragIndex, dropIndex, columns: fields });
+    return true;
   }
 
   protected toggleSort(field: string, additive = false): void {

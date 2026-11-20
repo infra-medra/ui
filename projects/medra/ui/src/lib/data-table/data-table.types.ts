@@ -26,3 +26,11 @@ export interface TableRowReorderEvent {
   readonly dragIndex: number;
   readonly dropIndex: number;
 }
+
+/** Emitted by `colReorder` (`DataTableComponent`) when the user moves a column — indices into the full declared-column order, hidden columns included. */
+export interface TableColumnReorderEvent {
+  readonly dragIndex: number;
+  readonly dropIndex: number;
+  /** Field names of every column in the new order. */
+  readonly columns: readonly string[];
+}

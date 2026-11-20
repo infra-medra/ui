@@ -14,8 +14,8 @@ const ROW_LABELS_AND_IDENTITY = ['row-aria-label', 'row-track-by'];
 /** The examples DAT-024.S6 adds for frozen columns, frozen rows and scrolling, by slug. */
 const FROZEN_AND_SCROLL = ['frozen-columns', 'frozen-columns-both', 'frozen-rows', 'scroll-horizontal', 'scroll-flexible'];
 
-/** The examples DAT-024.S7 covers for the fit and expand resize modes, the column toggle and column groups, by slug. */
-const RESIZE_TOGGLE_GROUPS = ['column-resize', 'column-resize-expand', 'column-toggle', 'column-groups'];
+/** The examples DAT-024.S7 covers for the fit and expand resize modes, the column toggle, column groups and column reorder, by slug. */
+const RESIZE_TOGGLE_GROUPS = ['column-resize', 'column-resize-expand', 'column-toggle', 'column-groups', 'column-reorder'];
 
 interface SectionReport {
   id: string;

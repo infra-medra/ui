@@ -10,3 +10,4 @@
 | 6 | 2026-11-20 | document-row-identity-and-row-labels | data-display | +DAT-027 ~DAT-024 | Developers building a `med-data-table` cannot learn from the docs or the spec that rows can be named for screen reade... |
 | 7 | 2026-11-20 | add-data-table-frozen-columns-rows-and-scroll | data-display | +DAT-028 +DAT-029 +DAT-030 ~DAT-024 | People building wide or tall tables with `med-data-table` cannot keep a key column or a summary row in view while the... |
 | 8 | 2026-11-20 | add-data-table-resize-modes-visibility-groups | data-display | +DAT-031 +DAT-032 +DAT-033 ~DAT-001 ~DAT-009 ~DAT-010 ~DAT-024 | People building tables with `med-data-table` cannot choose how a column resize affects the rest of the table, cannot ... |
+| 9 | 2026-11-20 | add-data-table-column-reorder | data-display | +DAT-034 ~DAT-024 | People building tables with `med-data-table` cannot let their users rearrange columns: the order is fixed by the temp... |

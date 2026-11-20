@@ -62,6 +62,11 @@ export class TableColumnComponent {
    * back to `true` restores the column as it was.
    */
   readonly visible = input(true, { transform: booleanAttribute });
+  /**
+   * Whether the user can move this column by dragging its header or with Alt+ArrowLeft/Right on the focused header.
+   * Set it to `false` to pin the column's position; other columns cannot be dropped onto it either.
+   */
+  readonly reorderable = input(true, { transform: booleanAttribute });
 
   readonly cellTemplate = contentChild(TemplateRef);
   readonly editTemplate = contentChild('editTemplate', { read: TemplateRef });

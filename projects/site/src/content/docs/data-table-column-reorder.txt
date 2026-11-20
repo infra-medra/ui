@@ -1,0 +1,3 @@
+## Column reorder
+
+Set `reorderableColumns` to let users move a column by dragging its header onto another header, or by focusing a header and pressing Alt+ArrowLeft or Alt+ArrowRight. The move is announced through a live region, and you can change its wording with `columnMoveAnnouncement`. Set `reorderable` to `false` on a column to pin it in place: it can neither be dragged nor dropped onto. Frozen columns move only among themselves, and free columns only among free columns, so a move never changes a frozen state. Hidden columns keep their place in the order. The `colReorder` output emits `dragIndex`, `dropIndex` and the `columns` fields in their new order.

@@ -42,6 +42,14 @@
 **Occurrences:** 1
 **Last seen:** 8
 
+### L-006 [lesson] Test each plan guard between two inputs with both inputs enabled
+
+**Statement:** When a plan decision cancels or guards a gesture because another input is active (for example preventDefault on dragstart during a column resize), write a test that enables both inputs together and asserts the cancellation. A bare early return passes every single-input test.
+**Scope:** capabilities: data-display · stages: tasks, apply, verify
+**Evidence:** add-data-table-column-reorder
+**Occurrences:** 1
+**Last seen:** 9
+
 ## Promoted
 
 ## Retired

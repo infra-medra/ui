@@ -2108,3 +2108,257 @@ describe('DataTableComponent column groups', () => {
     expect(priceHeader.getAttribute('aria-sort')).toBe('ascending');
   });
 });
+
+interface ReorderColumnDef {
+  field: string;
+  header: string;
+  frozen?: boolean;
+  visible?: boolean;
+  reorderable?: boolean;
+}
+
+@Component({
+  standalone: true,
+  imports: [DataTableComponent, TableColumnComponent],
+  template: `
+    <med-data-table [value]="rows" [reorderableColumns]="enabled" [resizableColumns]="resizable" (colReorder)="onColReorder($event)" ariaLabel="Column reorder">
+      @if (withGroup) {
+        <ng-template #headerGroup>
+          <tr>
+            <th class="group-cell" colspan="2">Group</th>
+            <th class="group-cell">Other</th>
+          </tr>
+        </ng-template>
+      }
+      @for (c of cols(); track c.field) {
+        <med-table-column [field]="c.field" [header]="c.header" [frozen]="!!c.frozen" [visible]="c.visible !== false" [reorderable]="c.reorderable !== false" width="100px" />
+      }
+    </med-data-table>
+  `,
+})
+class ReorderHostComponent {
+  rows = [{ a: 'a1', b: 'b1', c: 'c1', f1: 'f11', f2: 'f21' }];
+  enabled = true;
+  resizable = false;
+  withGroup = false;
+  cols = signal<ReorderColumnDef[]>([
+    { field: 'a', header: 'A' },
+    { field: 'b', header: 'B' },
+    { field: 'c', header: 'C' },
+  ]);
+  onColReorder = jest.fn();
+}
+
+describe('DataTableComponent column reorder', () => {
+  function create(setup: (host: ReorderHostComponent) => void = () => undefined) {
+    TestBed.configureTestingModule({ imports: [ReorderHostComponent] });
+    const fixture = TestBed.createComponent(ReorderHostComponent);
+    setup(fixture.componentInstance);
+    fixture.detectChanges();
+    return fixture;
+  }
+
+  const headerCells = (fixture: ComponentFixture<ReorderHostComponent>): HTMLElement[] => Array.from<HTMLElement>(fixture.nativeElement.querySelectorAll('thead tr:last-child th'));
+  const headerTexts = (fixture: ComponentFixture<ReorderHostComponent>): string[] => headerCells(fixture).map((th) => th.textContent!.trim());
+  const bodyTexts = (fixture: ComponentFixture<ReorderHostComponent>): string[] => Array.from<HTMLElement>(fixture.nativeElement.querySelectorAll('tbody tr:first-child td')).map((td) => td.textContent!.trim());
+
+  function fire(target: HTMLElement, type: string): void {
+    target.dispatchEvent(new Event(type, { bubbles: true, cancelable: true }));
+  }
+
+  function drag(fixture: ComponentFixture<ReorderHostComponent>, from: string, to: string): void {
+    const cells = headerCells(fixture);
+    const source = cells.find((th) => th.textContent!.trim() === from)!;
+    const target = cells.find((th) => th.textContent!.trim() === to)!;
+    fire(source, 'dragstart');
+    fire(target, 'dragover');
+    fire(target, 'drop');
+    fire(source, 'dragend');
+    fixture.detectChanges();
+  }
+
+  // DAT-034.S1
+  it('DAT-034.S1: dragging a header onto another moves the column in headers and body rows', () => {
+    const fixture = create();
+
+    drag(fixture, 'A', 'C');
+
+    expect(headerTexts(fixture)).toEqual(['B', 'C', 'A']);
+    expect(bodyTexts(fixture)).toEqual(['b1', 'c1', 'a1']);
+  });
+
+  // DAT-034.S2
+  it('DAT-034.S2: colReorder emits dragIndex, dropIndex and the new column order', () => {
+    const fixture = create();
+
+    drag(fixture, 'A', 'C');
+
+    expect(fixture.componentInstance.onColReorder).toHaveBeenCalledTimes(1);
+    expect(fixture.componentInstance.onColReorder).toHaveBeenCalledWith({ dragIndex: 0, dropIndex: 2, columns: ['b', 'c', 'a'] });
+  });
+
+  // DAT-034.S3
+  it('DAT-034.S3: dropping a header on itself changes nothing and does not emit', () => {
+    const fixture = create();
+
+    drag(fixture, 'B', 'B');
+
+    expect(headerTexts(fixture)).toEqual(['A', 'B', 'C']);
+    expect(fixture.componentInstance.onColReorder).not.toHaveBeenCalled();
+  });
+
+  // DAT-034.S4
+  it('DAT-034.S4: a free column cannot be dropped onto a frozen column', () => {
+    const fixture = create((host) =>
+      host.cols.set([
+        { field: 'f1', header: 'F', frozen: true },
+        { field: 'a', header: 'A' },
+        { field: 'b', header: 'B' },
+      ]),
+    );
+
+    drag(fixture, 'A', 'F');
+
+    expect(headerTexts(fixture)).toEqual(['F', 'A', 'B']);
+    expect(fixture.componentInstance.onColReorder).not.toHaveBeenCalled();
+  });
+
+  // DAT-034.S5
+  it('DAT-034.S5: frozen columns reorder among themselves and stay frozen with recomputed offsets', () => {
+    const fixture = create((host) =>
+      host.cols.set([
+        { field: 'f1', header: 'F1', frozen: true },
+        { field: 'f2', header: 'F2', frozen: true },
+        { field: 'a', header: 'A' },
+      ]),
+    );
+
+    drag(fixture, 'F1', 'F2');
+
+    expect(headerTexts(fixture)).toEqual(['F2', 'F1', 'A']);
+    const cells = headerCells(fixture);
+    expect(cells[0].style.position).toBe('sticky');
+    expect(cells[1].style.position).toBe('sticky');
+    expect(cells[0].style.left).toBe('0px');
+    expect(cells[1].style.left).toBe('100px');
+    expect(cells[2].style.position).not.toBe('sticky');
+  });
+
+  // DAT-034.S6
+  it('DAT-034.S6: a hidden column keeps its place in the order and returns to it when shown', () => {
+    const fixture = create((host) =>
+      host.cols.set([
+        { field: 'a', header: 'A' },
+        { field: 'b', header: 'B', visible: false },
+        { field: 'c', header: 'C' },
+      ]),
+    );
+
+    drag(fixture, 'A', 'C');
+    expect(fixture.componentInstance.onColReorder).toHaveBeenCalledWith({ dragIndex: 0, dropIndex: 2, columns: ['b', 'c', 'a'] });
+
+    fixture.componentInstance.cols.set([
+      { field: 'a', header: 'A' },
+      { field: 'b', header: 'B' },
+      { field: 'c', header: 'C' },
+    ]);
+    fixture.detectChanges();
+
+    expect(headerTexts(fixture)).toEqual(['B', 'C', 'A']);
+  });
+
+  // DAT-034.S7
+  it('DAT-034.S7: a column with reorderable false is not draggable and is not a drop target', () => {
+    const fixture = create((host) =>
+      host.cols.set([
+        { field: 'a', header: 'A' },
+        { field: 'b', header: 'B', reorderable: false },
+        { field: 'c', header: 'C' },
+      ]),
+    );
+
+    drag(fixture, 'A', 'B');
+
+    expect(headerTexts(fixture)).toEqual(['A', 'B', 'C']);
+    expect(fixture.componentInstance.onColReorder).not.toHaveBeenCalled();
+    expect(headerCells(fixture)[1].getAttribute('draggable')).not.toBe('true');
+    expect(headerCells(fixture)[0].getAttribute('draggable')).toBe('true');
+  });
+
+  // Plan D-03: a native header drag must not start while a column resize is in progress
+  it('plan D-03: dragstart is cancelled while a column resize is in progress and the order does not change', () => {
+    const fixture = create((host) => (host.resizable = true));
+    const cells = headerCells(fixture);
+    const handle = cells[0].querySelector('[data-col-resize-handle="true"]') as HTMLElement;
+    handle.dispatchEvent(new MouseEvent('pointerdown', { bubbles: true, cancelable: true, clientX: 0 }));
+
+    const dragStart = new Event('dragstart', { bubbles: true, cancelable: true });
+    cells[0].dispatchEvent(dragStart);
+    fire(cells[2], 'dragover');
+    fire(cells[2], 'drop');
+    fixture.detectChanges();
+
+    expect(dragStart.defaultPrevented).toBe(true);
+    expect(headerTexts(fixture)).toEqual(['A', 'B', 'C']);
+    expect(fixture.componentInstance.onColReorder).not.toHaveBeenCalled();
+    handle.dispatchEvent(new MouseEvent('pointerup', { bubbles: true, cancelable: true, clientX: 0 }));
+  });
+
+  // DAT-034.S10
+  it('DAT-034.S10: a #headerGroup row keeps the cells the application wrote while the column header row follows the order', () => {
+    const fixture = create((host) => (host.withGroup = true));
+
+    drag(fixture, 'A', 'C');
+
+    const groupCells = Array.from<HTMLElement>(fixture.nativeElement.querySelectorAll('thead tr:first-child .group-cell'));
+    expect(groupCells.map((th) => th.textContent!.trim())).toEqual(['Group', 'Other']);
+    expect(groupCells[0].getAttribute('colspan')).toBe('2');
+    expect(headerTexts(fixture)).toEqual(['B', 'C', 'A']);
+  });
+
+  // DAT-034.S11
+  it('DAT-034.S11: without reorderableColumns no header is draggable and Alt+ArrowRight does nothing', () => {
+    const fixture = create((host) => (host.enabled = false));
+
+    expect(headerCells(fixture).every((th) => th.getAttribute('draggable') !== 'true')).toBe(true);
+
+    drag(fixture, 'A', 'C');
+    headerCells(fixture)[1].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', altKey: true, bubbles: true, cancelable: true }));
+    fixture.detectChanges();
+
+    expect(headerTexts(fixture)).toEqual(['A', 'B', 'C']);
+    expect(fixture.componentInstance.onColReorder).not.toHaveBeenCalled();
+  });
+
+  function pressAlt(fixture: ComponentFixture<ReorderHostComponent>, header: HTMLElement, key: 'ArrowLeft' | 'ArrowRight'): void {
+    header.focus();
+    header.dispatchEvent(new KeyboardEvent('keydown', { key, altKey: true, bubbles: true, cancelable: true }));
+    fixture.detectChanges();
+  }
+
+  // DAT-034.S8
+  it('DAT-034.S8: Alt+ArrowRight moves the focused column one position, keeps focus, emits and announces', () => {
+    const fixture = create();
+    const headerB = headerCells(fixture)[1];
+
+    pressAlt(fixture, headerB, 'ArrowRight');
+
+    expect(headerTexts(fixture)).toEqual(['A', 'C', 'B']);
+    expect(document.activeElement).toBe(headerCells(fixture).find((th) => th.textContent!.trim() === 'B'));
+    expect(fixture.componentInstance.onColReorder).toHaveBeenCalledWith({ dragIndex: 1, dropIndex: 2, columns: ['a', 'c', 'b'] });
+    const live = fixture.nativeElement.querySelector('[aria-live="polite"]') as HTMLElement;
+    expect(live).not.toBeNull();
+    expect(live.textContent).toContain('B');
+    expect(live.textContent).toContain('3');
+  });
+
+  // DAT-034.S9
+  it('DAT-034.S9: Alt+ArrowLeft on the first column changes nothing and does not emit', () => {
+    const fixture = create();
+
+    pressAlt(fixture, headerCells(fixture)[0], 'ArrowLeft');
+
+    expect(headerTexts(fixture)).toEqual(['A', 'B', 'C']);
+    expect(fixture.componentInstance.onColReorder).not.toHaveBeenCalled();
+  });
+});
