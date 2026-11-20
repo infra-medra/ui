@@ -1,0 +1,17 @@
+<div class="mb-3 flex gap-2">
+  <button type="button" class="rounded border border-surface-300 px-3 py-1 text-sm dark:border-surface-700" (click)="refresh()">Refresh data</button>
+</div>
+<med-data-table #dt [value]="equipment" [rowTrackBy]="byId" ariaLabel="Lab equipment inventory (row identity)">
+  <med-table-column field="name" header="Details">
+    <ng-template let-row>
+      <button type="button" class="text-left underline" (click)="dt.toggleRowExpansion(row)">
+        {{ dt.expandedRowKeys()[row.id] ? 'Hide' : 'Show' }} {{ row.name }}
+      </button>
+    </ng-template>
+  </med-table-column>
+  <med-table-column field="category" header="Category" />
+  <med-table-column field="quantity" header="Quantity" align="right" />
+  <ng-template #rowexpansion let-row>
+    <p class="text-sm text-surface-700 dark:text-surface-200">{{ row.name }}: {{ row.quantity }} on the shelf.</p>
+  </ng-template>
+</med-data-table>

@@ -8,6 +8,9 @@ const PRE_EXISTING = ['basic', 'sort-multiple', 'edit-cell', 'export-csv', 'lazy
 /** The examples DAT-024.S4 adds, by slug. */
 const NEW_APPEARANCE_AND_SELECTION = ['selection-radio', 'keyboard-navigation', 'size', 'grid-lines', 'striped-rows'];
 
+/** The examples DAT-024.S5 adds for row labels and row identity, by slug. */
+const ROW_LABELS_AND_IDENTITY = ['row-aria-label', 'row-track-by'];
+
 interface SectionReport {
   id: string;
   proseLength: number;
@@ -92,6 +95,27 @@ test.describe('DataTable docs page', () => {
       expect(anchorIds, `no section for "${slug}"`).toContain(`example-${slug}`);
       expect(sections.find((s) => s.id === `example-${slug}`)!.demos, `no demo for "${slug}"`).toBe(1);
     }
+  });
+
+  // DAT-024.S5
+  test('DAT-024.S5: row labels and row identity each have a section with prose, a demo and a code block', async ({ page }) => {
+    const { anchorIds, sections } = await readPage(page);
+    for (const slug of ROW_LABELS_AND_IDENTITY) {
+      expect(anchorIds, `no section for "${slug}"`).toContain(`example-${slug}`);
+      const section = sections.find((s) => s.id === `example-${slug}`)!;
+      expect(section.proseLength, `no prose for "${slug}"`).toBeGreaterThan(0);
+      expect(section.demos, `no demo for "${slug}"`).toBe(1);
+      expect(section.codeBlocks, `no code block for "${slug}"`).toBeGreaterThanOrEqual(1);
+    }
+  });
+
+  // DAT-027.S1
+  test('DAT-027.S1: the row-aria-label demo names each row checkbox after its row', async ({ page }) => {
+    await page.goto(PAGE);
+    const table = page.locator('app-data-table-row-aria-label-demo med-data-table');
+    await table.scrollIntoViewIfNeeded({ timeout: 5_000 });
+    await expect(table.getByRole('checkbox', { name: 'Select Oscilloscope' })).toBeAttached();
+    await expect(table.getByRole('checkbox', { name: 'Select row' })).toHaveCount(0);
   });
 
   // DAT-024.S3

@@ -1,0 +1,5 @@
+## Row identity
+
+By default the table identifies a row by its position. Set `rowTrackBy` to a function that receives a row and its index and returns a stable value, such as the row `id`, and a row keeps its element when `value` is replaced by new objects with the same ids, for example after a refresh that returns the data in another order.
+
+When `dataKey` is not set, the same value is the key of the row expansion, so an expanded row stays open on its record after the refresh. Expand a row below and choose "Refresh data" to see it follow the record.
