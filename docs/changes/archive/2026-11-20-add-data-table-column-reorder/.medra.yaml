@@ -1,0 +1,79 @@
+change: add-data-table-column-reorder
+created: 2026-11-20
+track: full
+phase: archived
+diff_base: b1468e5
+gates:
+  proposal:
+    status: approved
+    by: Tiago Cavalli
+    at: 2026-11-20T18:01:57Z
+    hash: 00567acba83ac4ae68f3a109a1b32fbb35b4d079e6972cef65f3d64b977ff203
+    note: null
+  plan:
+    status: approved
+    by: Tiago Cavalli
+    at: 2026-11-20T18:04:34Z
+    hash: a1206449acc6b9be2edf3cc27c32b2b5de6575b5b402aca074e35de9d1af2c7b
+    note: null
+  tasks:
+    status: approved
+    by: Tiago Cavalli
+    at: 2026-11-20T18:06:19Z
+    hash: bf67f0274dd5ceedfd750db722b7128e342bed5ed8aad5f2d3dc0d0105195fd6
+    note: null
+  verify:
+    status: approved
+    by: Tiago Cavalli
+    at: 2026-11-20T18:29:25Z
+    hash: eae8c115874ae15fe9ec824b024ee2f31f1b468d288cfcb793a158355c38107a
+    note: null
+gate_notes: []
+reviews: []
+track_history: []
+blockers: []
+last_task_done_at: 2026-11-20T18:21:43Z
+test_hashes:
+  T002:
+    projects/medra/ui/src/lib/data-table/data-table.component.spec.ts: d4f49147717e8ca45e43a75e8857554479416e52b2eba49b8562e866f973d38e
+  T003:
+    projects/medra/ui/src/lib/data-table/data-table.component.spec.ts: d7998092e7f773eddf974df2bf253ca4ccbde8d9b9e75fbfac8978aeb3229319
+  T010:
+    e2e/site/data-table-column-reorder.spec.ts: 7d2afda832b8edf28b1fd76f1364e99b28b8185d56f1918389a3c257fa5a139a
+    e2e/site/data-table-docs.spec.ts: 75901a50e89aeb4bb452f63ba0f1da28c33bcb91e0b24dbebaeabc2e0b73384f
+    e2e/site/data-table-frozen.spec.ts: fd8a8594768802b3c2247611c4639279ce82f18a8efe73e3ba08bd8f356def72
+suite:
+  at: 2026-11-20T18:28:38Z
+  exit: 0
+  commands:
+    - npm test
+  fingerprint: f1b3973b2a6eb12a768f6b19db32aadf7ac9ace55869d4bb45b3944c27f527f5
+handoff_snapshots:
+  check:
+    "1":
+      .changeset/data-table-column-reorder.md: 8f3cf20516d141f6175cb68605dfd752f13ce33bade27ac5168b7643640ddcc7
+      e2e/site/data-table-column-reorder.spec.ts: 54b1da5b54b6bf794660e56cd395bc38e6fe521417bd42ad438c4c3ec4e2d69c
+      e2e/site/data-table-docs.spec.ts: 75901a50e89aeb4bb452f63ba0f1da28c33bcb91e0b24dbebaeabc2e0b73384f
+      projects/medra/ui/src/lib/data-table/data-table.component.spec.ts: d7998092e7f773eddf974df2bf253ca4ccbde8d9b9e75fbfac8978aeb3229319
+      projects/medra/ui/src/lib/data-table/data-table.component.ts: c7f8da96ed7aa5a161a8f2896541243004cca157816a5ffcc3de625d08725b5b
+      projects/medra/ui/src/lib/data-table/data-table.types.ts: de924b305a9f3c5b994397aa8dc9a91a23dc71d6af80729013e330fc06b85d29
+      projects/medra/ui/src/lib/data-table/table-column.component.ts: 9efa7bef2ac8a3ae9f68ccb73e4afdd3031ec361783eb9b81844d885f15e7bd9
+      projects/site/src/app/pages/docs/components/data-table.page.ts: 373923c027ac3b6a16fc96b8cdc4dfd42805fb177bbfb7969ad49fcd02524bda
+      projects/site/src/app/pages/docs/components/demos/data-table-column-reorder.demo.html: 12e7b7cc82578ac87ab33abe53ab68ad395f5cb322e818875b5b40c6389ac5ba
+      projects/site/src/app/pages/docs/components/demos/data-table-column-reorder.demo.ts: 06492282a9dd683c42ee1a5dba58f7f69d3383438d7960df76bd0b75d00e9406
+      projects/site/src/content/docs/data-table-column-reorder.txt: aaafc65d51c915e3e84da4550832c08cfe4a729a20ce11e2041207c648695a68
+    "2":
+      .changeset/data-table-column-reorder.md: 8f3cf20516d141f6175cb68605dfd752f13ce33bade27ac5168b7643640ddcc7
+      e2e/site/data-table-column-reorder.spec.ts: 54b1da5b54b6bf794660e56cd395bc38e6fe521417bd42ad438c4c3ec4e2d69c
+      e2e/site/data-table-docs.spec.ts: 75901a50e89aeb4bb452f63ba0f1da28c33bcb91e0b24dbebaeabc2e0b73384f
+      projects/medra/ui/src/lib/data-table/data-table.component.spec.ts: bfe214db7f939e927cd7131b7a6147c267baee013514082a6a56ca0db9e69a99
+      projects/medra/ui/src/lib/data-table/data-table.component.ts: 9c45e18e90b44de1dbe3262c910ce2d0b0dec099c4bd2885d31a5665f746ea9c
+      projects/medra/ui/src/lib/data-table/data-table.types.ts: de924b305a9f3c5b994397aa8dc9a91a23dc71d6af80729013e330fc06b85d29
+      projects/medra/ui/src/lib/data-table/table-column.component.ts: 9efa7bef2ac8a3ae9f68ccb73e4afdd3031ec361783eb9b81844d885f15e7bd9
+      projects/site/src/app/pages/docs/components/data-table.page.ts: 373923c027ac3b6a16fc96b8cdc4dfd42805fb177bbfb7969ad49fcd02524bda
+      projects/site/src/app/pages/docs/components/demos/data-table-column-reorder.demo.html: 12e7b7cc82578ac87ab33abe53ab68ad395f5cb322e818875b5b40c6389ac5ba
+      projects/site/src/app/pages/docs/components/demos/data-table-column-reorder.demo.ts: 06492282a9dd683c42ee1a5dba58f7f69d3383438d7960df76bd0b75d00e9406
+      projects/site/src/content/docs/data-table-column-reorder.txt: aaafc65d51c915e3e84da4550832c08cfe4a729a20ce11e2041207c648695a68
+archived:
+  at: 2026-11-20
+  sequence: 9

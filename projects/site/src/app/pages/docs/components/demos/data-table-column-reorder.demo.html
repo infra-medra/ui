@@ -1,0 +1,10 @@
+<med-data-table [value]="equipment" [reorderableColumns]="true" (colReorder)="onColReorder($event)" ariaLabel="Lab equipment inventory (column reorder)">
+  <med-table-column field="name" header="Name" width="200px" [frozen]="true" />
+  <med-table-column field="category" header="Category" width="180px" [frozen]="true" />
+  <med-table-column field="location" header="Location" width="160px" />
+  <med-table-column field="supplier" header="Supplier" width="180px" />
+  <med-table-column field="serial" header="Serial number" width="180px" />
+  <med-table-column field="quantity" header="Quantity" width="140px" align="right" />
+  <med-table-column field="status" header="Status" width="160px" [reorderable]="false" />
+</med-data-table>
+<p class="mt-2 text-sm text-surface-600 dark:text-surface-400" aria-live="off">{{ lastMove() }}</p>

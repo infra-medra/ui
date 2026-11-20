@@ -34,6 +34,7 @@ import { DataTableColumnResizeDemo } from './demos/data-table-column-resize.demo
 import { DataTableColumnResizeExpandDemo } from './demos/data-table-column-resize-expand.demo';
 import { DataTableColumnToggleDemo } from './demos/data-table-column-toggle.demo';
 import { DataTableColumnGroupsDemo } from './demos/data-table-column-groups.demo';
+import { DataTableColumnReorderDemo } from './demos/data-table-column-reorder.demo';
 import { DataTableFrozenColumnsUtilityDemo } from './demos/data-table-frozen-columns-utility.demo';
 import { DataTableEditCellDemo } from './demos/data-table-edit-cell.demo';
 import { DataTableLoadingDemo } from './demos/data-table-loading.demo';
@@ -74,6 +75,7 @@ import columnResizeCode from './demos/data-table-column-resize.demo.html?raw';
 import columnResizeExpandCode from './demos/data-table-column-resize-expand.demo.html?raw';
 import columnToggleCode from './demos/data-table-column-toggle.demo.html?raw';
 import columnGroupsCode from './demos/data-table-column-groups.demo.html?raw';
+import columnReorderCode from './demos/data-table-column-reorder.demo.html?raw';
 import frozenColumnsUtilityCode from './demos/data-table-frozen-columns-utility.demo.html?raw';
 import editCellCode from './demos/data-table-edit-cell.demo.html?raw';
 import loadingCode from './demos/data-table-loading.demo.html?raw';
@@ -115,6 +117,7 @@ import columnResizeContent from '../../../../content/docs/data-table-column-resi
 import columnResizeExpandContent from '../../../../content/docs/data-table-column-resize-expand.txt?raw';
 import columnToggleContent from '../../../../content/docs/data-table-column-toggle.txt?raw';
 import columnGroupsContent from '../../../../content/docs/data-table-column-groups.txt?raw';
+import columnReorderContent from '../../../../content/docs/data-table-column-reorder.txt?raw';
 import frozenColumnsUtilityContent from '../../../../content/docs/data-table-frozen-columns-utility.txt?raw';
 import editCellContent from '../../../../content/docs/data-table-edit-cell.txt?raw';
 import loadingContent from '../../../../content/docs/data-table-loading.txt?raw';
@@ -157,6 +160,7 @@ const EXAMPLES = [
   { id: 'example-column-resize-expand', label: 'Column resize (expand)' },
   { id: 'example-column-toggle', label: 'Column toggle' },
   { id: 'example-column-groups', label: 'Column groups' },
+  { id: 'example-column-reorder', label: 'Column reorder' },
   { id: 'example-edit-cell', label: 'Cell editing' },
   { id: 'example-loading', label: 'Loading' },
   { id: 'example-lazy', label: 'Lazy loading' },
@@ -205,6 +209,7 @@ const EXAMPLES = [
     DataTableColumnResizeExpandDemo,
     DataTableColumnToggleDemo,
     DataTableColumnGroupsDemo,
+    DataTableColumnReorderDemo,
     DataTableEditCellDemo,
     DataTableLoadingDemo,
     DataTableLazyDemo,
@@ -368,6 +373,14 @@ const EXAMPLES = [
         <div class="mt-4">
           <app-data-table-column-groups-demo />
           <div class="mt-3"><app-code-block [code]="columnGroupsCode" /></div>
+        </div>
+      </section>
+
+      <section id="example-column-reorder" class="mt-10 scroll-mt-24">
+        <app-prose class="block" [content]="columnReorderContent" />
+        <div class="mt-4">
+          <app-data-table-column-reorder-demo />
+          <div class="mt-3"><app-code-block [code]="columnReorderCode" /></div>
         </div>
       </section>
 
@@ -590,6 +603,8 @@ export default class DocsDataTable {
   protected readonly columnToggleCode = columnToggleCode;
   protected readonly columnGroupsContent = columnGroupsContent;
   protected readonly columnGroupsCode = columnGroupsCode;
+  protected readonly columnReorderContent = columnReorderContent;
+  protected readonly columnReorderCode = columnReorderCode;
   protected readonly frozenColumnsUtilityContent = frozenColumnsUtilityContent;
   protected readonly frozenColumnsUtilityCode = frozenColumnsUtilityCode;
   protected readonly editCellContent = editCellContent;
