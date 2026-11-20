@@ -5,9 +5,24 @@ import { InputTextDirective } from '../input-text/input-text.directive';
 import { PaginatorComponent } from '../paginator/paginator.component';
 import { ProgressSpinnerComponent } from '../progress-spinner/progress-spinner.component';
 import { checkboxBoxVariants } from '../checkbox/checkbox.styles';
+import { DOT_SIZE_CLASS, radioRingVariants } from '../radio-button/radio-button.styles';
 import { mergeClasses } from '../utils/merge-classes';
 import { TableColumnComponent } from './table-column.component';
-import { TableColumnAlign, TableLazyLoadEvent, TableRowReorderEvent, TableSelectionMode, TableSortMeta, TableSortMode, TableSortOrder } from './data-table.types';
+import { TableColumnAlign, TableLazyLoadEvent, TableRowReorderEvent, TableSelectionMode, TableSize, TableSortMeta, TableSortMode, TableSortOrder } from './data-table.types';
+
+let nextRadioGroupId = 0;
+
+const SIZE_PADDING_CLASS: Record<TableSize, string> = {
+  sm: 'px-2 py-1.5',
+  default: 'px-3 py-2.5',
+  lg: 'px-4 py-4',
+};
+
+const SIZE_TEXT_CLASS: Record<TableSize, string> = {
+  sm: 'text-xs',
+  default: 'text-sm',
+  lg: 'text-base',
+};
 
 const ALIGN_CLASS: Record<TableColumnAlign, string> = {
   left: 'text-left',
@@ -222,14 +237,14 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
           <med-progress-spinner [ariaLabel]="loadingLabel()" />
         </div>
       }
-      <table class="w-full border-collapse text-left text-sm" [class.table-fixed]="resizableColumns()" [class.opacity-50]="loading()" [attr.aria-label]="ariaLabel()">
+      <table [class]="tableClass()" [class.table-fixed]="resizableColumns()" [class.opacity-50]="loading()" [attr.aria-label]="ariaLabel()">
         <thead [class]="scrollable() ? 'sticky top-0 z-10 bg-surface-50 dark:bg-surface-800' : ''">
           <tr class="border-b border-surface-200 bg-surface-50 dark:border-surface-700 dark:bg-surface-800/50">
             @if (reorderable()) {
-              <th class="w-8 px-2 py-2.5"></th>
+              <th [class]="utilityCellClass('w-8', true)"></th>
             }
             @if (selectionMode() === 'multiple') {
-              <th class="w-10 px-3 py-2.5">
+              <th [class]="utilityCellClass('w-10')">
                 <span class="relative inline-flex">
                   <input
                     type="checkbox"
@@ -248,6 +263,9 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
                   </span>
                 </span>
               </th>
+            }
+            @if (selectionMode() === 'radio') {
+              <th [class]="utilityCellClass('w-10')"></th>
             }
             @for (col of columns(); track col.field()) {
               <th
@@ -289,7 +307,7 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
           @for (row of pagedValue(); track rowTrackBy()(row, $index); let i = $index) {
             @if (isGroupStart(row, i)) {
               <tr class="border-b border-surface-200 bg-surface-50 font-semibold dark:border-surface-700 dark:bg-surface-800/50">
-                <td [attr.colspan]="totalColumnCount()" class="px-3 py-2">
+                <td [attr.colspan]="totalColumnCount()" [class]="groupCellClass()">
                   @if (groupHeaderTemplate(); as t) {
                     <ng-container [ngTemplateOutlet]="t" [ngTemplateOutletContext]="{ $implicit: row }" />
                   } @else {
@@ -299,9 +317,9 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
               </tr>
             }
             <tr
-              [class]="rowClassFor(row)"
+              [class]="rowClassFor(row, i)"
               [attr.aria-selected]="selectionMode() ? isSelected(row) : null"
-              [attr.tabindex]="selectionMode() === 'single' ? 0 : null"
+              [attr.tabindex]="isSingleLike() ? 0 : null"
               [draggable]="reorderable()"
               (click)="onRowClick(row)"
               (keydown)="onRowKeydown($event, row)"
@@ -310,12 +328,12 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
               (drop)="onRowDrop(i)"
             >
               @if (reorderable()) {
-                <td class="w-8 cursor-move px-2 py-2.5 text-surface-400 dark:text-surface-500" (click)="$event.stopPropagation()">
+                <td [class]="utilityCellClass('w-8 cursor-move text-surface-400 dark:text-surface-500', true)" (click)="$event.stopPropagation()">
                   <med-icon name="bars-3" variant="mini" class="size-4" />
                 </td>
               }
               @if (selectionMode() === 'multiple') {
-                <td class="w-10 px-3 py-2.5">
+                <td [class]="utilityCellClass('w-10')">
                   <span class="relative inline-flex">
                     <input
                       type="checkbox"
@@ -328,6 +346,26 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
                     <span [class]="checkboxBoxClass" aria-hidden="true">
                       @if (isSelected(row)) {
                         <med-icon name="check" variant="solid" class="size-3" />
+                      }
+                    </span>
+                  </span>
+                </td>
+              }
+              @if (selectionMode() === 'radio') {
+                <td [class]="utilityCellClass('w-10')">
+                  <span class="relative inline-flex">
+                    <input
+                      type="radio"
+                      class="peer absolute inset-0 size-full cursor-pointer opacity-0"
+                      [name]="radioGroupName"
+                      [checked]="isSelected(row)"
+                      [attr.aria-label]="rowAriaLabel()?.(row) ?? 'Select row'"
+                      (click)="$event.stopPropagation()"
+                      (change)="selectSingle(row)"
+                    />
+                    <span [class]="radioRingClass" aria-hidden="true">
+                      @if (isSelected(row)) {
+                        <span [class]="radioDotClass"></span>
                       }
                     </span>
                   </span>
@@ -350,7 +388,7 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
             </tr>
             @if (isRowExpanded(row, i) && rowExpansionTemplate(); as expTpl) {
               <tr class="border-b border-surface-200 bg-surface-50/40 dark:border-surface-700 dark:bg-surface-800/30">
-                <td [attr.colspan]="totalColumnCount()" class="px-3 py-2.5">
+                <td [attr.colspan]="totalColumnCount()" [class]="expansionCellClass()">
                   <ng-container [ngTemplateOutlet]="expTpl" [ngTemplateOutletContext]="{ $implicit: row, rowIndex: i }" />
                 </td>
               </tr>
@@ -371,6 +409,12 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
 export class DataTableComponent<T> {
   readonly value = input<readonly T[]>([]);
   readonly selectionMode = input<TableSelectionMode>(null);
+  /** Cell padding and text size: `sm`, `default` or `lg`. */
+  readonly size = input<TableSize>('default');
+  /** Draws borders between cells. */
+  readonly showGridlines = input(false, { transform: booleanAttribute });
+  /** Gives alternate body rows a different background. */
+  readonly stripedRows = input(false, { transform: booleanAttribute });
   readonly selection = model<T | readonly T[] | null>(null);
   readonly paginator = input(false, { transform: booleanAttribute });
   readonly rows = input(10, { transform: numberAttribute });
@@ -436,6 +480,10 @@ export class DataTableComponent<T> {
   protected readonly rowExpansionTemplate = contentChild('rowexpansion', { read: TemplateRef });
   private readonly platformId = inject(PLATFORM_ID);
   protected readonly checkboxBoxClass = checkboxBoxVariants({ size: 'sm' });
+  protected readonly radioRingClass = radioRingVariants({ size: 'sm' });
+  protected readonly radioDotClass = `${DOT_SIZE_CLASS.sm} rounded-full bg-brand-500 dark:bg-brand-400`;
+  /** Shared `name` of the row radios, unique per table instance so two tables on a page keep independent groups. */
+  protected readonly radioGroupName = `med-data-table-radio-${nextRadioGroupId++}`;
   protected readonly wrapperClass = computed(() => mergeClasses('relative w-full overflow-x-auto rounded-lg border border-surface-200 dark:border-surface-700', this.class()));
 
   private readonly editingCell = signal<{ row: T; field: string } | null>(null);
@@ -588,7 +636,7 @@ export class DataTableComponent<T> {
 
   protected readonly effectiveTotalRecords = computed(() => (this.lazy() ? (this.totalRecords() ?? this.value().length) : this.sortedValue().length));
 
-  protected readonly totalColumnCount = computed(() => this.columns().length + (this.selectionMode() === 'multiple' ? 1 : 0) + (this.reorderable() ? 1 : 0));
+  protected readonly totalColumnCount = computed(() => this.columns().length + (this.selectionMode() === 'multiple' || this.selectionMode() === 'radio' ? 1 : 0) + (this.reorderable() ? 1 : 0));
 
   protected readonly allSelected = computed(() => {
     const rows = this.sortedValue();
@@ -633,9 +681,33 @@ export class DataTableComponent<T> {
     return this.rowFieldValue(previous, field) !== this.rowFieldValue(row, field);
   }
 
+  protected tableClass(): string {
+    return mergeClasses('w-full border-collapse text-left', SIZE_TEXT_CLASS[this.size()]);
+  }
+
+  private gridClass(): string {
+    return this.showGridlines() ? 'border-x border-surface-200 dark:border-surface-700' : '';
+  }
+
+  /** Padding for the select, reorder and header utility cells; `narrow` uses the tighter horizontal padding. */
+  protected utilityCellClass(extra: string, narrow = false): string {
+    const pad = SIZE_PADDING_CLASS[this.size()];
+    return mergeClasses(narrow ? pad.replace(/px-\S+/, 'px-2') : pad, extra, this.gridClass());
+  }
+
+  protected groupCellClass(): string {
+    return SIZE_PADDING_CLASS[this.size()];
+  }
+
+  protected expansionCellClass(): string {
+    return SIZE_PADDING_CLASS[this.size()];
+  }
+
   protected headerCellClass(col: TableColumnComponent): string {
     return mergeClasses(
-      'px-3 py-2.5 font-semibold text-surface-700 select-none dark:text-surface-200',
+      SIZE_PADDING_CLASS[this.size()],
+      this.gridClass(),
+      'font-semibold text-surface-700 select-none dark:text-surface-200',
       ALIGN_CLASS[col.align()],
       col.sortable()
         ? 'cursor-pointer focus-visible:outline-none focus-visible:ring-(--focus-ring-width) focus-visible:ring-offset-(--focus-ring-offset) focus-visible:ring-brand-500 dark:focus-visible:ring-brand-400'
@@ -644,14 +716,19 @@ export class DataTableComponent<T> {
   }
 
   protected cellClass(col: TableColumnComponent): string {
-    return mergeClasses('px-3 py-2.5 text-surface-900 dark:text-surface-50', ALIGN_CLASS[col.align()]);
+    return mergeClasses(SIZE_PADDING_CLASS[this.size()], 'text-surface-900 dark:text-surface-50', ALIGN_CLASS[col.align()], this.gridClass());
   }
 
-  protected rowClassFor(row: T): string {
+  protected rowClassFor(row: T, index: number): string {
+    const striped = this.stripedRows() && index % 2 === 1;
     return mergeClasses(
       'border-b border-surface-200 last:border-b-0 dark:border-surface-700',
       this.selectionMode() ? 'cursor-pointer' : '',
-      this.isSelected(row) ? 'bg-brand-50 dark:bg-brand-500/10' : 'hover:bg-surface-50 dark:hover:bg-surface-800/50',
+      this.isSelected(row)
+        ? 'bg-brand-50 dark:bg-brand-500/10'
+        : striped
+          ? 'bg-surface-100/70 hover:bg-surface-100 dark:bg-surface-800/60 dark:hover:bg-surface-800'
+          : 'hover:bg-surface-50 dark:hover:bg-surface-800/50',
       this.rowClass()?.(row) ?? '',
     );
   }
@@ -759,20 +836,42 @@ export class DataTableComponent<T> {
     return this.selectionMode() === 'multiple' ? Array.isArray(sel) && (sel as readonly T[]).some((r) => this.rowsEqual(r, row)) : sel !== null && this.rowsEqual(sel as T, row);
   }
 
+  /** `single` and `radio` share the same row selection behavior. */
+  protected isSingleLike(): boolean {
+    return this.selectionMode() === 'single' || this.selectionMode() === 'radio';
+  }
+
   protected onRowClick(row: T): void {
-    if (this.selectionMode() === 'single') {
+    if (this.isSingleLike()) {
       this.selectSingle(row);
     }
   }
 
   protected onRowKeydown(event: KeyboardEvent, row: T): void {
-    if (this.selectionMode() !== 'single') {
+    if (!this.isSingleLike()) {
       return;
     }
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
       this.selectSingle(row);
+      return;
     }
+    if (event.key === 'ArrowDown' || event.key === 'ArrowUp' || event.key === 'Home' || event.key === 'End') {
+      event.preventDefault();
+      this.moveRowFocus(event);
+    }
+  }
+
+  /** Moves focus between the focusable body rows of the current page, without changing the selection and without wrapping. */
+  private moveRowFocus(event: KeyboardEvent): void {
+    const current = event.currentTarget as HTMLElement;
+    const rows = Array.from(current.parentElement?.querySelectorAll<HTMLElement>(':scope > tr[tabindex]') ?? []);
+    const index = rows.indexOf(current);
+    if (index === -1) {
+      return;
+    }
+    const target = event.key === 'Home' ? 0 : event.key === 'End' ? rows.length - 1 : event.key === 'ArrowDown' ? Math.min(index + 1, rows.length - 1) : Math.max(index - 1, 0);
+    rows[target].focus();
   }
 
   protected selectSingle(row: T): void {

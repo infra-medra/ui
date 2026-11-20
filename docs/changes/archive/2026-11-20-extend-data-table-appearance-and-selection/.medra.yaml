@@ -1,0 +1,105 @@
+change: extend-data-table-appearance-and-selection
+created: 2026-11-20
+track: full
+phase: archived
+diff_base: 9dafa6c
+gates:
+  proposal:
+    status: approved
+    by: Tiago Cavalli
+    at: 2026-11-20T10:09:03Z
+    hash: 4af74c35bbf78501c6f2d7ef2946578269140e1331329bd19e1a9ea418a4d184
+    note: null
+  plan:
+    status: approved
+    by: Tiago Cavalli
+    at: 2026-11-20T10:11:12Z
+    hash: bdd8082c878383fa246c41d615565cb3d8c54c70d51416157d37cdffca1c45e2
+    note: null
+  tasks:
+    status: approved
+    by: Tiago Cavalli
+    at: 2026-11-20T10:49:04Z
+    hash: 3090b88cbf68b09c56bacfc70c926746f1babf45169d39483e402a0de14d7750
+    note: null
+  verify:
+    status: approved
+    by: Tiago Cavalli
+    at: 2026-11-20T11:04:21Z
+    hash: dcfaa85532d4f976434c062bb94bad958b5286ea33acc338e299ca9bb40ee207
+    note: null
+gate_notes:
+  - gate: verify
+    by: Tiago Cavalli
+    at: 2026-11-20T11:00:22Z
+    note: "Fix F-01: assert text size (fontSize) in the DAT-025.S1 e2e test"
+reviews: []
+track_history: []
+blockers: []
+test_hashes:
+  T001:
+    e2e/site/data-table-appearance.spec.ts: 41cc9a1bc65ae8b540a7a0518e77bbd2a310a72bb822714ae248799c86b5467e
+  T004:
+    projects/medra/ui/src/lib/data-table/data-table.component.spec.ts: 17f0dc239b67f156b9814749904c03f2bc8b87de4dbfecb60dedea183788e19e
+  T006:
+    projects/medra/ui/src/lib/data-table/data-table.component.spec.ts: ecc55d96a8aa586699047365a627a5e6758b44741705f7933a1d94b8f07a58cf
+  T008:
+    e2e/site/data-table-docs.spec.ts: d431d3ce6f3e68e5332f7ae543a701bbea92880eb711ad66f5dacba6d0c24961
+last_task_done_at: 2026-11-20T10:49:58Z
+suite:
+  at: 2026-11-20T11:03:20Z
+  exit: 0
+  commands:
+    - npm test
+  fingerprint: cc4d067a5303708521a2029ffbdf3d05561889b29b76ca488dbc454e4726c77f
+handoff_snapshots:
+  check:
+    "1":
+      .changeset/data-table-appearance-and-selection.md: bfe933a376c9b856d06716c3750ce31ab8c9099bf82c4395e0298c4e234f8f5f
+      e2e/site/data-table-appearance.spec.ts: 03cadb74cb5153235c8716413f40aa4ea6cffc73821013589ac0c75b7f81d36a
+      e2e/site/data-table-docs.spec.ts: d431d3ce6f3e68e5332f7ae543a701bbea92880eb711ad66f5dacba6d0c24961
+      projects/medra/ui/src/lib/data-table/data-table.component.spec.ts: dc8cdb009c70a2cee49cef75ce174e0624c2fbfc6ddcfb077ef51cb57a048239
+      projects/medra/ui/src/lib/data-table/data-table.component.ts: e7316b001a6f3973a5349df47e10557dfe2ce308462cd609a54979e131cb2cc5
+      projects/medra/ui/src/lib/data-table/data-table.types.ts: 47e109b08e4e36045e17bebbd4fd41701bf1a04a61d069656aafe608aedb4f97
+      projects/site/src/app/pages/docs/components/data-table.page.ts: 491b9a2072529c210961cbdcf570657f1cf2a1be7e26671ecd9fcbf5b75daede
+      projects/site/src/app/pages/docs/components/demos/data-table-grid-lines.demo.html: 9b39d6596f2f61857f868627f0ec42594d5c6e36afb3b91dc0c82ef733ae0abd
+      projects/site/src/app/pages/docs/components/demos/data-table-grid-lines.demo.ts: 48be73165b22f868c09d889a5de56f30e05476145c37987683fa038bf3f21486
+      projects/site/src/app/pages/docs/components/demos/data-table-keyboard-navigation.demo.html: a0970593c1745506bcfb508dbe0e19ed79f543f37aa47f6dd1191bbbdd59791f
+      projects/site/src/app/pages/docs/components/demos/data-table-keyboard-navigation.demo.ts: 6b99e57ffacd7f4688f82930830fa2284953d768272deca207ba30fa9a862a90
+      projects/site/src/app/pages/docs/components/demos/data-table-selection-radio.demo.html: 7fc60ec2f9b4d37ae454cc412005444b1bbfc2d3783fc3baa8018a69ed961283
+      projects/site/src/app/pages/docs/components/demos/data-table-selection-radio.demo.ts: 1fe763cfcadc37d0efc0cc7c7ef14271858794b7e8583f02a5296443f7026625
+      projects/site/src/app/pages/docs/components/demos/data-table-size.demo.html: a2853b02ce1b2b154aa93f5516a7d692b7a0f467e3be3ced7ad1fffbe259b69f
+      projects/site/src/app/pages/docs/components/demos/data-table-size.demo.ts: 4dff6eecaceaf7b8452dc6d839e1bbd97b43c9acb7ee7d1a624e2c66011e4ea3
+      projects/site/src/app/pages/docs/components/demos/data-table-striped-rows.demo.html: 1f3ffd76c3180d67e0eb963152af894c3b486847d177fef3166bb66335868f92
+      projects/site/src/app/pages/docs/components/demos/data-table-striped-rows.demo.ts: 7af2364c27557e9caa96af13e7a6ea89cd6de9099423de2d45dec57f29d1dff8
+      projects/site/src/content/docs/data-table-grid-lines.txt: 0f5c0e526b5b9b54b1d0316e68b3297ae55b976fb24385f02761c203f8d629af
+      projects/site/src/content/docs/data-table-keyboard-navigation.txt: 96158e8799b3a4d1a17025e25bd4232bc858fbd0994aa0018bf0a205229299e1
+      projects/site/src/content/docs/data-table-selection-radio.txt: 8e4a5812b8a8b2a504516e82379285613c499231b0525b884536a5f8965440c2
+      projects/site/src/content/docs/data-table-size.txt: 053b03427a291ac50bb7c3424191f7d1ef68d8790b1d1f73aea558eceeedf71f
+      projects/site/src/content/docs/data-table-striped-rows.txt: 5bf16a6976c19e9d8b8ceb4ab1cc5694a97d3e3f68fb8292d27f46728da4617a
+    "2":
+      .changeset/data-table-appearance-and-selection.md: bfe933a376c9b856d06716c3750ce31ab8c9099bf82c4395e0298c4e234f8f5f
+      e2e/site/data-table-appearance.spec.ts: a47a3831192aea338edcc33f4778ef7fb1d86ce04e961ccce6445b645edc27fb
+      e2e/site/data-table-docs.spec.ts: d431d3ce6f3e68e5332f7ae543a701bbea92880eb711ad66f5dacba6d0c24961
+      projects/medra/ui/src/lib/data-table/data-table.component.spec.ts: dc8cdb009c70a2cee49cef75ce174e0624c2fbfc6ddcfb077ef51cb57a048239
+      projects/medra/ui/src/lib/data-table/data-table.component.ts: e7316b001a6f3973a5349df47e10557dfe2ce308462cd609a54979e131cb2cc5
+      projects/medra/ui/src/lib/data-table/data-table.types.ts: 47e109b08e4e36045e17bebbd4fd41701bf1a04a61d069656aafe608aedb4f97
+      projects/site/src/app/pages/docs/components/data-table.page.ts: 491b9a2072529c210961cbdcf570657f1cf2a1be7e26671ecd9fcbf5b75daede
+      projects/site/src/app/pages/docs/components/demos/data-table-grid-lines.demo.html: 9b39d6596f2f61857f868627f0ec42594d5c6e36afb3b91dc0c82ef733ae0abd
+      projects/site/src/app/pages/docs/components/demos/data-table-grid-lines.demo.ts: 48be73165b22f868c09d889a5de56f30e05476145c37987683fa038bf3f21486
+      projects/site/src/app/pages/docs/components/demos/data-table-keyboard-navigation.demo.html: a0970593c1745506bcfb508dbe0e19ed79f543f37aa47f6dd1191bbbdd59791f
+      projects/site/src/app/pages/docs/components/demos/data-table-keyboard-navigation.demo.ts: 6b99e57ffacd7f4688f82930830fa2284953d768272deca207ba30fa9a862a90
+      projects/site/src/app/pages/docs/components/demos/data-table-selection-radio.demo.html: 7fc60ec2f9b4d37ae454cc412005444b1bbfc2d3783fc3baa8018a69ed961283
+      projects/site/src/app/pages/docs/components/demos/data-table-selection-radio.demo.ts: 1fe763cfcadc37d0efc0cc7c7ef14271858794b7e8583f02a5296443f7026625
+      projects/site/src/app/pages/docs/components/demos/data-table-size.demo.html: a2853b02ce1b2b154aa93f5516a7d692b7a0f467e3be3ced7ad1fffbe259b69f
+      projects/site/src/app/pages/docs/components/demos/data-table-size.demo.ts: 4dff6eecaceaf7b8452dc6d839e1bbd97b43c9acb7ee7d1a624e2c66011e4ea3
+      projects/site/src/app/pages/docs/components/demos/data-table-striped-rows.demo.html: 1f3ffd76c3180d67e0eb963152af894c3b486847d177fef3166bb66335868f92
+      projects/site/src/app/pages/docs/components/demos/data-table-striped-rows.demo.ts: 7af2364c27557e9caa96af13e7a6ea89cd6de9099423de2d45dec57f29d1dff8
+      projects/site/src/content/docs/data-table-grid-lines.txt: 0f5c0e526b5b9b54b1d0316e68b3297ae55b976fb24385f02761c203f8d629af
+      projects/site/src/content/docs/data-table-keyboard-navigation.txt: 96158e8799b3a4d1a17025e25bd4232bc858fbd0994aa0018bf0a205229299e1
+      projects/site/src/content/docs/data-table-selection-radio.txt: 8e4a5812b8a8b2a504516e82379285613c499231b0525b884536a5f8965440c2
+      projects/site/src/content/docs/data-table-size.txt: 053b03427a291ac50bb7c3424191f7d1ef68d8790b1d1f73aea558eceeedf71f
+      projects/site/src/content/docs/data-table-striped-rows.txt: 5bf16a6976c19e9d8b8ceb4ab1cc5694a97d3e3f68fb8292d27f46728da4617a
+archived:
+  at: 2026-11-20
+  sequence: 3

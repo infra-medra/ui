@@ -1,5 +1,8 @@
 export type TableSortOrder = 'asc' | 'desc' | null;
-export type TableSelectionMode = 'single' | 'multiple' | null;
+/** Cell padding and text size of a `med-data-table`. */
+export type TableSize = 'sm' | 'default' | 'lg';
+
+export type TableSelectionMode = 'single' | 'multiple' | 'radio' | null;
 export type TableColumnAlign = 'left' | 'center' | 'right';
 export type TableSortMode = 'single' | 'multiple';
 

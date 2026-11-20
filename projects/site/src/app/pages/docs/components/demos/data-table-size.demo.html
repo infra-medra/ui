@@ -1,0 +1,17 @@
+<div class="flex flex-col gap-6">
+<med-data-table [value]="equipment" dataKey="id" size="sm" ariaLabel="Lab equipment (small)">
+  <med-table-column field="name" header="Name" />
+  <med-table-column field="category" header="Category" />
+  <med-table-column field="quantity" header="Quantity" align="right" />
+</med-data-table>
+<med-data-table [value]="equipment" dataKey="id" size="default" ariaLabel="Lab equipment (default)">
+  <med-table-column field="name" header="Name" />
+  <med-table-column field="category" header="Category" />
+  <med-table-column field="quantity" header="Quantity" align="right" />
+</med-data-table>
+<med-data-table [value]="equipment" dataKey="id" size="lg" ariaLabel="Lab equipment (large)">
+  <med-table-column field="name" header="Name" />
+  <med-table-column field="category" header="Category" />
+  <med-table-column field="quantity" header="Quantity" align="right" />
+</med-data-table>
+</div>
