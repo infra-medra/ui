@@ -36,6 +36,8 @@ const REORDER_COLUMN_PX = 32;
 const SELECTION_COLUMN_PX = 40;
 /** Offset contribution of a frozen column with no usable pixel `width`. */
 const MIN_FROZEN_COLUMN_PX = 60;
+/** A column never resizes below this width. */
+const MIN_RESIZE_COLUMN_PX = 40;
 
 /** `Array.isArray()`'s negative branch doesn't reliably narrow a `readonly T[]` union member out in TypeScript (a known limitation with readonly arrays, same one `TreeSelectPanelComponent.isSingleNode` already documents) — an explicit type predicate does. */
 function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
@@ -57,7 +59,7 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
  *   virtualScroll is active" by not having the feature at all). `SelectPanelComponent`
  *   already shows the `CdkVirtualScrollViewport` technique is available in
  *   this codebase if a later version needs it for very large datasets.
- * - No column reorder/resize.
+ * - No column reorder (column resize is `resizableColumns` with `columnResizeMode`).
  * - No row expansion.
  * - No per-column filter row (avoids #16576 "column filter indicator
  *   disappearing") — a single global filter (`filterable`) covers the common
@@ -240,7 +242,7 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
       </div>
     }
     <ng-template #dataCells let-row let-i="index" let-frozen="frozen">
-      @for (col of columns(); track col.field()) {
+      @for (col of visibleColumns(); track col.field()) {
         <td [class]="cellClass(col, row, i)" [style]="frozenStyle(col)" (dblclick)="frozen ? null : onCellDblClick($event, row, col)">
           @if (!frozen && isEditingCell(row, col); as editing) {
             <ng-container
@@ -272,8 +274,11 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
           <med-progress-spinner [ariaLabel]="loadingLabel()" />
         </div>
       }
-      <table [class]="tableClass()" [class.table-fixed]="resizableColumns() || hasFrozenColumn()" [class.opacity-50]="loading()" [attr.aria-label]="ariaLabel()">
+      <table [class]="tableClass()" [style.width.px]="tableWidthPx()" [class.table-fixed]="resizableColumns() || hasFrozenColumn()" [class.opacity-50]="loading()" [attr.aria-label]="ariaLabel()">
         <thead #tableHead [class]="scrollable() ? 'sticky top-0 z-10 bg-surface-50 dark:bg-surface-800' : ''">
+          @if (headerGroupTemplate(); as hg) {
+            <ng-container [ngTemplateOutlet]="hg" />
+          }
           <tr class="border-b border-surface-200 bg-surface-50 dark:border-surface-700 dark:bg-surface-800/50">
             @if (reorderable()) {
               <th [class]="utilityCellClass('', true) + ' ' + frozenUtilityClass(null)" [style]="utilityStyle('reorder')"></th>
@@ -302,7 +307,7 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
             @if (selectionMode() === 'radio') {
               <th [class]="utilityCellClass('') + ' ' + frozenUtilityClass(null)" [style]="utilityStyle('selection')"></th>
             }
-            @for (col of columns(); track col.field()) {
+            @for (col of visibleColumns(); track col.field()) {
               <th
                 scope="col"
                 [style.width]="columnWidth(col)"
@@ -323,7 +328,7 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
                     }
                   }
                 </span>
-                @if (resizableColumns()) {
+                @if (resizableColumns() && hasResizeHandle(col)) {
                   <span
                     data-col-resize-handle="true"
                     class="absolute inset-y-0 right-0 w-1.5 cursor-col-resize touch-none select-none hover:bg-brand-400/50"
@@ -436,6 +441,11 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
             }
           </tbody>
         }
+        @if (footerGroupTemplate(); as fg) {
+          <tfoot [class]="'border-t border-surface-200 bg-surface-50 text-surface-700 dark:border-surface-700 dark:bg-surface-800/50 dark:text-surface-200' + (scrollable() ? ' sticky bottom-0 z-10' : '')">
+            <ng-container [ngTemplateOutlet]="fg" />
+          </tfoot>
+        }
       </table>
     </div>
     @if (paginator() && effectiveTotalRecords() > 0) {
@@ -486,6 +496,12 @@ export class DataTableComponent<T> {
   readonly groupRowsBy = input<string | null>(null);
   readonly reorderable = input(false, { transform: booleanAttribute });
   readonly resizableColumns = input(false, { transform: booleanAttribute });
+  /**
+   * How `resizableColumns` resizes: `fit` (default) keeps the table width and trades width between the dragged column and
+   * the next visible column, so the last visible column has no handle; `expand` changes only the dragged column and the table
+   * width by the same amount, so the wrapper scrolls horizontally once the table outgrows it.
+   */
+  readonly columnResizeMode = input<'fit' | 'expand'>('fit');
   readonly scrollable = input(false, { transform: booleanAttribute });
   /** Rows pinned next to the body: they use the same column templates but ignore sorting, the global filter and pagination, and cannot be selected. */
   readonly frozenValue = input<readonly T[] | null>(null);
@@ -525,6 +541,12 @@ export class DataTableComponent<T> {
   readonly colResize = output<{ readonly element: HTMLElement; readonly delta: number }>();
 
   protected readonly columns = contentChildren(TableColumnComponent);
+  /** The columns with `visible` on, in declaration order: what renders, spans, freezes and exports. Sorting and the default global-filter fields keep reading `columns()`, so a hidden column keeps its state. */
+  protected readonly visibleColumns = computed(() => this.columns().filter((col) => col.visible()));
+  /** Application-written `<tr>` rows rendered in `<thead>` above the column header row. */
+  protected readonly headerGroupTemplate = contentChild('headerGroup', { read: TemplateRef });
+  /** Application-written `<tr>` rows rendered in a `<tfoot>` after the body; no footer renders without it. */
+  protected readonly footerGroupTemplate = contentChild('footerGroup', { read: TemplateRef });
   protected readonly groupHeaderTemplate = contentChild('groupHeader', { read: TemplateRef });
   protected readonly rowExpansionTemplate = contentChild('rowexpansion', { read: TemplateRef });
   private readonly platformId = inject(PLATFORM_ID);
@@ -542,7 +564,17 @@ export class DataTableComponent<T> {
 
   private readonly editingCell = signal<{ row: T; field: string } | null>(null);
   private readonly resizedColumnWidths = signal<ReadonlyMap<string, number>>(new Map());
-  private colResizeState: { field: string; startX: number; startWidth: number; element: HTMLElement } | null = null;
+  /** Inline width of the table in `expand` mode (start width plus the applied delta); `null` keeps the table at its natural `w-full`. */
+  protected readonly tableWidthPx = signal<number | null>(null);
+  private colResizeState: {
+    field: string;
+    startX: number;
+    startWidth: number;
+    element: HTMLElement;
+    /** The next visible column's field and start width, in `fit` mode only. */
+    neighbour: { field: string; startWidth: number } | null;
+    tableStartWidth: number;
+  } | null = null;
   private readonly browserReady = signal(false);
   private readonly restoredKey = signal<string | null>(null);
   /** Undebounced — bound directly to the `<input>` so every keystroke is visible immediately; `filterDelay` only delays writing into `globalFilterValue`, see class doc. */
@@ -710,16 +742,16 @@ export class DataTableComponent<T> {
 
   protected readonly effectiveTotalRecords = computed(() => (this.lazy() ? (this.totalRecords() ?? this.value().length) : this.sortedValue().length));
 
-  protected readonly hasFrozenColumn = computed(() => this.columns().some((col) => col.frozen()));
+  protected readonly hasFrozenColumn = computed(() => this.visibleColumns().some((col) => col.frozen()));
 
   /** `true` when the reorder, selection and radio columns freeze on the left: they follow a left-frozen data column. */
-  protected readonly utilityFrozen = computed(() => this.columns().some((col) => col.frozen() && col.alignFrozen() === 'left'));
+  protected readonly utilityFrozen = computed(() => this.visibleColumns().some((col) => col.frozen() && col.alignFrozen() === 'left'));
 
   private readonly utilityWidth = computed(() => (this.reorderable() ? REORDER_COLUMN_PX : 0) + (this.selectionMode() === 'multiple' || this.selectionMode() === 'radio' ? SELECTION_COLUMN_PX : 0));
 
   /** Sticky side and offset of every frozen data column: each offset adds the widths of the frozen columns before it on its edge, the left edge starting after the utility columns. Derived from declared and resized widths, so no layout measurement is needed. */
   private readonly frozenLayout = computed(() => {
-    const cols = this.columns();
+    const cols = this.visibleColumns();
     const layout = new Map<TableColumnComponent, { readonly side: 'left' | 'right'; readonly offset: number }>();
     let left = this.utilityWidth();
     for (const col of cols) {
@@ -738,7 +770,7 @@ export class DataTableComponent<T> {
     return layout;
   });
 
-  protected readonly totalColumnCount = computed(() => this.columns().length + (this.selectionMode() === 'multiple' || this.selectionMode() === 'radio' ? 1 : 0) + (this.reorderable() ? 1 : 0));
+  protected readonly totalColumnCount = computed(() => this.visibleColumns().length + (this.selectionMode() === 'multiple' || this.selectionMode() === 'radio' ? 1 : 0) + (this.reorderable() ? 1 : 0));
 
   protected readonly allSelected = computed(() => {
     const rows = this.sortedValue();
@@ -1148,7 +1180,7 @@ export class DataTableComponent<T> {
    */
   exportCSV(options?: { readonly selectionOnly?: boolean }): void {
     const rows = options?.selectionOnly ? this.selectionAsArray() : this.sortedValue();
-    const cols = this.columns();
+    const cols = this.visibleColumns();
     const sep = this.csvSeparator();
     const escape = (value: string): string => (value.includes(sep) || value.includes('"') || value.includes('\n') ? `"${value.replace(/"/g, '""')}"` : value);
 
@@ -1178,18 +1210,51 @@ export class DataTableComponent<T> {
     return px !== undefined ? `${px}px` : col.width();
   }
 
+  /** `fit` resizes against the next visible column, so the last visible column has no handle there; `expand` gives every column one. */
+  protected hasResizeHandle(col: TableColumnComponent): boolean {
+    const visible = this.visibleColumns();
+    return this.columnResizeMode() === 'expand' || visible[visible.length - 1] !== col;
+  }
+
   protected onColResizeStart(event: PointerEvent, col: TableColumnComponent): void {
     const th = (event.currentTarget as HTMLElement).closest('th') as HTMLElement | null;
     if (!th) {
       return;
     }
     (event.currentTarget as HTMLElement).setPointerCapture?.(event.pointerId);
+    const visible = this.visibleColumns();
+    const nextCol = this.columnResizeMode() === 'fit' ? visible[visible.indexOf(col) + 1] : undefined;
+    const nextTh = th.nextElementSibling as HTMLElement | null;
+    if (this.columnResizeMode() === 'expand') {
+      this.pinMeasuredWidths(th, visible.indexOf(col), visible);
+    }
     this.colResizeState = {
       field: col.field(),
       startX: event.clientX,
       startWidth: th.getBoundingClientRect().width || 100,
       element: th,
+      neighbour: nextCol && nextTh ? { field: nextCol.field(), startWidth: nextTh.getBoundingClientRect().width || 100 } : null,
+      tableStartWidth: th.closest('table')?.getBoundingClientRect().width ?? 0,
     };
+  }
+
+  /**
+   * Freezes every visible column at its measured width before an `expand` drag. Otherwise a `w-full` fixed-layout table spreads
+   * the width it gains across all columns, so the neighbours would change too. Widths set by an earlier drag are kept.
+   */
+  private pinMeasuredWidths(th: HTMLElement, index: number, visible: readonly TableColumnComponent[]): void {
+    const cells = Array.from(th.parentElement?.children ?? []) as HTMLElement[];
+    const offset = cells.indexOf(th) - index;
+    this.resizedColumnWidths.update((map) => {
+      const next = new Map(map);
+      visible.forEach((column, i) => {
+        const width = cells[offset + i]?.getBoundingClientRect().width;
+        if (width && !next.has(column.field())) {
+          next.set(column.field(), width);
+        }
+      });
+      return next;
+    });
   }
 
   protected onColResizeMove(event: PointerEvent): void {
@@ -1197,8 +1262,18 @@ export class DataTableComponent<T> {
     if (!state) {
       return;
     }
-    const nextWidth = Math.max(40, Math.round(state.startWidth + (event.clientX - state.startX)));
+    const requested = Math.round(event.clientX - state.startX);
+    if (state.neighbour) {
+      const { field, startWidth } = state.neighbour;
+      const delta = Math.min(Math.max(requested, MIN_RESIZE_COLUMN_PX - state.startWidth), startWidth - MIN_RESIZE_COLUMN_PX);
+      this.resizedColumnWidths.update((map) => new Map(map).set(state.field, Math.round(state.startWidth + delta)).set(field, Math.round(startWidth - delta)));
+      return;
+    }
+    const nextWidth = Math.max(MIN_RESIZE_COLUMN_PX, state.startWidth + requested);
     this.resizedColumnWidths.update((map) => new Map(map).set(state.field, nextWidth));
+    if (this.columnResizeMode() === 'expand') {
+      this.tableWidthPx.set(state.tableStartWidth + (nextWidth - state.startWidth));
+    }
   }
 
   protected onColResizeEnd(): void {

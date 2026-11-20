@@ -1,0 +1,6 @@
+<med-data-table [value]="equipment" [resizableColumns]="true" columnResizeMode="expand" (colResize)="onResize($event)" ariaLabel="Lab equipment inventory (resizable columns, expand mode)">
+  <med-table-column field="name" header="Name" width="200px" />
+  <med-table-column field="category" header="Category" width="180px" />
+  <med-table-column field="quantity" header="Quantity" width="140px" align="right" />
+</med-data-table>
+<p class="mt-2 text-sm text-surface-500 dark:text-surface-400">Last resize: {{ lastResize }}</p>

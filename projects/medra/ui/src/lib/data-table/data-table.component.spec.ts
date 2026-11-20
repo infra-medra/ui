@@ -1,5 +1,5 @@
 import { Component, DebugElement, signal } from '@angular/core';
-import { TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { IconComponent } from '../icon/icon.component';
 import { DataTableComponent } from './data-table.component';
@@ -139,10 +139,12 @@ describe('DataTableComponent', () => {
     expect(first[2]).toBe('5'); // default rendering
   });
 
+  // DAT-001.S1
   it('shows the empty label and spans all columns when there is nothing to show', () => {
     const fixture = create((h) => (h.products = []));
     const rows = bodyRows(fixture);
     expect(rows).toHaveLength(1);
+    expect(rows[0].querySelectorAll('td')).toHaveLength(1);
     expect(rows[0].textContent).toContain('No results found');
     expect(rows[0].querySelector('td')!.getAttribute('colspan')).toBe('3');
   });
@@ -976,6 +978,7 @@ describe('DataTableComponent', () => {
       expect(csv.split('\n')[1]).toBe('Gadget,10,0');
     });
 
+    // DAT-009.S1
     it('quotes a value containing the separator, a quote, or a newline, doubling internal quotes', () => {
       const fixture = create((h) => (h.products = [{ name: 'Widget, "Pro"', price: 30, stock: 5 }]));
       const csv = exportedCsv(fixture);
@@ -1243,6 +1246,7 @@ describe('DataTableComponent', () => {
       expect(fixture.componentInstance.onRowReorder).not.toHaveBeenCalled();
     });
 
+    // DAT-010.S1
     it('indices refer to value() order, not the currently sorted/displayed order', () => {
       const fixture = create((h) => (h.reorderable = true));
       headerCells(fixture)[1].click(); // sort by Price ascending: Gadget(10), Gizmo(20), Widget(30)
@@ -1311,7 +1315,9 @@ describe('DataTableComponent', () => {
       const fixture = TestBed.createComponent(Wave2DataTableHostComponent);
       fixture.detectChanges();
 
-      expect(fixture.nativeElement.querySelectorAll('[data-col-resize-handle="true"]').length).toBeGreaterThanOrEqual(2);
+      // Default `fit` mode: every header but the last visible one has a handle (DAT-031.S3).
+      const headerCount = fixture.nativeElement.querySelectorAll('thead th').length;
+      expect(fixture.nativeElement.querySelectorAll('[data-col-resize-handle="true"]')).toHaveLength(headerCount - 1);
       const thead = fixture.nativeElement.querySelector('thead') as HTMLElement;
       expect(thead.className).toContain('sticky');
     });
@@ -1687,5 +1693,418 @@ describe('DataTableComponent frozen rows', () => {
       h.frozenRowsPosition = 'bottom';
     });
     expect(firstNames(fixture)).toEqual(['Widget', 'Gadget', 'Gizmo', 'Pinned']);
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [DataTableComponent, TableColumnComponent],
+  template: `
+    <med-data-table [value]="products" [(sortField)]="sortField" [(sortOrder)]="sortOrder" [reorderable]="reorderable" (rowReorder)="onRowReorder($event)" ariaLabel="Visibility">
+      <med-table-column field="name" header="Name" [frozen]="frozenAll" width="100px" />
+      <med-table-column field="price" header="Price" sortable [frozen]="frozenAll" width="100px" [visible]="priceVisible()" />
+      <med-table-column field="stock" header="Stock" [frozen]="frozenAll" width="100px" />
+    </med-data-table>
+  `,
+})
+class VisibilityHostComponent {
+  products: Product[] = PRODUCTS;
+  priceVisible = signal(true);
+  frozenAll = false;
+  reorderable = false;
+  onRowReorder = jest.fn();
+  sortField: string | null = null;
+  sortOrder: 'asc' | 'desc' | null = null;
+}
+
+@Component({
+  standalone: true,
+  imports: [DataTableComponent, TableColumnComponent],
+  template: `
+    <med-data-table [value]="[]" ariaLabel="Spans">
+      <med-table-column field="name" header="Name" />
+      <med-table-column field="price" header="Price" [visible]="false" />
+      <med-table-column field="stock" header="Stock" />
+      <med-table-column field="extra" header="Extra" />
+    </med-data-table>
+  `,
+})
+class VisibilitySpanHostComponent {}
+
+describe('DataTableComponent column visibility', () => {
+  function create(setup: (host: VisibilityHostComponent) => void = () => undefined) {
+    TestBed.configureTestingModule({ imports: [VisibilityHostComponent] });
+    const fixture = TestBed.createComponent(VisibilityHostComponent);
+    setup(fixture.componentInstance);
+    fixture.detectChanges();
+    return fixture;
+  }
+
+  const headerTexts = (fixture: ReturnType<typeof create>): string[] => Array.from<HTMLElement>(fixture.nativeElement.querySelectorAll('thead th')).map((th) => th.textContent!.trim());
+  const rowTexts = (fixture: ReturnType<typeof create>): string[][] =>
+    Array.from<HTMLElement>(fixture.nativeElement.querySelectorAll('tbody tr')).map((tr) => Array.from(tr.querySelectorAll('td')).map((td) => td.textContent!.trim()));
+
+  // DAT-032.S1
+  it('DAT-032.S1: a column with visible false renders no header cell and no body cell', () => {
+    const fixture = create((host) => (host.priceVisible.set(false)));
+
+    expect(headerTexts(fixture)).toEqual(['Name', 'Stock']);
+    expect(rowTexts(fixture)).toEqual([
+      ['Widget', '5'],
+      ['Gadget', '0'],
+      ['Gizmo', '12'],
+    ]);
+  });
+
+  // DAT-032.S2
+  it('DAT-032.S2: setting visible back to true restores the column in its original position', () => {
+    const fixture = create((host) => (host.priceVisible.set(false)));
+
+    fixture.componentInstance.priceVisible.set(true);
+    fixture.detectChanges();
+
+    expect(headerTexts(fixture)).toEqual(['Name', 'Price', 'Stock']);
+    expect(rowTexts(fixture)[0]).toEqual(['Widget', '30', '5']);
+  });
+
+  // DAT-032.S3
+  it('DAT-032.S3: the empty-state cell spans only the visible columns', () => {
+    TestBed.configureTestingModule({ imports: [VisibilitySpanHostComponent] });
+    const fixture = TestBed.createComponent(VisibilitySpanHostComponent);
+    fixture.detectChanges();
+
+    const cell = fixture.nativeElement.querySelector('tbody td') as HTMLElement;
+    expect(cell.getAttribute('colspan')).toBe('3');
+  });
+
+  // DAT-032.S4
+  it('DAT-032.S4: a hidden frozen column adds nothing to the offset of the frozen column after it', () => {
+    const fixture = create((host) => {
+      host.frozenAll = true;
+      host.priceVisible.set(false);
+    });
+
+    const header = Array.from<HTMLElement>(fixture.nativeElement.querySelectorAll('thead th'));
+    expect(header).toHaveLength(2);
+    expect(header[0].style.left).toBe('0px');
+    expect(header[1].style.left).toBe('100px');
+  });
+
+  // DAT-032.S5
+  it('DAT-032.S5: exportCSV leaves a hidden column out of the header and the rows', () => {
+    const fixture = create((host) => (host.priceVisible.set(false)));
+    let csv = '';
+    const spy = jest.spyOn(globalThis, 'Blob' as never).mockImplementation(((parts: string[]) => {
+      csv = parts[0];
+      return {} as Blob;
+    }) as never);
+    (fixture.debugElement.query(By.directive(DataTableComponent)).componentInstance as DataTableComponent<Product>).exportCSV();
+    spy.mockRestore();
+
+    expect(csv).toBe('Name,Stock\nWidget,5\nGadget,0\nGizmo,12');
+  });
+
+  // DAT-032.S6
+  it('DAT-032.S6: hiding and showing a sorted column keeps the sort', () => {
+    const fixture = create((host) => {
+      host.sortField = 'price';
+      host.sortOrder = 'asc';
+    });
+
+    fixture.componentInstance.priceVisible.set(false);
+    fixture.detectChanges();
+    expect(rowTexts(fixture).map((cells) => cells[0])).toEqual(['Gadget', 'Gizmo', 'Widget']);
+
+    fixture.componentInstance.priceVisible.set(true);
+    fixture.detectChanges();
+    const priceHeader = fixture.nativeElement.querySelectorAll('thead th')[1] as HTMLElement;
+    expect(priceHeader.getAttribute('aria-sort')).toBe('ascending');
+    expect(rowTexts(fixture).map((cells) => cells[0])).toEqual(['Gadget', 'Gizmo', 'Widget']);
+  });
+
+  // DAT-001.S1
+  it('DAT-001.S1: the empty label sits in one cell that spans only the visible columns', () => {
+    TestBed.configureTestingModule({ imports: [VisibilitySpanHostComponent] });
+    const fixture = TestBed.createComponent(VisibilitySpanHostComponent);
+    fixture.detectChanges();
+
+    const cells = fixture.nativeElement.querySelectorAll('tbody td');
+    expect(cells).toHaveLength(1);
+    expect(cells[0].textContent).toContain('No results found');
+    expect(cells[0].getAttribute('colspan')).toBe('3');
+  });
+
+  // DAT-009.S1
+  it('DAT-009.S1: a quoted value is enclosed in quotes and the hidden column is not exported', () => {
+    const fixture = create((host) => {
+      host.products = [{ name: 'Widget, "Pro"', price: 30, stock: 5 }];
+      host.priceVisible.set(false);
+    });
+    let csv = '';
+    const spy = jest.spyOn(globalThis, 'Blob' as never).mockImplementation(((parts: string[]) => {
+      csv = parts[0];
+      return {} as Blob;
+    }) as never);
+    (fixture.debugElement.query(By.directive(DataTableComponent)).componentInstance as DataTableComponent<Product>).exportCSV();
+    spy.mockRestore();
+
+    expect(csv.split('\n')[1]).toBe('"Widget, ""Pro""",5');
+  });
+
+  // DAT-010.S1
+  it('DAT-010.S1: rowReorder emits indices into value() while a column is hidden', () => {
+    const fixture = create((host) => {
+      host.reorderable = true;
+      host.priceVisible.set(false);
+      host.sortField = 'name';
+      host.sortOrder = 'asc';
+    });
+    const drag = (type: string): Event => new Event(type, { bubbles: true, cancelable: true });
+    const rows = Array.from<HTMLElement>(fixture.nativeElement.querySelectorAll('tbody tr'));
+
+    rows[0].dispatchEvent(drag('dragstart')); // sorted by name: Gadget (index 1 in value())
+    rows[2].dispatchEvent(drag('dragover')); // Widget (index 0 in value())
+    rows[2].dispatchEvent(drag('drop'));
+
+    expect(fixture.componentInstance.onRowReorder).toHaveBeenCalledWith({ dragIndex: 1, dropIndex: 0 });
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [DataTableComponent, TableColumnComponent],
+  template: `
+    <med-data-table [value]="products" [resizableColumns]="true" [columnResizeMode]="mode" (colResize)="onColResize($event)" ariaLabel="Resize">
+      <med-table-column field="name" header="Name" width="200px" />
+      <med-table-column field="price" header="Price" width="100px" />
+      <med-table-column field="stock" header="Stock" width="150px" />
+    </med-data-table>
+  `,
+})
+class ResizeHostComponent {
+  products: Product[] = PRODUCTS;
+  mode: 'fit' | 'expand' = 'fit';
+  onColResize = jest.fn();
+}
+
+@Component({
+  standalone: true,
+  imports: [DataTableComponent, TableColumnComponent],
+  template: `
+    <med-data-table [value]="products" [resizableColumns]="true" ariaLabel="Resize default">
+      <med-table-column field="name" header="Name" width="200px" />
+      <med-table-column field="price" header="Price" width="100px" />
+      <med-table-column field="stock" header="Stock" width="150px" />
+    </med-data-table>
+  `,
+})
+class ResizeDefaultHostComponent {
+  products: Product[] = PRODUCTS;
+}
+
+describe('DataTableComponent column resize modes', () => {
+  const DECLARED_WIDTHS = [200, 100, 150];
+
+  function create(mode?: 'fit' | 'expand') {
+    TestBed.configureTestingModule({ imports: [ResizeHostComponent, ResizeDefaultHostComponent] });
+    // Without a mode the host leaves `columnResizeMode` unbound, so the input default applies.
+    const fixture = mode ? TestBed.createComponent(ResizeHostComponent) : (TestBed.createComponent(ResizeDefaultHostComponent) as unknown as ComponentFixture<ResizeHostComponent>);
+    if (mode) {
+      fixture.componentInstance.mode = mode;
+    }
+    fixture.detectChanges();
+    // jsdom has no layout: report the declared widths as the measured ones.
+    const headers = Array.from<HTMLElement>(fixture.nativeElement.querySelectorAll('thead th'));
+    headers.forEach((th, i) => (th.getBoundingClientRect = () => ({ width: DECLARED_WIDTHS[i] }) as DOMRect));
+    (fixture.nativeElement.querySelector('table') as HTMLElement).getBoundingClientRect = () => ({ width: 450 }) as DOMRect;
+    return fixture;
+  }
+
+  const headers = (fixture: ReturnType<typeof create>): HTMLElement[] => Array.from(fixture.nativeElement.querySelectorAll('thead th'));
+  const handles = (fixture: ReturnType<typeof create>): HTMLElement[] => Array.from(fixture.nativeElement.querySelectorAll('[data-col-resize-handle="true"]'));
+
+  /** Drags the handle of header `index` by `dx` pixels and releases it. */
+  function drag(fixture: ReturnType<typeof create>, index: number, dx: number): void {
+    const handle = headers(fixture)[index].querySelector('[data-col-resize-handle="true"]') as HTMLElement;
+    const fire = (type: string, clientX: number): void => {
+      handle.dispatchEvent(new MouseEvent(type, { bubbles: true, cancelable: true, clientX }));
+    };
+    fire('pointerdown', 0);
+    fire('pointermove', dx);
+    fire('pointerup', dx);
+    fixture.detectChanges();
+  }
+
+  const table = (fixture: ReturnType<typeof create>): HTMLElement => fixture.nativeElement.querySelector('table');
+
+  // DAT-031.S1
+  it('DAT-031.S1: fit mode (the default) trades width between the dragged column and its right neighbour', () => {
+    const fixture = create();
+
+    drag(fixture, 0, 50);
+
+    expect(headers(fixture)[0].style.width).toBe('250px');
+    expect(headers(fixture)[1].style.width).toBe('50px');
+    expect(headers(fixture)[2].style.width).toBe('150px');
+    expect(table(fixture).style.width).toBe('');
+  });
+
+  // DAT-031.S2
+  it('DAT-031.S2: fit mode stops when the neighbour reaches 40px and the dragged column only grows by what it gave up', () => {
+    const fixture = create('fit');
+
+    drag(fixture, 0, 200);
+
+    expect(headers(fixture)[1].style.width).toBe('40px');
+    expect(headers(fixture)[0].style.width).toBe('260px');
+  });
+
+  // DAT-031.S3
+  it('DAT-031.S3: fit mode renders a handle on every header except the last visible one', () => {
+    const fixture = create('fit');
+
+    expect(handles(fixture)).toHaveLength(2);
+    expect(headers(fixture)[2].querySelector('[data-col-resize-handle="true"]')).toBeNull();
+  });
+
+  // DAT-031.S4
+  it('DAT-031.S4: expand mode changes only the dragged column and widens the table by the same amount', () => {
+    const fixture = create('expand');
+
+    drag(fixture, 0, 50);
+
+    expect(headers(fixture)[0].style.width).toBe('250px');
+    expect(headers(fixture)[1].style.width).toBe('100px');
+    expect(headers(fixture)[2].style.width).toBe('150px');
+    expect(table(fixture).style.width).toBe('500px');
+    expect(handles(fixture)).toHaveLength(3);
+  });
+
+  // DAT-031.S4
+  it('DAT-031.S4: expand mode does not shrink a column below 40px', () => {
+    const fixture = create('expand');
+
+    drag(fixture, 1, -500);
+
+    expect(headers(fixture)[1].style.width).toBe('40px');
+    expect(table(fixture).style.width).toBe('390px');
+  });
+
+  // DAT-031.S5
+  it.each(['fit', 'expand'] as const)('DAT-031.S5: %s mode emits colResize with the header element and the width delta', (mode) => {
+    const fixture = create(mode);
+
+    drag(fixture, 0, 30);
+
+    expect(fixture.componentInstance.onColResize).toHaveBeenCalledTimes(1);
+    expect(fixture.componentInstance.onColResize).toHaveBeenCalledWith({ element: headers(fixture)[0], delta: 30 });
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [DataTableComponent, TableColumnComponent],
+  template: `
+    <med-data-table [value]="products" ariaLabel="Groups">
+      <ng-template #headerGroup>
+        <tr>
+          <th class="group-cell" colspan="2">Product</th>
+          <th class="group-cell">Inventory</th>
+        </tr>
+      </ng-template>
+      <med-table-column field="name" header="Name" />
+      <med-table-column field="price" header="Price" sortable />
+      <med-table-column field="stock" header="Stock" />
+    </med-data-table>
+  `,
+})
+class GroupHeaderHostComponent {
+  products: Product[] = PRODUCTS;
+}
+
+@Component({
+  standalone: true,
+  imports: [DataTableComponent, TableColumnComponent],
+  template: `
+    <med-data-table [value]="products" ariaLabel="Footer group">
+      <ng-template #footerGroup>
+        <tr>
+          <td class="footer-cell" colspan="3">Total: 3 products</td>
+        </tr>
+      </ng-template>
+      <med-table-column field="name" header="Name" />
+      <med-table-column field="price" header="Price" />
+      <med-table-column field="stock" header="Stock" />
+    </med-data-table>
+  `,
+})
+class GroupFooterHostComponent {
+  products: Product[] = PRODUCTS;
+}
+
+@Component({
+  standalone: true,
+  imports: [DataTableComponent, TableColumnComponent],
+  template: `
+    <med-data-table [value]="products" ariaLabel="No footer">
+      <med-table-column field="name" header="Name" />
+      <med-table-column field="price" header="Price" />
+    </med-data-table>
+  `,
+})
+class NoFooterHostComponent {
+  products: Product[] = PRODUCTS;
+}
+
+describe('DataTableComponent column groups', () => {
+  // DAT-033.S1
+  it('DAT-033.S1: a #headerGroup row appears in the table header before the row of column headers', () => {
+    TestBed.configureTestingModule({ imports: [GroupHeaderHostComponent] });
+    const fixture = TestBed.createComponent(GroupHeaderHostComponent);
+    fixture.detectChanges();
+
+    const rows = Array.from<HTMLElement>(fixture.nativeElement.querySelectorAll('thead tr'));
+    expect(rows).toHaveLength(2);
+    expect(rows[0].querySelector('.group-cell')).not.toBeNull();
+    expect(rows[0].querySelector('.group-cell')!.getAttribute('colspan')).toBe('2');
+    expect(Array.from(rows[1].querySelectorAll('th')).map((th) => th.textContent!.trim())).toEqual(['Name', 'Price', 'Stock']);
+  });
+
+  // DAT-033.S2
+  it('DAT-033.S2: a #footerGroup row renders in a table footer after the body', () => {
+    TestBed.configureTestingModule({ imports: [GroupFooterHostComponent] });
+    const fixture = TestBed.createComponent(GroupFooterHostComponent);
+    fixture.detectChanges();
+
+    const table = fixture.nativeElement.querySelector('table') as HTMLElement;
+    const tfoot = table.querySelector('tfoot');
+    expect(tfoot).not.toBeNull();
+    expect(tfoot!.querySelector('.footer-cell')!.textContent!.trim()).toBe('Total: 3 products');
+    const tbody = table.querySelector('tbody')!;
+    expect(tbody.compareDocumentPosition(tfoot!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  // DAT-033.S3
+  it('DAT-033.S3: a table without a #footerGroup template renders no footer element', () => {
+    TestBed.configureTestingModule({ imports: [NoFooterHostComponent] });
+    const fixture = TestBed.createComponent(NoFooterHostComponent);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('tfoot')).toBeNull();
+  });
+
+  // DAT-033.S4
+  it('DAT-033.S4: clicking a sortable column header still sorts the rows with a header group', () => {
+    TestBed.configureTestingModule({ imports: [GroupHeaderHostComponent] });
+    const fixture = TestBed.createComponent(GroupHeaderHostComponent);
+    fixture.detectChanges();
+
+    const priceHeader = Array.from<HTMLElement>(fixture.nativeElement.querySelectorAll('thead tr:last-child th'))[1];
+    priceHeader.click();
+    fixture.detectChanges();
+
+    const names = Array.from<HTMLElement>(fixture.nativeElement.querySelectorAll('tbody tr')).map((tr) => tr.querySelector('td')!.textContent!.trim());
+    expect(names).toEqual(['Gadget', 'Gizmo', 'Widget']);
+    expect(priceHeader.getAttribute('aria-sort')).toBe('ascending');
   });
 });

@@ -1,0 +1,3 @@
+## Column toggle
+
+`visible` on a `med-table-column` shows or hides the column. A hidden column renders no header cell and no body cell, and it drops out of the empty-state span, the frozen offsets and CSV export. Showing it again restores it in its original position, and a sort on it is kept. Bind `visible` to any state you like; the demo drives it from a `med-multi-select`.

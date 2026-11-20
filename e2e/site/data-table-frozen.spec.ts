@@ -158,3 +158,30 @@ test.describe('DataTable horizontal and flexible scroll', () => {
     expect(Math.abs(headerGap)).toBeLessThanOrEqual(2);
   });
 });
+
+test.describe('DataTable frozen column with utility columns', () => {
+  // DAT-024.S8
+  test('DAT-024.S8: the reorder handle, the selection column and the frozen data column stay in view on horizontal scroll', async ({ page }) => {
+    await page.goto(PAGE);
+    const demo = page.locator('app-data-table-frozen-columns-utility-demo');
+    await expect(demo).toBeAttached();
+    await demo.scrollIntoViewIfNeeded();
+    const wrapper = wrapperOf(demo);
+
+    const firstRow = demo.locator('tbody tr').first();
+    // Reorder handle cell, selection checkbox cell and the frozen data cell are the first three cells of a row.
+    const utilityCells = [firstRow.locator('td').nth(0), firstRow.locator('td').nth(1), firstRow.locator('td').nth(2)];
+    await expect(firstRow.getByRole('checkbox')).toBeAttached();
+    expect(await wrapper.evaluate((el) => el.scrollWidth - el.clientWidth), 'the table must be wider than its wrapper').toBeGreaterThan(100);
+
+    await wrapper.evaluate((el) => (el.scrollLeft = el.scrollWidth));
+
+    const wrapperBox = (await wrapper.boundingBox())!;
+    for (const cell of utilityCells) {
+      const box = (await cell.boundingBox())!;
+      expect(box.x, 'cell stays inside the wrapper on the left').toBeGreaterThanOrEqual(wrapperBox.x - 2);
+      expect(box.x + box.width, 'cell stays inside the wrapper on the right').toBeLessThanOrEqual(wrapperBox.x + wrapperBox.width + 2);
+    }
+    expect(Math.abs(await edgeGap(utilityCells[0], wrapper, 'left'))).toBeLessThanOrEqual(2);
+  });
+});

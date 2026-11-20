@@ -1,0 +1,3 @@
+## Frozen column with reorder and selection columns
+
+The reorder handle column and the selection checkbox column are utility columns that the table adds for `reorderable` and `selectionMode`. When a data column is frozen they freeze with it, in order, ahead of the frozen data column, so the handle, the checkbox and the first data column all stay in view while the rest of the table scrolls sideways.

@@ -31,6 +31,10 @@ import { DataTableFrozenRowsDemo } from './demos/data-table-frozen-rows.demo';
 import { DataTableScrollHorizontalDemo } from './demos/data-table-scroll-horizontal.demo';
 import { DataTableScrollFlexibleDemo } from './demos/data-table-scroll-flexible.demo';
 import { DataTableColumnResizeDemo } from './demos/data-table-column-resize.demo';
+import { DataTableColumnResizeExpandDemo } from './demos/data-table-column-resize-expand.demo';
+import { DataTableColumnToggleDemo } from './demos/data-table-column-toggle.demo';
+import { DataTableColumnGroupsDemo } from './demos/data-table-column-groups.demo';
+import { DataTableFrozenColumnsUtilityDemo } from './demos/data-table-frozen-columns-utility.demo';
 import { DataTableEditCellDemo } from './demos/data-table-edit-cell.demo';
 import { DataTableLoadingDemo } from './demos/data-table-loading.demo';
 import { DataTableLazyDemo } from './demos/data-table-lazy.demo';
@@ -67,6 +71,10 @@ import frozenRowsCode from './demos/data-table-frozen-rows.demo.html?raw';
 import scrollHorizontalCode from './demos/data-table-scroll-horizontal.demo.html?raw';
 import scrollFlexibleCode from './demos/data-table-scroll-flexible.demo.html?raw';
 import columnResizeCode from './demos/data-table-column-resize.demo.html?raw';
+import columnResizeExpandCode from './demos/data-table-column-resize-expand.demo.html?raw';
+import columnToggleCode from './demos/data-table-column-toggle.demo.html?raw';
+import columnGroupsCode from './demos/data-table-column-groups.demo.html?raw';
+import frozenColumnsUtilityCode from './demos/data-table-frozen-columns-utility.demo.html?raw';
 import editCellCode from './demos/data-table-edit-cell.demo.html?raw';
 import loadingCode from './demos/data-table-loading.demo.html?raw';
 import lazyCode from './demos/data-table-lazy.demo.html?raw';
@@ -104,6 +112,10 @@ import frozenRowsContent from '../../../../content/docs/data-table-frozen-rows.t
 import scrollHorizontalContent from '../../../../content/docs/data-table-scroll-horizontal.txt?raw';
 import scrollFlexibleContent from '../../../../content/docs/data-table-scroll-flexible.txt?raw';
 import columnResizeContent from '../../../../content/docs/data-table-column-resize.txt?raw';
+import columnResizeExpandContent from '../../../../content/docs/data-table-column-resize-expand.txt?raw';
+import columnToggleContent from '../../../../content/docs/data-table-column-toggle.txt?raw';
+import columnGroupsContent from '../../../../content/docs/data-table-column-groups.txt?raw';
+import frozenColumnsUtilityContent from '../../../../content/docs/data-table-frozen-columns-utility.txt?raw';
 import editCellContent from '../../../../content/docs/data-table-edit-cell.txt?raw';
 import loadingContent from '../../../../content/docs/data-table-loading.txt?raw';
 import lazyContent from '../../../../content/docs/data-table-lazy.txt?raw';
@@ -142,6 +154,9 @@ const EXAMPLES = [
   { id: 'example-row-expansion', label: 'Row expansion' },
   { id: 'example-row-group-subheader', label: 'Row group subheader' },
   { id: 'example-column-resize', label: 'Column resize' },
+  { id: 'example-column-resize-expand', label: 'Column resize (expand)' },
+  { id: 'example-column-toggle', label: 'Column toggle' },
+  { id: 'example-column-groups', label: 'Column groups' },
   { id: 'example-edit-cell', label: 'Cell editing' },
   { id: 'example-loading', label: 'Loading' },
   { id: 'example-lazy', label: 'Lazy loading' },
@@ -160,6 +175,7 @@ const EXAMPLES = [
   { id: 'example-striped-rows', label: 'Striped rows' },
   { id: 'example-frozen-columns', label: 'Frozen columns' },
   { id: 'example-frozen-columns-both', label: 'Frozen columns on both sides' },
+  { id: 'example-frozen-columns-utility', label: 'Frozen column with utility columns' },
   { id: 'example-frozen-rows', label: 'Frozen rows' },
   { id: 'example-scroll-horizontal', label: 'Horizontal scroll' },
   { id: 'example-scroll-flexible', label: 'Flexible scroll' },
@@ -186,6 +202,9 @@ const EXAMPLES = [
     DataTableRowExpansionDemo,
     DataTableRowGroupSubheaderDemo,
     DataTableColumnResizeDemo,
+    DataTableColumnResizeExpandDemo,
+    DataTableColumnToggleDemo,
+    DataTableColumnGroupsDemo,
     DataTableEditCellDemo,
     DataTableLoadingDemo,
     DataTableLazyDemo,
@@ -204,6 +223,7 @@ const EXAMPLES = [
     DataTableStripedRowsDemo,
     DataTableFrozenColumnsDemo,
     DataTableFrozenColumnsBothDemo,
+    DataTableFrozenColumnsUtilityDemo,
     DataTableFrozenRowsDemo,
     DataTableScrollHorizontalDemo,
     DataTableScrollFlexibleDemo,
@@ -324,6 +344,30 @@ const EXAMPLES = [
         <div class="mt-4">
           <app-data-table-column-resize-demo />
           <div class="mt-3"><app-code-block [code]="columnResizeCode" /></div>
+        </div>
+      </section>
+
+      <section id="example-column-resize-expand" class="mt-10 scroll-mt-24">
+        <app-prose class="block" [content]="columnResizeExpandContent" />
+        <div class="mt-4">
+          <app-data-table-column-resize-expand-demo />
+          <div class="mt-3"><app-code-block [code]="columnResizeExpandCode" /></div>
+        </div>
+      </section>
+
+      <section id="example-column-toggle" class="mt-10 scroll-mt-24">
+        <app-prose class="block" [content]="columnToggleContent" />
+        <div class="mt-4">
+          <app-data-table-column-toggle-demo />
+          <div class="mt-3"><app-code-block [code]="columnToggleCode" /></div>
+        </div>
+      </section>
+
+      <section id="example-column-groups" class="mt-10 scroll-mt-24">
+        <app-prose class="block" [content]="columnGroupsContent" />
+        <div class="mt-4">
+          <app-data-table-column-groups-demo />
+          <div class="mt-3"><app-code-block [code]="columnGroupsCode" /></div>
         </div>
       </section>
 
@@ -471,6 +515,14 @@ const EXAMPLES = [
         </div>
       </section>
 
+      <section id="example-frozen-columns-utility" class="mt-10 scroll-mt-24">
+        <app-prose class="block" [content]="frozenColumnsUtilityContent" />
+        <div class="mt-4">
+          <app-data-table-frozen-columns-utility-demo />
+          <div class="mt-3"><app-code-block [code]="frozenColumnsUtilityCode" /></div>
+        </div>
+      </section>
+
       <section id="example-frozen-rows" class="mt-10 scroll-mt-24">
         <app-prose class="block" [content]="frozenRowsContent" />
         <div class="mt-4">
@@ -532,6 +584,14 @@ export default class DocsDataTable {
   protected readonly rowGroupSubheaderCode = rowGroupSubheaderCode;
   protected readonly columnResizeContent = columnResizeContent;
   protected readonly columnResizeCode = columnResizeCode;
+  protected readonly columnResizeExpandContent = columnResizeExpandContent;
+  protected readonly columnResizeExpandCode = columnResizeExpandCode;
+  protected readonly columnToggleContent = columnToggleContent;
+  protected readonly columnToggleCode = columnToggleCode;
+  protected readonly columnGroupsContent = columnGroupsContent;
+  protected readonly columnGroupsCode = columnGroupsCode;
+  protected readonly frozenColumnsUtilityContent = frozenColumnsUtilityContent;
+  protected readonly frozenColumnsUtilityCode = frozenColumnsUtilityCode;
   protected readonly editCellContent = editCellContent;
   protected readonly editCellCode = editCellCode;
   protected readonly loadingContent = loadingContent;

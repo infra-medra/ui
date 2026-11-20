@@ -1,0 +1,3 @@
+## Column groups
+
+Add a `#headerGroup` template with one or more `<tr>` rows to render group headers above the column header row, and a `#footerGroup` template to render a footer after the body. Without `#footerGroup` the table renders no footer. You own the `colspan` and `rowspan` of the cells you write. Sorting, filtering, selection, resize handles and frozen columns keep working on the column header row.
