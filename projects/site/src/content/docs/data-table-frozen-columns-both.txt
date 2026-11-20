@@ -1,0 +1,5 @@
+## Frozen columns on both sides
+
+Set `alignFrozen="right"` together with `frozen` to stick a column to the right edge. Left and right frozen columns can be combined, which is useful for a leading identifier and a trailing status or action column.
+
+The Name column stays on the left and the Status column stays on the right while the columns between them scroll.

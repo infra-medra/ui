@@ -1,0 +1,5 @@
+## Frozen rows
+
+Pass `frozenValue` to render rows that stay visible while the body scrolls. They use the same column templates as the regular rows but skip sorting, filtering and pagination. By default they stick directly under the header; set `frozenRowsPosition="bottom"` to stick them to the bottom edge instead. Frozen rows need a scrollable table, so set `scrollable` and a `scrollHeight`.
+
+The first table pins its row to the top and the second pins its row to the bottom.

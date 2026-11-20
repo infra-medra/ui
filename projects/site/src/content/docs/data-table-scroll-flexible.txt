@@ -1,0 +1,5 @@
+## Flexible scroll
+
+Set `scrollHeight="flex"` together with `scrollable` to make the table fill the height of its parent instead of capping at a fixed length. The parent must be a flex column with a defined height. The rows scroll inside the wrapper and the header stays sticky.
+
+The demo below places the table in a container that is 18rem tall.

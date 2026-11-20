@@ -1,0 +1,11 @@
+<med-data-table [value]="rows" [frozenValue]="pinned" [scrollable]="true" scrollHeight="240px" ariaLabel="Lab equipment inventory (frozen top row)">
+  <med-table-column field="name" header="Name" />
+  <med-table-column field="category" header="Category" />
+  <med-table-column field="quantity" header="Quantity" align="right" />
+</med-data-table>
+
+<med-data-table [value]="rows" [frozenValue]="pinned" frozenRowsPosition="bottom" [scrollable]="true" scrollHeight="240px" ariaLabel="Lab equipment inventory (frozen bottom row)" class="mt-6">
+  <med-table-column field="name" header="Name" />
+  <med-table-column field="category" header="Category" />
+  <med-table-column field="quantity" header="Quantity" align="right" />
+</med-data-table>

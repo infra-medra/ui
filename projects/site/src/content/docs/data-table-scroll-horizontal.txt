@@ -1,0 +1,5 @@
+## Horizontal scroll
+
+A table wider than its container scrolls inside its own wrapper, so the page itself never scrolls horizontally. Give each column a pixel `width` and use a fixed table layout, which `resizableColumns` or any `frozen` column switches on, so the browser keeps those widths instead of shrinking the columns to fit.
+
+Scroll the table below sideways to reach the last column.

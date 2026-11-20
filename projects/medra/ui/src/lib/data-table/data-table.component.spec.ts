@@ -24,6 +24,8 @@ const PRODUCTS: Product[] = [
     <med-data-table
       #dt
       [value]="products"
+      [frozenValue]="frozenValue"
+      [frozenRowsPosition]="frozenRowsPosition"
       [selectionMode]="selectionMode"
       [(selection)]="selection"
       [paginator]="paginator"
@@ -70,6 +72,8 @@ const PRODUCTS: Product[] = [
 })
 class HostComponent {
   products: Product[] = PRODUCTS;
+  frozenValue: Product[] | null = null;
+  frozenRowsPosition: 'top' | 'bottom' = 'top';
   selectionMode: 'single' | 'multiple' | 'radio' | null = null;
   selection: Product | readonly Product[] | null = null;
   paginator = false;
@@ -1480,5 +1484,208 @@ describe('DataTableComponent', () => {
       expect(details).toHaveLength(1);
       expect(details[0].textContent).toContain('Detail: Gadget');
     });
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [DataTableComponent, TableColumnComponent],
+  template: `
+    <med-data-table [value]="products" [selectionMode]="selectionMode" ariaLabel="Frozen">
+      <med-table-column field="name" header="Name" [frozen]="firstFrozen" width="120px" />
+      <med-table-column field="price" header="Price" [frozen]="secondFrozen" [alignFrozen]="priceAlign" width="100px" />
+      <med-table-column field="stock" header="Stock" [frozen]="lastFrozen" alignFrozen="right" />
+    </med-data-table>
+  `,
+})
+class FrozenHostComponent {
+  products: Product[] = PRODUCTS;
+  selectionMode: 'single' | 'multiple' | 'radio' | null = null;
+  firstFrozen = false;
+  secondFrozen = false;
+  priceAlign: 'left' | 'right' = 'left';
+  lastFrozen = false;
+}
+
+describe('DataTableComponent frozen columns', () => {
+  function create(setup: (host: FrozenHostComponent) => void) {
+    TestBed.configureTestingModule({ imports: [FrozenHostComponent] });
+    const fixture = TestBed.createComponent(FrozenHostComponent);
+    setup(fixture.componentInstance);
+    fixture.detectChanges();
+    return fixture;
+  }
+
+  const headerCells = (fixture: ReturnType<typeof create>): HTMLElement[] => Array.from(fixture.nativeElement.querySelectorAll('thead th'));
+  const firstRowCells = (fixture: ReturnType<typeof create>): HTMLElement[] => Array.from(fixture.nativeElement.querySelectorAll('tbody tr:first-child td'));
+
+  // DAT-028.S3
+  it('DAT-028.S3: several frozen columns stack, each offset by the widths before it', () => {
+    const fixture = create((host) => {
+      host.firstFrozen = true;
+      host.secondFrozen = true;
+    });
+
+    for (const cells of [headerCells(fixture), firstRowCells(fixture)]) {
+      expect(cells[0].style.position).toBe('sticky');
+      expect(cells[0].style.left).toBe('0px');
+      expect(cells[1].style.position).toBe('sticky');
+      expect(cells[1].style.left).toBe('120px');
+      expect(cells[2].style.position).not.toBe('sticky');
+    }
+  });
+
+  // DAT-028.S3
+  it('DAT-028.S3: a right-frozen column is offset from the right edge and a frozen column without a width counts 60px', () => {
+    const fixture = create((host) => {
+      host.lastFrozen = true;
+    });
+
+    expect(headerCells(fixture)[2].style.position).toBe('sticky');
+    expect(headerCells(fixture)[2].style.right).toBe('0px');
+    expect(firstRowCells(fixture)[2].style.right).toBe('0px');
+  });
+
+  // DAT-028.S3
+  it('DAT-028.S3: right-frozen columns stack from the right edge and a width-less one adds 60px to the next offset', () => {
+    const fixture = create((host) => {
+      host.secondFrozen = true;
+      host.priceAlign = 'right';
+      host.lastFrozen = true;
+    });
+
+    for (const cells of [headerCells(fixture), firstRowCells(fixture)]) {
+      expect(cells[2].style.right).toBe('0px');
+      expect(cells[1].style.right).toBe('60px');
+      expect(cells[1].style.position).toBe('sticky');
+    }
+  });
+
+  // DAT-028.S4
+  it('DAT-028.S4: a frozen column makes the table fixed-layout and gives frozen cells an opaque background', () => {
+    const fixture = create((host) => {
+      host.firstFrozen = true;
+    });
+
+    expect(fixture.nativeElement.querySelector('table').classList).toContain('table-fixed');
+    expect(headerCells(fixture)[0].className).toMatch(/\bbg-surface-\d+/);
+    expect(firstRowCells(fixture)[0].className).toMatch(/\bbg-surface-\d+/);
+    expect(firstRowCells(fixture)[1].className).not.toMatch(/\bbg-surface-0\b/);
+  });
+
+  // DAT-028.S4
+  it('DAT-028.S4: a table without a frozen column keeps the auto layout', () => {
+    const fixture = create(() => undefined);
+
+    expect(fixture.nativeElement.querySelector('table').classList).not.toContain('table-fixed');
+  });
+
+  // DAT-028.S5
+  it('DAT-028.S5: the selection column sticks at offset 0 and the frozen data column is offset by its width', () => {
+    const fixture = create((host) => {
+      host.selectionMode = 'multiple';
+      host.firstFrozen = true;
+    });
+
+    for (const cells of [headerCells(fixture), firstRowCells(fixture)]) {
+      expect(cells[0].style.position).toBe('sticky');
+      expect(cells[0].style.left).toBe('0px');
+      expect(cells[0].style.width).toBe('40px');
+      expect(cells[1].style.position).toBe('sticky');
+      expect(cells[1].style.left).toBe('40px');
+    }
+  });
+
+  // DAT-028.S6
+  it('DAT-028.S6: the selection column is not sticky when only a right-frozen column exists', () => {
+    const fixture = create((host) => {
+      host.selectionMode = 'multiple';
+      host.lastFrozen = true;
+    });
+
+    expect(headerCells(fixture)[0].style.position).not.toBe('sticky');
+    expect(firstRowCells(fixture)[0].style.position).not.toBe('sticky');
+  });
+});
+
+describe('DataTableComponent frozen rows', () => {
+  const PINNED: Product[] = [{ name: 'Pinned', price: 99, stock: 1 }];
+  const firstNames = (fixture: { nativeElement: HTMLElement }) => bodyRows(fixture).map((r) => cellText(r)[0]);
+
+  // DAT-029.S1
+  it('DAT-029.S1: frozen rows render before the rows from value', () => {
+    const fixture = create((h) => (h.frozenValue = PINNED));
+    expect(firstNames(fixture)).toEqual(['Pinned', 'Widget', 'Gadget', 'Gizmo']);
+  });
+
+  // DAT-029.S1
+  it('DAT-029.S1: no frozen row renders when frozenValue is empty or not set', () => {
+    expect(firstNames(create((h) => (h.frozenValue = [])))).toEqual(['Widget', 'Gadget', 'Gizmo']);
+    expect(firstNames(create())).toEqual(['Widget', 'Gadget', 'Gizmo']);
+  });
+
+  // DAT-029.S2
+  it('DAT-029.S2: frozen rows keep their order and stay visible through sort, filter and paging', () => {
+    jest.useFakeTimers();
+    const fixture = create((h) => {
+      h.frozenValue = [PINNED[0], { name: 'Zeta', price: 1, stock: 1 }];
+      h.paginator = true;
+      h.rows = 2;
+      h.filterable = true;
+      h.sortField = 'price';
+      h.sortOrder = 'asc';
+    });
+    expect(firstNames(fixture).slice(0, 2)).toEqual(['Pinned', 'Zeta']);
+
+    (fixture.nativeElement.querySelector('button[aria-label="Page 2"]') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    expect(firstNames(fixture).slice(0, 2)).toEqual(['Pinned', 'Zeta']);
+    (fixture.nativeElement.querySelector('button[aria-label="Page 1"]') as HTMLButtonElement).click();
+    fixture.detectChanges();
+
+    const input = fixture.nativeElement.querySelector('input[type="search"]') as HTMLInputElement;
+    input.value = 'gizmo';
+    input.dispatchEvent(new Event('input'));
+    jest.advanceTimersByTime(300);
+    fixture.detectChanges();
+    expect(firstNames(fixture)).toEqual(['Pinned', 'Zeta', 'Gizmo']);
+    jest.useRealTimers();
+  });
+
+  // DAT-029.S4
+  it('DAT-029.S4: clicking a frozen row selects nothing and does not emit rowSelect', () => {
+    const fixture = create((h) => {
+      h.frozenValue = PINNED;
+      h.selectionMode = 'single';
+    });
+    bodyRows(fixture)[0].click();
+    fixture.detectChanges();
+    expect(fixture.componentInstance.selection).toBeNull();
+    expect(fixture.componentInstance.onRowSelect).not.toHaveBeenCalled();
+    expect(bodyRows(fixture)[0].getAttribute('aria-selected')).not.toBe('true');
+  });
+
+  // DAT-029.S4
+  it('DAT-029.S4: a frozen row is display-only: double-clicking an editable cell opens no editor and the row has no pointer cursor', () => {
+    const fixture = create((h) => {
+      h.frozenValue = PINNED;
+      h.editMode = 'cell';
+      h.selectionMode = 'single';
+    });
+    const frozen = bodyRows(fixture)[0];
+    frozen.querySelectorAll('td')[0].dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('input.edit-input')).toBeNull();
+    expect(frozen.classList.contains('cursor-pointer')).toBe(false);
+    expect(bodyRows(fixture)[1].classList.contains('cursor-pointer')).toBe(true);
+  });
+
+  // DAT-029.S5
+  it('DAT-029.S5: with frozenRowsPosition bottom the frozen row is the last body row', () => {
+    const fixture = create((h) => {
+      h.frozenValue = PINNED;
+      h.frozenRowsPosition = 'bottom';
+    });
+    expect(firstNames(fixture)).toEqual(['Widget', 'Gadget', 'Gizmo', 'Pinned']);
   });
 });
