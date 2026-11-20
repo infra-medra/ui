@@ -8,3 +8,4 @@
 | 4 | 2026-11-20 | extend-data-table-keyboard-navigation-to-multiple-selection | data-display | ~DAT-026 | Keyboard users of a `med-data-table` with `selectionMode="multiple"` can only reach a row through its checkbox, so th... |
 | 5 | 2026-11-20 | extend-data-table-sorting-and-pagination | data-display | ~DAT-002 ~DAT-005 | People building a `med-data-table` cannot tell from the docs that a table can start sorted or that its page can be se... |
 | 6 | 2026-11-20 | document-row-identity-and-row-labels | data-display | +DAT-027 ~DAT-024 | Developers building a `med-data-table` cannot learn from the docs or the spec that rows can be named for screen reade... |
+| 7 | 2026-11-20 | add-data-table-frozen-columns-rows-and-scroll | data-display | +DAT-028 +DAT-029 +DAT-030 ~DAT-024 | People building wide or tall tables with `med-data-table` cannot keep a key column or a summary row in view while the... |

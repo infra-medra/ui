@@ -1,0 +1,123 @@
+change: add-data-table-frozen-columns-rows-and-scroll
+created: 2026-11-20
+track: full
+phase: archived
+diff_base: 280f710
+gates:
+  proposal:
+    status: approved
+    by: Tiago Cavalli
+    at: 2026-11-20T15:28:44Z
+    hash: 8ad62f3aa4657b3116925bfb414bbcacf67c78d00d0b572ffdee92a5d725d8b8
+    note: null
+  plan:
+    status: approved
+    by: Tiago Cavalli
+    at: 2026-11-20T14:22:00Z
+    hash: 62a91a821bab4a0ec8bc3b9b8c4a99650153d51ef4881db822767c05e5402d3e
+    note: null
+  tasks:
+    status: approved
+    by: Tiago Cavalli
+    at: 2026-11-20T14:25:24Z
+    hash: d2eb2d9a5aacbb318ba182b01cc9602abaa3c16123601fde0d83b57ae2459167
+    note: null
+  verify:
+    status: approved
+    by: Tiago Cavalli
+    at: 2026-11-20T15:34:43Z
+    hash: 387d424c114c312b095ba75f6d1b3016a9315a823fd2c16492a631cdcf81788b
+    note: Re-approved after the F-03 wording fix in the DAT-028 spec delta (text only, no code change).
+gate_notes:
+  - gate: proposal
+    by: Tiago Cavalli
+    at: 2026-11-20T14:18:42Z
+    note: "Refazer as decisões escolhidas errado: colunas de utilidade (reorder, seleção, expansão) congelam junto à esquerda; frozenValue com topo e rodapé (frozenRowsPosition); Column Toggle via input visible em med-table-column (change 4b)."
+  - gate: tasks
+    by: Tiago Cavalli
+    at: 2026-11-20T14:24:42Z
+    note: "rejected: no reason given"
+  - gate: verify
+    by: Tiago Cavalli
+    at: 2026-11-20T15:07:58Z
+    note: "Fix F-01: frozen rows must be display-only (no cell edit handler, no pointer cursor); add a unit test."
+  - gate: verify
+    by: Tiago Cavalli
+    at: 2026-11-20T15:15:04Z
+    note: "Add the missing F-02 test: 60px minimum width and right-edge stacking of frozen columns."
+reviews: []
+track_history: []
+blockers: []
+last_task_done_at: 2026-11-20T14:55:20Z
+test_hashes:
+  T002:
+    projects/medra/ui/src/lib/data-table/data-table.component.spec.ts: ff2e65949c5d9d5f80d399959cabd32ec3b7b39273ccc688f7603ce0bed59709
+  T003:
+    e2e/site/data-table-frozen.spec.ts: 026452256bd440e9125221d9ef8f97fa7f017fee3d4c579114a57d5b4a190ec8
+    projects/medra/ui/src/lib/data-table/data-table.component.spec.ts: ff2e65949c5d9d5f80d399959cabd32ec3b7b39273ccc688f7603ce0bed59709
+  T007:
+    projects/medra/ui/src/lib/data-table/data-table.component.spec.ts: 55983a3e83fb41c9c9bbe9dc99a08289bc8fca7b0e03b35abbeab403d2c08cf2
+  T008:
+    e2e/site/data-table-frozen.spec.ts: 6cc9f0e3a0983143205fd39e1b9865a827f2b7017d8e71862cf430fd8102eb44
+    projects/medra/ui/src/lib/data-table/data-table.component.spec.ts: 55983a3e83fb41c9c9bbe9dc99a08289bc8fca7b0e03b35abbeab403d2c08cf2
+  T011:
+    e2e/site/data-table-frozen.spec.ts: c02542d3b57cc31e0945026c851833f63612dfdc03dfb55b9ce7179a4cf59766
+  T013:
+    e2e/site/data-table-docs.spec.ts: a5014e32950918b9226eca2d750333f873443938bb65349e5933da408cfa914a
+suite:
+  at: 2026-11-20T15:16:49Z
+  exit: 0
+  commands:
+    - npm test
+  fingerprint: 2f23c3440ca249c3c9c5205b764305dacba5991ecc13dbfa321f1ee77032b573
+handoff_snapshots:
+  check:
+    "2":
+      .changeset/data-table-frozen-columns-rows-and-scroll.md: 595960924071670335ecfd41193c038dd0e862025ddae058648b416f2b085934
+      e2e/site/data-table-docs.spec.ts: a5014e32950918b9226eca2d750333f873443938bb65349e5933da408cfa914a
+      e2e/site/data-table-frozen.spec.ts: c02542d3b57cc31e0945026c851833f63612dfdc03dfb55b9ce7179a4cf59766
+      projects/medra/ui/src/lib/data-table/data-table.component.spec.ts: de4664460b07798c1314e9d9fe7b22a7215b755ca347563ae25a01b337cfe1b7
+      projects/medra/ui/src/lib/data-table/data-table.component.ts: 9775f95c0487247cb4908a6981c4d246d289d4ce41cdcbe9a00b0324765786bf
+      projects/medra/ui/src/lib/data-table/table-column.component.ts: 06aeeaacad2d7d6cf3f6d7a3ddddf01ac0be503caf38a9bbc361c9c0dabc5a65
+      projects/site/src/app/pages/docs/components/data-table.page.ts: bedfff355098ab2c55b0a16fb0f1d8ed421cdee040c13e0b3e6bc353fdfbf8a3
+      projects/site/src/app/pages/docs/components/demos/data-table-frozen-columns-both.demo.html: 3eedace968de3840cb3ed823dd4b82558493953132829e0c76ccd5eec26ebf5b
+      projects/site/src/app/pages/docs/components/demos/data-table-frozen-columns-both.demo.ts: a90c1567266258d989c82ab581de8853bfa09f9622df8df214d850cd02875ecb
+      projects/site/src/app/pages/docs/components/demos/data-table-frozen-columns.demo.html: 77a0586a046cbf8cab19cb95ce6dda58114822e87b38e6f374e1293988c4ca4d
+      projects/site/src/app/pages/docs/components/demos/data-table-frozen-columns.demo.ts: 271f0530512216e4adab3d9517133476c805bdb277ae313460a84550911ddc41
+      projects/site/src/app/pages/docs/components/demos/data-table-frozen-rows.demo.html: 4d05f2d30306e6d81faf613cdfb24ab063037589955fe4d7d83a562be74e9801
+      projects/site/src/app/pages/docs/components/demos/data-table-frozen-rows.demo.ts: 152b371c3d295a942cb4d8b3efc6f8c2dfe865153e7fdbc519ac964439ac174f
+      projects/site/src/app/pages/docs/components/demos/data-table-scroll-flexible.demo.html: 1d04bba52fdcc8d1e1be5042cdf0af377a6b22de0de80d63b96d8f344d03ad81
+      projects/site/src/app/pages/docs/components/demos/data-table-scroll-flexible.demo.ts: 3f7e622a1703f9a284b023232d98acd4d6d610b948c63d84c3a608fce1c93d5c
+      projects/site/src/app/pages/docs/components/demos/data-table-scroll-horizontal.demo.html: e268843e900d0656825721b1d87ecf1df6261f5d447290d2ee7d88ff72996450
+      projects/site/src/app/pages/docs/components/demos/data-table-scroll-horizontal.demo.ts: 4144b204afd7b2be55260b5bd0b3afec56afa7daf4e3691fb96bfeb0e14ffb7c
+      projects/site/src/content/docs/data-table-frozen-columns-both.txt: 1670c19921330e67dac71327ca810153998f0707f01b394fa772b0f3f5405b0c
+      projects/site/src/content/docs/data-table-frozen-columns.txt: 96ccdbd87704872901c068726b868f93f9f1a278737fe1f2f9c5e21951b3235a
+      projects/site/src/content/docs/data-table-frozen-rows.txt: 3b45b347e038d4601e95f22693b1eefafee7af7413111c1b9bf0cd359f8ad47a
+      projects/site/src/content/docs/data-table-scroll-flexible.txt: dd1065c6b056c27512277fa22455d11f567207450da9714d440f34cc176b1a8d
+      projects/site/src/content/docs/data-table-scroll-horizontal.txt: 2cda21accf48a789e6cb1eaf775b208d5e06164073ad008ce54609627a1a14c6
+    "3":
+      .changeset/data-table-frozen-columns-rows-and-scroll.md: 595960924071670335ecfd41193c038dd0e862025ddae058648b416f2b085934
+      e2e/site/data-table-docs.spec.ts: a5014e32950918b9226eca2d750333f873443938bb65349e5933da408cfa914a
+      e2e/site/data-table-frozen.spec.ts: c02542d3b57cc31e0945026c851833f63612dfdc03dfb55b9ce7179a4cf59766
+      projects/medra/ui/src/lib/data-table/data-table.component.spec.ts: b99c6739895f50ae2319c611f87e3d88c58debdff7f2b30d7161d9554d17ae86
+      projects/medra/ui/src/lib/data-table/data-table.component.ts: 9775f95c0487247cb4908a6981c4d246d289d4ce41cdcbe9a00b0324765786bf
+      projects/medra/ui/src/lib/data-table/table-column.component.ts: 06aeeaacad2d7d6cf3f6d7a3ddddf01ac0be503caf38a9bbc361c9c0dabc5a65
+      projects/site/src/app/pages/docs/components/data-table.page.ts: bedfff355098ab2c55b0a16fb0f1d8ed421cdee040c13e0b3e6bc353fdfbf8a3
+      projects/site/src/app/pages/docs/components/demos/data-table-frozen-columns-both.demo.html: 3eedace968de3840cb3ed823dd4b82558493953132829e0c76ccd5eec26ebf5b
+      projects/site/src/app/pages/docs/components/demos/data-table-frozen-columns-both.demo.ts: a90c1567266258d989c82ab581de8853bfa09f9622df8df214d850cd02875ecb
+      projects/site/src/app/pages/docs/components/demos/data-table-frozen-columns.demo.html: 77a0586a046cbf8cab19cb95ce6dda58114822e87b38e6f374e1293988c4ca4d
+      projects/site/src/app/pages/docs/components/demos/data-table-frozen-columns.demo.ts: 271f0530512216e4adab3d9517133476c805bdb277ae313460a84550911ddc41
+      projects/site/src/app/pages/docs/components/demos/data-table-frozen-rows.demo.html: 4d05f2d30306e6d81faf613cdfb24ab063037589955fe4d7d83a562be74e9801
+      projects/site/src/app/pages/docs/components/demos/data-table-frozen-rows.demo.ts: 152b371c3d295a942cb4d8b3efc6f8c2dfe865153e7fdbc519ac964439ac174f
+      projects/site/src/app/pages/docs/components/demos/data-table-scroll-flexible.demo.html: 1d04bba52fdcc8d1e1be5042cdf0af377a6b22de0de80d63b96d8f344d03ad81
+      projects/site/src/app/pages/docs/components/demos/data-table-scroll-flexible.demo.ts: 3f7e622a1703f9a284b023232d98acd4d6d610b948c63d84c3a608fce1c93d5c
+      projects/site/src/app/pages/docs/components/demos/data-table-scroll-horizontal.demo.html: e268843e900d0656825721b1d87ecf1df6261f5d447290d2ee7d88ff72996450
+      projects/site/src/app/pages/docs/components/demos/data-table-scroll-horizontal.demo.ts: 4144b204afd7b2be55260b5bd0b3afec56afa7daf4e3691fb96bfeb0e14ffb7c
+      projects/site/src/content/docs/data-table-frozen-columns-both.txt: 1670c19921330e67dac71327ca810153998f0707f01b394fa772b0f3f5405b0c
+      projects/site/src/content/docs/data-table-frozen-columns.txt: 96ccdbd87704872901c068726b868f93f9f1a278737fe1f2f9c5e21951b3235a
+      projects/site/src/content/docs/data-table-frozen-rows.txt: 3b45b347e038d4601e95f22693b1eefafee7af7413111c1b9bf0cd359f8ad47a
+      projects/site/src/content/docs/data-table-scroll-flexible.txt: dd1065c6b056c27512277fa22455d11f567207450da9714d440f34cc176b1a8d
+      projects/site/src/content/docs/data-table-scroll-horizontal.txt: 2cda21accf48a789e6cb1eaf775b208d5e06164073ad008ce54609627a1a14c6
+archived:
+  at: 2026-11-20
+  sequence: 7

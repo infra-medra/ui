@@ -1,0 +1,5 @@
+## Frozen columns
+
+Set `frozen` on a `med-table-column` to keep it in view while the table scrolls horizontally. The column sticks to the left edge by default. Give every column a pixel `width`: the table switches to a fixed layout when any column is frozen, and the sticky offsets are derived from those widths, so nothing is measured or recomputed on resize.
+
+Scroll the table below sideways to see the Name column stay in place.

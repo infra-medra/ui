@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, PLATFORM_ID, TemplateRef, afterNextRender, booleanAttribute, computed, contentChild, contentChildren, effect, inject, input, linkedSignal, model, numberAttribute, output, signal, untracked } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, PLATFORM_ID, TemplateRef, afterNextRender, booleanAttribute, computed, contentChild, contentChildren, effect, ElementRef, inject, input, linkedSignal, model, numberAttribute, output, signal, untracked, viewChild } from '@angular/core';
 import { NgTemplateOutlet, isPlatformBrowser } from '@angular/common';
 import { IconComponent } from '../icon/icon.component';
 import { InputTextDirective } from '../input-text/input-text.directive';
@@ -30,6 +30,13 @@ const ALIGN_CLASS: Record<TableColumnAlign, string> = {
   right: 'text-right',
 };
 
+/** Width of the row reorder handle column, in px: exact so the sticky offsets of frozen columns after it are exact. */
+const REORDER_COLUMN_PX = 32;
+/** Width of the selection checkbox and radio column, in px. */
+const SELECTION_COLUMN_PX = 40;
+/** Offset contribution of a frozen column with no usable pixel `width`. */
+const MIN_FROZEN_COLUMN_PX = 60;
+
 /** `Array.isArray()`'s negative branch doesn't reliably narrow a `readonly T[]` union member out in TypeScript (a known limitation with readonly arrays, same one `TreeSelectPanelComponent.isSingleNode` already documents) — an explicit type predicate does. */
 function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
   return Array.isArray(value);
@@ -50,12 +57,6 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
  *   virtualScroll is active" by not having the feature at all). `SelectPanelComponent`
  *   already shows the `CdkVirtualScrollViewport` technique is available in
  *   this codebase if a later version needs it for very large datasets.
- * - No frozen/sticky columns — still true here even after `TableColumnComponent`
- *   grew `frozen`/`alignFrozen` for `TreeTableComponent`'s own sake: both inputs
- *   are inert on this component, which never reads them. `TreeTableComponent`'s
- *   own doc explains the pure-CSS `position: sticky` technique it uses; nothing
- *   about that approach is DataTable-specific, so lifting the cut here later,
- *   if ever needed, should be able to reuse it directly.
  * - No column reorder/resize.
  * - No row expansion.
  * - No per-column filter row (avoids #16576 "column filter indicator
@@ -67,6 +68,13 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
  *   `TabsComponent` already uses for its own overflow.
  * None of these are dead ends — each layers on top of this API without a
  * breaking change if a later version needs it.
+ *
+ * **Frozen columns** (`frozen`/`alignFrozen` on `TableColumnComponent`) use the same declarative
+ * `position: sticky` technique as `TreeTableComponent`: `frozenLayout` derives each frozen cell's `left`/`right` offset
+ * from the declared (or resized) pixel widths of the frozen columns before it on that edge, with a 60px minimum for a
+ * column without a `px` width, so no layout is measured and nothing recomputes on resize. Any frozen column forces
+ * `table-fixed`, otherwise the browser may shrink a column below the width the offsets assume. A left-frozen data
+ * column also freezes the reorder, selection and radio columns, which have exact pixel widths so their offsets are exact.
  *
  * **Sorting** cycles a sortable column through
  * `asc → desc → none (unsorted) → asc → ...` on header click, explicitly —
@@ -216,7 +224,7 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
   standalone: true,
   imports: [NgTemplateOutlet, IconComponent, InputTextDirective, PaginatorComponent, ProgressSpinnerComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { class: 'block' },
+  host: { class: 'block min-w-0', '[class.flex]': 'flexHeight()', '[class.flex-col]': 'flexHeight()', '[class.h-full]': 'flexHeight()' },
   template: `
     @if (filterable()) {
       <div class="mb-3 flex justify-end">
@@ -231,20 +239,47 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
         />
       </div>
     }
-    <div [class]="wrapperClass()" [class.overflow-y-auto]="scrollable()" [style.maxHeight]="scrollable() ? scrollHeight() : null">
+    <ng-template #dataCells let-row let-i="index" let-frozen="frozen">
+      @for (col of columns(); track col.field()) {
+        <td [class]="cellClass(col, row, i)" [style]="frozenStyle(col)" (dblclick)="frozen ? null : onCellDblClick($event, row, col)">
+          @if (!frozen && isEditingCell(row, col); as editing) {
+            <ng-container
+              [ngTemplateOutlet]="col.editTemplate()!"
+              [ngTemplateOutletContext]="{ $implicit: row, onSave: saveEdit(row, col), onCancel: cancelEdit(row, col) }"
+            />
+          } @else if (col.cellTemplate(); as t) {
+            <ng-container [ngTemplateOutlet]="t" [ngTemplateOutletContext]="{ $implicit: row, rowIndex: i }" />
+          } @else {
+            {{ cellValue(row, col) }}
+          }
+        </td>
+      }
+    </ng-template>
+    <ng-template #frozenRow let-row let-i="index">
+      <tr [class]="rowClassFor(row, i, false)">
+        @if (reorderable()) {
+          <td [class]="utilityCellClass('', true) + ' ' + frozenUtilityClass(row, i)" [style]="utilityStyle('reorder')"></td>
+        }
+        @if (selectionMode() === 'multiple' || selectionMode() === 'radio') {
+          <td [class]="utilityCellClass('') + ' ' + frozenUtilityClass(row, i)" [style]="utilityStyle('selection')"></td>
+        }
+        <ng-container [ngTemplateOutlet]="dataCells" [ngTemplateOutletContext]="{ $implicit: row, index: i, frozen: true }" />
+      </tr>
+    </ng-template>
+    <div [class]="wrapperClass()" [class.overflow-y-auto]="scrollable()" [style.maxHeight]="scrollable() && !flexHeight() ? scrollHeight() : null">
       @if (loading()) {
         <div class="absolute inset-0 z-10 flex items-center justify-center bg-surface-0/60 dark:bg-surface-800/60">
           <med-progress-spinner [ariaLabel]="loadingLabel()" />
         </div>
       }
-      <table [class]="tableClass()" [class.table-fixed]="resizableColumns()" [class.opacity-50]="loading()" [attr.aria-label]="ariaLabel()">
-        <thead [class]="scrollable() ? 'sticky top-0 z-10 bg-surface-50 dark:bg-surface-800' : ''">
+      <table [class]="tableClass()" [class.table-fixed]="resizableColumns() || hasFrozenColumn()" [class.opacity-50]="loading()" [attr.aria-label]="ariaLabel()">
+        <thead #tableHead [class]="scrollable() ? 'sticky top-0 z-10 bg-surface-50 dark:bg-surface-800' : ''">
           <tr class="border-b border-surface-200 bg-surface-50 dark:border-surface-700 dark:bg-surface-800/50">
             @if (reorderable()) {
-              <th [class]="utilityCellClass('w-8', true)"></th>
+              <th [class]="utilityCellClass('', true) + ' ' + frozenUtilityClass(null)" [style]="utilityStyle('reorder')"></th>
             }
             @if (selectionMode() === 'multiple') {
-              <th [class]="utilityCellClass('w-10')">
+              <th [class]="utilityCellClass('') + ' ' + frozenUtilityClass(null)" [style]="utilityStyle('selection')">
                 <span class="relative inline-flex">
                   <input
                     type="checkbox"
@@ -265,12 +300,13 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
               </th>
             }
             @if (selectionMode() === 'radio') {
-              <th [class]="utilityCellClass('w-10')"></th>
+              <th [class]="utilityCellClass('') + ' ' + frozenUtilityClass(null)" [style]="utilityStyle('selection')"></th>
             }
             @for (col of columns(); track col.field()) {
               <th
                 scope="col"
                 [style.width]="columnWidth(col)"
+                [style]="frozenStyle(col)"
                 [class]="headerCellClass(col)"
                 [class.relative]="resizableColumns()"
                 [attr.aria-sort]="ariaSortFor(col)"
@@ -303,6 +339,13 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
             }
           </tr>
         </thead>
+        @if (frozenRowsPosition() === 'top' && frozenRows().length) {
+          <tbody [class]="scrollable() ? 'sticky z-[5] bg-surface-0 dark:bg-surface-800' : ''" [style.top.px]="scrollable() ? headerHeight() : null">
+            @for (row of frozenRows(); track $index; let i = $index) {
+              <ng-container [ngTemplateOutlet]="frozenRow" [ngTemplateOutletContext]="{ $implicit: row, index: i }" />
+            }
+          </tbody>
+        }
         <tbody>
           @for (row of pagedValue(); track rowTrackBy()(row, $index); let i = $index) {
             @if (isGroupStart(row, i)) {
@@ -328,12 +371,12 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
               (drop)="onRowDrop(i)"
             >
               @if (reorderable()) {
-                <td [class]="utilityCellClass('w-8 cursor-move text-surface-400 dark:text-surface-500', true)" (click)="$event.stopPropagation()">
+                <td [class]="utilityCellClass('cursor-move text-surface-400 dark:text-surface-500', true) + ' ' + frozenUtilityClass(row, i)" [style]="utilityStyle('reorder')" (click)="$event.stopPropagation()">
                   <med-icon name="bars-3" variant="mini" class="size-4" />
                 </td>
               }
               @if (selectionMode() === 'multiple') {
-                <td [class]="utilityCellClass('w-10')">
+                <td [class]="utilityCellClass('') + ' ' + frozenUtilityClass(row, i)" [style]="utilityStyle('selection')">
                   <span class="relative inline-flex">
                     <input
                       type="checkbox"
@@ -352,7 +395,7 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
                 </td>
               }
               @if (selectionMode() === 'radio') {
-                <td [class]="utilityCellClass('w-10')">
+                <td [class]="utilityCellClass('') + ' ' + frozenUtilityClass(row, i)" [style]="utilityStyle('selection')">
                   <span class="relative inline-flex">
                     <input
                       type="radio"
@@ -371,20 +414,7 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
                   </span>
                 </td>
               }
-              @for (col of columns(); track col.field()) {
-                <td [class]="cellClass(col)" (dblclick)="onCellDblClick($event, row, col)">
-                  @if (isEditingCell(row, col); as editing) {
-                    <ng-container
-                      [ngTemplateOutlet]="col.editTemplate()!"
-                      [ngTemplateOutletContext]="{ $implicit: row, onSave: saveEdit(row, col), onCancel: cancelEdit(row, col) }"
-                    />
-                  } @else if (col.cellTemplate(); as t) {
-                    <ng-container [ngTemplateOutlet]="t" [ngTemplateOutletContext]="{ $implicit: row, rowIndex: i }" />
-                  } @else {
-                    {{ cellValue(row, col) }}
-                  }
-                </td>
-              }
+              <ng-container [ngTemplateOutlet]="dataCells" [ngTemplateOutletContext]="{ $implicit: row, index: i }" />
             </tr>
             @if (isRowExpanded(row, i) && rowExpansionTemplate(); as expTpl) {
               <tr class="border-b border-surface-200 bg-surface-50/40 dark:border-surface-700 dark:bg-surface-800/30">
@@ -399,6 +429,13 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
             </tr>
           }
         </tbody>
+        @if (frozenRowsPosition() === 'bottom' && frozenRows().length) {
+          <tbody [class]="scrollable() ? 'sticky bottom-0 z-[5] bg-surface-0 dark:bg-surface-800' : ''">
+            @for (row of frozenRows(); track $index; let i = $index) {
+              <ng-container [ngTemplateOutlet]="frozenRow" [ngTemplateOutletContext]="{ $implicit: row, index: i }" />
+            }
+          </tbody>
+        }
       </table>
     </div>
     @if (paginator() && effectiveTotalRecords() > 0) {
@@ -450,6 +487,14 @@ export class DataTableComponent<T> {
   readonly reorderable = input(false, { transform: booleanAttribute });
   readonly resizableColumns = input(false, { transform: booleanAttribute });
   readonly scrollable = input(false, { transform: booleanAttribute });
+  /** Rows pinned next to the body: they use the same column templates but ignore sorting, the global filter and pagination, and cannot be selected. */
+  readonly frozenValue = input<readonly T[] | null>(null);
+  /** Where the `frozenValue` rows sit: directly under the header (`top`) or after the rows from `value` (`bottom`). */
+  readonly frozenRowsPosition = input<'top' | 'bottom'>('top');
+  protected readonly frozenRows = computed(() => this.frozenValue() ?? []);
+  private readonly tableHead = viewChild<ElementRef<HTMLElement>>('tableHead');
+  /** Height of the sticky `<thead>`, which is where top frozen rows stick; measured in the browser only, so server rendering never touches `ResizeObserver`. */
+  protected readonly headerHeight = signal(0);
   readonly scrollHeight = input<string | null>(null);
   readonly stateKey = input<string | null>(null);
   readonly stateStorage = input<'session' | 'local'>('session');
@@ -483,12 +528,17 @@ export class DataTableComponent<T> {
   protected readonly groupHeaderTemplate = contentChild('groupHeader', { read: TemplateRef });
   protected readonly rowExpansionTemplate = contentChild('rowexpansion', { read: TemplateRef });
   private readonly platformId = inject(PLATFORM_ID);
+  private readonly destroyRef = inject(DestroyRef);
   protected readonly checkboxBoxClass = checkboxBoxVariants({ size: 'sm' });
   protected readonly radioRingClass = radioRingVariants({ size: 'sm' });
   protected readonly radioDotClass = `${DOT_SIZE_CLASS.sm} rounded-full bg-brand-500 dark:bg-brand-400`;
   /** Shared `name` of the row radios, unique per table instance so two tables on a page keep independent groups. */
   protected readonly radioGroupName = `med-data-table-radio-${nextRadioGroupId++}`;
-  protected readonly wrapperClass = computed(() => mergeClasses('relative w-full overflow-x-auto rounded-lg border border-surface-200 dark:border-surface-700', this.class()));
+  /** `scrollable` with `scrollHeight="flex"`: the wrapper fills the height of its parent instead of capping at a fixed length. */
+  protected readonly flexHeight = computed(() => this.scrollable() && this.scrollHeight() === 'flex');
+  protected readonly wrapperClass = computed(() =>
+    mergeClasses('relative w-full overflow-x-auto rounded-lg border border-surface-200 dark:border-surface-700', this.flexHeight() ? 'min-h-0 flex-1' : '', this.class()),
+  );
 
   private readonly editingCell = signal<{ row: T; field: string } | null>(null);
   private readonly resizedColumnWidths = signal<ReadonlyMap<string, number>>(new Map());
@@ -500,11 +550,24 @@ export class DataTableComponent<T> {
   private filterDebounceHandle: ReturnType<typeof setTimeout> | null = null;
   private draggedRowIndex: number | null = null;
 
+  private observeHeaderHeight(): void {
+    const head = this.tableHead()?.nativeElement;
+    if (!head || typeof ResizeObserver === 'undefined') {
+      return;
+    }
+    const observer = new ResizeObserver(() => this.headerHeight.set(head.getBoundingClientRect().height));
+    observer.observe(head);
+    this.destroyRef.onDestroy(() => observer.disconnect());
+  }
+
   constructor() {
     // Restoring only after the first render keeps the first client render identical to the server-rendered markup. Restoring
     // earlier changes the state before hydration reconciles the DOM, and the class bindings then leave stale server classes behind
     // (for example two "current page" buttons in the paginator).
-    afterNextRender(() => this.browserReady.set(true));
+    afterNextRender(() => {
+      this.browserReady.set(true);
+      this.observeHeaderHeight();
+    });
 
     effect(() => {
       const key = this.stateKey();
@@ -647,6 +710,34 @@ export class DataTableComponent<T> {
 
   protected readonly effectiveTotalRecords = computed(() => (this.lazy() ? (this.totalRecords() ?? this.value().length) : this.sortedValue().length));
 
+  protected readonly hasFrozenColumn = computed(() => this.columns().some((col) => col.frozen()));
+
+  /** `true` when the reorder, selection and radio columns freeze on the left: they follow a left-frozen data column. */
+  protected readonly utilityFrozen = computed(() => this.columns().some((col) => col.frozen() && col.alignFrozen() === 'left'));
+
+  private readonly utilityWidth = computed(() => (this.reorderable() ? REORDER_COLUMN_PX : 0) + (this.selectionMode() === 'multiple' || this.selectionMode() === 'radio' ? SELECTION_COLUMN_PX : 0));
+
+  /** Sticky side and offset of every frozen data column: each offset adds the widths of the frozen columns before it on its edge, the left edge starting after the utility columns. Derived from declared and resized widths, so no layout measurement is needed. */
+  private readonly frozenLayout = computed(() => {
+    const cols = this.columns();
+    const layout = new Map<TableColumnComponent, { readonly side: 'left' | 'right'; readonly offset: number }>();
+    let left = this.utilityWidth();
+    for (const col of cols) {
+      if (col.frozen() && col.alignFrozen() === 'left') {
+        layout.set(col, { side: 'left', offset: left });
+        left += this.frozenColumnPx(col);
+      }
+    }
+    let right = 0;
+    for (let i = cols.length - 1; i >= 0; i--) {
+      if (cols[i].frozen() && cols[i].alignFrozen() === 'right') {
+        layout.set(cols[i], { side: 'right', offset: right });
+        right += this.frozenColumnPx(cols[i]);
+      }
+    }
+    return layout;
+  });
+
   protected readonly totalColumnCount = computed(() => this.columns().length + (this.selectionMode() === 'multiple' || this.selectionMode() === 'radio' ? 1 : 0) + (this.reorderable() ? 1 : 0));
 
   protected readonly allSelected = computed(() => {
@@ -706,6 +797,62 @@ export class DataTableComponent<T> {
     return mergeClasses(narrow ? pad.replace(/px-\S+/, 'px-2') : pad, extra, this.gridClass());
   }
 
+  /** Pixel width of a frozen column for its neighbours' offsets: a resized width wins, then a `px` `width`, then the 60px minimum. */
+  private frozenColumnPx(col: TableColumnComponent): number {
+    const resized = this.resizedColumnWidths().get(col.field());
+    if (resized !== undefined) {
+      return resized;
+    }
+    const match = /^\s*(\d+(?:\.\d+)?)px\s*$/.exec(col.width() ?? '');
+    return match ? parseFloat(match[1]) : MIN_FROZEN_COLUMN_PX;
+  }
+
+  /** Sticky style of a frozen data column, or `null` for any other column. */
+  protected frozenStyle(col: TableColumnComponent): Record<string, string> | null {
+    const placed = this.frozenLayout().get(col);
+    return placed ? { position: 'sticky', [placed.side]: `${placed.offset}px`, 'z-index': '1' } : null;
+  }
+
+  /** Exact width of a utility column, plus its sticky offset when a left-frozen data column makes it freeze. */
+  protected utilityStyle(kind: 'reorder' | 'selection'): Record<string, string> {
+    const px = kind === 'reorder' ? REORDER_COLUMN_PX : SELECTION_COLUMN_PX;
+    const style: Record<string, string> = { width: `${px}px`, 'min-width': `${px}px`, 'max-width': `${px}px` };
+    if (this.utilityFrozen()) {
+      style['position'] = 'sticky';
+      style['left'] = `${kind === 'selection' && this.reorderable() ? REORDER_COLUMN_PX : 0}px`;
+      style['z-index'] = '1';
+    }
+    return style;
+  }
+
+  /** Opaque background of a sticky utility cell (`row` is `null` in the header). */
+  protected frozenUtilityClass(row: T | null, index = 0): string {
+    return this.utilityFrozen() ? this.frozenBackground(row, index) : '';
+  }
+
+  /** Opaque background so scrolled content does not show through a sticky cell. It follows the row state, because a sticky cell does not inherit the row's own background; `group-hover` mirrors the row hover. */
+  private frozenBackground(row: T | null, index: number): string {
+    if (row === null) {
+      return 'bg-surface-50 dark:bg-surface-800';
+    }
+    if (this.isSelected(row)) {
+      return 'bg-brand-50 dark:bg-brand-950';
+    }
+    return this.stripedRows() && index % 2 === 1
+      ? 'bg-surface-100 group-hover:bg-surface-50 dark:bg-surface-800 dark:group-hover:bg-surface-700'
+      : 'bg-surface-0 group-hover:bg-surface-50 dark:bg-surface-800 dark:group-hover:bg-surface-700';
+  }
+
+  /** Background and scroll-facing border of a frozen data cell (`row` is `null` in the header). */
+  private frozenCellClass(col: TableColumnComponent, row: T | null, index: number): string {
+    const placed = this.frozenLayout().get(col);
+    if (!placed) {
+      return '';
+    }
+    const border = placed.side === 'left' ? 'border-r' : 'border-l';
+    return mergeClasses(this.frozenBackground(row, index), border, 'border-surface-200 dark:border-surface-700');
+  }
+
   protected groupCellClass(): string {
     return SIZE_PADDING_CLASS[this.size()];
   }
@@ -720,21 +867,23 @@ export class DataTableComponent<T> {
       this.gridClass(),
       'font-semibold text-surface-700 select-none dark:text-surface-200',
       ALIGN_CLASS[col.align()],
+      this.frozenCellClass(col, null, 0),
       col.sortable()
         ? 'cursor-pointer focus-visible:outline-none focus-visible:ring-(--focus-ring-width) focus-visible:ring-offset-(--focus-ring-offset) focus-visible:ring-brand-500 dark:focus-visible:ring-brand-400'
         : '',
     );
   }
 
-  protected cellClass(col: TableColumnComponent): string {
-    return mergeClasses(SIZE_PADDING_CLASS[this.size()], 'text-surface-900 dark:text-surface-50', ALIGN_CLASS[col.align()], this.gridClass());
+  protected cellClass(col: TableColumnComponent, row: T, index: number): string {
+    return mergeClasses(SIZE_PADDING_CLASS[this.size()], 'text-surface-900 dark:text-surface-50', ALIGN_CLASS[col.align()], this.gridClass(), this.frozenCellClass(col, row, index));
   }
 
-  protected rowClassFor(row: T, index: number): string {
+  /** `interactive` is `false` for frozen rows, which are display-only: no pointer cursor, since they cannot be selected. */
+  protected rowClassFor(row: T, index: number, interactive = true): string {
     const striped = this.stripedRows() && index % 2 === 1;
     return mergeClasses(
-      'border-b border-surface-200 last:border-b-0 dark:border-surface-700',
-      this.selectionMode() ? 'cursor-pointer' : '',
+      'group border-b border-surface-200 last:border-b-0 dark:border-surface-700',
+      interactive && this.selectionMode() ? 'cursor-pointer' : '',
       this.isSelected(row)
         ? 'bg-brand-50 dark:bg-brand-500/10'
         : striped

@@ -25,6 +25,11 @@ import { DataTableKeyboardNavigationDemo } from './demos/data-table-keyboard-nav
 import { DataTableSizeDemo } from './demos/data-table-size.demo';
 import { DataTableGridLinesDemo } from './demos/data-table-grid-lines.demo';
 import { DataTableStripedRowsDemo } from './demos/data-table-striped-rows.demo';
+import { DataTableFrozenColumnsDemo } from './demos/data-table-frozen-columns.demo';
+import { DataTableFrozenColumnsBothDemo } from './demos/data-table-frozen-columns-both.demo';
+import { DataTableFrozenRowsDemo } from './demos/data-table-frozen-rows.demo';
+import { DataTableScrollHorizontalDemo } from './demos/data-table-scroll-horizontal.demo';
+import { DataTableScrollFlexibleDemo } from './demos/data-table-scroll-flexible.demo';
 import { DataTableColumnResizeDemo } from './demos/data-table-column-resize.demo';
 import { DataTableEditCellDemo } from './demos/data-table-edit-cell.demo';
 import { DataTableLoadingDemo } from './demos/data-table-loading.demo';
@@ -56,6 +61,11 @@ import keyboardNavigationCode from './demos/data-table-keyboard-navigation.demo.
 import sizeCode from './demos/data-table-size.demo.html?raw';
 import gridLinesCode from './demos/data-table-grid-lines.demo.html?raw';
 import stripedRowsCode from './demos/data-table-striped-rows.demo.html?raw';
+import frozenColumnsCode from './demos/data-table-frozen-columns.demo.html?raw';
+import frozenColumnsBothCode from './demos/data-table-frozen-columns-both.demo.html?raw';
+import frozenRowsCode from './demos/data-table-frozen-rows.demo.html?raw';
+import scrollHorizontalCode from './demos/data-table-scroll-horizontal.demo.html?raw';
+import scrollFlexibleCode from './demos/data-table-scroll-flexible.demo.html?raw';
 import columnResizeCode from './demos/data-table-column-resize.demo.html?raw';
 import editCellCode from './demos/data-table-edit-cell.demo.html?raw';
 import loadingCode from './demos/data-table-loading.demo.html?raw';
@@ -88,6 +98,11 @@ import keyboardNavigationContent from '../../../../content/docs/data-table-keybo
 import sizeContent from '../../../../content/docs/data-table-size.txt?raw';
 import gridLinesContent from '../../../../content/docs/data-table-grid-lines.txt?raw';
 import stripedRowsContent from '../../../../content/docs/data-table-striped-rows.txt?raw';
+import frozenColumnsContent from '../../../../content/docs/data-table-frozen-columns.txt?raw';
+import frozenColumnsBothContent from '../../../../content/docs/data-table-frozen-columns-both.txt?raw';
+import frozenRowsContent from '../../../../content/docs/data-table-frozen-rows.txt?raw';
+import scrollHorizontalContent from '../../../../content/docs/data-table-scroll-horizontal.txt?raw';
+import scrollFlexibleContent from '../../../../content/docs/data-table-scroll-flexible.txt?raw';
 import columnResizeContent from '../../../../content/docs/data-table-column-resize.txt?raw';
 import editCellContent from '../../../../content/docs/data-table-edit-cell.txt?raw';
 import loadingContent from '../../../../content/docs/data-table-loading.txt?raw';
@@ -143,6 +158,11 @@ const EXAMPLES = [
   { id: 'example-size', label: 'Size' },
   { id: 'example-grid-lines', label: 'Grid lines' },
   { id: 'example-striped-rows', label: 'Striped rows' },
+  { id: 'example-frozen-columns', label: 'Frozen columns' },
+  { id: 'example-frozen-columns-both', label: 'Frozen columns on both sides' },
+  { id: 'example-frozen-rows', label: 'Frozen rows' },
+  { id: 'example-scroll-horizontal', label: 'Horizontal scroll' },
+  { id: 'example-scroll-flexible', label: 'Flexible scroll' },
 ] as const;
 
 @Component({
@@ -182,6 +202,11 @@ const EXAMPLES = [
     DataTableSizeDemo,
     DataTableGridLinesDemo,
     DataTableStripedRowsDemo,
+    DataTableFrozenColumnsDemo,
+    DataTableFrozenColumnsBothDemo,
+    DataTableFrozenRowsDemo,
+    DataTableScrollHorizontalDemo,
+    DataTableScrollFlexibleDemo,
   ],
   template: `
     <app-component-doc title="DataTable" slug="data-table" [examples]="examples">
@@ -430,6 +455,46 @@ const EXAMPLES = [
         </div>
       </section>
 
+      <section id="example-frozen-columns" class="mt-10 scroll-mt-24">
+        <app-prose class="block" [content]="frozenColumnsContent" />
+        <div class="mt-4">
+          <app-data-table-frozen-columns-demo />
+          <div class="mt-3"><app-code-block [code]="frozenColumnsCode" /></div>
+        </div>
+      </section>
+
+      <section id="example-frozen-columns-both" class="mt-10 scroll-mt-24">
+        <app-prose class="block" [content]="frozenColumnsBothContent" />
+        <div class="mt-4">
+          <app-data-table-frozen-columns-both-demo />
+          <div class="mt-3"><app-code-block [code]="frozenColumnsBothCode" /></div>
+        </div>
+      </section>
+
+      <section id="example-frozen-rows" class="mt-10 scroll-mt-24">
+        <app-prose class="block" [content]="frozenRowsContent" />
+        <div class="mt-4">
+          <app-data-table-frozen-rows-demo />
+          <div class="mt-3"><app-code-block [code]="frozenRowsCode" /></div>
+        </div>
+      </section>
+
+      <section id="example-scroll-horizontal" class="mt-10 scroll-mt-24">
+        <app-prose class="block" [content]="scrollHorizontalContent" />
+        <div class="mt-4">
+          <app-data-table-scroll-horizontal-demo />
+          <div class="mt-3"><app-code-block [code]="scrollHorizontalCode" /></div>
+        </div>
+      </section>
+
+      <section id="example-scroll-flexible" class="mt-10 scroll-mt-24">
+        <app-prose class="block" [content]="scrollFlexibleContent" />
+        <div class="mt-4">
+          <app-data-table-scroll-flexible-demo />
+          <div class="mt-3"><app-code-block [code]="scrollFlexibleCode" /></div>
+        </div>
+      </section>
+
       <app-api-table api [entries]="apiEntries" />
     </app-component-doc>
   `,
@@ -499,4 +564,14 @@ export default class DocsDataTable {
   protected readonly gridLinesCode = gridLinesCode;
   protected readonly stripedRowsContent = stripedRowsContent;
   protected readonly stripedRowsCode = stripedRowsCode;
+  protected readonly frozenColumnsContent = frozenColumnsContent;
+  protected readonly frozenColumnsCode = frozenColumnsCode;
+  protected readonly frozenColumnsBothContent = frozenColumnsBothContent;
+  protected readonly frozenColumnsBothCode = frozenColumnsBothCode;
+  protected readonly frozenRowsContent = frozenRowsContent;
+  protected readonly frozenRowsCode = frozenRowsCode;
+  protected readonly scrollHorizontalContent = scrollHorizontalContent;
+  protected readonly scrollHorizontalCode = scrollHorizontalCode;
+  protected readonly scrollFlexibleContent = scrollFlexibleContent;
+  protected readonly scrollFlexibleCode = scrollFlexibleCode;
 }

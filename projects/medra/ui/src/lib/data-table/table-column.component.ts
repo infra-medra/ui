@@ -33,14 +33,12 @@ import { TableColumnAlign } from './data-table.types';
  * since every other component so far has only ever needed one projected template per content-child
  * slot.
  *
- * **`frozen`/`alignFrozen`** only so far; `DataTableComponent` still documents "no frozen/sticky
- * columns" as its own deliberate v1 cut, see that file's doc, so these two inputs are currently
- * inert there). Deliberately **not** computed imperatively with pixel offsets (a `ResizeObserver`
+ * **`frozen`/`alignFrozen`** keep a column in view while the table scrolls horizontally, in `DataTableComponent` and
+ * `TreeTableComponent` alike. Deliberately **not** computed imperatively with pixel offsets (a `ResizeObserver`
  * plus a window `resize` listener would recompute them, the shape behind the known "doesn't
- * recompute when the layout changes" bug). `TreeTableComponent` instead derives each frozen
- * column's `left`/`right` offset declaratively from its own existing `columnStyleWidth()` signal
- * graph and applies plain CSS `position: sticky` — the browser handles during-scroll stickiness
- * natively, no JS recomputation loop at all.
+ * recompute when the layout changes" bug): each table derives every frozen column's `left`/`right` offset
+ * declaratively from the column widths and applies plain CSS `position: sticky`, so the browser handles
+ * stickiness natively with no JS recomputation loop.
  */
 @Component({
   selector: 'med-table-column',
