@@ -1,0 +1,126 @@
+change: add-data-table-row-editing-and-group-modes
+created: 2026-11-20
+track: full
+phase: archived
+diff_base: "0458357"
+gates:
+  proposal:
+    status: approved
+    by: Tiago Cavalli
+    at: 2026-11-20T18:41:29Z
+    hash: 86b65f9697556c45bc9bb4a52f69fdc8972b02b2676ce317e6673ea340f267ce
+    note: null
+  plan:
+    status: approved
+    by: Tiago Cavalli
+    at: 2026-11-20T18:47:11Z
+    hash: f840d3f654b08392343a54c44fc2a5f959bebb702574bc2c0f0a9022868fbb86
+    note: null
+  tasks:
+    status: approved
+    by: Tiago Cavalli
+    at: 2026-11-20T19:41:33Z
+    hash: e7afab69af66ea0383191b75e376503f72be5aed280b8b584d2ab01016decdf1
+    note: null
+  verify:
+    status: approved
+    by: Tiago Cavalli
+    at: 2026-11-20T20:05:42Z
+    hash: b0b0b9843cc029fccc1b734f39a2e66381d003d871d8d4d4d0c327737dc8957c
+    note: null
+gate_notes:
+  - gate: verify
+    by: Tiago Cavalli
+    at: 2026-11-20T20:03:14Z
+    note: "Fix minor F-01 (r2): expansion row renders no cell when the merged column is the only column; skip the expansion row when lead + trail is 0 and add a unit test"
+reviews: []
+track_history: []
+blockers:
+  - task: T014
+    at: 2026-11-20T18:56:57Z
+    note: "CLI requires red evidence in tdd mode (task.kind), but T014 characterizes behavior that already works (L-003); the DAT-010 tests pass green from the start (the test is retagged 'DAT-010.S1:' in the spec). Needs a decision: switch the task to test-after/kind green, or accept it."
+    resolved: true
+    resolved_at: 2026-11-20T18:58:00Z
+  - task: T014
+    at: 2026-11-20T18:58:04Z
+    note: "CLI refuses --kind green for a [TEST] task in tdd mode (task.kind: needs red evidence). User approved recording green, but the CLI does not allow it; needs a mode change (testing mode test-after in docs/config-flow.yaml) or a CLI-side exemption."
+    resolved: true
+    resolved_at: 2026-11-20T19:01:30Z
+  - task: T020
+    at: 2026-11-20T19:42:20Z
+    note: "Characterization retag of an already-green test: tdd mode demands --kind red, which cannot be produced honestly (L-003). Test retagged as 'DAT-008.S1: ...' and 'npx jest ... -t DAT-008.S1' passes. Needs user decision: accept green evidence or switch testing mode."
+    resolved: true
+    resolved_at: 2026-11-20T19:46:16Z
+last_task_done_at: 2026-11-20T19:46:22Z
+test_hashes:
+  T002:
+    projects/medra/ui/src/lib/data-table/data-table.component.spec.ts: 763a93c5538997d61df1584923af900707a58835e8ec0b3fc0030e101fecfc24
+  T005:
+    projects/medra/ui/src/lib/data-table/data-table.component.spec.ts: 6ddff557dce02946cc47089725a87f3f45631148d67419618d846b6046d75853
+  T009:
+    projects/medra/ui/src/lib/data-table/data-table.component.spec.ts: 9587f90e851226d1af62b4f0761380b6e02fa01dbc49869d9a525cab850d977d
+  T012:
+    projects/medra/ui/src/lib/data-table/data-table.component.spec.ts: b425cd5b2f354151f4b7b6930b73517a55fcba4af60ba155eb84ede8d030c1a8
+  T016:
+    e2e/site/data-table-column-reorder.spec.ts: 54b1da5b54b6bf794660e56cd395bc38e6fe521417bd42ad438c4c3ec4e2d69c
+    e2e/site/data-table-docs.spec.ts: fcb573df721f401bc5620867a31bdd1184979bf6c2b3afb7928a79d93b6ed8eb
+    e2e/site/data-table-frozen.spec.ts: fd8a8594768802b3c2247611c4639279ce82f18a8efe73e3ba08bd8f356def72
+    e2e/site/data-table-row-editing.spec.ts: 56de3eeb2d8e2503763455833995f36bbe7bd7129c64836bb99c0990f5ddc86e
+    e2e/site/data-table-row-groups.spec.ts: 3235859854bccbea7c3bc59c877a80da1902d7e3e15a48f7864ba560b6d0b995
+suite:
+  at: 2026-11-20T20:04:57Z
+  exit: 0
+  commands:
+    - npm test
+  fingerprint: e5afb894deb2b02d3204318bcf0b85850d5c79f346dfe35376da2a44f070a4c2
+handoff_snapshots:
+  check:
+    "2":
+      .changeset/data-table-row-editing-and-group-modes.md: e730c3a447d9e6eddc586e8c87f047174047ca18c8d795b42cb38edbb875bd16
+      .claude/settings.local.json: 2d83dbfaed5da84edbf873d6483e8afb36b822d1f8e2bb08878e558e980ca53f
+      e2e/site/data-table-docs.spec.ts: fcb573df721f401bc5620867a31bdd1184979bf6c2b3afb7928a79d93b6ed8eb
+      e2e/site/data-table-row-editing.spec.ts: 56de3eeb2d8e2503763455833995f36bbe7bd7129c64836bb99c0990f5ddc86e
+      e2e/site/data-table-row-groups.spec.ts: ec592ea2439176234dc68ec4acbe1e87b1c921f04ee0095a6dfb592852d36846
+      projects/medra/ui/src/lib/data-table/data-table.component.spec.ts: 46e01bec36d0e6ac8248474b945672657b3ef7fb0c07bcb75fd31989f6dbbe88
+      projects/medra/ui/src/lib/data-table/data-table.component.ts: 4c583832724ebf894a1289a26089760949790da778dcb391698d1d7dc5459f61
+      projects/medra/ui/src/lib/data-table/data-table.types.ts: d959acc9b2499e38fabbcb44507fe8726998837e35cfa520ff3a85641476a62b
+      projects/site/src/app/pages/docs/components/data-table.page.ts: d9cf6a9cd67cb74d771accb6eededbab9813c9a50ac5a0ba7c18380fee8e10f5
+      projects/site/src/app/pages/docs/components/demos/data-table-edit-cell-selection.demo.html: d8106776f162530befa34c46f16f4ee5d46db21b3782cc5f3972dff3594d0749
+      projects/site/src/app/pages/docs/components/demos/data-table-edit-cell-selection.demo.ts: 33f4ede77b6f9b121c8f390325726ea7b6c10d6d6b0d11854f022c8a2e84c380
+      projects/site/src/app/pages/docs/components/demos/data-table-edit-row.demo.html: 79fb2214d862c775856c6cbf48b848b93ca4146da990e2f88b31615940f145ff
+      projects/site/src/app/pages/docs/components/demos/data-table-edit-row.demo.ts: 97a1c63388e292796f87d0609f757fb2cbf8f28e2dbd57157b12708ed27cdcc6
+      projects/site/src/app/pages/docs/components/demos/data-table-row-group-expandable.demo.html: 7f709564bdbccc5e0cfbd0ff4e925128c4eace3e54cb84eddb968a07038c2545
+      projects/site/src/app/pages/docs/components/demos/data-table-row-group-expandable.demo.ts: 5e90ca3f77f1a9636315f544d2f423f6a55dce00b00040ebca05b5c5778d06f6
+      projects/site/src/app/pages/docs/components/demos/data-table-row-group-rowspan.demo.html: cd8718ea4ba2bc5e056b8f06113bbf19d79e36a2ae70356a035f1f50f73b91c2
+      projects/site/src/app/pages/docs/components/demos/data-table-row-group-rowspan.demo.ts: 4f6d3b25d00e8a0baf33246eafe7acc0af6c8180b3e30ad8b028a826206ce9fd
+      projects/site/src/content/docs/data-table-edit-cell-selection.txt: 5618878cebaeb635f28b01d1d93ba126e719c9bc768144393ccf8c96625f0a65
+      projects/site/src/content/docs/data-table-edit-row.txt: 59ed6dd2981398b98b8801128dfa4f05cf11a9dd04a639a63639a185e7574aba
+      projects/site/src/content/docs/data-table-row-group-expandable.txt: 4db221bfe40929aba304c4eb7a0383cf954445ad44c918b8f036bd26c19f7af4
+      projects/site/src/content/docs/data-table-row-group-rowspan.txt: 714385ff64cdd7e8446a9784535ebcba5a713099533bd8b6d2fe79648dc60116
+      projects/site/src/content/docs/data-table-row-group-subheader.txt: 71f819ba3e884903ff5ad031395323d9c118e03d849f3dd5985601cd4b0ae00b
+    "3":
+      .changeset/data-table-row-editing-and-group-modes.md: e730c3a447d9e6eddc586e8c87f047174047ca18c8d795b42cb38edbb875bd16
+      .claude/settings.local.json: 2d83dbfaed5da84edbf873d6483e8afb36b822d1f8e2bb08878e558e980ca53f
+      e2e/site/data-table-docs.spec.ts: fcb573df721f401bc5620867a31bdd1184979bf6c2b3afb7928a79d93b6ed8eb
+      e2e/site/data-table-row-editing.spec.ts: 56de3eeb2d8e2503763455833995f36bbe7bd7129c64836bb99c0990f5ddc86e
+      e2e/site/data-table-row-groups.spec.ts: ec592ea2439176234dc68ec4acbe1e87b1c921f04ee0095a6dfb592852d36846
+      projects/medra/ui/src/lib/data-table/data-table.component.spec.ts: c4ee0859dbc4f203552bd41e49179446b460ae73d027e3abd74b2b322f127827
+      projects/medra/ui/src/lib/data-table/data-table.component.ts: 9bfdfc479c6cf5bc164942cfb68427326de693a5f8a0ccc1a38502e5285733d8
+      projects/medra/ui/src/lib/data-table/data-table.types.ts: d959acc9b2499e38fabbcb44507fe8726998837e35cfa520ff3a85641476a62b
+      projects/site/src/app/pages/docs/components/data-table.page.ts: d9cf6a9cd67cb74d771accb6eededbab9813c9a50ac5a0ba7c18380fee8e10f5
+      projects/site/src/app/pages/docs/components/demos/data-table-edit-cell-selection.demo.html: d8106776f162530befa34c46f16f4ee5d46db21b3782cc5f3972dff3594d0749
+      projects/site/src/app/pages/docs/components/demos/data-table-edit-cell-selection.demo.ts: 33f4ede77b6f9b121c8f390325726ea7b6c10d6d6b0d11854f022c8a2e84c380
+      projects/site/src/app/pages/docs/components/demos/data-table-edit-row.demo.html: 79fb2214d862c775856c6cbf48b848b93ca4146da990e2f88b31615940f145ff
+      projects/site/src/app/pages/docs/components/demos/data-table-edit-row.demo.ts: 97a1c63388e292796f87d0609f757fb2cbf8f28e2dbd57157b12708ed27cdcc6
+      projects/site/src/app/pages/docs/components/demos/data-table-row-group-expandable.demo.html: 7f709564bdbccc5e0cfbd0ff4e925128c4eace3e54cb84eddb968a07038c2545
+      projects/site/src/app/pages/docs/components/demos/data-table-row-group-expandable.demo.ts: 5e90ca3f77f1a9636315f544d2f423f6a55dce00b00040ebca05b5c5778d06f6
+      projects/site/src/app/pages/docs/components/demos/data-table-row-group-rowspan.demo.html: cd8718ea4ba2bc5e056b8f06113bbf19d79e36a2ae70356a035f1f50f73b91c2
+      projects/site/src/app/pages/docs/components/demos/data-table-row-group-rowspan.demo.ts: 4f6d3b25d00e8a0baf33246eafe7acc0af6c8180b3e30ad8b028a826206ce9fd
+      projects/site/src/content/docs/data-table-edit-cell-selection.txt: 5618878cebaeb635f28b01d1d93ba126e719c9bc768144393ccf8c96625f0a65
+      projects/site/src/content/docs/data-table-edit-row.txt: 59ed6dd2981398b98b8801128dfa4f05cf11a9dd04a639a63639a185e7574aba
+      projects/site/src/content/docs/data-table-row-group-expandable.txt: 4db221bfe40929aba304c4eb7a0383cf954445ad44c918b8f036bd26c19f7af4
+      projects/site/src/content/docs/data-table-row-group-rowspan.txt: 714385ff64cdd7e8446a9784535ebcba5a713099533bd8b6d2fe79648dc60116
+      projects/site/src/content/docs/data-table-row-group-subheader.txt: 71f819ba3e884903ff5ad031395323d9c118e03d849f3dd5985601cd4b0ae00b
+archived:
+  at: 2026-11-20
+  sequence: 10

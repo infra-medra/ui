@@ -1,0 +1,7 @@
+## Row-span grouping
+
+`rowGroupMode="rowspan"` merges the `groupRowsBy` column's cells vertically instead of inserting a
+subheader row: each run of consecutive rows that share the value shows that value once, in a cell
+spanning the whole run. A group never crosses a page boundary, and a `#rowexpansion` row opened
+inside a group extends its span. When the `groupRowsBy` column is hidden, nothing merges. As with
+subheader grouping, `groupRowsBy` becomes the primary sort key.

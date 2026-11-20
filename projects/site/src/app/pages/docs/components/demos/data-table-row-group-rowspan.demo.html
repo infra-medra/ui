@@ -1,0 +1,14 @@
+<med-data-table #dt [value]="equipment" dataKey="id" rowGroupMode="rowspan" groupRowsBy="category" ariaLabel="Lab equipment by category (merged cells)">
+  <med-table-column field="category" header="Category" />
+  <med-table-column field="name" header="Name">
+    <ng-template let-row>
+      <button medButton type="button" variant="text" size="sm" (click)="dt.toggleRowExpansion(row)">
+        {{ dt.expandedRowKeys()[row.id] ? 'Hide' : 'Show' }} {{ row.name }}
+      </button>
+    </ng-template>
+  </med-table-column>
+  <med-table-column field="quantity" header="Quantity" align="right" />
+  <ng-template #rowexpansion let-row>
+    <p class="text-sm text-surface-700 dark:text-surface-200">{{ row.name }} is currently <strong>{{ row.status }}</strong>.</p>
+  </ng-template>
+</med-data-table>

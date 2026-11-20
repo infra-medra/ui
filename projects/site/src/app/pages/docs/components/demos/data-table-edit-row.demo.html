@@ -1,0 +1,18 @@
+<med-data-table [value]="equipment()" editMode="row" ariaLabel="Lab equipment inventory (row editing)" (rowEditComplete)="onRowEditComplete($event)">
+  <med-table-column field="name" header="Name" editable>
+    <ng-template let-row>{{ row.name }}</ng-template>
+    <ng-template #editTemplate let-row let-onChange="onChange">
+      <input medInputText class="h-7 w-44 text-sm" [value]="row.name" (input)="onChange($any($event.target).value)" />
+    </ng-template>
+  </med-table-column>
+  <med-table-column field="category" header="Category" />
+  <med-table-column field="quantity" header="Quantity" align="right" editable>
+    <ng-template let-row>{{ row.quantity }}</ng-template>
+    <ng-template #editTemplate let-row let-onChange="onChange">
+      <input medInputText type="number" class="h-7 w-20 text-sm" [value]="row.quantity" (input)="onChange($any($event.target).valueAsNumber)" />
+    </ng-template>
+  </med-table-column>
+</med-data-table>
+<p class="mt-2 text-sm text-surface-500 dark:text-surface-400">
+  Last saved row: <span data-testid="saved-row">{{ savedRow() || 'none yet' }}</span>
+</p>

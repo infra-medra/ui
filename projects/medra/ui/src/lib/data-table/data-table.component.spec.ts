@@ -44,6 +44,7 @@ const PRODUCTS: Product[] = [
       [lazy]="lazy"
       [totalRecords]="totalRecords"
       [editMode]="editMode"
+      [editTrigger]="editTrigger"
       [rowGroupMode]="rowGroupMode"
       [groupRowsBy]="groupRowsBy"
       [reorderable]="reorderable"
@@ -92,6 +93,7 @@ class HostComponent {
   lazy = false;
   totalRecords: number | null = null;
   editMode: 'cell' | null = null;
+  editTrigger: 'dblclick' | 'click' = 'dblclick';
   rowGroupMode: 'subheader' | null = null;
   groupRowsBy: string | null = null;
   reorderable = false;
@@ -895,7 +897,7 @@ describe('DataTableComponent', () => {
       expect(editInput(fixture)).toBeNull();
     });
 
-    it('Enter in the edit template commits editComplete with the new value and exits edit mode', () => {
+    it('DAT-008.S1: Enter in the edit template commits editComplete with the new value and exits edit mode', () => {
       const fixture = create((h) => (h.editMode = 'cell'));
       bodyRows(fixture)[0].querySelectorAll('td')[0].dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
       fixture.detectChanges();
@@ -1247,7 +1249,7 @@ describe('DataTableComponent', () => {
     });
 
     // DAT-010.S1
-    it('indices refer to value() order, not the currently sorted/displayed order', () => {
+    it('DAT-010.S1: indices refer to value() order, not the currently sorted/displayed order', () => {
       const fixture = create((h) => (h.reorderable = true));
       headerCells(fixture)[1].click(); // sort by Price ascending: Gadget(10), Gizmo(20), Widget(30)
       fixture.detectChanges();
@@ -2360,5 +2362,594 @@ describe('DataTableComponent column reorder', () => {
 
     expect(headerTexts(fixture)).toEqual(['A', 'B', 'C']);
     expect(fixture.componentInstance.onColReorder).not.toHaveBeenCalled();
+  });
+});
+
+describe('DataTableComponent editing', () => {
+  function nameCell(fixture: { nativeElement: HTMLElement }, index = 0): HTMLElement {
+    return bodyRows(fixture)[index].querySelectorAll('td')[0] as HTMLElement;
+  }
+
+  function editInput(fixture: { nativeElement: HTMLElement }): HTMLInputElement | null {
+    return fixture.nativeElement.querySelector('input.edit-input');
+  }
+
+  // DAT-008.S2
+  it('DAT-008.S2: a single click enters edit mode with editTrigger="click" and does not select the row', () => {
+    const fixture = create((h) => {
+      h.editMode = 'cell';
+      h.editTrigger = 'click';
+      h.selectionMode = 'single';
+    });
+    nameCell(fixture).click();
+    fixture.detectChanges();
+
+    expect(editInput(fixture)).not.toBeNull();
+    expect(fixture.componentInstance.onRowSelect).not.toHaveBeenCalled();
+    expect(fixture.componentInstance.selection).toBeNull();
+  });
+
+  // DAT-008.S3
+  it('DAT-008.S3: a space and ArrowDown inside an edit input leave the selection and focus alone', () => {
+    const fixture = create((h) => {
+      h.editMode = 'cell';
+      h.selectionMode = 'single';
+    });
+    nameCell(fixture).dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
+    fixture.detectChanges();
+
+    const input = editInput(fixture)!;
+    input.focus();
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true, cancelable: true }));
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }));
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.onRowSelect).not.toHaveBeenCalled();
+    expect(fixture.componentInstance.selection).toBeNull();
+    expect(document.activeElement).toBe(input);
+  });
+
+  // DAT-008.S4
+  it('DAT-008.S4: a single click does not enter edit mode with the default editTrigger', () => {
+    const fixture = create((h) => (h.editMode = 'cell'));
+    nameCell(fixture).click();
+    fixture.detectChanges();
+    expect(editInput(fixture)).toBeNull();
+  });
+
+  // DAT-008.S5
+  it('DAT-008.S5: the double-click path selects the row on its first click, and a click inside the edit template changes nothing', () => {
+    const fixture = create((h) => {
+      h.editMode = 'cell';
+      h.selectionMode = 'single';
+    });
+    const cell = nameCell(fixture);
+    cell.click();
+    cell.click();
+    cell.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
+    fixture.detectChanges();
+    expect(fixture.componentInstance.selection).toBe(PRODUCTS[0]);
+    const selectCalls = fixture.componentInstance.onRowSelect.mock.calls.length;
+
+    editInput(fixture)!.click();
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.selection).toBe(PRODUCTS[0]);
+    expect(fixture.componentInstance.onRowSelect.mock.calls.length).toBe(selectCalls);
+    expect(editInput(fixture)).not.toBeNull();
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [DataTableComponent, TableColumnComponent],
+  template: `
+    <med-data-table [value]="products" [editMode]="editMode" [selectionMode]="selectionMode" [(selection)]="selection" (rowEditComplete)="onRowEditComplete($event)" (rowEditCancel)="onRowEditCancel($event)" (rowSelect)="onRowSelect($event)">
+      <med-table-column field="name" header="Name" editable>
+        <ng-template let-row>{{ row.name }}</ng-template>
+        <ng-template #editTemplate let-row let-onChange="onChange" let-onSave="onSave" let-onCancel="onCancel">
+          <input class="name-input" [value]="row.name" (input)="onChange($any($event.target).value)" (keydown.enter)="onSave($any($event.target).value)" (keydown.escape)="onCancel()" />
+        </ng-template>
+      </med-table-column>
+      <med-table-column field="price" header="Price">
+        <ng-template let-row>{{ '$' + row.price }}</ng-template>
+      </med-table-column>
+      <med-table-column field="stock" header="Stock" editable>
+        <ng-template let-row>{{ row.stock }}</ng-template>
+        <ng-template #editTemplate let-row let-onChange="onChange">
+          <input class="stock-input" [value]="row.stock" (input)="onChange($any($event.target).value)" />
+        </ng-template>
+      </med-table-column>
+    </med-data-table>
+  `,
+})
+class RowEditHostComponent {
+  products: Product[] = PRODUCTS;
+  editMode: 'cell' | 'row' | null = 'row';
+  selectionMode: 'single' | null = null;
+  selection: Product | null = null;
+  onRowEditComplete = jest.fn();
+  onRowEditCancel = jest.fn();
+  onRowSelect = jest.fn();
+}
+
+describe('DataTableComponent row editing', () => {
+  function createRowEdit(configure?: (h: RowEditHostComponent) => void) {
+    const fixture = TestBed.createComponent(RowEditHostComponent);
+    configure?.(fixture.componentInstance);
+    fixture.detectChanges();
+    return fixture;
+  }
+
+  function button(fixture: { nativeElement: HTMLElement }, row: number, label: string): HTMLButtonElement | null {
+    return bodyRows(fixture)[row].querySelector(`button[aria-label="${label}"]`);
+  }
+
+  function type(input: HTMLInputElement, value: string): void {
+    input.value = value;
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+
+  function inputs(fixture: { nativeElement: HTMLElement }): HTMLInputElement[] {
+    return Array.from(fixture.nativeElement.querySelectorAll('input.name-input, input.stock-input'));
+  }
+
+  // DAT-035.S1
+  it('DAT-035.S1: edits every editable column at once and saves one rowEditComplete with both values', () => {
+    const fixture = createRowEdit();
+    expect(headerCells(fixture)).toHaveLength(4);
+    button(fixture, 0, 'Edit row')!.click();
+    fixture.detectChanges();
+
+    const row = bodyRows(fixture)[0];
+    expect(row.querySelector('input.name-input')).not.toBeNull();
+    expect(row.querySelector('input.stock-input')).not.toBeNull();
+    expect(button(fixture, 0, 'Edit row')).toBeNull();
+
+    type(row.querySelector('input.name-input')!, 'Widget Pro');
+    type(row.querySelector('input.stock-input')!, '9');
+    button(fixture, 0, 'Save row')!.click();
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.onRowEditComplete).toHaveBeenCalledTimes(1);
+    expect(fixture.componentInstance.onRowEditComplete).toHaveBeenCalledWith({ row: PRODUCTS[0], values: { name: 'Widget Pro', stock: '9' } });
+    expect(inputs(fixture)).toHaveLength(0);
+    expect(cellText(bodyRows(fixture)[0])[0]).toBe('Widget');
+  });
+
+  // DAT-035.S2
+  it('DAT-035.S2: cancel emits rowEditCancel with the row, never rowEditComplete, and restores the display', () => {
+    const fixture = createRowEdit();
+    button(fixture, 1, 'Edit row')!.click();
+    fixture.detectChanges();
+    button(fixture, 1, 'Cancel editing')!.click();
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.onRowEditCancel).toHaveBeenCalledWith(PRODUCTS[1]);
+    expect(fixture.componentInstance.onRowEditComplete).not.toHaveBeenCalled();
+    expect(inputs(fixture)).toHaveLength(0);
+    expect(cellText(bodyRows(fixture)[1])[0]).toBe('Gadget');
+  });
+
+  // DAT-035.S3
+  it('DAT-035.S3: Enter in an edit template saves the row and Escape cancels it', () => {
+    const fixture = createRowEdit();
+    button(fixture, 0, 'Edit row')!.click();
+    fixture.detectChanges();
+    const name = bodyRows(fixture)[0].querySelector('input.name-input') as HTMLInputElement;
+    name.focus();
+    name.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.onRowEditComplete).toHaveBeenCalledTimes(1);
+    expect(inputs(fixture)).toHaveLength(0);
+
+    button(fixture, 0, 'Edit row')!.click();
+    fixture.detectChanges();
+    bodyRows(fixture)[0].querySelector('input.name-input')!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.onRowEditCancel).toHaveBeenCalledWith(PRODUCTS[0]);
+    expect(fixture.componentInstance.onRowEditComplete).toHaveBeenCalledTimes(1);
+    expect(inputs(fixture)).toHaveLength(0);
+  });
+
+  // DAT-035.S1
+  it('DAT-035.S1: rowEditComplete values include editable fields the user did not touch', () => {
+    const fixture = createRowEdit();
+    button(fixture, 0, 'Edit row')!.click();
+    fixture.detectChanges();
+    type(bodyRows(fixture)[0].querySelector('input.name-input')!, 'Widget Pro');
+    button(fixture, 0, 'Save row')!.click();
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.onRowEditComplete).toHaveBeenCalledWith({
+      row: PRODUCTS[0],
+      values: { name: 'Widget Pro', stock: PRODUCTS[0].stock },
+    });
+  });
+
+  // DAT-035.S3
+  it('DAT-035.S3: Enter and Escape in an edit template with no key handlers save and cancel the row once', () => {
+    const fixture = createRowEdit();
+    button(fixture, 0, 'Edit row')!.click();
+    fixture.detectChanges();
+    const stock = bodyRows(fixture)[0].querySelector('input.stock-input') as HTMLInputElement;
+    stock.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.onRowEditComplete).toHaveBeenCalledTimes(1);
+    expect(inputs(fixture)).toHaveLength(0);
+
+    button(fixture, 0, 'Edit row')!.click();
+    fixture.detectChanges();
+    bodyRows(fixture)[0].querySelector('input.stock-input')!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.onRowEditCancel).toHaveBeenCalledTimes(1);
+    expect(fixture.componentInstance.onRowEditComplete).toHaveBeenCalledTimes(1);
+  });
+
+  // DAT-035.S3
+  it('DAT-035.S3: Enter on the edited row outside an edit template does not save it', () => {
+    const fixture = createRowEdit();
+    button(fixture, 0, 'Edit row')!.click();
+    fixture.detectChanges();
+    bodyRows(fixture)[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.onRowEditComplete).not.toHaveBeenCalled();
+    expect(inputs(fixture)).toHaveLength(2);
+  });
+
+  // DAT-035.S4
+  it('DAT-035.S4: renders no actions column or edit button with editMode unset or "cell"', () => {
+    for (const mode of [null, 'cell'] as const) {
+      const fixture = createRowEdit((h) => (h.editMode = mode));
+      expect(headerCells(fixture)).toHaveLength(3);
+      expect(fixture.nativeElement.querySelector('button[aria-label="Edit row"]')).toBeNull();
+    }
+  });
+
+  // DAT-035.S5
+  it('DAT-035.S5: starting a second row cancels the first and only the second shows edit templates', () => {
+    const fixture = createRowEdit();
+    button(fixture, 0, 'Edit row')!.click();
+    fixture.detectChanges();
+    button(fixture, 1, 'Edit row')!.click();
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.onRowEditCancel).toHaveBeenCalledTimes(1);
+    expect(fixture.componentInstance.onRowEditCancel).toHaveBeenCalledWith(PRODUCTS[0]);
+    expect(bodyRows(fixture)[0].querySelector('input')).toBeNull();
+    expect(bodyRows(fixture)[1].querySelectorAll('input')).toHaveLength(2);
+  });
+
+  // DAT-035.S6
+  it('DAT-035.S6: activating an edit button does not select the row', () => {
+    const fixture = createRowEdit((h) => (h.selectionMode = 'single'));
+    button(fixture, 0, 'Edit row')!.click();
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.onRowSelect).not.toHaveBeenCalled();
+    expect(fixture.componentInstance.selection).toBeNull();
+  });
+});
+
+interface TeamRow {
+  id: string;
+  team: string;
+  name: string;
+}
+
+const TEAM_ROWS: TeamRow[] = [
+  { id: '1', team: 'A', name: 'Ann' },
+  { id: '2', team: 'A', name: 'Ari' },
+  { id: '3', team: 'A', name: 'Abe' },
+  { id: '4', team: 'B', name: 'Bob' },
+  { id: '5', team: 'B', name: 'Bea' },
+];
+
+@Component({
+  standalone: true,
+  imports: [DataTableComponent, TableColumnComponent],
+  template: `
+    <med-data-table
+      [value]="rowsData"
+      dataKey="id"
+      rowGroupMode="rowspan"
+      groupRowsBy="team"
+      [paginator]="paginator"
+      [rows]="pageRows"
+      [first]="first"
+      [selectionMode]="selectionMode"
+      [(expandedRowKeys)]="expandedRowKeys"
+    >
+      <med-table-column field="team" header="Team" [visible]="teamVisible" />
+      <med-table-column field="name" header="Name" [visible]="nameVisible" />
+      <ng-template #rowexpansion let-row>
+        <div class="expanded-detail">Detail: {{ row.name }}</div>
+      </ng-template>
+    </med-data-table>
+  `,
+})
+class RowSpanHostComponent {
+  rowsData: TeamRow[] = TEAM_ROWS;
+  paginator = false;
+  pageRows = 10;
+  first = 0;
+  teamVisible = true;
+  nameVisible = true;
+  selectionMode: 'multiple' | null = null;
+  expandedRowKeys: Record<string, boolean> = {};
+}
+
+describe('DataTableComponent row-span grouping', () => {
+  function createSpan(configure?: (h: RowSpanHostComponent) => void) {
+    const fixture = TestBed.createComponent(RowSpanHostComponent);
+    configure?.(fixture.componentInstance);
+    fixture.detectChanges();
+    return fixture;
+  }
+
+  function spanCells(fixture: { nativeElement: HTMLElement }): HTMLTableCellElement[] {
+    return Array.from(fixture.nativeElement.querySelectorAll<HTMLTableCellElement>('tbody td[rowspan]'));
+  }
+
+  function rowspans(fixture: { nativeElement: HTMLElement }): string[] {
+    return spanCells(fixture).map((td) => `${td.textContent?.trim()}:${td.getAttribute('rowspan')}`);
+  }
+
+  // DAT-036.S1
+  it('DAT-036.S1: renders one team cell per run with rowspan 3 and 2 and no subheader row', () => {
+    const fixture = createSpan();
+    const rows = bodyRows(fixture);
+
+    expect(rowspans(fixture)).toEqual(['A:3', 'B:2']);
+    expect(rows).toHaveLength(5);
+    // Rows 2, 3 and 5 omit the team cell; every row except the run starts has one cell.
+    expect(rows.map((tr) => tr.querySelectorAll('td').length)).toEqual([2, 1, 1, 2, 1]);
+    // No subheader row: every row has an individual name cell and no full-width cell.
+    expect(fixture.nativeElement.querySelector('tbody td[colspan]')).toBeNull();
+  });
+
+  // DAT-036.S2
+  it('DAT-036.S2: a run never spans a page break — the second page has its own spans', () => {
+    const fixture = createSpan((h) => {
+      h.paginator = true;
+      h.pageRows = 2;
+      h.first = 2;
+    });
+    const rows = bodyRows(fixture);
+
+    expect(rows).toHaveLength(2);
+    expect(rowspans(fixture)).toEqual(['A:1', 'B:1']);
+    expect(rows.map((tr) => cellText(tr))).toEqual([
+      ['A', 'Abe'],
+      ['B', 'Bob'],
+    ]);
+  });
+
+  // DAT-036.S3
+  it('DAT-036.S3: an expanded row inside a run adds one to the rowspan and its expansion row has one cell fewer', () => {
+    const fixture = createSpan((h) => (h.expandedRowKeys = { '2': true }));
+
+    expect(rowspans(fixture)).toEqual(['A:4', 'B:2']);
+    const expansion = fixture.nativeElement.querySelector('.expanded-detail')!.closest('tr') as HTMLElement;
+    const expansionCell = expansion.querySelector('td')!;
+    const dataRow = bodyRows(fixture)[1];
+    expect(expansion.querySelectorAll('td')).toHaveLength(1);
+    // The data row beside it has the merged cell omitted too (only the name cell remains) and the
+    // expansion cell spans the one remaining visible column, not both.
+    expect(dataRow.querySelectorAll('td')).toHaveLength(1);
+    expect(expansionCell.getAttribute('colspan')).toBe('1');
+    // Table stays rectangular: 2 columns minus the merged one on every non-start row.
+    const fullWidthOfRowsBelowMergedCell = [bodyRows(fixture)[1], expansion, bodyRows(fixture)[2]].map((tr) =>
+      Array.from(tr.querySelectorAll('td')).reduce((sum, td) => sum + Number(td.getAttribute('colspan') ?? 1), 0),
+    );
+    expect(fullWidthOfRowsBelowMergedCell).toEqual([1, 1, 1]);
+  });
+
+  // DAT-036.S3
+  it('DAT-036.S3: with a selection column before the merged column the expansion row splits around it and the table stays rectangular', () => {
+    const fixture = createSpan((h) => {
+      h.selectionMode = 'multiple';
+      h.expandedRowKeys = { '2': true };
+    });
+    const expansion = fixture.nativeElement.querySelector('.expanded-detail')!.closest('tr') as HTMLElement;
+    const colspans = Array.from(expansion.querySelectorAll('td')).map((td) => Number(td.getAttribute('colspan') ?? 1));
+
+    // Columns: selection, team (merged from the run's first row), name. The expansion cells cover the two others.
+    expect(colspans).toEqual([1, 1]);
+    expect(colspans.reduce((a, b) => a + b, 0) + 1).toBe(3);
+    expect(expansion.querySelectorAll('.expanded-detail')).toHaveLength(1);
+  });
+
+  // DAT-036.S3
+  it('DAT-036.S3: with the merged column as the only column an expanded row renders no expansion row and adds nothing to the rowspan', () => {
+    const fixture = createSpan((h) => {
+      h.nameVisible = false;
+      h.expandedRowKeys = { '2': true };
+    });
+
+    expect(fixture.nativeElement.querySelector('.expanded-detail')).toBeNull();
+    expect(rowspans(fixture)).toEqual(['A:3', 'B:2']);
+  });
+
+  // DAT-036.S4
+  it('DAT-036.S4: a hidden group column merges nothing and every row renders its own cells', () => {
+    const fixture = createSpan((h) => (h.teamVisible = false));
+    const rows = bodyRows(fixture);
+
+    expect(rows).toHaveLength(5);
+    expect(rows.map((tr) => cellText(tr))).toEqual([['Ann'], ['Ari'], ['Abe'], ['Bob'], ['Bea']]);
+    expect(
+      Array.from(fixture.nativeElement.querySelectorAll('tbody td')).every((td) => Number((td as HTMLElement).getAttribute('rowspan') ?? 1) <= 1),
+    ).toBe(true);
+  });
+});
+
+interface CategoryRow {
+  id: string;
+  category: string;
+  name: string;
+}
+
+const CATEGORY_ROWS: CategoryRow[] = [
+  { id: '1', category: 'Hardware', name: 'Widget' },
+  { id: '2', category: 'Hardware', name: 'Gadget' },
+  { id: '3', category: 'Hardware', name: 'Gizmo' },
+  { id: '4', category: 'Software', name: 'Editor' },
+  { id: '5', category: 'Software', name: 'Browser' },
+  { id: '6', category: 'Software', name: 'Compiler' },
+];
+
+@Component({
+  standalone: true,
+  imports: [DataTableComponent, TableColumnComponent],
+  template: `
+    <med-data-table
+      #dt
+      [value]="rowsData"
+      dataKey="id"
+      rowGroupMode="subheader"
+      groupRowsBy="category"
+      [expandableRowGroups]="expandable"
+      [(expandedRowGroups)]="expandedRowGroups"
+      [selectionMode]="'single'"
+      [(selection)]="selection"
+      [(expandedRowKeys)]="expandedRowKeys"
+      (rowGroupExpand)="onExpand($event)"
+      (rowGroupCollapse)="onCollapse($event)"
+    >
+      <med-table-column field="name" header="Name" />
+      <med-table-column field="category" header="Category" />
+      <ng-template #rowexpansion let-row>
+        <div class="expanded-detail">Detail: {{ row.name }}</div>
+      </ng-template>
+    </med-data-table>
+  `,
+})
+class RowGroupHostComponent {
+  rowsData: CategoryRow[] = CATEGORY_ROWS;
+  expandable = true;
+  expandedRowGroups: readonly string[] = [];
+  selection: CategoryRow | readonly CategoryRow[] | null = null;
+  expandedRowKeys: Record<string, boolean> = {};
+  onExpand = jest.fn();
+  onCollapse = jest.fn();
+}
+
+describe('DataTableComponent expandable row groups', () => {
+  function createGroups(configure?: (h: RowGroupHostComponent) => void) {
+    const fixture = TestBed.createComponent(RowGroupHostComponent);
+    configure?.(fixture.componentInstance);
+    fixture.detectChanges();
+    return fixture;
+  }
+
+  function subheaders(fixture: { nativeElement: HTMLElement }): HTMLElement[] {
+    return bodyRows(fixture).filter((tr) => tr.querySelectorAll('td').length === 1 && tr.querySelector('td')!.hasAttribute('colspan') && !tr.querySelector('.expanded-detail'));
+  }
+
+  function toggle(fixture: { nativeElement: HTMLElement }, index: number): HTMLButtonElement | null {
+    return subheaders(fixture)[index]?.querySelector('button[aria-expanded]') ?? null;
+  }
+
+  function dataRowNames(fixture: { nativeElement: HTMLElement }): string[] {
+    return bodyRows(fixture)
+      .filter((tr) => !subheaders(fixture).includes(tr) && !tr.querySelector('.expanded-detail'))
+      .map((tr) => cellText(tr)[0]);
+  }
+
+  // DAT-037.S1
+  it('DAT-037.S1: collapsing a group hides its three rows, keeps its subheader, reports aria-expanded false and emits rowGroupCollapse', () => {
+    const fixture = createGroups();
+    expect(toggle(fixture, 0)!.getAttribute('aria-expanded')).toBe('true');
+    expect(toggle(fixture, 0)!.getAttribute('aria-label')).toContain('Hardware');
+
+    toggle(fixture, 0)!.click();
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.onCollapse).toHaveBeenCalledWith('Hardware');
+    expect(fixture.componentInstance.expandedRowGroups).toEqual(['Hardware']);
+    expect(subheaders(fixture)[0].textContent).toContain('Hardware');
+    expect(toggle(fixture, 0)!.getAttribute('aria-expanded')).toBe('false');
+    expect(dataRowNames(fixture)).not.toContain('Widget');
+    expect(dataRowNames(fixture)).not.toContain('Gadget');
+    expect(dataRowNames(fixture)).not.toContain('Gizmo');
+  });
+
+  it('DAT-037.S1: a collapsed group also hides the #rowexpansion rows attached to its rows', () => {
+    const fixture = createGroups((h) => (h.expandedRowKeys = { '1': true }));
+    expect(fixture.nativeElement.querySelector('.expanded-detail')).not.toBeNull();
+
+    toggle(fixture, 0)!.click();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.expanded-detail')).toBeNull();
+  });
+
+  // DAT-037.S2
+  it('DAT-037.S2: Enter on the toggle of a collapsed group shows its rows and emits rowGroupExpand', () => {
+    const fixture = createGroups((h) => (h.expandedRowGroups = ['Hardware']));
+    expect(dataRowNames(fixture)).not.toContain('Widget');
+    expect(toggle(fixture, 0)!.getAttribute('aria-expanded')).toBe('false');
+
+    toggle(fixture, 0)!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.onExpand).toHaveBeenCalledTimes(1);
+    expect(fixture.componentInstance.onExpand).toHaveBeenCalledWith('Hardware');
+    expect(fixture.componentInstance.expandedRowGroups).toEqual([]);
+    expect(dataRowNames(fixture)).toContain('Widget');
+    expect(toggle(fixture, 0)!.getAttribute('aria-expanded')).toBe('true');
+  });
+
+  it('DAT-037.S2: the default empty model starts every group expanded', () => {
+    const fixture = createGroups();
+    expect(toggle(fixture, 0)!.getAttribute('aria-expanded')).toBe('true');
+    expect(dataRowNames(fixture)).toContain('Widget');
+  });
+
+  // DAT-037.S3
+  it('DAT-037.S3: renders no toggle without expandableRowGroups and shows every group', () => {
+    const fixture = createGroups((h) => (h.expandable = false));
+    expect(fixture.nativeElement.querySelector('tbody button[aria-expanded]')).toBeNull();
+    expect(subheaders(fixture).length).toBeGreaterThan(0);
+    expect(dataRowNames(fixture)).toContain('Widget');
+  });
+
+  // DAT-037.S4
+  it('DAT-037.S4: a selected row stays selected after its group is collapsed and expanded', () => {
+    const fixture = createGroups((h) => (h.selection = CATEGORY_ROWS[0]));
+    toggle(fixture, 0)!.click();
+    fixture.detectChanges();
+    expect(fixture.componentInstance.selection).toBe(CATEGORY_ROWS[0]);
+
+    toggle(fixture, 0)!.click();
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.selection).toBe(CATEGORY_ROWS[0]);
+    const row = bodyRows(fixture).find((tr) => cellText(tr)[0] === 'Widget')!;
+    expect(row.getAttribute('aria-selected')).toBe('true');
+  });
+
+  it('DAT-037.S1: collapsing does not change the paginator and keeps collapsed rows in exportCSV()', () => {
+    const fixture = createGroups();
+    const table = fixture.debugElement.query(By.directive(DataTableComponent)).componentInstance as DataTableComponent<CategoryRow>;
+    toggle(fixture, 0)!.click();
+    fixture.detectChanges();
+
+    expect(table.first()).toBe(0);
+    let csv = '';
+    const spy = jest.spyOn(globalThis, 'Blob' as never).mockImplementation(((parts: string[]) => {
+      csv = parts[0];
+      return {} as Blob;
+    }) as never);
+    table.exportCSV();
+    spy.mockRestore();
+    expect(csv.split('\n')).toHaveLength(7);
+    expect(csv).toContain('Widget');
   });
 });

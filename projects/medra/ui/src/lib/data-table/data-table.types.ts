@@ -34,3 +34,10 @@ export interface TableColumnReorderEvent {
   /** Field names of every column in the new order. */
   readonly columns: readonly string[];
 }
+
+/** Emitted by `rowEditComplete` (`DataTableComponent`) when the user saves a row in `editMode="row"`. */
+export interface TableRowEditEvent<T = unknown> {
+  readonly row: T;
+  /** The value of each editable field, keyed by field name, as given by its edit template. */
+  readonly values: Readonly<Record<string, unknown>>;
+}

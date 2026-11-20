@@ -1,0 +1,9 @@
+## Row editing
+
+`editMode="row"` edits a whole row at once. A column opts in with `editable` and a named
+`#editTemplate`, as in cell editing, but its template calls `onChange(value)` to record the field's
+value instead of saving on its own. The table adds an actions column with edit, save and cancel
+buttons (named by `editRowLabel`, `saveRowLabel` and `cancelRowLabel`). Saving emits
+`rowEditComplete` with the row and the value of every editable field, cancelling emits
+`rowEditCancel`, and Enter and Escape save and cancel from inside an edit cell. Only one row is in
+edit mode at a time: starting to edit another row cancels the open one.

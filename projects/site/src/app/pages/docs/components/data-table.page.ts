@@ -18,6 +18,8 @@ import { DataTableProgrammaticPaginationDemo } from './demos/data-table-programm
 import { DataTableScrollVerticalDemo } from './demos/data-table-scroll-vertical.demo';
 import { DataTableRowExpansionDemo } from './demos/data-table-row-expansion.demo';
 import { DataTableRowGroupSubheaderDemo } from './demos/data-table-row-group-subheader.demo';
+import { DataTableRowGroupRowspanDemo } from './demos/data-table-row-group-rowspan.demo';
+import { DataTableRowGroupExpandableDemo } from './demos/data-table-row-group-expandable.demo';
 import { DataTableSelectionRadioDemo } from './demos/data-table-selection-radio.demo';
 import { DataTableRowAriaLabelDemo } from './demos/data-table-row-aria-label.demo';
 import { DataTableRowTrackByDemo } from './demos/data-table-row-track-by.demo';
@@ -37,6 +39,8 @@ import { DataTableColumnGroupsDemo } from './demos/data-table-column-groups.demo
 import { DataTableColumnReorderDemo } from './demos/data-table-column-reorder.demo';
 import { DataTableFrozenColumnsUtilityDemo } from './demos/data-table-frozen-columns-utility.demo';
 import { DataTableEditCellDemo } from './demos/data-table-edit-cell.demo';
+import { DataTableEditRowDemo } from './demos/data-table-edit-row.demo';
+import { DataTableEditCellSelectionDemo } from './demos/data-table-edit-cell-selection.demo';
 import { DataTableLoadingDemo } from './demos/data-table-loading.demo';
 import { DataTableLazyDemo } from './demos/data-table-lazy.demo';
 import { DataTableEmptyStateDemo } from './demos/data-table-empty-state.demo';
@@ -59,6 +63,8 @@ import programmaticPaginationCode from './demos/data-table-programmatic-paginati
 import scrollVerticalCode from './demos/data-table-scroll-vertical.demo.html?raw';
 import rowExpansionCode from './demos/data-table-row-expansion.demo.html?raw';
 import rowGroupSubheaderCode from './demos/data-table-row-group-subheader.demo.html?raw';
+import rowGroupRowspanCode from './demos/data-table-row-group-rowspan.demo.html?raw';
+import rowGroupExpandableCode from './demos/data-table-row-group-expandable.demo.html?raw';
 import selectionRadioCode from './demos/data-table-selection-radio.demo.html?raw';
 import rowAriaLabelCode from './demos/data-table-row-aria-label.demo.html?raw';
 import rowTrackByCode from './demos/data-table-row-track-by.demo.html?raw';
@@ -78,6 +84,8 @@ import columnGroupsCode from './demos/data-table-column-groups.demo.html?raw';
 import columnReorderCode from './demos/data-table-column-reorder.demo.html?raw';
 import frozenColumnsUtilityCode from './demos/data-table-frozen-columns-utility.demo.html?raw';
 import editCellCode from './demos/data-table-edit-cell.demo.html?raw';
+import editRowCode from './demos/data-table-edit-row.demo.html?raw';
+import editCellSelectionCode from './demos/data-table-edit-cell-selection.demo.html?raw';
 import loadingCode from './demos/data-table-loading.demo.html?raw';
 import lazyCode from './demos/data-table-lazy.demo.html?raw';
 import emptyStateCode from './demos/data-table-empty-state.demo.html?raw';
@@ -101,6 +109,8 @@ import programmaticPaginationContent from '../../../../content/docs/data-table-p
 import scrollVerticalContent from '../../../../content/docs/data-table-scroll-vertical.txt?raw';
 import rowExpansionContent from '../../../../content/docs/data-table-row-expansion.txt?raw';
 import rowGroupSubheaderContent from '../../../../content/docs/data-table-row-group-subheader.txt?raw';
+import rowGroupRowspanContent from '../../../../content/docs/data-table-row-group-rowspan.txt?raw';
+import rowGroupExpandableContent from '../../../../content/docs/data-table-row-group-expandable.txt?raw';
 import selectionRadioContent from '../../../../content/docs/data-table-selection-radio.txt?raw';
 import rowAriaLabelContent from '../../../../content/docs/data-table-row-aria-label.txt?raw';
 import rowTrackByContent from '../../../../content/docs/data-table-row-track-by.txt?raw';
@@ -120,6 +130,8 @@ import columnGroupsContent from '../../../../content/docs/data-table-column-grou
 import columnReorderContent from '../../../../content/docs/data-table-column-reorder.txt?raw';
 import frozenColumnsUtilityContent from '../../../../content/docs/data-table-frozen-columns-utility.txt?raw';
 import editCellContent from '../../../../content/docs/data-table-edit-cell.txt?raw';
+import editRowContent from '../../../../content/docs/data-table-edit-row.txt?raw';
+import editCellSelectionContent from '../../../../content/docs/data-table-edit-cell-selection.txt?raw';
 import loadingContent from '../../../../content/docs/data-table-loading.txt?raw';
 import lazyContent from '../../../../content/docs/data-table-lazy.txt?raw';
 import emptyStateContent from '../../../../content/docs/data-table-empty-state.txt?raw';
@@ -156,12 +168,16 @@ const EXAMPLES = [
   { id: 'example-scroll-vertical', label: 'Vertical scroll' },
   { id: 'example-row-expansion', label: 'Row expansion' },
   { id: 'example-row-group-subheader', label: 'Row group subheader' },
+  { id: 'example-row-group-rowspan', label: 'Row group row span' },
+  { id: 'example-row-group-expandable', label: 'Expandable row groups' },
   { id: 'example-column-resize', label: 'Column resize' },
   { id: 'example-column-resize-expand', label: 'Column resize (expand)' },
   { id: 'example-column-toggle', label: 'Column toggle' },
   { id: 'example-column-groups', label: 'Column groups' },
   { id: 'example-column-reorder', label: 'Column reorder' },
   { id: 'example-edit-cell', label: 'Cell editing' },
+  { id: 'example-edit-row', label: 'Row editing' },
+  { id: 'example-edit-cell-selection', label: 'Cell editing with selection' },
   { id: 'example-loading', label: 'Loading' },
   { id: 'example-lazy', label: 'Lazy loading' },
   { id: 'example-empty-state', label: 'Empty state' },
@@ -205,12 +221,16 @@ const EXAMPLES = [
     DataTableScrollVerticalDemo,
     DataTableRowExpansionDemo,
     DataTableRowGroupSubheaderDemo,
+    DataTableRowGroupRowspanDemo,
+    DataTableRowGroupExpandableDemo,
     DataTableColumnResizeDemo,
     DataTableColumnResizeExpandDemo,
     DataTableColumnToggleDemo,
     DataTableColumnGroupsDemo,
     DataTableColumnReorderDemo,
     DataTableEditCellDemo,
+    DataTableEditRowDemo,
+    DataTableEditCellSelectionDemo,
     DataTableLoadingDemo,
     DataTableLazyDemo,
     DataTableEmptyStateDemo,
@@ -344,6 +364,22 @@ const EXAMPLES = [
         </div>
       </section>
 
+      <section id="example-row-group-rowspan" class="mt-10 scroll-mt-24">
+        <app-prose class="block" [content]="rowGroupRowspanContent" />
+        <div class="mt-4">
+          <app-data-table-row-group-rowspan-demo />
+          <div class="mt-3"><app-code-block [code]="rowGroupRowspanCode" /></div>
+        </div>
+      </section>
+
+      <section id="example-row-group-expandable" class="mt-10 scroll-mt-24">
+        <app-prose class="block" [content]="rowGroupExpandableContent" />
+        <div class="mt-4">
+          <app-data-table-row-group-expandable-demo />
+          <div class="mt-3"><app-code-block [code]="rowGroupExpandableCode" /></div>
+        </div>
+      </section>
+
       <section id="example-column-resize" class="mt-10 scroll-mt-24">
         <app-prose class="block" [content]="columnResizeContent" />
         <div class="mt-4">
@@ -389,6 +425,22 @@ const EXAMPLES = [
         <div class="mt-4">
           <app-data-table-edit-cell-demo />
           <div class="mt-3"><app-code-block [code]="editCellCode" /></div>
+        </div>
+      </section>
+
+      <section id="example-edit-row" class="mt-10 scroll-mt-24">
+        <app-prose class="block" [content]="editRowContent" />
+        <div class="mt-4">
+          <app-data-table-edit-row-demo />
+          <div class="mt-3"><app-code-block [code]="editRowCode" /></div>
+        </div>
+      </section>
+
+      <section id="example-edit-cell-selection" class="mt-10 scroll-mt-24">
+        <app-prose class="block" [content]="editCellSelectionContent" />
+        <div class="mt-4">
+          <app-data-table-edit-cell-selection-demo />
+          <div class="mt-3"><app-code-block [code]="editCellSelectionCode" /></div>
         </div>
       </section>
 
@@ -595,6 +647,10 @@ export default class DocsDataTable {
   protected readonly rowExpansionCode = rowExpansionCode;
   protected readonly rowGroupSubheaderContent = rowGroupSubheaderContent;
   protected readonly rowGroupSubheaderCode = rowGroupSubheaderCode;
+  protected readonly rowGroupRowspanContent = rowGroupRowspanContent;
+  protected readonly rowGroupRowspanCode = rowGroupRowspanCode;
+  protected readonly rowGroupExpandableContent = rowGroupExpandableContent;
+  protected readonly rowGroupExpandableCode = rowGroupExpandableCode;
   protected readonly columnResizeContent = columnResizeContent;
   protected readonly columnResizeCode = columnResizeCode;
   protected readonly columnResizeExpandContent = columnResizeExpandContent;
@@ -609,6 +665,10 @@ export default class DocsDataTable {
   protected readonly frozenColumnsUtilityCode = frozenColumnsUtilityCode;
   protected readonly editCellContent = editCellContent;
   protected readonly editCellCode = editCellCode;
+  protected readonly editRowContent = editRowContent;
+  protected readonly editRowCode = editRowCode;
+  protected readonly editCellSelectionContent = editCellSelectionContent;
+  protected readonly editCellSelectionCode = editCellSelectionCode;
   protected readonly loadingContent = loadingContent;
   protected readonly loadingCode = loadingCode;
   protected readonly lazyContent = lazyContent;

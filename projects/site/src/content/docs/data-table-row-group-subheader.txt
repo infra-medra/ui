@@ -3,5 +3,6 @@
 `rowGroupMode="subheader"` renders a full-width subheader row whenever consecutive rows' own
 `groupRowsBy` field value changes — optionally templated via `#groupHeader` (default: just prints
 the group value). Setting `groupRowsBy` makes it the primary sort key ahead of `sortField`/
-`multiSortMeta`, so same-group rows never scatter across the table. A `'rowspan'` mode (merging the grouped cell vertically instead of a separate subheader row), isn't
-implemented here — only `'subheader'`.
+`multiSortMeta`, so same-group rows never scatter across the table. To merge the grouped cell
+vertically instead, use `rowGroupMode="rowspan"`; to let users collapse each group, add
+`expandableRowGroups`.
