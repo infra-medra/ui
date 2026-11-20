@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, TemplateRef, booleanAttribute, computed, contentChild, effect, input, model, numberAttribute, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, TemplateRef, booleanAttribute, computed, contentChild, effect, input, linkedSignal, model, numberAttribute, output } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { IconComponent } from '../icon/icon.component';
 import { InputTextDirective } from '../input-text/input-text.directive';
@@ -127,7 +127,7 @@ import { mergeClasses } from '../utils/merge-classes';
       <med-paginator
         class="mt-4 block"
         [totalRecords]="effectiveTotalRecords()"
-        [rows]="rows()"
+        [(rows)]="pageSize"
         [rowsPerPageOptions]="rowsPerPageOptions()"
         [(first)]="first"
         (pageChange)="pageChange.emit($event)"
@@ -145,6 +145,8 @@ export class DataViewComponent<T> {
   readonly layout = input<'list' | 'grid'>('list');
   readonly paginator = input(false, { transform: booleanAttribute });
   readonly rows = input(10, { transform: numberAttribute });
+  /** The page size in effect: follows `rows()`, and the paginator's "rows per page" select writes to it, so the visible slice and `lazyLoad` follow the user's choice. */
+  protected readonly pageSize = linkedSignal(() => this.rows());
   readonly rowsPerPageOptions = input<readonly number[] | null>(null);
   readonly sortComparator = input<((a: T, b: T) => number) | null>(null);
   readonly filterPredicate = input<((item: T, query: string) => boolean) | null>(null);
@@ -195,7 +197,7 @@ export class DataViewComponent<T> {
       return this.sortedItems();
     }
     const first = this.first();
-    return this.sortedItems().slice(first, first + this.rows());
+    return this.sortedItems().slice(first, first + this.pageSize());
   });
 
   protected readonly effectiveTotalRecords = computed(() => (this.lazy() ? this.totalRecords() : this.sortedItems().length));
@@ -208,7 +210,7 @@ export class DataViewComponent<T> {
     let firstRun = true;
     effect(() => {
       const first = this.first();
-      const rows = this.rows();
+      const rows = this.pageSize();
       if (!this.lazy()) {
         return;
       }

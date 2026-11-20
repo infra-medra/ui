@@ -490,6 +490,7 @@ describe('TreeTableComponent Wave 2 (selectionMode, sortMode, paginator)', () =>
         [(sortOrder)]="sortOrder"
         [paginator]="paginator"
         [rows]="rows"
+        [rowsPerPageOptions]="rowsPerPageOptions"
         [(first)]="first"
       >
         <med-table-column field="name" header="Name" [sortable]="true" />
@@ -509,6 +510,7 @@ describe('TreeTableComponent Wave 2 (selectionMode, sortMode, paginator)', () =>
     sortOrder: 'asc' | 'desc' | null = null;
     paginator = true;
     rows = 2;
+    rowsPerPageOptions: readonly number[] | null = null;
     first = 0;
   }
 
@@ -534,5 +536,19 @@ describe('TreeTableComponent Wave 2 (selectionMode, sortMode, paginator)', () =>
     const sortedRows = Array.from(fixture.nativeElement.querySelectorAll('tbody tr')) as HTMLElement[];
     expect(sortedRows[0].textContent).toContain('Alice');
     expect(sortedRows[1].textContent).toContain('Bob');
+  });
+
+  it('picking a larger page size shows that many rows', () => {
+    const fixture = TestBed.createComponent(Wave2TreeTableHostComponent);
+    fixture.componentInstance.rowsPerPageOptions = [2, 3];
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelectorAll('tbody tr')).toHaveLength(2);
+
+    const select = fixture.nativeElement.querySelector('med-paginator select') as HTMLSelectElement;
+    select.value = '3';
+    select.dispatchEvent(new Event('change'));
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelectorAll('tbody tr')).toHaveLength(3);
   });
 });

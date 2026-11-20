@@ -310,5 +310,38 @@ describe('DataViewComponent (header/footer/empty templates, filter, loading, laz
       const optionValues = Array.from(select!.querySelectorAll('option')).map((o) => (o as HTMLOptionElement).value);
       expect(optionValues).toEqual(['5', '10', '25']);
     });
+
+    it('picking a larger page size shows that many items', () => {
+      const fixture = createExt((h) => {
+        h.paginator = true;
+        h.rows = 1;
+        h.rowsPerPageOptions = [1, 2, 3];
+      });
+      expect(itemTexts(fixture)).toHaveLength(1);
+
+      const select = fixture.nativeElement.querySelector('med-paginator select') as HTMLSelectElement;
+      select.value = '3';
+      select.dispatchEvent(new Event('change'));
+      fixture.detectChanges();
+
+      expect(itemTexts(fixture)).toHaveLength(Math.min(3, PRODUCTS.length));
+    });
+
+    it('in lazy mode, picking a page size emits lazyLoad with the new rows', () => {
+      const fixture = createExt((h) => {
+        h.lazy = true;
+        h.paginator = true;
+        h.rows = 5;
+        h.rowsPerPageOptions = [5, 10];
+        h.totalRecords = 83;
+      });
+
+      const select = fixture.nativeElement.querySelector('med-paginator select') as HTMLSelectElement;
+      select.value = '10';
+      select.dispatchEvent(new Event('change'));
+      fixture.detectChanges();
+
+      expect(fixture.componentInstance.onLazyLoad).toHaveBeenLastCalledWith({ first: 0, rows: 10 });
+    });
   });
 });
