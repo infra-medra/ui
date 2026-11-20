@@ -1,0 +1,10 @@
+<div class="mb-3 flex gap-2">
+  <button type="button" class="rounded border border-surface-300 px-3 py-1 text-sm dark:border-surface-700" (click)="first = 0">First page</button>
+  <button type="button" class="rounded border border-surface-300 px-3 py-1 text-sm dark:border-surface-700" (click)="goToLastPage()">Last page</button>
+</div>
+<med-data-table [value]="equipment" [paginator]="true" [rows]="3" [(first)]="first" ariaLabel="Lab equipment inventory (page set from code)">
+  <med-table-column field="name" header="Name" />
+  <med-table-column field="category" header="Category" />
+  <med-table-column field="quantity" header="Quantity" align="right" />
+</med-data-table>
+<p class="mt-2 text-sm text-surface-500 dark:text-surface-400">First visible row index: {{ first }}</p>

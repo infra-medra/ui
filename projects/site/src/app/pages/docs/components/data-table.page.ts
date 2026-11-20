@@ -9,9 +9,12 @@ import { DataTableBasicDemo } from './demos/data-table-basic.demo';
 import { DataTableSelectionSingleDemo } from './demos/data-table-selection-single.demo';
 import { DataTableSelectionMultipleDemo } from './demos/data-table-selection-multiple.demo';
 import { DataTableSortSingleDemo } from './demos/data-table-sort-single.demo';
+import { DataTablePresortDemo } from './demos/data-table-presort.demo';
+import { DataTableRemovableSortDemo } from './demos/data-table-removable-sort.demo';
 import { DataTableSortMultipleDemo } from './demos/data-table-sort-multiple.demo';
 import { DataTableFilterGlobalDemo } from './demos/data-table-filter-global.demo';
 import { DataTablePaginationDemo } from './demos/data-table-pagination.demo';
+import { DataTableProgrammaticPaginationDemo } from './demos/data-table-programmatic-pagination.demo';
 import { DataTableScrollVerticalDemo } from './demos/data-table-scroll-vertical.demo';
 import { DataTableRowExpansionDemo } from './demos/data-table-row-expansion.demo';
 import { DataTableRowGroupSubheaderDemo } from './demos/data-table-row-group-subheader.demo';
@@ -35,9 +38,12 @@ import basicCode from './demos/data-table-basic.demo.html?raw';
 import selectionSingleCode from './demos/data-table-selection-single.demo.html?raw';
 import selectionMultipleCode from './demos/data-table-selection-multiple.demo.html?raw';
 import sortSingleCode from './demos/data-table-sort-single.demo.html?raw';
+import presortCode from './demos/data-table-presort.demo.html?raw';
+import removableSortCode from './demos/data-table-removable-sort.demo.html?raw';
 import sortMultipleCode from './demos/data-table-sort-multiple.demo.html?raw';
 import filterGlobalCode from './demos/data-table-filter-global.demo.html?raw';
 import paginationCode from './demos/data-table-pagination.demo.html?raw';
+import programmaticPaginationCode from './demos/data-table-programmatic-pagination.demo.html?raw';
 import scrollVerticalCode from './demos/data-table-scroll-vertical.demo.html?raw';
 import rowExpansionCode from './demos/data-table-row-expansion.demo.html?raw';
 import rowGroupSubheaderCode from './demos/data-table-row-group-subheader.demo.html?raw';
@@ -62,9 +68,12 @@ import basicContent from '../../../../content/docs/data-table-basic.txt?raw';
 import selectionSingleContent from '../../../../content/docs/data-table-selection-single.txt?raw';
 import selectionMultipleContent from '../../../../content/docs/data-table-selection-multiple.txt?raw';
 import sortSingleContent from '../../../../content/docs/data-table-sort-single.txt?raw';
+import presortContent from '../../../../content/docs/data-table-presort.txt?raw';
+import removableSortContent from '../../../../content/docs/data-table-removable-sort.txt?raw';
 import sortMultipleContent from '../../../../content/docs/data-table-sort-multiple.txt?raw';
 import filterGlobalContent from '../../../../content/docs/data-table-filter-global.txt?raw';
 import paginationContent from '../../../../content/docs/data-table-pagination.txt?raw';
+import programmaticPaginationContent from '../../../../content/docs/data-table-programmatic-pagination.txt?raw';
 import scrollVerticalContent from '../../../../content/docs/data-table-scroll-vertical.txt?raw';
 import rowExpansionContent from '../../../../content/docs/data-table-row-expansion.txt?raw';
 import rowGroupSubheaderContent from '../../../../content/docs/data-table-row-group-subheader.txt?raw';
@@ -102,9 +111,12 @@ const EXAMPLES = [
   { id: 'example-selection-single', label: 'Single selection' },
   { id: 'example-selection-multiple', label: 'Multiple selection' },
   { id: 'example-sort-single', label: 'Single sort' },
+  { id: 'example-presort', label: 'Presort' },
+  { id: 'example-removable-sort', label: 'Removable sort' },
   { id: 'example-sort-multiple', label: 'Multiple sort' },
   { id: 'example-filter-global', label: 'Global filter' },
   { id: 'example-pagination', label: 'Pagination' },
+  { id: 'example-programmatic-pagination', label: 'Programmatic pagination' },
   { id: 'example-scroll-vertical', label: 'Vertical scroll' },
   { id: 'example-row-expansion', label: 'Row expansion' },
   { id: 'example-row-group-subheader', label: 'Row group subheader' },
@@ -136,9 +148,12 @@ const EXAMPLES = [
     DataTableSelectionSingleDemo,
     DataTableSelectionMultipleDemo,
     DataTableSortSingleDemo,
+    DataTablePresortDemo,
+    DataTableRemovableSortDemo,
     DataTableSortMultipleDemo,
     DataTableFilterGlobalDemo,
     DataTablePaginationDemo,
+    DataTableProgrammaticPaginationDemo,
     DataTableScrollVerticalDemo,
     DataTableRowExpansionDemo,
     DataTableRowGroupSubheaderDemo,
@@ -197,6 +212,22 @@ const EXAMPLES = [
         </div>
       </section>
 
+      <section id="example-presort" class="mt-10 scroll-mt-24">
+        <app-prose class="block" [content]="presortContent" />
+        <div class="mt-4">
+          <app-data-table-presort-demo />
+          <div class="mt-3"><app-code-block [code]="presortCode" /></div>
+        </div>
+      </section>
+
+      <section id="example-removable-sort" class="mt-10 scroll-mt-24">
+        <app-prose class="block" [content]="removableSortContent" />
+        <div class="mt-4">
+          <app-data-table-removable-sort-demo />
+          <div class="mt-3"><app-code-block [code]="removableSortCode" /></div>
+        </div>
+      </section>
+
       <section id="example-sort-multiple" class="mt-10 scroll-mt-24">
         <app-prose class="block" [content]="sortMultipleContent" />
         <div class="mt-4">
@@ -218,6 +249,14 @@ const EXAMPLES = [
         <div class="mt-4">
           <app-data-table-pagination-demo />
           <div class="mt-3"><app-code-block [code]="paginationCode" /></div>
+        </div>
+      </section>
+
+      <section id="example-programmatic-pagination" class="mt-10 scroll-mt-24">
+        <app-prose class="block" [content]="programmaticPaginationContent" />
+        <div class="mt-4">
+          <app-data-table-programmatic-pagination-demo />
+          <div class="mt-3"><app-code-block [code]="programmaticPaginationCode" /></div>
         </div>
       </section>
 
@@ -382,12 +421,18 @@ export default class DocsDataTable {
   protected readonly selectionMultipleCode = selectionMultipleCode;
   protected readonly sortSingleContent = sortSingleContent;
   protected readonly sortSingleCode = sortSingleCode;
+  protected readonly presortContent = presortContent;
+  protected readonly presortCode = presortCode;
+  protected readonly removableSortContent = removableSortContent;
+  protected readonly removableSortCode = removableSortCode;
   protected readonly sortMultipleContent = sortMultipleContent;
   protected readonly sortMultipleCode = sortMultipleCode;
   protected readonly filterGlobalContent = filterGlobalContent;
   protected readonly filterGlobalCode = filterGlobalCode;
   protected readonly paginationContent = paginationContent;
   protected readonly paginationCode = paginationCode;
+  protected readonly programmaticPaginationContent = programmaticPaginationContent;
+  protected readonly programmaticPaginationCode = programmaticPaginationCode;
   protected readonly scrollVerticalContent = scrollVerticalContent;
   protected readonly scrollVerticalCode = scrollVerticalCode;
   protected readonly rowExpansionContent = rowExpansionContent;

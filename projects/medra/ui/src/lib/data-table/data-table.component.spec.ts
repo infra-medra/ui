@@ -1,4 +1,4 @@
-import { Component, DebugElement } from '@angular/core';
+import { Component, DebugElement, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { IconComponent } from '../icon/icon.component';
@@ -28,6 +28,10 @@ const PRODUCTS: Product[] = [
       [(selection)]="selection"
       [paginator]="paginator"
       [rows]="rows"
+      [(first)]="first"
+      [(sortField)]="sortField"
+      [(sortOrder)]="sortOrder"
+      [removableSort]="removableSort"
       [rowsPerPageOptions]="rowsPerPageOptions"
       [dataKey]="dataKey"
       [filterable]="filterable"
@@ -70,6 +74,10 @@ class HostComponent {
   selection: Product | readonly Product[] | null = null;
   paginator = false;
   rows = 10;
+  first = signal(0);
+  sortField: string | null = null;
+  sortOrder: 'asc' | 'desc' | null = null;
+  removableSort = true;
   rowsPerPageOptions: readonly number[] | null = null;
   dataKey: string | null = null;
   filterable = false;
@@ -136,6 +144,7 @@ describe('DataTableComponent', () => {
   });
 
   describe('sorting', () => {
+    // DAT-002.S1
     it('clicking a sortable header cycles asc -> desc -> none (unsorted), not a two-state toggle', () => {
       const fixture = create();
       const priceHeader = headerCells(fixture)[1];
@@ -154,6 +163,29 @@ describe('DataTableComponent', () => {
       fixture.detectChanges();
       expect(cellText(bodyRows(fixture)[0])[0]).toBe('Widget'); // back to original (unsorted) order
       expect(priceHeader.getAttribute('aria-sort')).toBe('none');
+    });
+
+    // DAT-002.S3
+    it('DAT-002.S3: renders sorted from the initial sortField and sortOrder', () => {
+      const fixture = create((h) => {
+        h.sortField = 'price';
+        h.sortOrder = 'desc';
+      });
+      expect(bodyRows(fixture).map((r) => cellText(r)[0])).toEqual(['Widget', 'Gizmo', 'Gadget']);
+      expect(headerCells(fixture)[1].getAttribute('aria-sort')).toBe('descending');
+    });
+
+    // DAT-002.S4
+    it('DAT-002.S4: with removableSort false, a sorted column alternates asc/desc and never goes unsorted', () => {
+      const fixture = create((h) => (h.removableSort = false));
+      const priceHeader = headerCells(fixture)[1];
+      const seen: (string | null)[] = [];
+      for (let i = 0; i < 3; i++) {
+        priceHeader.click();
+        fixture.detectChanges();
+        seen.push(priceHeader.getAttribute('aria-sort'));
+      }
+      expect(seen).toEqual(['ascending', 'descending', 'ascending']);
     });
 
     it('clicking a non-sortable header does nothing', () => {
@@ -185,6 +217,7 @@ describe('DataTableComponent', () => {
       expect(stockHeader.getAttribute('tabindex')).toBeNull();
     });
 
+    // DAT-002.S2
     it('Space on a focused sortable header cycles sort, same as a click (Wave 2 fix — 2026-08-19)', () => {
       const fixture = create();
       const priceHeader = headerCells(fixture)[1];
@@ -273,6 +306,7 @@ describe('DataTableComponent', () => {
   });
 
   describe('pagination', () => {
+    // DAT-005.S1
     it('slices sortedValue to the current page', () => {
       const fixture = create((h) => {
         h.paginator = true;
@@ -286,6 +320,32 @@ describe('DataTableComponent', () => {
 
       expect(bodyRows(fixture)).toHaveLength(1);
       expect(cellText(bodyRows(fixture)[0])[0]).toBe('Gizmo');
+    });
+
+    // DAT-005.S2
+    it('DAT-005.S2: setting first from the host shows the page that contains it', () => {
+      const fixture = create((h) => {
+        h.paginator = true;
+        h.rows = 2;
+      });
+      fixture.componentInstance.first.set(2);
+      fixture.detectChanges();
+
+      expect(bodyRows(fixture).map((r) => cellText(r)[0])).toEqual(['Gizmo']);
+      const current = fixture.nativeElement.querySelector('button[aria-current="page"]') as HTMLButtonElement;
+      expect(current.getAttribute('aria-label')).toBe('Page 2');
+    });
+
+    // DAT-005.S3
+    it('DAT-005.S3: a page change by the user writes the new first back to the host', () => {
+      const fixture = create((h) => {
+        h.paginator = true;
+        h.rows = 2;
+      });
+      (fixture.nativeElement.querySelector('button[aria-label="Page 2"]') as HTMLButtonElement).click();
+      fixture.detectChanges();
+
+      expect(fixture.componentInstance.first()).toBe(2);
     });
   });
 
@@ -954,13 +1014,18 @@ describe('DataTableComponent', () => {
       expect(optionValues).toEqual(['5', '10', '25']);
     });
 
-    it('picking a larger page size shows that many rows', () => {
+    // DAT-005.S4
+    it('DAT-005.S4: picking a larger page size shows that many rows and returns to the first page', () => {
       const fixture = create((h) => {
         h.paginator = true;
         h.rows = 1;
         h.rowsPerPageOptions = [1, 2, 3];
       });
+      fixture.componentInstance.first.set(2);
+      fixture.detectChanges();
       expect(bodyRows(fixture)).toHaveLength(1);
+      const before = fixture.nativeElement.querySelector('button[aria-current="page"]') as HTMLButtonElement;
+      expect(before.getAttribute('aria-label')).toBe('Page 3');
 
       const select = fixture.nativeElement.querySelector('med-paginator select') as HTMLSelectElement;
       select.value = '3';
@@ -968,6 +1033,9 @@ describe('DataTableComponent', () => {
       fixture.detectChanges();
 
       expect(bodyRows(fixture)).toHaveLength(Math.min(3, PRODUCTS.length));
+      expect(fixture.componentInstance.first()).toBe(0);
+      const current = fixture.nativeElement.querySelector('button[aria-current="page"]') as HTMLButtonElement;
+      expect(current.getAttribute('aria-label')).toBe('Page 1');
     });
 
     it('in lazy mode, picking a page size emits lazyLoad with the new rows', () => {

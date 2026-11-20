@@ -1,0 +1,3 @@
+## Sort that cannot be removed
+
+By default a third click on a sorted header clears the sort. Set `[removableSort]="false"` to keep the column sorted: clicks then alternate between ascending and descending. It applies to `sortMode="single"` only.
