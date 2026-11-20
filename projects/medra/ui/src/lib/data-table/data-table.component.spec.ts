@@ -478,16 +478,78 @@ describe('DataTableComponent', () => {
     });
 
     // DAT-026.S3
-    it('DAT-026.S3: multiple mode and no selection mode do not handle the keys', () => {
-      for (const mode of ['multiple', null] as const) {
-        const fixture = attached((h) => (h.selectionMode = mode));
-        const rows = bodyRows(fixture);
-        rows[0].focus();
-        const event = press(rows[0], 'ArrowDown');
-        expect(event.defaultPrevented).toBe(false);
-        expect(document.activeElement).not.toBe(rows[1]);
-        fixture.destroy();
-      }
+    it('DAT-026.S3: a table without a selection mode does not handle the keys', () => {
+      const fixture = attached((h) => (h.selectionMode = null));
+      const rows = bodyRows(fixture);
+      rows[0].focus();
+      const event = press(rows[0], 'ArrowDown');
+      expect(event.defaultPrevented).toBe(false);
+      expect(document.activeElement).not.toBe(rows[1]);
+    });
+
+    // DAT-026.S4
+    it('DAT-026.S4: in multiple mode the arrows, End and Home move focus and keep the selection', () => {
+      const fixture = attached((h) => {
+        h.selectionMode = 'multiple';
+        h.selection = [PRODUCTS[0], PRODUCTS[1]];
+      });
+      const rows = bodyRows(fixture);
+      expect(rows[1].getAttribute('tabindex')).toBe('0');
+      rows[1].focus();
+
+      const down = press(rows[1], 'ArrowDown');
+      expect(document.activeElement).toBe(rows[2]);
+      expect(down.defaultPrevented).toBe(true);
+
+      press(rows[2], 'ArrowDown');
+      expect(document.activeElement).toBe(rows[2]);
+
+      press(rows[2], 'Home');
+      expect(document.activeElement).toBe(rows[0]);
+
+      press(rows[0], 'End');
+      expect(document.activeElement).toBe(rows[2]);
+
+      fixture.detectChanges();
+      expect(fixture.componentInstance.selection).toEqual([PRODUCTS[0], PRODUCTS[1]]);
+      expect(fixture.componentInstance.onRowSelect).not.toHaveBeenCalled();
+    });
+
+    // DAT-026.S5
+    it('DAT-026.S5: in multiple mode Space adds the focused row and Enter removes it again', () => {
+      const fixture = attached((h) => (h.selectionMode = 'multiple'));
+      const rows = bodyRows(fixture);
+      rows[1].focus();
+
+      const space = press(rows[1], ' ');
+      fixture.detectChanges();
+      expect(space.defaultPrevented).toBe(true);
+      expect(fixture.componentInstance.selection).toEqual([PRODUCTS[1]]);
+
+      press(bodyRows(fixture)[1], 'Enter');
+      fixture.detectChanges();
+      expect(fixture.componentInstance.selection).toEqual([]);
+    });
+
+    // DAT-026.S5
+    it('DAT-026.S5: in multiple mode keys pressed on the row checkbox are left to the checkbox, which toggles the row once', () => {
+      const fixture = attached((h) => (h.selectionMode = 'multiple'));
+      const rows = bodyRows(fixture);
+      const checkbox = rows[1].querySelector('input[type="checkbox"]') as HTMLInputElement;
+      checkbox.focus();
+
+      const space = press(checkbox, ' ');
+      const arrow = press(checkbox, 'ArrowDown');
+      fixture.detectChanges();
+
+      expect(space.defaultPrevented).toBe(false);
+      expect(arrow.defaultPrevented).toBe(false);
+      expect(document.activeElement).toBe(checkbox);
+      expect(fixture.componentInstance.selection).toBeNull();
+
+      checkbox.click();
+      fixture.detectChanges();
+      expect(fixture.componentInstance.selection).toEqual([PRODUCTS[1]]);
     });
 
     // DAT-026.S1

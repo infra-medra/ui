@@ -12,3 +12,18 @@
 <p class="mt-2 text-sm text-surface-500 dark:text-surface-400">
   Focus a row, then use ArrowUp, ArrowDown, Home and End to move between rows.
 </p>
+<med-data-table
+  class="mt-6 block"
+  [value]="equipment"
+  selectionMode="multiple"
+  dataKey="id"
+  [(selection)]="selectedMany"
+  ariaLabel="Lab equipment inventory (keyboard navigation, multiple selection)"
+>
+  <med-table-column field="name" header="Name" />
+  <med-table-column field="category" header="Category" />
+  <med-table-column field="quantity" header="Quantity" align="right" />
+</med-data-table>
+<p class="mt-2 text-sm text-surface-500 dark:text-surface-400">
+  With multiple selection the same keys move focus, and Space or Enter toggles the focused row.
+</p>

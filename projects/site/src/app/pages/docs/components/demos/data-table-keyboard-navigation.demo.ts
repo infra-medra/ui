@@ -24,4 +24,5 @@ export class DataTableKeyboardNavigationDemo {
   ];
 
   protected selected: EquipmentItem | readonly EquipmentItem[] | null = null;
+  protected selectedMany: EquipmentItem | readonly EquipmentItem[] | null = [];
 }
