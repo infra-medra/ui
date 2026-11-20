@@ -30,5 +30,7 @@ jobs:
         run: node tools/release/check.mjs changeset
       - name: Version policy check
         run: node tools/release/check.mjs policy
+      # The parity tests read API docs that are generated, not tracked.
+      - run: npm run -w projects/site generate:api-docs
       - run: npm test
       - run: npm run build
