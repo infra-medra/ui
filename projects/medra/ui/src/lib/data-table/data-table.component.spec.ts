@@ -891,6 +891,39 @@ describe('DataTableComponent', () => {
       const optionValues = Array.from(select!.querySelectorAll('option')).map((o) => (o as HTMLOptionElement).value);
       expect(optionValues).toEqual(['5', '10', '25']);
     });
+
+    it('picking a larger page size shows that many rows', () => {
+      const fixture = create((h) => {
+        h.paginator = true;
+        h.rows = 1;
+        h.rowsPerPageOptions = [1, 2, 3];
+      });
+      expect(bodyRows(fixture)).toHaveLength(1);
+
+      const select = fixture.nativeElement.querySelector('med-paginator select') as HTMLSelectElement;
+      select.value = '3';
+      select.dispatchEvent(new Event('change'));
+      fixture.detectChanges();
+
+      expect(bodyRows(fixture)).toHaveLength(Math.min(3, PRODUCTS.length));
+    });
+
+    it('in lazy mode, picking a page size emits lazyLoad with the new rows', () => {
+      const fixture = create((h) => {
+        h.lazy = true;
+        h.paginator = true;
+        h.rows = 5;
+        h.rowsPerPageOptions = [5, 10];
+        h.totalRecords = 83;
+      });
+
+      const select = fixture.nativeElement.querySelector('med-paginator select') as HTMLSelectElement;
+      select.value = '10';
+      select.dispatchEvent(new Event('change'));
+      fixture.detectChanges();
+
+      expect(fixture.componentInstance.onLazyLoad).toHaveBeenLastCalledWith(expect.objectContaining({ first: 0, rows: 10 }));
+    });
   });
 
   describe('dataKey', () => {
@@ -1147,6 +1180,17 @@ describe('DataTableComponent', () => {
       expect(fixture.nativeElement.querySelectorAll('[data-col-resize-handle="true"]').length).toBeGreaterThanOrEqual(2);
       const thead = fixture.nativeElement.querySelector('thead') as HTMLElement;
       expect(thead.className).toContain('sticky');
+    });
+
+    it('restores the stored sort after the first render and does not overwrite it with the defaults', () => {
+      sessionStorage.setItem('dt-wave2-state', JSON.stringify({ first: 0, sortField: 'price', sortOrder: 'desc', expandedRowKeys: {} }));
+      const fixture = TestBed.createComponent(Wave2DataTableHostComponent);
+      fixture.detectChanges();
+      fixture.detectChanges();
+
+      expect(fixture.componentInstance.sortField).toBe('price');
+      expect(fixture.componentInstance.sortOrder).toBe('desc');
+      expect(JSON.parse(sessionStorage.getItem('dt-wave2-state')!).sortField).toBe('price');
     });
 
     it('renders #rowexpansion template when expandedRowKeys has the row key and persists sort state', () => {

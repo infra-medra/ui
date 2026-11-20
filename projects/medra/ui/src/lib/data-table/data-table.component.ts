@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, PLATFORM_ID, TemplateRef, booleanAttribute, computed, contentChild, contentChildren, effect, inject, input, model, numberAttribute, output, signal, untracked } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, PLATFORM_ID, TemplateRef, afterNextRender, booleanAttribute, computed, contentChild, contentChildren, effect, inject, input, linkedSignal, model, numberAttribute, output, signal, untracked } from '@angular/core';
 import { NgTemplateOutlet, isPlatformBrowser } from '@angular/common';
 import { IconComponent } from '../icon/icon.component';
 import { InputTextDirective } from '../input-text/input-text.directive';
@@ -402,7 +402,7 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
       </table>
     </div>
     @if (paginator() && effectiveTotalRecords() > 0) {
-      <med-paginator class="mt-3 block" [totalRecords]="effectiveTotalRecords()" [rows]="rows()" [rowsPerPageOptions]="rowsPerPageOptions()" [(first)]="first" />
+      <med-paginator class="mt-3 block" [totalRecords]="effectiveTotalRecords()" [(rows)]="pageSize" [rowsPerPageOptions]="rowsPerPageOptions()" [(first)]="first" />
     }
   `,
 })
@@ -418,6 +418,8 @@ export class DataTableComponent<T> {
   readonly selection = model<T | readonly T[] | null>(null);
   readonly paginator = input(false, { transform: booleanAttribute });
   readonly rows = input(10, { transform: numberAttribute });
+  /** The page size in effect: follows `rows()`, and the paginator's "rows per page" select writes to it, so the visible slice and `lazyLoad` follow the user's choice. */
+  protected readonly pageSize = linkedSignal(() => this.rows());
   readonly rowsPerPageOptions = input<readonly number[] | null>(null);
   readonly first = model(0);
   /** Row identity key for selection comparisons — see class doc's "dataKey" section. Unset (default): reference equality, unchanged from before this input existed. */
@@ -489,20 +491,26 @@ export class DataTableComponent<T> {
   private readonly editingCell = signal<{ row: T; field: string } | null>(null);
   private readonly resizedColumnWidths = signal<ReadonlyMap<string, number>>(new Map());
   private colResizeState: { field: string; startX: number; startWidth: number; element: HTMLElement } | null = null;
-  private restoredStateKey: string | null = null;
+  private readonly browserReady = signal(false);
+  private readonly restoredKey = signal<string | null>(null);
   /** Undebounced — bound directly to the `<input>` so every keystroke is visible immediately; `filterDelay` only delays writing into `globalFilterValue`, see class doc. */
   protected readonly filterInputText = signal('');
   private filterDebounceHandle: ReturnType<typeof setTimeout> | null = null;
   private draggedRowIndex: number | null = null;
 
   constructor() {
+    // Restoring only after the first render keeps the first client render identical to the server-rendered markup. Restoring
+    // earlier changes the state before hydration reconciles the DOM, and the class bindings then leave stale server classes behind
+    // (for example two "current page" buttons in the paginator).
+    afterNextRender(() => this.browserReady.set(true));
+
     effect(() => {
       const key = this.stateKey();
-      if (!key || this.restoredStateKey === key) {
+      if (!this.browserReady() || !key || untracked(this.restoredKey) === key) {
         return;
       }
-      this.restoredStateKey = key;
       this.restoreTableState(key);
+      this.restoredKey.set(key);
     });
 
     effect(() => {
@@ -511,7 +519,8 @@ export class DataTableComponent<T> {
       const sortField = this.sortField();
       const sortOrder = this.sortOrder();
       const expandedRowKeys = this.expandedRowKeys();
-      if (!key) {
+      // Never persist before the stored state was restored, or the initial defaults would overwrite it.
+      if (!key || this.restoredKey() !== key) {
         return;
       }
       this.persistTableState(key, { first, sortField, sortOrder, expandedRowKeys });
@@ -525,7 +534,7 @@ export class DataTableComponent<T> {
       // the whole point of the effect, not a stray dependency.
       this.lazyLoad.emit({
         first: this.first(),
-        rows: this.rows(),
+        rows: this.pageSize(),
         sortField: this.sortField(),
         sortOrder: this.sortOrder(),
         multiSortMeta: this.multiSortMeta(),
@@ -631,7 +640,7 @@ export class DataTableComponent<T> {
       return this.sortedValue();
     }
     const start = this.first();
-    return this.sortedValue().slice(start, start + this.rows());
+    return this.sortedValue().slice(start, start + this.pageSize());
   });
 
   protected readonly effectiveTotalRecords = computed(() => (this.lazy() ? (this.totalRecords() ?? this.value().length) : this.sortedValue().length));
