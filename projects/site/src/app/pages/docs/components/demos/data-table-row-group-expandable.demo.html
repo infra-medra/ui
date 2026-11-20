@@ -1,0 +1,15 @@
+<med-data-table
+  [value]="equipment"
+  [(expandedRowGroups)]="collapsedGroups"
+  rowGroupMode="subheader"
+  groupRowsBy="category"
+  expandableRowGroups
+  ariaLabel="Lab equipment by category (collapsible groups)"
+>
+  <ng-template #groupHeader let-row>
+    <span class="font-semibold text-surface-700 dark:text-surface-200">{{ row.category }}</span>
+  </ng-template>
+  <med-table-column field="name" header="Name" />
+  <med-table-column field="quantity" header="Quantity" align="right" />
+</med-data-table>
+<p class="mt-2 text-sm text-surface-500 dark:text-surface-400">Collapsed groups: {{ collapsedGroups().length ? collapsedGroups().join(', ') : 'none' }}.</p>

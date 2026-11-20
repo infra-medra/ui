@@ -8,7 +8,7 @@ import { checkboxBoxVariants } from '../checkbox/checkbox.styles';
 import { DOT_SIZE_CLASS, radioRingVariants } from '../radio-button/radio-button.styles';
 import { mergeClasses } from '../utils/merge-classes';
 import { TableColumnComponent } from './table-column.component';
-import { TableColumnAlign, TableColumnReorderEvent, TableLazyLoadEvent, TableRowReorderEvent, TableSelectionMode, TableSize, TableSortMeta, TableSortMode, TableSortOrder } from './data-table.types';
+import { TableColumnAlign, TableColumnReorderEvent, TableLazyLoadEvent, TableRowEditEvent, TableRowReorderEvent, TableSelectionMode, TableSize, TableSortMeta, TableSortMode, TableSortOrder } from './data-table.types';
 
 let nextRadioGroupId = 0;
 
@@ -59,8 +59,6 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
  *   virtualScroll is active" by not having the feature at all). `SelectPanelComponent`
  *   already shows the `CdkVirtualScrollViewport` technique is available in
  *   this codebase if a later version needs it for very large datasets.
- * - No column reorder (column resize is `resizableColumns` with `columnResizeMode`).
- * - No row expansion.
  * - No per-column filter row (avoids #16576 "column filter indicator
  *   disappearing") — a single global filter (`filterable`) covers the common
  *   "search this table" case with far less surface area.
@@ -135,22 +133,25 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
  * "select all" already only ever operated on `sortedValue()`, which in
  * lazy mode already *is* just the current page.
  *
- * **`editMode: 'cell'`** (row-level batch editing
- * `editMode: 'row'` — is a documented cut for this pass: it needs its own
- * actions column plus aggregate commit/cancel across every editable cell
- * in a row at once, meaningfully more surface area than cell-at-a-time
- * editing for the same core value). A column opts in with `editable` on
+ * **`editMode`** has two values. A column opts in with `editable` on
  * `TableColumnComponent` plus a second named template
  * (`<ng-template #editTemplate let-row let-onSave="onSave"
  * let-onCancel="onCancel">`, see that file's own doc for why a second
- * template needs an explicit name). Double-click (not a plain click,
- * which already means "select this row" in `selectionMode="single"`) a
- * cell to enter edit mode; the consumer's own edit template decides which
- * events call `onSave(value)`/`onCancel()` — this component only tracks
- * *which* cell is currently being edited and emits `editComplete`/
- * `editCancel` when told to, the same "consumer wires the actual input,
- * this just provides the context functions" split `cellTemplate` already
- * uses for display.
+ * template needs an explicit name).
+ * - `'cell'` edits one cell at a time. `editTrigger` picks the gesture that starts it: a double
+ *   click (default; a plain click already means "select this row" in `selectionMode="single"`) or a
+ *   single click, which stops at the cell so it never selects the row. Clicks and keys inside an
+ *   edit cell never reach row selection or row keyboard navigation. The consumer's own edit
+ *   template decides which events call `onSave(value)`/`onCancel()` — this component only tracks
+ *   *which* cell is currently being edited and emits `editComplete`/`editCancel` when told to, the
+ *   same "consumer wires the actual input, this just provides the context functions" split
+ *   `cellTemplate` already uses for display.
+ * - `'row'` adds an actions column with edit, save and cancel buttons (named by `editRowLabel`,
+ *   `saveRowLabel`, `cancelRowLabel`; the column header text by `rowActionsHeaderLabel`) and edits
+ *   every editable cell of one row together; at most one row is in edit mode. Save emits
+ *   `rowEditComplete` with the row and each editable field's value; cancel emits `rowEditCancel`
+ *   with the row, and so does starting to edit another row while one is open. Enter saves and
+ *   Escape cancels from inside an edit cell.
  *
  * **`exportCSV()`** is a plain public method (called via a template
  * reference variable, `<med-data-table #dt>` /
@@ -200,13 +201,19 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
  *
  * **`rowGroupMode: 'subheader'` + `groupRowsBy`** renders a full-width subheader row (optionally
  * templated via `<ng-template #groupHeader let-row>`, default just prints the group value) whenever
- * consecutive rows' `groupRowsBy` field value changes `'rowspan'` (merging the grouped cell
- * vertically across the group's own rows instead of a separate subheader row), is a documented cut:
- * it needs per-cell rowspan bookkeeping interleaved with the existing column-driven `<td>` loop,
- * meaningfully more surface area for a layout variant of the same underlying grouping. Setting
- * `groupRowsBy` makes it the primary sort key ahead of `sortField`/`multiSortMeta`, so grouping
- * implies grouping-column-first sort — otherwise same-group rows could scatter across the table and
- * the subheader boundary detection would fire once per row.
+ * consecutive rows' `groupRowsBy` field value changes. **`rowGroupMode: 'rowspan'`** instead
+ * merges the `groupRowsBy` column's cells vertically across each group's own rows (a `groupSpans`
+ * computed gives each displayed row a span or "omit"; groups never cross a page boundary, and an
+ * expanded `#rowexpansion` row inside a group extends the span). Setting `groupRowsBy` makes it
+ * the primary sort key ahead of `sortField`/`multiSortMeta`, so grouping implies
+ * grouping-column-first sort — otherwise same-group rows could scatter across the table and the
+ * group boundary detection would fire once per row.
+ *
+ * **`expandableRowGroups`** (with `rowGroupMode="subheader"`) adds a toggle button to each
+ * subheader row, named by `rowGroupToggleLabel`, that collapses or expands the group. The
+ * `expandedRowGroups` model holds the group values that are currently collapsed (the default empty
+ * list leaves every group expanded), and `rowGroupExpand`/`rowGroupCollapse` emit the group value
+ * on each user toggle.
  *
  * **`reorderable`** adds a small drag-handle column (`bars-3`/hamburger icon) and native HTML5
  * drag-and-drop on each row; dropping emits `rowReorder` with `dragIndex`/`dropIndex` — indices
@@ -255,13 +262,14 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
         />
       </div>
     }
-    <ng-template #dataCells let-row let-i="index" let-frozen="frozen">
+    <ng-template #dataCells let-row let-i="index" let-frozen="frozen" let-span="span">
       @for (col of visibleColumns(); track col.field()) {
-        <td [class]="cellClass(col, row, i)" [style]="frozenStyle(col)" (dblclick)="frozen ? null : onCellDblClick($event, row, col)">
+        @if (frozen || span !== 0 || col.field() !== spanColumnField()) {
+        <td [class]="cellClass(col, row, i)" [style]="frozenStyle(col)" [attr.rowspan]="!frozen && span >= 1 && col.field() === spanColumnField() ? span : null" [attr.data-med-editing]="!frozen && isEditingCell(row, col) ? '' : null" (click)="frozen ? null : onCellClick($event, row, col)" (dblclick)="frozen ? null : onCellDblClick($event, row, col)">
           @if (!frozen && isEditingCell(row, col); as editing) {
             <ng-container
               [ngTemplateOutlet]="col.editTemplate()!"
-              [ngTemplateOutletContext]="{ $implicit: row, onSave: saveEdit(row, col), onCancel: cancelEdit(row, col) }"
+              [ngTemplateOutletContext]="editContext(row, col)"
             />
           } @else if (col.cellTemplate(); as t) {
             <ng-container [ngTemplateOutlet]="t" [ngTemplateOutletContext]="{ $implicit: row, rowIndex: i }" />
@@ -269,6 +277,7 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
             {{ cellValue(row, col) }}
           }
         </td>
+        }
       }
     </ng-template>
     <ng-template #frozenRow let-row let-i="index">
@@ -280,6 +289,9 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
           <td [class]="utilityCellClass('') + ' ' + frozenUtilityClass(row, i)" [style]="utilityStyle('selection')"></td>
         }
         <ng-container [ngTemplateOutlet]="dataCells" [ngTemplateOutletContext]="{ $implicit: row, index: i, frozen: true }" />
+        @if (editMode() === 'row') {
+          <td [class]="utilityCellClass('')"></td>
+        }
       </tr>
     </ng-template>
     <div [class]="wrapperClass()" [class.overflow-y-auto]="scrollable()" [style.maxHeight]="scrollable() && !flexHeight() ? scrollHeight() : null">
@@ -362,6 +374,9 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
                 }
               </th>
             }
+            @if (editMode() === 'row') {
+              <th scope="col" [class]="utilityCellClass('')"><span class="sr-only">{{ rowActionsHeaderLabel() }}</span></th>
+            }
           </tr>
         </thead>
         @if (frozenRowsPosition() === 'top' && frozenRows().length) {
@@ -376,6 +391,18 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
             @if (isGroupStart(row, i)) {
               <tr class="border-b border-surface-200 bg-surface-50 font-semibold dark:border-surface-700 dark:bg-surface-800/50">
                 <td [attr.colspan]="totalColumnCount()" [class]="groupCellClass()">
+                  @if (isRowGroupToggleable()) {
+                    <button
+                      type="button"
+                      class="mr-2 inline-flex size-6 items-center justify-center rounded align-middle text-surface-600 hover:bg-surface-200 focus-visible:outline-2 focus-visible:outline-brand-500 dark:text-surface-300 dark:hover:bg-surface-700"
+                      [attr.aria-expanded]="!isGroupCollapsed(row)"
+                      [attr.aria-label]="rowGroupToggleLabel()(groupValue(row), !isGroupCollapsed(row))"
+                      (click)="toggleRowGroup(row)"
+                      (keydown.enter)="$event.preventDefault(); toggleRowGroup(row)"
+                    >
+                      <med-icon [name]="isGroupCollapsed(row) ? 'chevron-right' : 'chevron-down'" variant="mini" class="size-4" />
+                    </button>
+                  }
                   @if (groupHeaderTemplate(); as t) {
                     <ng-container [ngTemplateOutlet]="t" [ngTemplateOutletContext]="{ $implicit: row }" />
                   } @else {
@@ -384,6 +411,7 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
                 </td>
               </tr>
             }
+            @if (!isRowHiddenByGroup(row)) {
             <tr
               [class]="rowClassFor(row, i)"
               [attr.aria-selected]="selectionMode() ? isSelected(row) : null"
@@ -439,14 +467,48 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
                   </span>
                 </td>
               }
-              <ng-container [ngTemplateOutlet]="dataCells" [ngTemplateOutletContext]="{ $implicit: row, index: i }" />
-            </tr>
-            @if (isRowExpanded(row, i) && rowExpansionTemplate(); as expTpl) {
-              <tr class="border-b border-surface-200 bg-surface-50/40 dark:border-surface-700 dark:bg-surface-800/30">
-                <td [attr.colspan]="totalColumnCount()" [class]="expansionCellClass()">
-                  <ng-container [ngTemplateOutlet]="expTpl" [ngTemplateOutletContext]="{ $implicit: row, rowIndex: i }" />
+              <ng-container [ngTemplateOutlet]="dataCells" [ngTemplateOutletContext]="{ $implicit: row, index: i, span: groupSpans()[i] ?? 1 }" />
+              @if (editMode() === 'row') {
+                <td [class]="utilityCellClass('whitespace-nowrap')" (click)="$event.stopPropagation()">
+                  @if (editingRow() === row) {
+                    <button type="button" [class]="rowActionButtonClass" [attr.aria-label]="saveRowLabel()" (click)="saveRowEdit()">
+                      <med-icon name="check" variant="mini" class="size-4" />
+                    </button>
+                    <button type="button" [class]="rowActionButtonClass" [attr.aria-label]="cancelRowLabel()" (click)="cancelRowEdit()">
+                      <med-icon name="x-mark" variant="mini" class="size-4" />
+                    </button>
+                  } @else {
+                    <button type="button" [class]="rowActionButtonClass" [attr.aria-label]="editRowLabel()" (click)="startRowEdit(row)">
+                      <med-icon name="pencil-square" variant="mini" class="size-4" />
+                    </button>
+                  }
                 </td>
+              }
+            </tr>
+            @if (expansionRowsRender() && isRowExpanded(row, i) && rowExpansionTemplate(); as expTpl) {
+              <tr class="border-b border-surface-200 bg-surface-50/40 dark:border-surface-700 dark:bg-surface-800/30">
+                @if (expansionLayout(); as layout) {
+                  @if (layout.lead > 0) {
+                    <td [attr.colspan]="layout.lead" [class]="expansionCellClass()">
+                      @if (layout.lead >= layout.trail) {
+                        <ng-container [ngTemplateOutlet]="expTpl" [ngTemplateOutletContext]="{ $implicit: row, rowIndex: i }" />
+                      }
+                    </td>
+                  }
+                  @if (layout.trail > 0) {
+                    <td [attr.colspan]="layout.trail" [class]="expansionCellClass()">
+                      @if (layout.lead < layout.trail) {
+                        <ng-container [ngTemplateOutlet]="expTpl" [ngTemplateOutletContext]="{ $implicit: row, rowIndex: i }" />
+                      }
+                    </td>
+                  }
+                } @else {
+                  <td [attr.colspan]="totalColumnCount()" [class]="expansionCellClass()">
+                    <ng-container [ngTemplateOutlet]="expTpl" [ngTemplateOutletContext]="{ $implicit: row, rowIndex: i }" />
+                  </td>
+                }
               </tr>
+            }
             }
           } @empty {
             <tr>
@@ -509,10 +571,27 @@ export class DataTableComponent<T> {
   /** Reinterprets `value()` as "current page only, already filtered/sorted server-side" — see class doc's "lazy" section. */
   readonly lazy = input(false, { transform: booleanAttribute });
   readonly totalRecords = input<number | null>(null);
-  /** `'cell'` only — see class doc for why `'row'` is a documented cut this pass. */
-  readonly editMode = input<'cell' | null>(null);
-  /** `'subheader'` only — see class doc for why `'rowspan'` is a documented cut this pass. */
-  readonly rowGroupMode = input<'subheader' | null>(null);
+  /** `'cell'` edits one cell at a time; `'row'` adds an actions column and edits every editable cell of a row together. */
+  readonly editMode = input<'cell' | 'row' | null>(null);
+  /** With `editMode="cell"`, the gesture that starts editing a cell: a double click (default) or a single click. */
+  readonly editTrigger = input<'dblclick' | 'click'>('dblclick');
+  /** `'subheader'` renders a full-width subheader row per group; `'rowspan'` merges each group's cells in the `groupRowsBy` column. */
+  readonly rowGroupMode = input<'subheader' | 'rowspan' | null>(null);
+  /** With `rowGroupMode="subheader"`, adds a toggle button to each subheader row that collapses or expands the group. */
+  readonly expandableRowGroups = input(false, { transform: booleanAttribute });
+  /** Group values that are currently collapsed; the default empty list means every group is expanded. */
+  readonly expandedRowGroups = model<readonly string[]>([]);
+  /** Accessible name of the edit button in the actions column of `editMode="row"`. */
+  readonly editRowLabel = input('Edit row');
+  /** Accessible name of the save button in the actions column of `editMode="row"`. */
+  readonly saveRowLabel = input('Save row');
+  /** Accessible name of the cancel button in the actions column of `editMode="row"`. */
+  readonly cancelRowLabel = input('Cancel editing');
+  /** Screen-reader-only header text of the actions column of `editMode="row"`. */
+  readonly rowActionsHeaderLabel = input('Row actions');
+  /** Builds the accessible name of a group toggle button from the group value and whether the group is expanded. */
+  readonly rowGroupToggleLabel = input<(group: string, expanded: boolean) => string>((group, expanded) => (expanded ? `Collapse group ${group}` : `Expand group ${group}`));
+  /** The row field whose consecutive equal values form a group for `rowGroupMode`; it also becomes the primary sort key. */
   readonly groupRowsBy = input<string | null>(null);
   readonly reorderable = input(false, { transform: booleanAttribute });
   readonly resizableColumns = input(false, { transform: booleanAttribute });
@@ -555,6 +634,14 @@ export class DataTableComponent<T> {
   readonly lazyLoad = output<TableLazyLoadEvent>();
   readonly editComplete = output<{ readonly row: T; readonly field: string; readonly value: unknown }>();
   readonly editCancel = output<{ readonly row: T; readonly field: string }>();
+  /** Emitted when a row is saved in `editMode="row"`, with the row and the value of each editable field. */
+  readonly rowEditComplete = output<TableRowEditEvent<T>>();
+  /** Emitted when row editing is cancelled, including when another row starts editing. */
+  readonly rowEditCancel = output<T>();
+  /** Emitted with the group value when the user expands a collapsed group. */
+  readonly rowGroupExpand = output<string>();
+  /** Emitted with the group value when the user collapses a group. */
+  readonly rowGroupCollapse = output<string>();
   readonly rowSelect = output<T>();
   readonly rowUnselect = output<T>();
   readonly sort = output<{ readonly field: string | null; readonly order: TableSortOrder; readonly multiSortMeta: readonly TableSortMeta[]; readonly data: readonly T[] }>();
@@ -603,6 +690,10 @@ export class DataTableComponent<T> {
   );
 
   private readonly editingCell = signal<{ row: T; field: string } | null>(null);
+  /** The row in edit mode with `editMode="row"`; at most one row at a time. */
+  protected readonly editingRow = signal<T | null>(null);
+  /** Values the edit templates of the row being edited have reported through `onChange` or `onSave`, keyed by field. */
+  private rowDraft: Record<string, unknown> = {};
   private readonly resizedColumnWidths = signal<ReadonlyMap<string, number>>(new Map());
   /** Inline width of the table in `expand` mode (start width plus the applied delta); `null` keeps the table at its natural `w-full`. */
   protected readonly tableWidthPx = signal<number | null>(null);
@@ -727,7 +818,62 @@ export class DataTableComponent<T> {
   }
 
   /** `rowGroupMode() === 'subheader'`: `groupRowsBy()` becomes the primary sort key ahead of anything else — otherwise same-group rows could scatter and the subheader boundary would fire once per row, see class doc's "rowGroupMode" section. */
-  private readonly effectiveGroupField = computed(() => (this.rowGroupMode() === 'subheader' ? this.groupRowsBy() : null));
+  private readonly effectiveGroupField = computed(() => (this.rowGroupMode() ? this.groupRowsBy() : null));
+
+  /** The visible column row-span grouping merges: `rowGroupMode() === 'rowspan'` and `groupRowsBy()` naming a visible column's field, otherwise `null` and nothing merges. */
+  protected readonly spanColumnField = computed(() => {
+    const field = this.groupRowsBy();
+    if (this.rowGroupMode() !== 'rowspan' || !field) {
+      return null;
+    }
+    return this.visibleColumns().some((col) => col.field() === field) ? field : null;
+  });
+
+  /**
+   * Row-span grouping: one entry per displayed row. The first row of a run of consecutive rows sharing the `groupRowsBy` value gets the run length plus the expanded `#rowexpansion` rows inside it; the other rows of the run get `0` (their grouped cell is omitted). Empty when nothing merges. Computed per displayed page, so a run never crosses a page boundary.
+   */
+  protected readonly groupSpans = computed<readonly number[]>(() => {
+    const field = this.spanColumnField();
+    if (!field) {
+      return [];
+    }
+    const rows = this.pagedValue();
+    const hasExpansion = !!this.rowExpansionTemplate() && this.expansionRowsRender();
+    const spans: number[] = [];
+    let runStart = -1;
+    rows.forEach((row, i) => {
+      const startsRun = i === 0 || this.rowFieldValue(rows[i - 1], field) !== this.rowFieldValue(row, field);
+      if (startsRun) {
+        runStart = i;
+        spans.push(0);
+      } else {
+        spans.push(0);
+      }
+      spans[runStart] += 1 + (hasExpansion && this.isRowExpanded(row, i) ? 1 : 0);
+    });
+    return spans;
+  });
+
+  /**
+   * Row-span grouping: the expansion row cannot cross the merged cell's slot, so it is split into a leading and a trailing
+   * cell around the merged column. `null` when no column is merged (one full-width cell). The wider side holds the expansion template.
+   */
+  protected readonly expansionLayout = computed<{ lead: number; trail: number } | null>(() => {
+    const field = this.spanColumnField();
+    if (!field) {
+      return null;
+    }
+    const cols = this.visibleColumns();
+    const idx = cols.findIndex((col) => col.field() === field);
+    const utilityBefore = (this.reorderable() ? 1 : 0) + (this.selectionMode() === 'multiple' || this.selectionMode() === 'radio' ? 1 : 0);
+    return { lead: utilityBefore + idx, trail: cols.length - idx - 1 + (this.editMode() === 'row' ? 1 : 0) };
+  });
+
+  /** `false` when row-span grouping leaves the expansion row no column to render in (the merged column is the only one): the row is skipped and does not count toward a rowspan. */
+  protected readonly expansionRowsRender = computed(() => {
+    const layout = this.expansionLayout();
+    return !layout || layout.lead + layout.trail > 0;
+  });
 
   /** `lazy()`: `value()` is already sorted server-side, identity passthrough same as `filteredValue`. `sortMode() === 'multiple'`: each `multiSortMeta` entry breaks ties left by the ones before it, primary key first. */
   protected readonly sortedValue = computed(() => {
@@ -810,7 +956,7 @@ export class DataTableComponent<T> {
     return layout;
   });
 
-  protected readonly totalColumnCount = computed(() => this.visibleColumns().length + (this.selectionMode() === 'multiple' || this.selectionMode() === 'radio' ? 1 : 0) + (this.reorderable() ? 1 : 0));
+  protected readonly totalColumnCount = computed(() => this.visibleColumns().length + (this.selectionMode() === 'multiple' || this.selectionMode() === 'radio' ? 1 : 0) + (this.reorderable() ? 1 : 0) + (this.editMode() === 'row' ? 1 : 0));
 
   protected readonly allSelected = computed(() => {
     const rows = this.sortedValue();
@@ -842,9 +988,37 @@ export class DataTableComponent<T> {
     return field ? this.rowFieldValue(row, field) : '';
   }
 
+  /** `true` when subheader rows carry a collapse toggle: `rowGroupMode="subheader"`, `expandableRowGroups` and a `groupRowsBy` field. */
+  protected isRowGroupToggleable(): boolean {
+    return this.rowGroupMode() === 'subheader' && this.expandableRowGroups() && !!this.groupRowsBy();
+  }
+
+  /** `true` when `row` belongs to a group whose value is in the `expandedRowGroups` model (the collapsed ones). */
+  protected isGroupCollapsed(row: T): boolean {
+    return this.isRowGroupToggleable() && this.expandedRowGroups().includes(this.groupValue(row));
+  }
+
+  /** A collapsed group hides its body rows and their expansion rows; the subheader row stays. */
+  protected isRowHiddenByGroup(row: T): boolean {
+    return this.isGroupCollapsed(row);
+  }
+
+  /** Collapses an expanded group or expands a collapsed one, updating the model and emitting the matching output. */
+  protected toggleRowGroup(row: T): void {
+    const value = this.groupValue(row);
+    const collapsed = this.expandedRowGroups();
+    if (collapsed.includes(value)) {
+      this.expandedRowGroups.set(collapsed.filter((group) => group !== value));
+      this.rowGroupExpand.emit(value);
+    } else {
+      this.expandedRowGroups.set([...collapsed, value]);
+      this.rowGroupCollapse.emit(value);
+    }
+  }
+
   /** A group boundary starts at `index` when `rowGroupMode()` is on and either it's the first row or the previous row's group value differs. */
   protected isGroupStart(row: T, index: number): boolean {
-    const field = this.effectiveGroupField();
+    const field = this.rowGroupMode() === 'subheader' ? this.effectiveGroupField() : null;
     if (!field) {
       return false;
     }
@@ -864,6 +1038,8 @@ export class DataTableComponent<T> {
   }
 
   /** Padding for the select, reorder and header utility cells; `narrow` uses the tighter horizontal padding. */
+  protected readonly rowActionButtonClass = 'inline-flex size-7 items-center justify-center rounded-md text-surface-600 hover:bg-surface-100 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-brand-500 dark:text-surface-300 dark:hover:bg-surface-700';
+
   protected utilityCellClass(extra: string, narrow = false): string {
     const pad = SIZE_PADDING_CLASS[this.size()];
     return mergeClasses(narrow ? pad.replace(/px-\S+/, 'px-2') : pad, extra, this.gridClass());
@@ -1193,6 +1369,24 @@ export class DataTableComponent<T> {
   }
 
   protected onRowKeydown(event: KeyboardEvent, row: T): void {
+    // Enter saves and Escape cancels an edited row, even from an edit template that does not handle them itself.
+    if (this.editMode() === 'row' && this.editingRow() === row && (event.key === 'Enter' || event.key === 'Escape')) {
+      const target = event.target as HTMLElement | null;
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        this.cancelRowEdit();
+        return;
+      }
+      if (target?.closest?.('[data-med-editing]') && !target.closest('button, textarea, a')) {
+        event.preventDefault();
+        this.saveRowEdit();
+        return;
+      }
+    }
+    // Keys pressed inside an edit template belong to it: they must neither select the row nor move the row focus.
+    if ((event.target as HTMLElement | null)?.closest?.('[data-med-editing]')) {
+      return;
+    }
     const mode = this.selectionMode();
     if (!mode) {
       return;
@@ -1292,8 +1486,25 @@ export class DataTableComponent<T> {
   }
 
   protected isEditingCell(row: T, col: TableColumnComponent): boolean {
+    if (this.editMode() === 'row') {
+      return this.editingRow() === row && col.editable() && !!col.editTemplate();
+    }
     const editing = this.editingCell();
     return editing !== null && editing.row === row && editing.field === col.field();
+  }
+
+  /** With `editTrigger="click"` a click on an editable cell starts editing it; the event stops here so the row click never selects the row. */
+  protected onCellClick(event: MouseEvent, row: T, col: TableColumnComponent): void {
+    // A click inside a cell that is already being edited belongs to the edit template, never to row selection.
+    if (this.isEditingCell(row, col)) {
+      event.stopPropagation();
+      return;
+    }
+    if (this.editTrigger() !== 'click' || this.editMode() !== 'cell' || !col.editable() || !col.editTemplate()) {
+      return;
+    }
+    event.stopPropagation();
+    this.editingCell.set({ row, field: col.field() });
   }
 
   protected onCellDblClick(event: MouseEvent, row: T, col: TableColumnComponent): void {
@@ -1308,6 +1519,69 @@ export class DataTableComponent<T> {
     // either way.
     event.stopPropagation();
     this.editingCell.set({ row, field: col.field() });
+  }
+
+  /** Starts editing `row`; a row already being edited is cancelled first, emitting `rowEditCancel` for it. */
+  protected startRowEdit(row: T): void {
+    const current = this.editingRow();
+    if (current === row) {
+      return;
+    }
+    if (current !== null) {
+      this.cancelRowEdit();
+    }
+    this.rowDraft = {};
+    this.editingRow.set(row);
+  }
+
+  protected saveRowEdit(): void {
+    const row = this.editingRow();
+    if (row === null) {
+      return;
+    }
+    // Every editable field with an edit template: the draft value when one was recorded, the row's current value otherwise.
+    const values: Record<string, unknown> = {};
+    for (const col of this.visibleColumns()) {
+      if (col.editable() && col.editTemplate()) {
+        const field = col.field();
+        values[field] = field in this.rowDraft ? this.rowDraft[field] : (row as Record<string, unknown>)[field];
+      }
+    }
+    this.rowDraft = {};
+    this.editingRow.set(null);
+    this.rowEditComplete.emit({ row, values });
+  }
+
+  protected cancelRowEdit(): void {
+    const row = this.editingRow();
+    if (row === null) {
+      return;
+    }
+    this.rowDraft = {};
+    this.editingRow.set(null);
+    this.rowEditCancel.emit(row);
+  }
+
+  /**
+   * Template context of an edit template. In row mode `onChange` records the field's value in the row's draft, `onSave`
+   * records it and commits the whole row, and `onCancel` cancels the row; in cell mode `onSave`/`onCancel` act on the single cell.
+   */
+  protected editContext(row: T, col: TableColumnComponent): Record<string, unknown> {
+    if (this.editMode() !== 'row') {
+      return { $implicit: row, onSave: this.saveEdit(row, col), onCancel: this.cancelEdit(row, col) };
+    }
+    const field = col.field();
+    return {
+      $implicit: row,
+      onChange: (value: unknown) => {
+        this.rowDraft[field] = value;
+      },
+      onSave: (value: unknown) => {
+        this.rowDraft[field] = value;
+        this.saveRowEdit();
+      },
+      onCancel: () => this.cancelRowEdit(),
+    };
   }
 
   /** Bound once per render for the currently-editing cell only (guarded by `isEditingCell()` in the template) — not a perf concern, at most one cell is ever in edit mode at a time. */

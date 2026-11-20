@@ -1,0 +1,28 @@
+<med-data-table
+  [value]="equipment()"
+  [(selection)]="selected"
+  selectionMode="single"
+  editMode="cell"
+  editTrigger="click"
+  ariaLabel="Lab equipment inventory (editable, selectable)"
+  (editComplete)="onEditComplete($event)"
+>
+  <med-table-column field="name" header="Name" />
+  <med-table-column field="category" header="Category" />
+  <med-table-column field="quantity" header="Quantity" align="right" editable>
+    <ng-template #editTemplate let-row let-onSave="onSave" let-onCancel="onCancel">
+      <input
+        medInputText
+        type="number"
+        class="h-7 w-20 text-sm"
+        [value]="row.quantity"
+        (keydown.enter)="onSave($any($event.target).valueAsNumber)"
+        (blur)="onSave($any($event.target).valueAsNumber)"
+        (keydown.escape)="onCancel()"
+      />
+    </ng-template>
+  </med-table-column>
+</med-data-table>
+<p class="mt-2 text-sm text-surface-500 dark:text-surface-400">
+  Selected: {{ selected()?.name ?? 'none' }}. Click a quantity to edit it without selecting its row.
+</p>

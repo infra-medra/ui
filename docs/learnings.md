@@ -22,9 +22,9 @@
 
 **Statement:** When a change only documents and tests behavior that already works, write its test tasks so they do not require a red run, or the first apply stops on a blocker. State in tasks.md that the tests are expected green from the start.
 **Scope:** capabilities: data-display · stages: tasks, apply
-**Evidence:** document-row-identity-and-row-labels
-**Occurrences:** 1
-**Last seen:** 6
+**Evidence:** document-row-identity-and-row-labels, add-data-table-row-editing-and-group-modes
+**Occurrences:** 2
+**Last seen:** 10
 
 ### L-004 [preference] Commit the previous change before verifying the next one
 
@@ -46,9 +46,25 @@
 
 **Statement:** When a plan decision cancels or guards a gesture because another input is active (for example preventDefault on dragstart during a column resize), write a test that enables both inputs together and asserts the cancellation. A bare early return passes every single-input test.
 **Scope:** capabilities: data-display · stages: tasks, apply, verify
-**Evidence:** add-data-table-column-reorder
+**Evidence:** add-data-table-column-reorder, add-data-table-row-editing-and-group-modes
+**Occurrences:** 2
+**Last seen:** 10
+
+### L-007 [lesson] Test layout features at every column position, not only the default one
+
+**Statement:** Test rowspan or colspan features with a utility column (selection, reorder, row actions) before the merged column and with the merged column in the middle, and assert that each row's colspans plus its merged cells add up to the total column count. A test with the grouped column first passes while every other layout breaks.
+**Scope:** capabilities: data-display · stages: tasks, apply, verify
+**Evidence:** add-data-table-row-editing-and-group-modes
 **Occurrences:** 1
-**Last seen:** 9
+**Last seen:** 10
+
+### L-008 [lesson] Use theme-defined color tokens for new interactive controls
+
+**Statement:** Style new controls only with tokens the theme defines (for example brand-500, not primary-500); an unknown Tailwind class generates no CSS and silently drops the focus ring. Check the class against tailwind-theme-medraui.css before using it.
+**Scope:** capabilities: data-display · stages: apply, verify
+**Evidence:** add-data-table-row-editing-and-group-modes
+**Occurrences:** 1
+**Last seen:** 10
 
 ## Promoted
 

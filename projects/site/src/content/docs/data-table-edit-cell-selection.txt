@@ -1,0 +1,7 @@
+## Cell editing with row selection
+
+By default, `editMode="cell"` starts editing on a double click, because a single click already
+selects the row in `selectionMode="single"`. Set `editTrigger="click"` to start editing on a single
+click instead: the click stops at the cell, so it never selects the row. Clicks and keys inside an
+edit cell, such as a space or an arrow key typed into the input, never reach row selection or row
+keyboard navigation either.

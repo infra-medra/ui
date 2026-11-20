@@ -1,0 +1,7 @@
+## Expandable row groups
+
+Add `expandableRowGroups` to `rowGroupMode="subheader"` to give each subheader row a toggle button
+that collapses or expands its group, named by `rowGroupToggleLabel`. The `expandedRowGroups` model
+holds the values of the groups that are currently collapsed — the default empty list leaves every
+group expanded — and `rowGroupCollapse` and `rowGroupExpand` emit the group value on each toggle.
+The toggle is a native button, so Enter and Space work from the keyboard.
