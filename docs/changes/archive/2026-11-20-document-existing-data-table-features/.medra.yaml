@@ -1,0 +1,173 @@
+change: document-existing-data-table-features
+created: 2026-11-19
+track: full
+phase: archived
+diff_base: 7ddca3d
+gates:
+  proposal:
+    status: approved
+    by: Tiago Cavalli
+    at: 2026-11-20T01:54:33Z
+    hash: ec9dd3203769a1d3a1a57d5b7cee8407fd3f66af2256717075d7382b521e13e6
+    note: null
+  plan:
+    status: approved
+    by: Tiago Cavalli
+    at: 2026-11-20T01:57:44Z
+    hash: 160593b4c630cb071cc4a497d2bbb8398e5b3c9a813cb8f2a8621ccbe0a61352
+    note: null
+  tasks:
+    status: approved
+    by: Tiago Cavalli
+    at: 2026-11-20T01:59:26Z
+    hash: 404f5ce637a35e9939ad69231f2e03f8742a31d69d59289a01da720595665af4
+    note: null
+  verify:
+    status: approved
+    by: Tiago Cavalli
+    at: 2026-11-20T10:00:32Z
+    hash: 43a1152e85c6fdda3cc5a33df8e573ebbc1f5f45839fe4da0a207f0286cd745c
+    note: null
+gate_notes:
+  - gate: verify
+    by: Tiago Cavalli
+    at: 2026-11-20T09:51:59Z
+    note: "Document the config change: keep e2e/** and **/*.spec.* in testing.paths of docs/config-flow.yaml and account for it in the change documents."
+reviews: []
+track_history: []
+blockers: []
+test_hashes:
+  T001:
+    e2e/site/data-table-docs.spec.ts: 72cd51f6b1467567bf19ea0994476be64ae4e8129318c58f26212d4891bf4c72
+last_task_done_at: 2026-11-20T02:15:06Z
+suite:
+  at: 2026-11-20T09:53:30Z
+  exit: 0
+  commands:
+    - npm test
+  fingerprint: 7591e36a8befff9c1f77d43aef3016ae1358264765ed18864615b628b5d33793
+handoff_snapshots:
+  check:
+    "1":
+      e2e/site/data-table-docs.spec.ts: 72cd51f6b1467567bf19ea0994476be64ae4e8129318c58f26212d4891bf4c72
+      projects/site/src/app/pages/docs/components/data-table.page.ts: 40e58c645451b501c2050ed5c66c3446d1042a79d93ac4f0c6657212cc2d25f5
+      projects/site/src/app/pages/docs/components/demos/data-table-column-resize.demo.html: 5d13306bc4ad35dde666aac653d9a8369fbdd2ff76055ce8fbbdf5129e0ebf90
+      projects/site/src/app/pages/docs/components/demos/data-table-column-resize.demo.ts: b0b231e2d04f3a6963a36087c85a700f27422f2b6b9d6b8ef14b0f9a52886ed3
+      projects/site/src/app/pages/docs/components/demos/data-table-conditional-style.demo.html: 09e1574dd974263f9303f74062dd227de70bba70c8f0df1209606d0c4f585479
+      projects/site/src/app/pages/docs/components/demos/data-table-conditional-style.demo.ts: 8b98f8629b3d9fd6747222362be530e6c7a0a4e7c23aa00f1547d4dcede99a9b
+      projects/site/src/app/pages/docs/components/demos/data-table-edit-cell.demo.html: a883e13b6769296fcc73382e889e6ae761a405e021a638f859b8b93171873355
+      projects/site/src/app/pages/docs/components/demos/data-table-edit-cell.demo.ts: e548c8ad6a38df1c22e54cb83f96ec103cc6f83d7cce9cbbe88cc9918d7fb7ef
+      projects/site/src/app/pages/docs/components/demos/data-table-empty-state.demo.html: 111ed03702ae6ebe71dfd150817c5ee158ca97fcd12217902a2d6194646a9dd9
+      projects/site/src/app/pages/docs/components/demos/data-table-empty-state.demo.ts: 6b4dcdb6d942923cc677f682c6c577291cf782d4149e971c5c7543cefd727dab
+      projects/site/src/app/pages/docs/components/demos/data-table-export-csv.demo.html: d2e7b43a9e85c4300cd126f05b45822e46825accbf09a2a94935c4ddde3c9bd3
+      projects/site/src/app/pages/docs/components/demos/data-table-export-csv.demo.ts: c9f577b4c9779086cf7f37f28ea7aa02353edd39fb3c7ac7a167d852b73d86f0
+      projects/site/src/app/pages/docs/components/demos/data-table-filter-global.demo.html: 206afddadfeb95a5a14f89c778774b999bffbea49af2fca007bb48b87b51c15e
+      projects/site/src/app/pages/docs/components/demos/data-table-filter-global.demo.ts: 47d5d553f0b54fa05154b652b5bffdf034e6097bcd440b170f5c4a2423889025
+      projects/site/src/app/pages/docs/components/demos/data-table-loading.demo.html: ca67d0ee029943aa9154fd4e90059e4a115a495cd3bdab543f1a52d62ddcee38
+      projects/site/src/app/pages/docs/components/demos/data-table-loading.demo.ts: 3db3ee0529b784e00026f5bcb0112acc8393474340a5644662ecfb107eab0f64
+      projects/site/src/app/pages/docs/components/demos/data-table-multi-sort-edit.demo.html: deleted
+      projects/site/src/app/pages/docs/components/demos/data-table-pagination.demo.html: b5c846c6da0dc2b1368daa23fcb9c85bdbe119d7ced2238db087caff57d671fc
+      projects/site/src/app/pages/docs/components/demos/data-table-pagination.demo.ts: 42909e66fe4fbc93f0af47cfd8aba1bf5b948616fde53101a2258809743421aa
+      projects/site/src/app/pages/docs/components/demos/data-table-row-expansion.demo.html: 6cc6dc9196c34e96a70e9992d287e35a4c96d57544f744a7f3b1ab89d57e500b
+      projects/site/src/app/pages/docs/components/demos/data-table-row-expansion.demo.ts: 849c3c742d037df49809659d4a08b2d1a43e5e545193b1a1c2c09b314169f3a7
+      projects/site/src/app/pages/docs/components/demos/data-table-row-group-subheader.demo.html: c1e86591dcb08a94f560773573a3d03a123bc2cdf846b0862d0685ed1c440500
+      projects/site/src/app/pages/docs/components/demos/data-table-row-group-subheader.demo.ts: e95acc398ccccc842e29cc882195a7999b7b6c4e7217254a8db6302089baff76
+      projects/site/src/app/pages/docs/components/demos/data-table-row-reorder-events.demo.html: 12fc50453f571dae144d0c5b4dafca330c584ca5921e094f9930cc0292052691
+      projects/site/src/app/pages/docs/components/demos/data-table-row-reorder-events.demo.ts: 74bb3b9e36a6b468ca9664059d6334dc8243a688667f8e90029e121c095abd0e
+      projects/site/src/app/pages/docs/components/demos/data-table-scroll-vertical.demo.html: ae13c7b0e796ea71b29959660c0834a69b3cb0b6a5410eecc04c42fe062e5e68
+      projects/site/src/app/pages/docs/components/demos/data-table-scroll-vertical.demo.ts: fa6b30ab62df68cbaf81377cd5b5662afea4ef9e7dda6639b39a13b164e46b54
+      projects/site/src/app/pages/docs/components/demos/data-table-selection-multiple.demo.html: 3d73de2875da09fe9358c29026c4cdecefa9f64ed09a412c71e83335d44fea14
+      projects/site/src/app/pages/docs/components/demos/data-table-selection-multiple.demo.ts: e3759786b019dd56d370aa045a4687004c982d49b0f08e6f7296c37f68121be3
+      projects/site/src/app/pages/docs/components/demos/data-table-selection-single.demo.html: 171a2dbc35fe3435bad514407b93626b46ef3c435ca6877ca1e757ecd510a747
+      projects/site/src/app/pages/docs/components/demos/data-table-selection-single.demo.ts: 29201e05ed0db1d8e74a05120cfcae9dd8eac99601c63fe39b896873fb20e68a
+      projects/site/src/app/pages/docs/components/demos/data-table-sort-multiple.demo.html: de70f0a87c7bc19e291c86fd2d9758be74a64a76acbeb4549bc9572404c9f129
+      projects/site/src/app/pages/docs/components/demos/data-table-sort-multiple.demo.ts: 2a3ad220617189fc66d5c3a6de8667c11cf372f5e5222f7af6e8f67d624a1a07
+      projects/site/src/app/pages/docs/components/demos/data-table-sort-single.demo.html: d65de8a2221d18a1a574c04a05d8754047f540603919d577c27f68bc07db3908
+      projects/site/src/app/pages/docs/components/demos/data-table-sort-single.demo.ts: 6944f37f63f573b43f65bd419b60dad3e9129bc1c1cbea041b8bff7d8475f87f
+      projects/site/src/app/pages/docs/components/demos/data-table-stateful.demo.html: 220e9d5bddeec7ec891d3e0b07409a93091fc81682f35033ca25d67eb56518c4
+      projects/site/src/app/pages/docs/components/demos/data-table-stateful.demo.ts: 404899da16dcb0042a67f625f0e82cb9bd7b8aad63498d4e8be455c2491b3eec
+      projects/site/src/app/pages/docs/components/demos/data-table-templates.demo.html: 05637dfb1149af5792c0624cee9f851bc62e6b950f88410188229aa47e8e3525
+      projects/site/src/app/pages/docs/components/demos/data-table-templates.demo.ts: 121fd7f91384763292ddf3876f7bc1a2a2610514865e3b886bca7ce1b206a49e
+      projects/site/src/content/docs/data-table-basic.txt: 11bbeb216a215107d5f32905110796e2010ff52fb87d0a207fff0c7d90903d10
+      projects/site/src/content/docs/data-table-column-resize.txt: 80a03236667b1271536b8c2a5c9f3d719d6333fd4c616d27c81230515d1823e4
+      projects/site/src/content/docs/data-table-conditional-style.txt: 00bd14624f456ab5b4b218acaf9303f78f1baa4fe2c4177b5af5a4c1e8574dc0
+      projects/site/src/content/docs/data-table-edit-cell.txt: 4f200dd8ea8d0fd5513c6be697299356766e70c5e5f72a16c1d2ef83d29bd3cc
+      projects/site/src/content/docs/data-table-empty-state.txt: 06cbf9e4f6de9e085aeb0afc213e652107b65c5174777f09a38ce7258a331466
+      projects/site/src/content/docs/data-table-export-csv.txt: 12510781b106d9910a815dd79b0c8e20edfc241068dde741ebbd8f4d79997e7c
+      projects/site/src/content/docs/data-table-filter-global.txt: f2a41537ee4a7c3586b2c8c812659c8754681ed1c6a57dddff9fb2d53afbfba6
+      projects/site/src/content/docs/data-table-loading.txt: c6cbf57555bb02a7e4ca3023277da4ef1c13d0652b15321d9ca3daa861c9e82f
+      projects/site/src/content/docs/data-table-multi-sort-edit.txt: deleted
+      projects/site/src/content/docs/data-table-pagination.txt: 4d10955decae05420c32ff587d57bb394f046f36e54e8cb3fe382ee28c396658
+      projects/site/src/content/docs/data-table-row-expansion.txt: 105dd20e387ac937783aa3650669704280cdf276fcd4b4f4fb871fe36e879b13
+      projects/site/src/content/docs/data-table-row-group-subheader.txt: 071423280b306ddb5f65e8b1d52045d46f48f0c9ea4bec2db7683925cd36e646
+      projects/site/src/content/docs/data-table-row-reorder-events.txt: 202bfaa2fd798254b0a59224a55b760a5cc7591a2f8682f1af945125c75ee73d
+      projects/site/src/content/docs/data-table-scroll-vertical.txt: 8b55983762ca98862a2b65210e770cf772dbf529e2bce0a51a7f7a9abc5756eb
+      projects/site/src/content/docs/data-table-selection-multiple.txt: c90b27bc70effd7d5232816eb3794059f0f5e155449c6c006b43a59e4d35e3c3
+      projects/site/src/content/docs/data-table-selection-single.txt: 34523ad34f9f233b6f37a5a28ef044ba9e5edca8e3507b536607f5e188bda039
+      projects/site/src/content/docs/data-table-sort-multiple.txt: 93464f4a7e3cb1defee56e6ff5a49f25e30426f29aa205182fe4e00ceb0b3877
+      projects/site/src/content/docs/data-table-sort-single.txt: cda32a2fffa1b754f91b556fd0ea79692a73948b53f4b7533e2c83759c3b7ea9
+      projects/site/src/content/docs/data-table-stateful.txt: a4aaf969efdaa24347449633721b3e0785eb8b4c683b6f064ac17be55d6ac479
+      projects/site/src/content/docs/data-table-templates.txt: 14efa2827464c54d48b493b1e4ba97a7e7e3d2a1706e9e1d14b9ab5f7dc57986
+    "2":
+      e2e/site/data-table-docs.spec.ts: 72cd51f6b1467567bf19ea0994476be64ae4e8129318c58f26212d4891bf4c72
+      projects/site/src/app/pages/docs/components/data-table.page.ts: 40e58c645451b501c2050ed5c66c3446d1042a79d93ac4f0c6657212cc2d25f5
+      projects/site/src/app/pages/docs/components/demos/data-table-column-resize.demo.html: 5d13306bc4ad35dde666aac653d9a8369fbdd2ff76055ce8fbbdf5129e0ebf90
+      projects/site/src/app/pages/docs/components/demos/data-table-column-resize.demo.ts: b0b231e2d04f3a6963a36087c85a700f27422f2b6b9d6b8ef14b0f9a52886ed3
+      projects/site/src/app/pages/docs/components/demos/data-table-conditional-style.demo.html: 09e1574dd974263f9303f74062dd227de70bba70c8f0df1209606d0c4f585479
+      projects/site/src/app/pages/docs/components/demos/data-table-conditional-style.demo.ts: 8b98f8629b3d9fd6747222362be530e6c7a0a4e7c23aa00f1547d4dcede99a9b
+      projects/site/src/app/pages/docs/components/demos/data-table-edit-cell.demo.html: a883e13b6769296fcc73382e889e6ae761a405e021a638f859b8b93171873355
+      projects/site/src/app/pages/docs/components/demos/data-table-edit-cell.demo.ts: e548c8ad6a38df1c22e54cb83f96ec103cc6f83d7cce9cbbe88cc9918d7fb7ef
+      projects/site/src/app/pages/docs/components/demos/data-table-empty-state.demo.html: 111ed03702ae6ebe71dfd150817c5ee158ca97fcd12217902a2d6194646a9dd9
+      projects/site/src/app/pages/docs/components/demos/data-table-empty-state.demo.ts: 6b4dcdb6d942923cc677f682c6c577291cf782d4149e971c5c7543cefd727dab
+      projects/site/src/app/pages/docs/components/demos/data-table-export-csv.demo.html: d2e7b43a9e85c4300cd126f05b45822e46825accbf09a2a94935c4ddde3c9bd3
+      projects/site/src/app/pages/docs/components/demos/data-table-export-csv.demo.ts: c9f577b4c9779086cf7f37f28ea7aa02353edd39fb3c7ac7a167d852b73d86f0
+      projects/site/src/app/pages/docs/components/demos/data-table-filter-global.demo.html: 206afddadfeb95a5a14f89c778774b999bffbea49af2fca007bb48b87b51c15e
+      projects/site/src/app/pages/docs/components/demos/data-table-filter-global.demo.ts: 47d5d553f0b54fa05154b652b5bffdf034e6097bcd440b170f5c4a2423889025
+      projects/site/src/app/pages/docs/components/demos/data-table-loading.demo.html: ca67d0ee029943aa9154fd4e90059e4a115a495cd3bdab543f1a52d62ddcee38
+      projects/site/src/app/pages/docs/components/demos/data-table-loading.demo.ts: 3db3ee0529b784e00026f5bcb0112acc8393474340a5644662ecfb107eab0f64
+      projects/site/src/app/pages/docs/components/demos/data-table-multi-sort-edit.demo.html: deleted
+      projects/site/src/app/pages/docs/components/demos/data-table-pagination.demo.html: b5c846c6da0dc2b1368daa23fcb9c85bdbe119d7ced2238db087caff57d671fc
+      projects/site/src/app/pages/docs/components/demos/data-table-pagination.demo.ts: 42909e66fe4fbc93f0af47cfd8aba1bf5b948616fde53101a2258809743421aa
+      projects/site/src/app/pages/docs/components/demos/data-table-row-expansion.demo.html: 6cc6dc9196c34e96a70e9992d287e35a4c96d57544f744a7f3b1ab89d57e500b
+      projects/site/src/app/pages/docs/components/demos/data-table-row-expansion.demo.ts: 849c3c742d037df49809659d4a08b2d1a43e5e545193b1a1c2c09b314169f3a7
+      projects/site/src/app/pages/docs/components/demos/data-table-row-group-subheader.demo.html: c1e86591dcb08a94f560773573a3d03a123bc2cdf846b0862d0685ed1c440500
+      projects/site/src/app/pages/docs/components/demos/data-table-row-group-subheader.demo.ts: e95acc398ccccc842e29cc882195a7999b7b6c4e7217254a8db6302089baff76
+      projects/site/src/app/pages/docs/components/demos/data-table-row-reorder-events.demo.html: 12fc50453f571dae144d0c5b4dafca330c584ca5921e094f9930cc0292052691
+      projects/site/src/app/pages/docs/components/demos/data-table-row-reorder-events.demo.ts: 74bb3b9e36a6b468ca9664059d6334dc8243a688667f8e90029e121c095abd0e
+      projects/site/src/app/pages/docs/components/demos/data-table-scroll-vertical.demo.html: ae13c7b0e796ea71b29959660c0834a69b3cb0b6a5410eecc04c42fe062e5e68
+      projects/site/src/app/pages/docs/components/demos/data-table-scroll-vertical.demo.ts: fa6b30ab62df68cbaf81377cd5b5662afea4ef9e7dda6639b39a13b164e46b54
+      projects/site/src/app/pages/docs/components/demos/data-table-selection-multiple.demo.html: 3d73de2875da09fe9358c29026c4cdecefa9f64ed09a412c71e83335d44fea14
+      projects/site/src/app/pages/docs/components/demos/data-table-selection-multiple.demo.ts: e3759786b019dd56d370aa045a4687004c982d49b0f08e6f7296c37f68121be3
+      projects/site/src/app/pages/docs/components/demos/data-table-selection-single.demo.html: 171a2dbc35fe3435bad514407b93626b46ef3c435ca6877ca1e757ecd510a747
+      projects/site/src/app/pages/docs/components/demos/data-table-selection-single.demo.ts: 29201e05ed0db1d8e74a05120cfcae9dd8eac99601c63fe39b896873fb20e68a
+      projects/site/src/app/pages/docs/components/demos/data-table-sort-multiple.demo.html: de70f0a87c7bc19e291c86fd2d9758be74a64a76acbeb4549bc9572404c9f129
+      projects/site/src/app/pages/docs/components/demos/data-table-sort-multiple.demo.ts: 2a3ad220617189fc66d5c3a6de8667c11cf372f5e5222f7af6e8f67d624a1a07
+      projects/site/src/app/pages/docs/components/demos/data-table-sort-single.demo.html: d65de8a2221d18a1a574c04a05d8754047f540603919d577c27f68bc07db3908
+      projects/site/src/app/pages/docs/components/demos/data-table-sort-single.demo.ts: 6944f37f63f573b43f65bd419b60dad3e9129bc1c1cbea041b8bff7d8475f87f
+      projects/site/src/app/pages/docs/components/demos/data-table-stateful.demo.html: 220e9d5bddeec7ec891d3e0b07409a93091fc81682f35033ca25d67eb56518c4
+      projects/site/src/app/pages/docs/components/demos/data-table-stateful.demo.ts: 404899da16dcb0042a67f625f0e82cb9bd7b8aad63498d4e8be455c2491b3eec
+      projects/site/src/app/pages/docs/components/demos/data-table-templates.demo.html: 05637dfb1149af5792c0624cee9f851bc62e6b950f88410188229aa47e8e3525
+      projects/site/src/app/pages/docs/components/demos/data-table-templates.demo.ts: 121fd7f91384763292ddf3876f7bc1a2a2610514865e3b886bca7ce1b206a49e
+      projects/site/src/content/docs/data-table-basic.txt: 11bbeb216a215107d5f32905110796e2010ff52fb87d0a207fff0c7d90903d10
+      projects/site/src/content/docs/data-table-column-resize.txt: 80a03236667b1271536b8c2a5c9f3d719d6333fd4c616d27c81230515d1823e4
+      projects/site/src/content/docs/data-table-conditional-style.txt: 00bd14624f456ab5b4b218acaf9303f78f1baa4fe2c4177b5af5a4c1e8574dc0
+      projects/site/src/content/docs/data-table-edit-cell.txt: 4f200dd8ea8d0fd5513c6be697299356766e70c5e5f72a16c1d2ef83d29bd3cc
+      projects/site/src/content/docs/data-table-empty-state.txt: 06cbf9e4f6de9e085aeb0afc213e652107b65c5174777f09a38ce7258a331466
+      projects/site/src/content/docs/data-table-export-csv.txt: 12510781b106d9910a815dd79b0c8e20edfc241068dde741ebbd8f4d79997e7c
+      projects/site/src/content/docs/data-table-filter-global.txt: f2a41537ee4a7c3586b2c8c812659c8754681ed1c6a57dddff9fb2d53afbfba6
+      projects/site/src/content/docs/data-table-loading.txt: c6cbf57555bb02a7e4ca3023277da4ef1c13d0652b15321d9ca3daa861c9e82f
+      projects/site/src/content/docs/data-table-multi-sort-edit.txt: deleted
+      projects/site/src/content/docs/data-table-pagination.txt: 4d10955decae05420c32ff587d57bb394f046f36e54e8cb3fe382ee28c396658
+      projects/site/src/content/docs/data-table-row-expansion.txt: 105dd20e387ac937783aa3650669704280cdf276fcd4b4f4fb871fe36e879b13
+      projects/site/src/content/docs/data-table-row-group-subheader.txt: 071423280b306ddb5f65e8b1d52045d46f48f0c9ea4bec2db7683925cd36e646
+      projects/site/src/content/docs/data-table-row-reorder-events.txt: 202bfaa2fd798254b0a59224a55b760a5cc7591a2f8682f1af945125c75ee73d
+      projects/site/src/content/docs/data-table-scroll-vertical.txt: 8b55983762ca98862a2b65210e770cf772dbf529e2bce0a51a7f7a9abc5756eb
+      projects/site/src/content/docs/data-table-selection-multiple.txt: c90b27bc70effd7d5232816eb3794059f0f5e155449c6c006b43a59e4d35e3c3
+      projects/site/src/content/docs/data-table-selection-single.txt: 34523ad34f9f233b6f37a5a28ef044ba9e5edca8e3507b536607f5e188bda039
+      projects/site/src/content/docs/data-table-sort-multiple.txt: 93464f4a7e3cb1defee56e6ff5a49f25e30426f29aa205182fe4e00ceb0b3877
+      projects/site/src/content/docs/data-table-sort-single.txt: cda32a2fffa1b754f91b556fd0ea79692a73948b53f4b7533e2c83759c3b7ea9
+      projects/site/src/content/docs/data-table-stateful.txt: a4aaf969efdaa24347449633721b3e0785eb8b4c683b6f064ac17be55d6ac479
+      projects/site/src/content/docs/data-table-templates.txt: 14efa2827464c54d48b493b1e4ba97a7e7e3d2a1706e9e1d14b9ab5f7dc57986
+archived:
+  at: 2026-11-20
+  sequence: 2

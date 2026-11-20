@@ -1,0 +1,14 @@
+<med-data-table
+  [value]="equipment"
+  selectionMode="single"
+  dataKey="id"
+  [(selection)]="selected"
+  ariaLabel="Lab equipment inventory (single selection)"
+>
+  <med-table-column field="name" header="Name" />
+  <med-table-column field="category" header="Category" />
+  <med-table-column field="quantity" header="Quantity" align="right" />
+</med-data-table>
+<p class="mt-2 text-sm text-surface-500 dark:text-surface-400">
+  Selected: {{ selectedName }}. Click a row, or focus it and press Enter or Space.
+</p>

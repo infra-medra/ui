@@ -12,6 +12,8 @@ testing:
     - "**/*.test.*"
     - "**/*_test.*"
     - tests/**
+    - e2e/**
+    - "**/*.spec.*"
 learning:
   max_active: 40
   promote_after: 3

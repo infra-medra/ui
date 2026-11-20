@@ -8,11 +8,11 @@ interface EquipmentItem {
 }
 
 @Component({
-  selector: 'app-data-table-export-demo',
+  selector: 'app-data-table-export-csv-demo',
   imports: [DataTableComponent, TableColumnComponent, ButtonDirective],
-  templateUrl: './data-table-export.demo.html',
+  templateUrl: './data-table-export-csv.demo.html',
 })
-export class DataTableExportDemo {
+export class DataTableExportCsvDemo {
   protected readonly equipment: EquipmentItem[] = [
     { name: 'Oscilloscope', category: 'Test equipment', quantity: 4 },
     { name: 'Soldering station', category: 'Workbench tools', quantity: 12 },

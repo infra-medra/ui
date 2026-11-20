@@ -8,11 +8,11 @@ interface EquipmentItem {
 }
 
 @Component({
-  selector: 'app-data-table-grouped-rows-demo',
+  selector: 'app-data-table-row-group-subheader-demo',
   imports: [DataTableComponent, TableColumnComponent],
-  templateUrl: './data-table-grouped-rows.demo.html',
+  templateUrl: './data-table-row-group-subheader.demo.html',
 })
-export class DataTableGroupedRowsDemo {
+export class DataTableRowGroupSubheaderDemo {
   protected readonly equipment: EquipmentItem[] = [
     { name: 'Oscilloscope', category: 'Test equipment', quantity: 4 },
     { name: 'Multimeter', category: 'Test equipment', quantity: 0 },

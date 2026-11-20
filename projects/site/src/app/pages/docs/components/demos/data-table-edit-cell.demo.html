@@ -1,0 +1,19 @@
+<med-data-table [value]="equipment()" editMode="cell" ariaLabel="Lab equipment inventory (editable)" (editComplete)="onEditComplete($event)">
+  <med-table-column field="name" header="Name" />
+  <med-table-column field="category" header="Category" />
+  <med-table-column field="quantity" header="Quantity" align="right" editable>
+    <ng-template let-row>{{ row.quantity }}</ng-template>
+    <ng-template #editTemplate let-row let-onSave="onSave" let-onCancel="onCancel">
+      <input
+        medInputText
+        type="number"
+        class="h-7 w-20 text-sm"
+        [value]="row.quantity"
+        (keydown.enter)="onSave($any($event.target).valueAsNumber)"
+        (blur)="onSave($any($event.target).valueAsNumber)"
+        (keydown.escape)="onCancel()"
+      />
+    </ng-template>
+  </med-table-column>
+</med-data-table>
+<p class="mt-2 text-sm text-surface-500 dark:text-surface-400">Double-click a quantity cell to edit it.</p>

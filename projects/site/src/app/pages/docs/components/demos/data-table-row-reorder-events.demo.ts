@@ -8,11 +8,11 @@ interface Playlist {
 }
 
 @Component({
-  selector: 'app-data-table-reorder-events-demo',
+  selector: 'app-data-table-row-reorder-events-demo',
   imports: [DataTableComponent, TableColumnComponent],
-  templateUrl: './data-table-reorder-events.demo.html',
+  templateUrl: './data-table-row-reorder-events.demo.html',
 })
-export class DataTableReorderEventsDemo {
+export class DataTableRowReorderEventsDemo {
   protected readonly tracks = signal<Playlist[]>([
     { id: 't1', title: 'Morning Glow', artist: 'Nadia Reyes' },
     { id: 't2', title: 'Concrete Skyline', artist: 'The Overpass' },

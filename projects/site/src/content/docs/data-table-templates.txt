@@ -1,0 +1,3 @@
+## Column templates
+
+By default a cell prints `row[field]`. Put an `<ng-template let-row>` inside a `<med-table-column>` to render the cell yourself, with the row as the template context. Use it to format values, add secondary text or colour a status.

@@ -1,0 +1,3 @@
+## Pagination
+
+`paginator` splits the rows into pages. `rows` sets the page size, and `rowsPerPageOptions` adds a page-size selector next to the page controls. `first` is the zero-based index of the first visible row and can be bound two-way to read or change the current page.

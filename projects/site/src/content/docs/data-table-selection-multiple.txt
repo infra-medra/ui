@@ -1,0 +1,5 @@
+## Multiple selection
+
+`selectionMode="multiple"` adds a checkbox column and binds `[(selection)]` to an array of rows. The header checkbox selects every row, across all pages, that passes the current filter, so searching first and then selecting all picks only the matches. Use `selectAllLabel` to change the accessible name of that checkbox.
+
+As with single selection, set `dataKey` so rows are matched by a stable key.

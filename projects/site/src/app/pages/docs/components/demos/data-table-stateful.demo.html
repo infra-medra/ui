@@ -1,0 +1,13 @@
+<med-data-table
+  [value]="equipment"
+  [paginator]="true"
+  [rows]="4"
+  stateKey="docs-data-table-stateful"
+  stateStorage="session"
+  ariaLabel="Lab equipment inventory (persisted state)"
+>
+  <med-table-column field="name" header="Name" sortable />
+  <med-table-column field="category" header="Category" sortable />
+  <med-table-column field="quantity" header="Quantity" align="right" sortable />
+</med-data-table>
+<p class="mt-2 text-sm text-surface-500 dark:text-surface-400">Sort or change page, then reload the page: the table comes back as you left it.</p>
