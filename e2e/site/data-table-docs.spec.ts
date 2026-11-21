@@ -158,6 +158,20 @@ test.describe('DataTable docs page', () => {
     }
   });
 
+  // DAT-024.S11
+  test('DAT-024.S11: the column filter menu has an index entry and a section with prose, a demo and a code block', async ({ page }) => {
+    const { tocIds, anchorIds, sections } = await readPage(page);
+    expect(tocIds, 'no index entry for "column-filters"').toContain('example-column-filters');
+    expect(anchorIds, 'no section for "column-filters"').toContain('example-column-filters');
+    const section = sections.find((s) => s.id === 'example-column-filters')!;
+    expect(section.proseLength, 'no prose for "column-filters"').toBeGreaterThan(0);
+    expect(section.demos, 'no demo for "column-filters"').toBe(1);
+    expect(section.codeBlocks, 'no code block for "column-filters"').toBeGreaterThanOrEqual(1);
+    expect(anchorIds.indexOf('example-column-filters'), 'the column filter section does not follow the global filter').toBe(
+      anchorIds.indexOf('example-filter-global') + 1,
+    );
+  });
+
   // DAT-027.S1
   test('DAT-027.S1: the row-aria-label demo names each row checkbox after its row', async ({ page }) => {
     await page.goto(PAGE);
