@@ -2,8 +2,10 @@ import { Component, DebugElement, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { IconComponent } from '../icon/icon.component';
+import { SelectComponent } from '../select/select.component';
 import { DataTableComponent } from './data-table.component';
 import { TableColumnComponent } from './table-column.component';
+import { TableColumnFilters, TableFilterMatchMode } from './data-table.types';
 
 interface Product {
   name: string;
@@ -261,13 +263,15 @@ describe('DataTableComponent', () => {
     beforeEach(() => jest.useFakeTimers());
     afterEach(() => jest.useRealTimers());
 
-    it('a global filter matches against any visible column value, after the debounce', () => {
+    // DAT-004.S1
+    it('DAT-004.S1: a global filter matches against any visible column value, after the debounce', () => {
       const fixture = create((h) => (h.filterable = true));
       const input = fixture.nativeElement.querySelector('input[type="search"]') as HTMLInputElement;
       input.value = 'gizmo';
       input.dispatchEvent(new Event('input'));
       fixture.detectChanges();
 
+      expect(input.value).toBe('gizmo');
       expect(bodyRows(fixture)).toHaveLength(3); // debounced — not yet applied
 
       jest.advanceTimersByTime(300);
@@ -839,10 +843,12 @@ describe('DataTableComponent', () => {
       expect(fixture.nativeElement.textContent).toContain('50');
     });
 
-    it('emits lazyLoad once on init, and again whenever page/sort/filter changes', () => {
+    // DAT-007.S1
+    it('DAT-007.S1: emits lazyLoad once on init, and again whenever page/sort/filter changes', () => {
       const fixture = create((h) => {
         h.lazy = true;
         h.paginator = true;
+        h.totalRecords = 30;
       });
       expect(fixture.componentInstance.onLazyLoad).toHaveBeenCalledTimes(1);
       expect(fixture.componentInstance.onLazyLoad).toHaveBeenCalledWith({
@@ -852,12 +858,18 @@ describe('DataTableComponent', () => {
         sortOrder: null,
         multiSortMeta: [],
         filter: '',
+        columnFilters: {},
       });
 
       headerCells(fixture)[0].click(); // sort by Name
       fixture.detectChanges();
       expect(fixture.componentInstance.onLazyLoad).toHaveBeenCalledTimes(2);
       expect(fixture.componentInstance.onLazyLoad).toHaveBeenLastCalledWith(expect.objectContaining({ sortField: 'name', sortOrder: 'asc' }));
+
+      (fixture.nativeElement.querySelector('button[aria-label="Next page"]') as HTMLButtonElement).click(); // change the page
+      fixture.detectChanges();
+      expect(fixture.componentInstance.onLazyLoad).toHaveBeenCalledTimes(3);
+      expect(fixture.componentInstance.onLazyLoad).toHaveBeenLastCalledWith(expect.objectContaining({ first: 10, rows: 10, sortField: 'name', sortOrder: 'asc' }));
     });
 
     it('never emits lazyLoad when lazy is off', () => {
@@ -2951,5 +2963,568 @@ describe('DataTableComponent expandable row groups', () => {
     spy.mockRestore();
     expect(csv.split('\n')).toHaveLength(7);
     expect(csv).toContain('Widget');
+  });
+});
+
+interface Item {
+  name: string;
+  price: number;
+}
+
+const ITEMS: Item[] = [
+  { name: 'Widget', price: 30 },
+  { name: 'Gadget', price: 10 },
+  { name: 'Widget Pro', price: 20 },
+];
+
+@Component({
+  standalone: true,
+  imports: [DataTableComponent, TableColumnComponent],
+  template: `
+    <med-data-table [value]="items" [filterable]="filterable" [(columnFilters)]="columnFilters" (filter)="onFilter($event)" ariaLabel="Items">
+      <med-table-column field="name" header="Name" columnFilter />
+      <med-table-column field="price" header="Price" />
+    </med-data-table>
+  `,
+})
+class ColumnFilterHostComponent {
+  items: Item[] = ITEMS;
+  filterable = false;
+  columnFilters = signal<TableColumnFilters>({});
+  onFilter = jest.fn();
+}
+
+@Component({
+  standalone: true,
+  imports: [DataTableComponent, TableColumnComponent],
+  template: `
+    <med-data-table
+      [value]="items"
+      [filterable]="filterable"
+      [(columnFilters)]="columnFilters"
+      [paginator]="paginator"
+      [rows]="rows"
+      [(first)]="first"
+      [(sortField)]="sortField"
+      [(sortOrder)]="sortOrder"
+      [reorderableColumns]="reorderable"
+      [selectionMode]="selectionMode"
+      [matchModeLabels]="matchModeLabels"
+      [lazy]="lazy"
+      (lazyLoad)="onLazyLoad($event)"
+      (filter)="onFilter($event)"
+      (sort)="onSort($event)"
+      (colReorder)="onColReorder($event)"
+      ariaLabel="Items"
+    >
+      <med-table-column field="name" header="Name" sortable columnFilter [filterMatchModes]="nameModes" />
+      <med-table-column field="price" header="Price" sortable [columnFilter]="priceFilter" filterType="numeric" [filterMatchModes]="priceModes" [filterMatchMode]="priceMode" />
+      <med-table-column field="stock" header="Stock" />
+    </med-data-table>
+  `,
+})
+class ColumnFilterMenuHostComponent {
+  items = [
+    { name: 'Widget', price: 30, stock: 1 },
+    { name: 'Gadget', price: 10, stock: 2 },
+    { name: 'Widget Pro', price: 20, stock: 3 },
+  ];
+  filterable = false;
+  columnFilters = signal<TableColumnFilters>({});
+  paginator = false;
+  rows = 10;
+  first = signal(0);
+  sortField: string | null = null;
+  sortOrder: 'asc' | 'desc' | null = null;
+  reorderable = false;
+  selectionMode: 'multiple' | null = null;
+  matchModeLabels: Partial<Record<TableFilterMatchMode, string>> = {};
+  nameModes: readonly TableFilterMatchMode[] | null = null;
+  priceFilter = false;
+  priceModes: readonly TableFilterMatchMode[] | null = null;
+  priceMode: TableFilterMatchMode | null = null;
+  onFilter = jest.fn();
+  onSort = jest.fn();
+  onColReorder = jest.fn();
+  lazy = false;
+  onLazyLoad = jest.fn();
+}
+
+@Component({
+  standalone: true,
+  imports: [DataTableComponent, TableColumnComponent],
+  template: `
+    <med-data-table [value]="items" stateKey="dt-column-filter-state" [(columnFilters)]="columnFilters" [(sortField)]="sortField" [(sortOrder)]="sortOrder" ariaLabel="Releases">
+      <med-table-column field="name" header="Name" sortable columnFilter />
+      <med-table-column field="price" header="Price" sortable columnFilter filterType="numeric" filterMatchMode="gte" />
+      <med-table-column field="released" header="Released" columnFilter filterType="date" />
+    </med-data-table>
+  `,
+})
+class ColumnFilterStateHostComponent {
+  items = [
+    { name: 'Widget', price: 30, released: new Date(2026, 2, 9, 23, 30) },
+    { name: 'Gadget', price: 10, released: new Date(2026, 2, 10, 8, 0) },
+    { name: 'Widget Pro', price: 20, released: new Date(2026, 2, 11, 0, 0) },
+  ];
+  columnFilters = signal<TableColumnFilters>({});
+  sortField: string | null = null;
+  sortOrder: 'asc' | 'desc' | null = null;
+}
+
+describe('DataTableComponent column filters', () => {
+  beforeEach(() => jest.useFakeTimers());
+  afterEach(() => jest.useRealTimers());
+
+  function createFiltered(configure?: (h: ColumnFilterHostComponent) => void) {
+    const fixture = TestBed.createComponent(ColumnFilterHostComponent);
+    configure?.(fixture.componentInstance);
+    fixture.detectChanges();
+    return fixture;
+  }
+
+  function names(fixture: { nativeElement: HTMLElement }): string[] {
+    return bodyRows(fixture).map((tr) => cellText(tr)[0]);
+  }
+
+  // DAT-038.S2
+  it('DAT-038.S2: an active rule "wid" on name combined with the global text "pro" shows only the rows that match both', () => {
+    const fixture = createFiltered((h) => {
+      h.filterable = true;
+      h.columnFilters.set({ name: { matchMode: 'contains', value: 'wid' } });
+    });
+    expect(names(fixture)).toEqual(['Widget', 'Widget Pro']);
+
+    const input = fixture.nativeElement.querySelector('input[type="search"]') as HTMLInputElement;
+    input.value = 'pro';
+    input.dispatchEvent(new Event('input'));
+    jest.advanceTimersByTime(300);
+    fixture.detectChanges();
+
+    expect(names(fixture)).toEqual(['Widget Pro']);
+  });
+
+  it('DAT-038.S2: a rule set by the host filters the rows and an inactive rule filters nothing', () => {
+    const fixture = createFiltered((h) => h.columnFilters.set({ name: { matchMode: 'equals', value: '' } }));
+    expect(names(fixture)).toEqual(['Widget', 'Gadget', 'Widget Pro']);
+
+    fixture.componentInstance.columnFilters.set({ name: { matchMode: 'startsWith', value: 'gad' } });
+    fixture.detectChanges();
+
+    expect(names(fixture)).toEqual(['Gadget']);
+  });
+
+  it('DAT-038.S2: a rule for an unknown field is ignored', () => {
+    const fixture = createFiltered((h) => h.columnFilters.set({ missing: { matchMode: 'equals', value: 'x' } }));
+    expect(names(fixture)).toEqual(['Widget', 'Gadget', 'Widget Pro']);
+  });
+
+  // DAT-009.S2
+  it('DAT-009.S2: exportCSV() with an active rule holds the header and only the rows that pass it', () => {
+    const fixture = createFiltered((h) => h.columnFilters.set({ name: { matchMode: 'notContains', value: 'gadget' } }));
+    const table = fixture.debugElement.query(By.directive(DataTableComponent)).componentInstance as DataTableComponent<Item>;
+    let csv = '';
+    const spy = jest.spyOn(globalThis, 'Blob' as never).mockImplementation(((parts: string[]) => {
+      csv = parts[0];
+      return {} as Blob;
+    }) as never);
+    table.exportCSV();
+    spy.mockRestore();
+
+    expect(csv).toBe('Name,Price\nWidget,30\nWidget Pro,20');
+  });
+
+  describe('menu', () => {
+    afterEach(() => document.querySelectorAll('.cdk-overlay-container').forEach((el) => el.remove()));
+
+    type MenuFixture = ComponentFixture<ColumnFilterMenuHostComponent>;
+
+    function createMenu(configure?: (h: ColumnFilterMenuHostComponent) => void): MenuFixture {
+      const fixture = TestBed.createComponent(ColumnFilterMenuHostComponent);
+      configure?.(fixture.componentInstance);
+      fixture.detectChanges();
+      return fixture;
+    }
+
+    /** First non-empty cell of each body row, so a selection column before `name` does not shift it. */
+    function rowNames(fixture: MenuFixture): string[] {
+      return bodyRows(fixture).map((tr) => cellText(tr).find((text) => text !== '') ?? '');
+    }
+
+    function headerFor(fixture: MenuFixture, header: string): HTMLElement {
+      return headerCells(fixture).find((th) => th.textContent?.includes(header))!;
+    }
+
+    function funnel(fixture: MenuFixture, header: string): HTMLButtonElement {
+      return fixture.nativeElement.querySelector(`thead th button[aria-label="Filter ${header}"]`) as HTMLButtonElement;
+    }
+
+    function funnelIcon(fixture: MenuFixture, header: string): IconComponent {
+      const button = fixture.debugElement.query(By.css(`thead th button[aria-label="Filter ${header}"]`));
+      return button.query(By.directive(IconComponent)).componentInstance as IconComponent;
+    }
+
+    function menu(): HTMLElement | null {
+      return document.querySelector('.cdk-overlay-pane[role="dialog"]');
+    }
+
+    function openMenu(fixture: MenuFixture, header: string): HTMLElement {
+      funnel(fixture, header).click();
+      fixture.detectChanges();
+      return menu()!;
+    }
+
+    function valueInput(): HTMLInputElement {
+      return menu()!.querySelector('input:not([type="hidden"])') as HTMLInputElement;
+    }
+
+    function typeValue(fixture: MenuFixture, text: string): void {
+      const input = valueInput();
+      input.value = text;
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      fixture.detectChanges();
+    }
+
+    function pressEnter(fixture: MenuFixture, target: HTMLElement): void {
+      target.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+      fixture.detectChanges();
+    }
+
+    function menuButton(label: string): HTMLButtonElement | undefined {
+      return Array.from(menu()!.querySelectorAll('button')).find((b) => b.textContent?.trim() === label);
+    }
+
+    function matchModeSelect(): HTMLElement | null {
+      return menu()!.querySelector('[role="combobox"]');
+    }
+
+    // DAT-038.S1
+    it('DAT-038.S1: typing "wid" in the name menu and pressing Enter shows only "Widget" and "Widget Pro", closes the menu and marks the funnel active', () => {
+      const fixture = createMenu();
+      expect(rowNames(fixture)).toEqual(['Widget', 'Gadget', 'Widget Pro']);
+      expect(funnelIcon(fixture, 'Name').variant()).not.toBe('solid');
+
+      openMenu(fixture, 'Name');
+      typeValue(fixture, 'wid');
+      pressEnter(fixture, valueInput());
+
+      expect(rowNames(fixture)).toEqual(['Widget', 'Widget Pro']);
+      expect(menu()).toBeNull();
+      expect(funnelIcon(fixture, 'Name').variant()).toBe('solid');
+    });
+
+    it('DAT-038.S1: the menu holds a match mode select, a value control, and Apply and Clear buttons', () => {
+      const fixture = createMenu();
+      openMenu(fixture, 'Name');
+
+      expect(menu()).not.toBeNull();
+      expect(matchModeSelect()).not.toBeNull();
+      expect(valueInput()).not.toBeNull();
+      expect(menuButton('Apply')).toBeDefined();
+      expect(menuButton('Clear')).toBeDefined();
+    });
+
+    it('DAT-038.S1: the match mode select is left out when the column offers a single mode', () => {
+      const fixture = createMenu((h) => (h.nameModes = ['equals']));
+      openMenu(fixture, 'Name');
+
+      expect(matchModeSelect()).toBeNull();
+      expect(valueInput()).not.toBeNull();
+    });
+
+    // DAT-038.S3
+    it('DAT-038.S3: Clear removes the active rule on name, shows all rows and drops the active state', () => {
+      const fixture = createMenu((h) => h.columnFilters.set({ name: { matchMode: 'contains', value: 'wid' } }));
+      expect(rowNames(fixture)).toEqual(['Widget', 'Widget Pro']);
+      expect(funnelIcon(fixture, 'Name').variant()).toBe('solid');
+
+      openMenu(fixture, 'Name');
+      menuButton('Clear')!.click();
+      fixture.detectChanges();
+
+      expect(rowNames(fixture)).toEqual(['Widget', 'Gadget', 'Widget Pro']);
+      expect(funnelIcon(fixture, 'Name').variant()).not.toBe('solid');
+      expect(fixture.componentInstance.columnFilters()['name']).toBeUndefined();
+      expect(menu()).toBeNull();
+    });
+
+    // DAT-038.S4
+    it('DAT-038.S4: clicking the funnel of a sortable, reorderable name column after a selection column opens the menu and leaves the sort unchanged', () => {
+      const fixture = createMenu((h) => {
+        h.reorderable = true;
+        h.selectionMode = 'multiple';
+      });
+      expect(headerFor(fixture, 'Name').getAttribute('aria-sort')).toBe('none');
+
+      openMenu(fixture, 'Name');
+
+      expect(menu()).not.toBeNull();
+      expect(fixture.componentInstance.sortField).toBeNull();
+      expect(fixture.componentInstance.sortOrder).toBeNull();
+      expect(fixture.componentInstance.onSort).not.toHaveBeenCalled();
+      expect(headerFor(fixture, 'Name').getAttribute('aria-sort')).toBe('none');
+      expect(rowNames(fixture)).toEqual(['Widget', 'Gadget', 'Widget Pro']);
+    });
+
+    it('DAT-038.S4: Enter, Space and Alt+ArrowRight on the funnel neither sort nor move the column, and Enter opens the menu', () => {
+      const fixture = createMenu((h) => {
+        h.reorderable = true;
+        h.selectionMode = 'multiple';
+      });
+      const button = funnel(fixture, 'Name');
+      const headersBefore = headerCells(fixture).map((th) => th.textContent?.trim());
+
+      button.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true, cancelable: true }));
+      button.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', altKey: true, bubbles: true, cancelable: true }));
+      pressEnter(fixture, button);
+      // A browser turns Enter on a native button into a click; jsdom does not.
+      button.click();
+      fixture.detectChanges();
+
+      expect(menu()).not.toBeNull();
+      expect(fixture.componentInstance.sortField).toBeNull();
+      expect(fixture.componentInstance.onSort).not.toHaveBeenCalled();
+      expect(fixture.componentInstance.onColReorder).not.toHaveBeenCalled();
+      expect(headerCells(fixture).map((th) => th.textContent?.trim())).toEqual(headersBefore);
+      expect(headerFor(fixture, 'Name').getAttribute('aria-sort')).toBe('none');
+    });
+
+    // DAT-038.S5
+    it('DAT-038.S5: Escape discards a typed draft, closes the menu, leaves the rows unfiltered and returns focus to the funnel', () => {
+      const fixture = createMenu();
+      const button = funnel(fixture, 'Name');
+      expect(button.getAttribute('aria-haspopup')).toBe('dialog');
+      expect(button.getAttribute('aria-expanded')).toBe('false');
+
+      openMenu(fixture, 'Name');
+      expect(button.getAttribute('aria-expanded')).toBe('true');
+      typeValue(fixture, 'wid');
+      menu()!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
+      fixture.detectChanges();
+
+      expect(menu()).toBeNull();
+      expect(rowNames(fixture)).toEqual(['Widget', 'Gadget', 'Widget Pro']);
+      expect(fixture.componentInstance.columnFilters()).toEqual({});
+      expect(document.activeElement).toBe(button);
+      expect(button.getAttribute('aria-expanded')).toBe('false');
+    });
+
+    it('DAT-038.S5: an outside click also closes the menu without committing and returns focus to the funnel', () => {
+      const fixture = createMenu();
+      const button = funnel(fixture, 'Name');
+      openMenu(fixture, 'Name');
+      typeValue(fixture, 'wid');
+
+      const outside = bodyRows(fixture)[0];
+      outside.dispatchEvent(new MouseEvent('pointerdown', { bubbles: true }));
+      outside.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+      fixture.detectChanges();
+
+      expect(menu()).toBeNull();
+      expect(rowNames(fixture)).toEqual(['Widget', 'Gadget', 'Widget Pro']);
+      expect(document.activeElement).toBe(button);
+      expect(button.getAttribute('aria-expanded')).toBe('false');
+    });
+
+    // DAT-038.S6
+    it('DAT-038.S6: applying a rule from the second page shows the first page of the filtered rows', () => {
+      const fixture = createMenu((h) => {
+        h.paginator = true;
+        h.rows = 2;
+        h.first.set(2);
+      });
+      expect(rowNames(fixture)).toEqual(['Widget Pro']);
+
+      openMenu(fixture, 'Name');
+      typeValue(fixture, 'wid');
+      menuButton('Apply')!.click();
+      fixture.detectChanges();
+
+      expect(fixture.componentInstance.first()).toBe(0);
+      expect(rowNames(fixture)).toEqual(['Widget', 'Widget Pro']);
+      expect(menu()).toBeNull();
+    });
+
+    // DAT-038.S7
+    it('DAT-038.S7: only the name header, which has columnFilter, renders a funnel button', () => {
+      const fixture = createMenu();
+
+      expect(headerFor(fixture, 'Name').querySelector('button[aria-label="Filter Name"]')).not.toBeNull();
+      expect(headerFor(fixture, 'Price').querySelector('button')).toBeNull();
+      expect(headerFor(fixture, 'Stock').querySelector('button')).toBeNull();
+    });
+
+    // DAT-038.S8
+    it('DAT-038.S8: a rule written by the application filters the rows and marks the funnel, and a rule applied in the menu updates columnFilters', () => {
+      const fixture = createMenu((h) => h.columnFilters.set({ name: { matchMode: 'startsWith', value: 'gad' } }));
+
+      expect(rowNames(fixture)).toEqual(['Gadget']);
+      expect(funnelIcon(fixture, 'Name').variant()).toBe('solid');
+
+      openMenu(fixture, 'Name');
+      expect(valueInput().value).toBe('gad');
+      typeValue(fixture, 'wid');
+      pressEnter(fixture, valueInput());
+
+      expect(fixture.componentInstance.columnFilters()).toEqual({ name: { matchMode: 'startsWith', value: 'wid' } });
+      expect(rowNames(fixture)).toEqual(['Widget', 'Widget Pro']);
+    });
+
+    // DAT-039.S4
+    it('DAT-039.S4: a numeric column listing gt, lt and a text-only mode, preselecting gt, offers only lt and gt with gt selected', () => {
+      const fixture = createMenu((h) => {
+        h.priceFilter = true;
+        h.priceModes = ['gt', 'lt', 'startsWith'];
+        h.priceMode = 'gt';
+        h.matchModeLabels = { gt: 'Greater', lt: 'Less', startsWith: 'Starts' };
+      });
+      openMenu(fixture, 'Price');
+
+      expect(matchModeSelect()!.textContent?.trim()).toContain('Greater');
+
+      // jsdom never lays out the select panel's virtual scroll rows (see select.component.spec.ts), so read the offered options from the select itself.
+      const select = fixture.debugElement.query(By.directive(SelectComponent)).componentInstance as SelectComponent<TableFilterMatchMode>;
+      const options = select.options() as readonly { label: string; value: TableFilterMatchMode }[];
+      expect(options.map((o) => o.label)).toEqual(['Less', 'Greater']);
+      expect(options.map((o) => o.value)).toEqual(['lt', 'gt']);
+    });
+
+    // DAT-004.S2
+    it('DAT-004.S2: applying a column rule under the global text "pro" emits filter with "pro" and the rows that pass both', () => {
+      const fixture = createMenu((h) => (h.filterable = true));
+      const search = fixture.nativeElement.querySelector('input[type="search"]') as HTMLInputElement;
+      search.value = 'pro';
+      search.dispatchEvent(new Event('input'));
+      jest.advanceTimersByTime(300);
+      fixture.detectChanges();
+      const host = fixture.componentInstance;
+      host.onFilter.mockClear();
+
+      openMenu(fixture, 'Name');
+      typeValue(fixture, 'widget');
+      menuButton('Apply')!.click();
+      fixture.detectChanges();
+
+      expect(host.onFilter).toHaveBeenCalledTimes(1);
+      expect(host.onFilter).toHaveBeenCalledWith({ value: 'pro', data: [host.items[2]] });
+      expect(rowNames(fixture)).toEqual(['Widget Pro']);
+    });
+
+    // DAT-007.S2
+    it('DAT-007.S2: in a lazy table a rule that would hide a row leaves all three rows shown and lazyLoad emits it in columnFilters', () => {
+      const fixture = createMenu((h) => (h.lazy = true));
+      const host = fixture.componentInstance;
+      expect(rowNames(fixture)).toEqual(['Widget', 'Gadget', 'Widget Pro']);
+      host.onLazyLoad.mockClear();
+
+      openMenu(fixture, 'Name');
+      typeValue(fixture, 'wid');
+      pressEnter(fixture, valueInput());
+
+      expect(host.columnFilters()).toEqual({ name: { matchMode: 'contains', value: 'wid' } });
+      expect(rowNames(fixture)).toEqual(['Widget', 'Gadget', 'Widget Pro']);
+      expect(host.onLazyLoad).toHaveBeenCalledTimes(1);
+      expect(host.onLazyLoad).toHaveBeenLastCalledWith(expect.objectContaining({ first: 0, columnFilters: { name: { matchMode: 'contains', value: 'wid' } } }));
+    });
+  });
+
+  describe('state', () => {
+    const STATE_KEY = 'dt-column-filter-state';
+
+    beforeEach(() => sessionStorage.clear());
+    afterEach(() => {
+      sessionStorage.clear();
+      document.querySelectorAll('.cdk-overlay-container').forEach((el) => el.remove());
+    });
+
+    type StateFixture = ComponentFixture<ColumnFilterStateHostComponent>;
+
+    function createState(): StateFixture {
+      const fixture = TestBed.createComponent(ColumnFilterStateHostComponent);
+      fixture.detectChanges();
+      fixture.detectChanges(); // state is restored after the first render
+      return fixture;
+    }
+
+    function rowNames(fixture: StateFixture): string[] {
+      return bodyRows(fixture).map((tr) => cellText(tr)[0]);
+    }
+
+    function funnelIcon(fixture: StateFixture, header: string): IconComponent {
+      const button = fixture.debugElement.query(By.css(`thead th button[aria-label="Filter ${header}"]`));
+      return button.query(By.directive(IconComponent)).componentInstance as IconComponent;
+    }
+
+    function applyFromMenu(fixture: StateFixture, header: string, text: string): void {
+      (fixture.nativeElement.querySelector(`thead th button[aria-label="Filter ${header}"]`) as HTMLButtonElement).click();
+      fixture.detectChanges();
+      const input = document.querySelector('.cdk-overlay-pane[role="dialog"] input:not([type="hidden"])') as HTMLInputElement;
+      input.value = text;
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      fixture.detectChanges();
+      input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+      fixture.detectChanges();
+    }
+
+    // DAT-010.S2
+    it('DAT-010.S2: a text, a numeric and a date rule applied in one table hold in a new table with the same stateKey, which filters its rows by them', () => {
+      const first = createState();
+      applyFromMenu(first, 'Name', 'wid');
+      applyFromMenu(first, 'Price', '25');
+      first.componentInstance.columnFilters.update((rules) => ({ ...rules, released: { matchMode: 'dateBefore', value: new Date(2026, 2, 10) } }));
+      first.detectChanges();
+      expect(rowNames(first)).toEqual(['Widget']);
+      first.destroy();
+
+      const second = createState();
+      const restored = second.componentInstance.columnFilters();
+
+      expect(restored).toEqual({
+        name: { matchMode: 'contains', value: 'wid' },
+        price: { matchMode: 'gte', value: 25 },
+        released: { matchMode: 'dateBefore', value: new Date(2026, 2, 10) },
+      });
+      expect(restored['released'].value).toBeInstanceOf(Date);
+      expect(rowNames(second)).toEqual(['Widget']);
+      expect(funnelIcon(second, 'Name').variant()).toBe('solid');
+      expect(funnelIcon(second, 'Price').variant()).toBe('solid');
+      expect(funnelIcon(second, 'Released').variant()).toBe('solid');
+    });
+
+    it('DAT-010.S2: a stored entry for an unknown field, a wrong-typed value or an invalid date is dropped on restore', () => {
+      sessionStorage.setItem(
+        STATE_KEY,
+        JSON.stringify({
+          first: 0,
+          sortField: null,
+          sortOrder: null,
+          expandedRowKeys: {},
+          columnFilters: {
+            name: { matchMode: 'startsWith', value: 'gad' },
+            missing: { matchMode: 'contains', value: 'x' },
+            price: { matchMode: 'gt', value: 'abc' },
+            released: { matchMode: 'dateIs', value: 'not-a-date' },
+          },
+        }),
+      );
+      const fixture = createState();
+
+      expect(fixture.componentInstance.columnFilters()).toEqual({ name: { matchMode: 'startsWith', value: 'gad' } });
+      expect(rowNames(fixture)).toEqual(['Gadget']);
+    });
+
+    // DAT-010.S3
+    it('DAT-010.S3: stored state with a sort and no column filters restores the sort with no column rule active', () => {
+      sessionStorage.setItem(STATE_KEY, JSON.stringify({ first: 0, sortField: 'price', sortOrder: 'desc', expandedRowKeys: {} }));
+      const fixture = createState();
+
+      expect(fixture.componentInstance.sortField).toBe('price');
+      expect(fixture.componentInstance.sortOrder).toBe('desc');
+      expect(rowNames(fixture)).toEqual(['Widget', 'Widget Pro', 'Gadget']);
+      expect(fixture.componentInstance.columnFilters()).toEqual({});
+      expect(funnelIcon(fixture, 'Name').variant()).not.toBe('solid');
+      expect(funnelIcon(fixture, 'Price').variant()).not.toBe('solid');
+      expect(funnelIcon(fixture, 'Released').variant()).not.toBe('solid');
+    });
   });
 });

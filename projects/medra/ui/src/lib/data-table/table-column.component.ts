@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, TemplateRef, booleanAttribute, contentChild, input } from '@angular/core';
-import { TableColumnAlign } from './data-table.types';
+import { TableColumnAlign, TableFilterMatchMode, TableFilterType } from './data-table.types';
 
 /**
  * Pure column *metadata*, declared as a content child of `<med-data-table>` (`<med-table-column
@@ -67,6 +67,14 @@ export class TableColumnComponent {
    * Set it to `false` to pin the column's position; other columns cannot be dropped onto it either.
    */
   readonly reorderable = input(true, { transform: booleanAttribute });
+  /** Adds a funnel button to the header that opens a filter menu for this column. */
+  readonly columnFilter = input(false, { transform: booleanAttribute });
+  /** Value type of the column's filter: decides the value control and the match modes offered. */
+  readonly filterType = input<TableFilterType>('text');
+  /** Match mode preselected in the filter menu when it is offered; defaults to the first mode of the type. */
+  readonly filterMatchMode = input<TableFilterMatchMode | null>(null);
+  /** Restricts the offered match modes to those listed here that belong to `filterType`. */
+  readonly filterMatchModes = input<readonly TableFilterMatchMode[] | null>(null);
 
   readonly cellTemplate = contentChild(TemplateRef);
   readonly editTemplate = contentChild('editTemplate', { read: TemplateRef });

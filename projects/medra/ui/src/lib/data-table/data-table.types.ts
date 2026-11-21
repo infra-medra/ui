@@ -19,6 +19,8 @@ export interface TableLazyLoadEvent {
   readonly sortOrder: TableSortOrder;
   readonly multiSortMeta: readonly TableSortMeta[];
   readonly filter: string;
+  /** Active column filter rules keyed by field; the data source applies them, since a lazy table does not filter `value` itself. */
+  readonly columnFilters: TableColumnFilters;
 }
 
 /** Emitted by `rowReorder` (`DataTableComponent`'s `reorderable`) — indices into `value()`, not the currently displayed (sorted/filtered/paged) view. */
@@ -41,3 +43,35 @@ export interface TableRowEditEvent<T = unknown> {
   /** The value of each editable field, keyed by field name, as given by its edit template. */
   readonly values: Readonly<Record<string, unknown>>;
 }
+
+/** Value type of a column filter; decides the control in the filter menu and the match modes offered. */
+export type TableFilterType = 'text' | 'numeric' | 'date';
+
+/**
+ * Match mode of a column filter rule. Text: `contains`, `notContains`, `startsWith`, `endsWith`, `equals`, `notEquals`.
+ * Numeric: `equals`, `notEquals`, `lt`, `lte`, `gt`, `gte`. Date: `dateIs`, `dateIsNot`, `dateBefore`, `dateAfter`.
+ */
+export type TableFilterMatchMode =
+  | 'contains'
+  | 'notContains'
+  | 'startsWith'
+  | 'endsWith'
+  | 'equals'
+  | 'notEquals'
+  | 'lt'
+  | 'lte'
+  | 'gt'
+  | 'gte'
+  | 'dateIs'
+  | 'dateIsNot'
+  | 'dateBefore'
+  | 'dateAfter';
+
+/** A rule applied to one column: a match mode and the value to compare cells against. A `null`, empty or `NaN` value makes the rule inactive. */
+export interface TableColumnFilter {
+  readonly matchMode: TableFilterMatchMode;
+  readonly value: string | number | Date | null;
+}
+
+/** Active column filter rules, keyed by column `field`. */
+export type TableColumnFilters = Readonly<Record<string, TableColumnFilter>>;

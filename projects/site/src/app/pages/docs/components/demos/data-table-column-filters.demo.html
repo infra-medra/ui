@@ -1,0 +1,6 @@
+<med-data-table [value]="products" [(columnFilters)]="filters" ariaLabel="Product releases (column filters)">
+  <med-table-column field="name" header="Name" columnFilter />
+  <med-table-column field="price" header="Price" columnFilter filterType="numeric" [filterMatchModes]="['equals', 'lt', 'gt']" />
+  <med-table-column field="released" header="Released" columnFilter filterType="date" />
+</med-data-table>
+<p class="mt-2 text-sm text-surface-500 dark:text-surface-400">Filtered columns: {{ activeFields() }}</p>

@@ -13,6 +13,7 @@ import { DataTablePresortDemo } from './demos/data-table-presort.demo';
 import { DataTableRemovableSortDemo } from './demos/data-table-removable-sort.demo';
 import { DataTableSortMultipleDemo } from './demos/data-table-sort-multiple.demo';
 import { DataTableFilterGlobalDemo } from './demos/data-table-filter-global.demo';
+import { DataTableColumnFiltersDemo } from './demos/data-table-column-filters.demo';
 import { DataTablePaginationDemo } from './demos/data-table-pagination.demo';
 import { DataTableProgrammaticPaginationDemo } from './demos/data-table-programmatic-pagination.demo';
 import { DataTableScrollVerticalDemo } from './demos/data-table-scroll-vertical.demo';
@@ -58,6 +59,7 @@ import presortCode from './demos/data-table-presort.demo.html?raw';
 import removableSortCode from './demos/data-table-removable-sort.demo.html?raw';
 import sortMultipleCode from './demos/data-table-sort-multiple.demo.html?raw';
 import filterGlobalCode from './demos/data-table-filter-global.demo.html?raw';
+import columnFiltersCode from './demos/data-table-column-filters.demo.html?raw';
 import paginationCode from './demos/data-table-pagination.demo.html?raw';
 import programmaticPaginationCode from './demos/data-table-programmatic-pagination.demo.html?raw';
 import scrollVerticalCode from './demos/data-table-scroll-vertical.demo.html?raw';
@@ -104,6 +106,7 @@ import presortContent from '../../../../content/docs/data-table-presort.txt?raw'
 import removableSortContent from '../../../../content/docs/data-table-removable-sort.txt?raw';
 import sortMultipleContent from '../../../../content/docs/data-table-sort-multiple.txt?raw';
 import filterGlobalContent from '../../../../content/docs/data-table-filter-global.txt?raw';
+import columnFiltersContent from '../../../../content/docs/data-table-column-filters.txt?raw';
 import paginationContent from '../../../../content/docs/data-table-pagination.txt?raw';
 import programmaticPaginationContent from '../../../../content/docs/data-table-programmatic-pagination.txt?raw';
 import scrollVerticalContent from '../../../../content/docs/data-table-scroll-vertical.txt?raw';
@@ -163,6 +166,7 @@ const EXAMPLES = [
   { id: 'example-removable-sort', label: 'Removable sort' },
   { id: 'example-sort-multiple', label: 'Multiple sort' },
   { id: 'example-filter-global', label: 'Global filter' },
+  { id: 'example-column-filters', label: 'Column filters' },
   { id: 'example-pagination', label: 'Pagination' },
   { id: 'example-programmatic-pagination', label: 'Programmatic pagination' },
   { id: 'example-scroll-vertical', label: 'Vertical scroll' },
@@ -216,6 +220,7 @@ const EXAMPLES = [
     DataTableRemovableSortDemo,
     DataTableSortMultipleDemo,
     DataTableFilterGlobalDemo,
+    DataTableColumnFiltersDemo,
     DataTablePaginationDemo,
     DataTableProgrammaticPaginationDemo,
     DataTableScrollVerticalDemo,
@@ -321,6 +326,14 @@ const EXAMPLES = [
         <div class="mt-4">
           <app-data-table-filter-global-demo />
           <div class="mt-3"><app-code-block [code]="filterGlobalCode" /></div>
+        </div>
+      </section>
+
+      <section id="example-column-filters" class="mt-10 scroll-mt-24">
+        <app-prose class="block" [content]="columnFiltersContent" />
+        <div class="mt-4">
+          <app-data-table-column-filters-demo />
+          <div class="mt-3"><app-code-block [code]="columnFiltersCode" /></div>
         </div>
       </section>
 
@@ -637,6 +650,8 @@ export default class DocsDataTable {
   protected readonly sortMultipleCode = sortMultipleCode;
   protected readonly filterGlobalContent = filterGlobalContent;
   protected readonly filterGlobalCode = filterGlobalCode;
+  protected readonly columnFiltersContent = columnFiltersContent;
+  protected readonly columnFiltersCode = columnFiltersCode;
   protected readonly paginationContent = paginationContent;
   protected readonly paginationCode = paginationCode;
   protected readonly programmaticPaginationContent = programmaticPaginationContent;

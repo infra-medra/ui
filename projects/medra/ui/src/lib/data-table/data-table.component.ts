@@ -1,16 +1,41 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, Injector, PLATFORM_ID, TemplateRef, afterNextRender, booleanAttribute, computed, contentChild, contentChildren, effect, ElementRef, inject, input, linkedSignal, model, numberAttribute, output, signal, untracked, viewChild } from '@angular/core';
 import { NgTemplateOutlet, isPlatformBrowser } from '@angular/common';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ButtonDirective } from '../button/button.directive';
+import { DatePickerComponent } from '../date-picker/date-picker.component';
 import { IconComponent } from '../icon/icon.component';
 import { InputTextDirective } from '../input-text/input-text.directive';
 import { PaginatorComponent } from '../paginator/paginator.component';
+import { PopoverComponent } from '../popover/popover.component';
+import { SelectComponent } from '../select/select.component';
 import { ProgressSpinnerComponent } from '../progress-spinner/progress-spinner.component';
 import { checkboxBoxVariants } from '../checkbox/checkbox.styles';
 import { DOT_SIZE_CLASS, radioRingVariants } from '../radio-button/radio-button.styles';
 import { mergeClasses } from '../utils/merge-classes';
 import { TableColumnComponent } from './table-column.component';
-import { TableColumnAlign, TableColumnReorderEvent, TableLazyLoadEvent, TableRowEditEvent, TableRowReorderEvent, TableSelectionMode, TableSize, TableSortMeta, TableSortMode, TableSortOrder } from './data-table.types';
+import { FILTER_MODES_BY_TYPE, isRuleActive, matchesColumnFilter, offeredMatchModes, preselectedMatchMode } from './data-table-column-filter';
+import { TableColumnAlign, TableColumnFilter, TableColumnFilters, TableFilterMatchMode, TableColumnReorderEvent, TableLazyLoadEvent, TableRowEditEvent, TableRowReorderEvent, TableSelectionMode, TableSize, TableSortMeta, TableSortMode, TableSortOrder } from './data-table.types';
 
 let nextRadioGroupId = 0;
+
+/** English names of the column filter match modes; `matchModeLabels` overrides them. */
+const DEFAULT_MATCH_MODE_LABELS: Readonly<Record<TableFilterMatchMode, string>> = {
+  contains: 'Contains',
+  notContains: 'Does not contain',
+  startsWith: 'Starts with',
+  endsWith: 'Ends with',
+  equals: 'Equals',
+  notEquals: 'Does not equal',
+  lt: 'Less than',
+  lte: 'Less than or equal to',
+  gt: 'Greater than',
+  gte: 'Greater than or equal to',
+  dateIs: 'Date is',
+  dateIsNot: 'Date is not',
+  dateBefore: 'Date is before',
+  dateAfter: 'Date is after',
+};
 
 const SIZE_PADDING_CLASS: Record<TableSize, string> = {
   sm: 'px-2 py-1.5',
@@ -60,8 +85,12 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
  *   already shows the `CdkVirtualScrollViewport` technique is available in
  *   this codebase if a later version needs it for very large datasets.
  * - No per-column filter row (avoids #16576 "column filter indicator
- *   disappearing") — a single global filter (`filterable`) covers the common
- *   "search this table" case with far less surface area.
+ *   disappearing"). Per-column filtering is a funnel menu instead: a column
+ *   with `columnFilter` gets a header button that opens a popover with a match
+ *   mode select, a value control for its `filterType` and Apply and Clear
+ *   buttons. The rules live in the two-way `columnFilters` model, whose state
+ *   (not a DOM indicator) drives the funnel's active look, and combine with
+ *   the global filter (`filterable`).
  * - No `responsiveLayout="stack"` mode (avoids #16510, a regression in the
  *   original) — instead the table wrapper scrolls horizontally past the
  *   viewport (`overflow-x-auto`), the same M3-aligned pattern
@@ -242,7 +271,7 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
 @Component({
   selector: 'med-data-table',
   standalone: true,
-  imports: [NgTemplateOutlet, IconComponent, InputTextDirective, PaginatorComponent, ProgressSpinnerComponent],
+  imports: [NgTemplateOutlet, ReactiveFormsModule, ButtonDirective, DatePickerComponent, IconComponent, InputTextDirective, PaginatorComponent, PopoverComponent, ProgressSpinnerComponent, SelectComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'block min-w-0', '[class.flex]': 'flexHeight()', '[class.flex-col]': 'flexHeight()', '[class.h-full]': 'flexHeight()' },
   template: `
@@ -358,6 +387,48 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
                     @if (multiSortPriority(col); as priority) {
                       <sup class="text-[0.6rem] font-semibold text-surface-500 dark:text-surface-400">{{ priority }}</sup>
                     }
+                  }
+                  @if (col.columnFilter()) {
+                    <button
+                      #funnelButton
+                      type="button"
+                      [class]="funnelButtonClass(col)"
+                      [attr.aria-label]="columnFilterLabel()(col.header())"
+                      aria-haspopup="dialog"
+                      [attr.aria-expanded]="openFilterField() === col.field()"
+                      (click)="$event.stopPropagation(); filterPopover.toggle(funnelButton)"
+                      (keydown)="$event.stopPropagation()"
+                    >
+                      <med-icon name="funnel" [variant]="isColumnFilterActive(col) ? 'solid' : 'mini'" class="size-3.5" />
+                    </button>
+                    <med-popover #filterPopover [ariaLabel]="columnFilterLabel()(col.header())" (shown)="onFilterMenuShown(col)" (hidden)="onFilterMenuHidden(funnelButton)">
+                      @if (filterDraft(); as draft) {
+                        @if (draft.field === col.field()) {
+                          <div class="flex w-64 flex-col gap-3 text-left font-normal normal-case">
+                            @if (filterModeOptions(col); as modeOptions) {
+                              @if (modeOptions.length > 1) {
+                                <med-select fluid [options]="modeOptions" [ariaLabel]="filterMatchModeLabel()" [formControl]="filterModeControl" />
+                              }
+                            }
+                            @switch (col.filterType()) {
+                              @case ('numeric') {
+                                <input type="number" medInputText [attr.aria-label]="columnFilterLabel()(col.header())" [value]="draft.value ?? ''" (input)="onFilterNumberInput($event)" (keydown.enter)="$event.preventDefault(); applyColumnFilter(col, filterPopover)" />
+                              }
+                              @case ('date') {
+                                <med-date-picker [formControl]="filterDateControl" />
+                              }
+                              @default {
+                                <input type="text" medInputText [attr.aria-label]="columnFilterLabel()(col.header())" [value]="draft.value ?? ''" (input)="onFilterTextInput($event)" (keydown.enter)="$event.preventDefault(); applyColumnFilter(col, filterPopover)" />
+                              }
+                            }
+                            <div class="flex justify-end gap-2">
+                              <button medButton type="button" variant="outlined" severity="secondary" size="sm" (click)="clearColumnFilter(col, filterPopover)">{{ clearFilterLabel() }}</button>
+                              <button medButton type="button" size="sm" (click)="applyColumnFilter(col, filterPopover)">{{ applyFilterLabel() }}</button>
+                            </div>
+                          </div>
+                        }
+                      }
+                    </med-popover>
                   }
                 </span>
                 @if (resizableColumns() && hasResizeHandle(col)) {
@@ -560,9 +631,25 @@ export class DataTableComponent<T> {
   /** `'multiple'` layers `multiSortMeta` on top — `sortField`/`sortOrder` stay exactly as-is for `'single'` consumers. */
   readonly sortMode = input<TableSortMode>('single');
   readonly multiSortMeta = model<readonly TableSortMeta[]>([]);
+  /** Shows the global search box above the table. Its text combines with the per-column rules in `columnFilters`: a row is shown only when it passes both. */
   readonly filterable = input(false, { transform: booleanAttribute });
   readonly globalFilterValue = model('');
-  /** Narrows which columns `filterable`'s global search scans — unset (default): every declared column, same as before this input existed. */
+  /**
+   * Active column filter rules keyed by column `field` (two-way). A rule filters its column's rows after the global text
+   * filter; a rule for a field no column declares is kept and ignored. With `lazy` it is not applied client-side.
+   */
+  readonly columnFilters = model<TableColumnFilters>({});
+  /** Accessible name of a column's filter funnel button, from the column header. Default: `Filter {header}`. */
+  readonly columnFilterLabel = input<(header: string) => string>((header) => `Filter ${header}`);
+  /** Text of the filter menu's button that commits the rule. Default: `Apply`. */
+  readonly applyFilterLabel = input('Apply');
+  /** Text of the filter menu's button that removes the column's rule. Default: `Clear`. */
+  readonly clearFilterLabel = input('Clear');
+  /** Accessible name of the filter menu's match mode select. Default: `Match mode`. */
+  readonly filterMatchModeLabel = input('Match mode');
+  /** Overrides the English names of the match modes shown in the filter menu; modes left out keep their default name. */
+  readonly matchModeLabels = input<Partial<Record<TableFilterMatchMode, string>>>({});
+  /** Narrows which columns `filterable`'s global search scans — unset (default): every declared column, same as before this input existed. Per-column rules (`columnFilter`) are not affected by it. */
   readonly globalFilterFields = input<readonly string[] | null>(null);
   /** Debounces committing a keystroke to `globalFilterValue` (and therefore to `filteredValue()`) — the `<input>` itself still reflects every keystroke immediately, see class doc. */
   readonly filterDelay = input(300, { transform: numberAttribute });
@@ -724,6 +811,8 @@ export class DataTableComponent<T> {
   }
 
   constructor() {
+    this.filterModeControl.valueChanges.pipe(takeUntilDestroyed()).subscribe((mode) => this.setFilterDraftMode(mode));
+    this.filterDateControl.valueChanges.pipe(takeUntilDestroyed()).subscribe((date) => this.setFilterDraftValue(date));
     // Restoring only after the first render keeps the first client render identical to the server-rendered markup. Restoring
     // earlier changes the state before hydration reconciles the DOM, and the class bindings then leave stale server classes behind
     // (for example two "current page" buttons in the paginator).
@@ -747,11 +836,12 @@ export class DataTableComponent<T> {
       const sortField = this.sortField();
       const sortOrder = this.sortOrder();
       const expandedRowKeys = this.expandedRowKeys();
+      const columnFilters = this.columnFilters();
       // Never persist before the stored state was restored, or the initial defaults would overwrite it.
       if (!key || this.restoredKey() !== key) {
         return;
       }
-      this.persistTableState(key, { first, sortField, sortOrder, expandedRowKeys });
+      this.persistTableState(key, { first, sortField, sortOrder, expandedRowKeys, columnFilters });
     });
 
     effect(() => {
@@ -767,6 +857,7 @@ export class DataTableComponent<T> {
         sortOrder: this.sortOrder(),
         multiSortMeta: this.multiSortMeta(),
         filter: this.globalFilterValue(),
+        columnFilters: this.columnFilters(),
       });
     });
 
@@ -797,12 +888,21 @@ export class DataTableComponent<T> {
     if (this.lazy()) {
       return this.value();
     }
+    let rows = this.value();
     const query = this.globalFilterValue().trim().toLowerCase();
-    if (!query) {
-      return this.value();
+    if (query) {
+      const fields = this.globalFilterFields() ?? this.columns().map((col) => col.field());
+      rows = rows.filter((row) => fields.some((field) => this.rowFieldValue(row, field).toLowerCase().includes(query)));
     }
-    const fields = this.globalFilterFields() ?? this.columns().map((col) => col.field());
-    return this.value().filter((row) => fields.some((field) => this.rowFieldValue(row, field).toLowerCase().includes(query)));
+    const rules = this.columnFilters();
+    for (const col of this.columns()) {
+      const rule = rules[col.field()];
+      if (!isRuleActive(rule)) continue;
+      const field = col.field();
+      const type = col.filterType();
+      rows = rows.filter((row) => matchesColumnFilter((row as Record<string, unknown>)[field], rule, type));
+    }
+    return rows;
   });
 
   private rowFieldValue(row: T, field: string): string {
@@ -1148,6 +1248,102 @@ export class DataTableComponent<T> {
     }
     const order = this.sortMode() === 'multiple' ? (this.multiSortMeta().find((m) => m.field === col.field())?.order ?? null) : this.sortField() === col.field() ? this.sortOrder() : null;
     return order === 'asc' ? 'ascending' : order === 'desc' ? 'descending' : 'none';
+  }
+
+  /** Field of the column whose filter menu is open, or `null`; drives the funnel's `aria-expanded`. */
+  protected readonly openFilterField = signal<string | null>(null);
+
+  /** Whether `col` has an active rule in `columnFilters`, which switches its funnel to the active state. */
+  protected isColumnFilterActive(col: TableColumnComponent): boolean {
+    return isRuleActive(this.columnFilters()[col.field()]);
+  }
+
+  protected funnelButtonClass(col: TableColumnComponent): string {
+    return mergeClasses(
+      'inline-flex items-center justify-center rounded-sm p-0.5 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-brand-500',
+      this.isColumnFilterActive(col) ? 'text-brand-600 dark:text-brand-400' : 'text-surface-400 hover:text-surface-600 dark:text-surface-500 dark:hover:text-surface-300',
+    );
+  }
+
+  /** Rule being edited in the one open filter menu; seeded when the menu opens and discarded when it closes. */
+  protected readonly filterDraft = signal<{ readonly field: string; readonly matchMode: TableFilterMatchMode; readonly value: TableColumnFilter['value'] } | null>(null);
+
+  /** Options of the match mode select: the modes `col` offers, named by `matchModeLabels` over the English defaults. */
+  protected filterModeOptions(col: TableColumnComponent): { label: string; value: TableFilterMatchMode }[] {
+    const labels = { ...DEFAULT_MATCH_MODE_LABELS, ...this.matchModeLabels() };
+    return offeredMatchModes(col.filterType(), col.filterMatchModes()).map((mode) => ({ label: labels[mode] ?? mode, value: mode }));
+  }
+
+  protected onFilterMenuShown(col: TableColumnComponent): void {
+    this.openFilterField.set(col.field());
+    const rule = this.columnFilters()[col.field()];
+    const offered = offeredMatchModes(col.filterType(), col.filterMatchModes());
+    const matchMode = rule && offered.includes(rule.matchMode) ? rule.matchMode : preselectedMatchMode(col.filterType(), offered, col.filterMatchMode());
+    const value = rule?.value ?? null;
+    this.filterDraft.set({ field: col.field(), matchMode, value });
+    this.filterModeControl.setValue(matchMode, { emitEvent: false });
+    this.filterDateControl.setValue(value instanceof Date ? value : null, { emitEvent: false });
+  }
+
+  /** Closing the menu by any route discards the draft and returns focus to its funnel button, which a click does not always focus (D-03). */
+  protected onFilterMenuHidden(button: HTMLButtonElement): void {
+    this.openFilterField.set(null);
+    this.filterDraft.set(null);
+    button.focus();
+  }
+
+  /**
+   * Bind the match mode select and the date picker, which are value accessors with no signal model. A `FormControl`
+   * writes its value into the accessor as soon as the control renders, where `ngModel` would wait a microtask.
+   */
+  protected readonly filterModeControl = new FormControl<TableFilterMatchMode>('contains', { nonNullable: true });
+  protected readonly filterDateControl = new FormControl<Date | null>(null);
+
+  protected setFilterDraftMode(matchMode: TableFilterMatchMode): void {
+    this.filterDraft.update((draft) => (draft ? { ...draft, matchMode } : draft));
+  }
+
+  protected setFilterDraftValue(value: TableColumnFilter['value']): void {
+    this.filterDraft.update((draft) => (draft ? { ...draft, value } : draft));
+  }
+
+  protected onFilterTextInput(event: Event): void {
+    this.setFilterDraftValue((event.target as HTMLInputElement).value);
+  }
+
+  /** An empty or invalid number field stores `null`, so `0` stays a real value. */
+  protected onFilterNumberInput(event: Event): void {
+    const text = (event.target as HTMLInputElement).value;
+    const value = text.trim() === '' ? null : Number(text);
+    this.setFilterDraftValue(value === null || Number.isNaN(value) ? null : value);
+  }
+
+  /** Commits the draft as `col`'s rule (an inactive draft removes it) and closes the menu. */
+  protected applyColumnFilter(col: TableColumnComponent, popover: PopoverComponent): void {
+    const draft = this.filterDraft();
+    if (draft) {
+      const rule: TableColumnFilter = { matchMode: draft.matchMode, value: draft.value };
+      this.commitColumnFilter(col.field(), isRuleActive(rule) ? rule : null);
+    }
+    popover.hide();
+  }
+
+  protected clearColumnFilter(col: TableColumnComponent, popover: PopoverComponent): void {
+    this.commitColumnFilter(col.field(), null);
+    popover.hide();
+  }
+
+  /** A rule change from the menu returns to the first page; an application write to `columnFilters` does not (D-06). */
+  private commitColumnFilter(field: string, rule: TableColumnFilter | null): void {
+    const next: Record<string, TableColumnFilter> = { ...this.columnFilters() };
+    if (rule) {
+      next[field] = rule;
+    } else {
+      delete next[field];
+    }
+    this.columnFilters.set(next);
+    this.first.set(0);
+    this.filter.emit({ value: this.globalFilterValue(), data: this.filteredValue() });
   }
 
   protected sortIconClass(col: TableColumnComponent): string {
@@ -1600,8 +1796,8 @@ export class DataTableComponent<T> {
   }
 
   /**
-   * Exports `sortedValue()` (every currently filtered/sorted row, not just
-   * the visible page) as CSV, or just `selection()` when `{ selectionOnly:
+   * Exports `sortedValue()` (every row that passes the global filter and every
+   * column filter, in the current sort order, not just the visible page) as CSV, or just `selection()` when `{ selectionOnly:
    * true }` is passed. See class doc for the escaping rule and why this is
    * a plain method rather than a rendered button.
    */
@@ -1769,6 +1965,7 @@ export class DataTableComponent<T> {
         sortField?: string | null;
         sortOrder?: TableSortOrder;
         expandedRowKeys?: Record<string, boolean>;
+        columnFilters?: unknown;
       };
       if (typeof parsed.first === 'number') {
         this.first.set(parsed.first);
@@ -1782,9 +1979,49 @@ export class DataTableComponent<T> {
       if (parsed.expandedRowKeys && typeof parsed.expandedRowKeys === 'object') {
         this.expandedRowKeys.set(parsed.expandedRowKeys);
       }
+      // State stored before column filters existed has no such key and restores as before.
+      if (parsed.columnFilters !== undefined) {
+        this.columnFilters.set(this.parseStoredColumnFilters(parsed.columnFilters));
+      }
     } catch {
       // Ignore malformed stored state.
     }
+  }
+
+  /**
+   * Keeps each stored rule whose field is a declared column and whose match mode and value fit that column's
+   * `filterType`: a string for text, a finite number for numeric, a valid ISO date string (turned back into a `Date`)
+   * for date. Anything else is dropped.
+   */
+  private parseStoredColumnFilters(stored: unknown): TableColumnFilters {
+    if (!stored || typeof stored !== 'object') {
+      return {};
+    }
+    const entries = stored as Record<string, unknown>;
+    const rules: Record<string, TableColumnFilter> = {};
+    for (const col of this.columns()) {
+      const entry = entries[col.field()] as { matchMode?: unknown; value?: unknown } | null | undefined;
+      if (!entry || typeof entry !== 'object') {
+        continue;
+      }
+      const type = col.filterType();
+      const matchMode = entry.matchMode as TableFilterMatchMode;
+      if (!FILTER_MODES_BY_TYPE[type].includes(matchMode)) {
+        continue;
+      }
+      const value = entry.value;
+      if (type === 'text' && typeof value === 'string') {
+        rules[col.field()] = { matchMode, value };
+      } else if (type === 'numeric' && typeof value === 'number' && Number.isFinite(value)) {
+        rules[col.field()] = { matchMode, value };
+      } else if (type === 'date' && typeof value === 'string') {
+        const date = new Date(value);
+        if (!Number.isNaN(date.getTime())) {
+          rules[col.field()] = { matchMode, value: date };
+        }
+      }
+    }
+    return rules;
   }
 
   private persistTableState(
@@ -1794,6 +2031,7 @@ export class DataTableComponent<T> {
       sortField: string | null;
       sortOrder: TableSortOrder;
       expandedRowKeys: Record<string, boolean>;
+      columnFilters: TableColumnFilters;
     },
   ): void {
     const storage = this.getStateStorage();
