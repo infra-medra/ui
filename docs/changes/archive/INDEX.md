@@ -13,3 +13,4 @@
 | 9 | 2026-11-20 | add-data-table-column-reorder | data-display | +DAT-034 ~DAT-024 | People building tables with `med-data-table` cannot let their users rearrange columns: the order is fixed by the temp... |
 | 10 | 2026-11-20 | add-data-table-row-editing-and-group-modes | data-display | +DAT-035 +DAT-036 +DAT-037 ~DAT-008 ~DAT-010 ~DAT-024 | People building tables with `med-data-table` can edit only one cell at a time, only by double-clicking it, and can gr... |
 | 11 | 2026-11-21 | add-data-table-column-filters | data-display | +DAT-038 +DAT-039 ~DAT-004 ~DAT-007 ~DAT-009 ~DAT-010 ~DAT-024 | People building tables with `med-data-table` can search only across all columns at once, so they cannot narrow a tabl... |
+| 12 | 2026-11-22 | add-data-table-slots-and-skeleton | data-display | +DAT-040 +DAT-041 +DAT-042 ~DAT-007 ~DAT-024 | Applications using `<med-data-table>` currently have no way to render a table-level caption bar, a bottom summary bar... |

@@ -66,6 +66,22 @@
 **Occurrences:** 1
 **Last seen:** 10
 
+### L-009 [lesson] Run all component e2e specs when changing wrapper DOM
+
+**Statement:** When a change alters a component's wrapper or scroll-container DOM hierarchy, run every Playwright spec for that component (such as e2e/site/data-table-*.spec.ts), not only the newly added spec. Running only new specs or Jest misses selector regressions in existing e2e files.
+**Scope:** capabilities: data-display · stages: tasks, apply, verify
+**Evidence:** add-data-table-slots-and-skeleton
+**Occurrences:** 1
+**Last seen:** 12
+
+### L-010 [lesson] Target component regions with data attributes, not direct-child CSS paths
+
+**Statement:** Query internal component regions like scroll viewports using semantic data-* attributes (such as data-med-scroll-viewport) instead of direct-child utility selectors like > div.overflow-x-auto. Direct-child class paths break whenever an outer wrapper element is added.
+**Scope:** capabilities: data-display · stages: tasks, apply
+**Evidence:** add-data-table-slots-and-skeleton
+**Occurrences:** 1
+**Last seen:** 12
+
 ## Promoted
 
 ## Retired
