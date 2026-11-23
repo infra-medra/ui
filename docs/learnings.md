@@ -14,9 +14,9 @@
 
 **Statement:** When retagging an existing test with a scenario ID, check that it asserts each Given and Then clause of the scenario, not only the first. Coverage only matches the tag, so an unasserted clause passes it silently.
 **Scope:** capabilities: data-display · stages: tasks, apply, verify
-**Evidence:** extend-data-table-sorting-and-pagination, add-data-table-resize-modes-visibility-groups
-**Occurrences:** 2
-**Last seen:** 8
+**Evidence:** extend-data-table-sorting-and-pagination, add-data-table-resize-modes-visibility-groups, add-data-table-pagination-options
+**Occurrences:** 3
+**Last seen:** 15
 
 ### L-003 [lesson] Characterization tasks of existing behavior cannot show red evidence
 
