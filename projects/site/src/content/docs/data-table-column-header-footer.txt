@@ -1,0 +1,9 @@
+## Column header and footer templates
+
+A column's `#header` template replaces its `header` text in the header cell. The sort indicator, the filter button, the resize handle and the sort, keyboard and drag behavior of the header stay in place. A click, Enter or Space on an interactive element inside the template, such as a button, does not sort the column; the element receives the event instead. The `header` text remains the column's plain-text name for the column filter, the column move announcement, the stacked label and the CSV export.
+
+A column's `footer` text, or its `#footer` template when both are set, renders in a footer row under the table. The template receives as `$implicit` the rows that pass the global filter and the column filters, in sorted order across all pages, so a total is not limited to the current page. A column without a footer gets an empty footer cell. While the table is stacked, each footer cell with content shows its column label beside it, and empty footer cells are hidden.
+
+Sorting by a column compares its `field` by default. Set `sortBy` to sort by another row property, such as a numeric rank behind a text status, or `sortCompare` to pass a comparison function for the column. `sortCompare` takes precedence over `sortBy`. The sort state, events and persisted state keep naming the column by its `field`.
+
+The demo below has a Price column with a `#header` template holding an icon and a button, and a `#footer` template that sums the prices. The Item column is frozen and has a footer text. The Status column sorts by a `sortBy` rank, and the Version column sorts with a `sortCompare` that reads each version part by part, so "1.10" comes after "1.9".

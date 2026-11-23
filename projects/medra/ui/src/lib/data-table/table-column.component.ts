@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component, TemplateRef, booleanAttribute, contentChild, input } from '@angular/core';
-import { TableColumnAlign, TableFilterMatchMode, TableFilterType } from './data-table.types';
+import { ChangeDetectionStrategy, Component, TemplateRef, booleanAttribute, computed, contentChild, contentChildren, input } from '@angular/core';
+import { TableColumnAlign, TableFilterMatchMode, TableFilterType, TableSortCompare } from './data-table.types';
 
 /**
  * Pure column *metadata*, declared as a content child of `<med-data-table>` (`<med-table-column
@@ -33,6 +33,13 @@ import { TableColumnAlign, TableFilterMatchMode, TableFilterType } from './data-
  * since every other component so far has only ever needed one projected template per content-child
  * slot.
  *
+ * **Named `#header`, `#footer` and custom sorting.** A `<ng-template #header>` replaces the `header` text in the
+ * column's header cell; the `header` text stays the plain-text name used by filter labels, move announcements, stacked
+ * labels and CSV export. `footer` text or a `<ng-template #footer>` fills the column's footer cell, and the template
+ * wins when both are set; it receives every filtered and sorted row across all pages as `$implicit`. `sortBy` names
+ * the row property to compare, and `sortCompare` gives a full ascending comparator that takes precedence over it. The
+ * table reads these inputs in `DataTableComponent`, which renders the header and footer cells.
+ *
  * **`frozen`/`alignFrozen`** keep a column in view while the table scrolls horizontally, in `DataTableComponent` and
  * `TreeTableComponent` alike. Deliberately **not** computed imperatively with pixel offsets (a `ResizeObserver`
  * plus a window `resize` listener would recompute them, the shape behind the known "doesn't
@@ -51,6 +58,16 @@ export class TableColumnComponent {
   readonly field = input.required<string>();
   readonly header = input('');
   readonly sortable = input(false, { transform: booleanAttribute });
+  /**
+   * Name of the row property that sorting by this column compares, when it is not the `field`. The sort state, events and
+   * persisted state still name the column by its `field`.
+   */
+  readonly sortBy = input<string | null>(null);
+  /**
+   * Compares two rows for ascending order when sorting by this column; takes precedence over `sortBy`. A descending sort reverses
+   * its result. Ignored in `lazy` mode, where the application sorts.
+   */
+  readonly sortCompare = input<TableSortCompare | null>(null);
   readonly align = input<TableColumnAlign>('left');
   readonly width = input<string | null>(null);
   readonly editable = input(false, { transform: booleanAttribute });
@@ -81,6 +98,29 @@ export class TableColumnComponent {
   /** Restricts the offered match modes to those listed here that belong to `filterType`. */
   readonly filterMatchModes = input<readonly TableFilterMatchMode[] | null>(null);
 
-  readonly cellTemplate = contentChild(TemplateRef);
+  /**
+   * The projected `<ng-template #header>` that replaces the `header` text inside the column's header cell. The `header` text stays
+   * the column's plain-text name wherever the table needs one (column filter labels, move announcements, stacked labels, CSV export).
+   */
+  readonly headerTemplate = contentChild('header', { read: TemplateRef });
+  /**
+   * Text of the column's footer cell, shown when the table renders a column footer row. A `#footer` template takes its place
+   * when both are set. The table gives the template every row that passes the global filter and the column rules, in sorted order
+   * across all pages (with `lazy`, the current `value`), as `$implicit`.
+   */
+  readonly footer = input<string | null>(null);
+  /** The projected `<ng-template #footer>` that renders the column's footer cell. */
+  readonly footerTemplate = contentChild('footer', { read: TemplateRef });
+  /** Every `<ng-template>` projected directly into the column, in document order. */
+  private readonly projectedTemplates = contentChildren(TemplateRef);
+  /**
+   * The projected `<ng-template>` that renders the body cells: the first one that is not the header or edit template, so an
+   * unnamed template written after `#header` still renders the cells.
+   */
+  readonly cellTemplate = computed(() => {
+    // Angular may hand out a new `TemplateRef` object per read, so templates are told apart by their anchor node.
+    const reserved = new Set([this.headerTemplate(), this.footerTemplate(), this.editTemplate()].map((template) => template?.elementRef.nativeElement));
+    return this.projectedTemplates().find((template) => !reserved.has(template.elementRef.nativeElement));
+  });
   readonly editTemplate = contentChild('editTemplate', { read: TemplateRef });
 }

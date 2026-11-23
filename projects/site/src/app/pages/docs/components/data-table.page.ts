@@ -60,6 +60,7 @@ import { DataTableExportCsvDemo } from './demos/data-table-export-csv.demo';
 import { DataTableRowReorderEventsDemo } from './demos/data-table-row-reorder-events.demo';
 import { DataTableContextMenuDemo } from './demos/data-table-context-menu.demo';
 import { DataTableResponsiveStackDemo } from './demos/data-table-responsive-stack.demo';
+import { DataTableColumnHeaderFooterDemo } from './demos/data-table-column-header-footer.demo';
 
 import basicCode from './demos/data-table-basic.demo.html?raw';
 import selectionSingleCode from './demos/data-table-selection-single.demo.html?raw';
@@ -74,6 +75,7 @@ import columnFiltersCode from './demos/data-table-column-filters.demo.html?raw';
 import paginationCode from './demos/data-table-pagination.demo.html?raw';
 import paginatorOptionsCode from './demos/data-table-paginator-options.demo.html?raw';
 import responsiveStackCode from './demos/data-table-responsive-stack.demo.html?raw';
+import columnHeaderFooterCode from './demos/data-table-column-header-footer.demo.html?raw';
 import programmaticPaginationCode from './demos/data-table-programmatic-pagination.demo.html?raw';
 import scrollVerticalCode from './demos/data-table-scroll-vertical.demo.html?raw';
 import rowExpansionCode from './demos/data-table-row-expansion.demo.html?raw';
@@ -131,6 +133,7 @@ import columnFiltersContent from '../../../../content/docs/data-table-column-fil
 import paginationContent from '../../../../content/docs/data-table-pagination.txt?raw';
 import paginatorOptionsContent from '../../../../content/docs/data-table-paginator-options.txt?raw';
 import responsiveStackContent from '../../../../content/docs/data-table-responsive-stack.txt?raw';
+import columnHeaderFooterContent from '../../../../content/docs/data-table-column-header-footer.txt?raw';
 import programmaticPaginationContent from '../../../../content/docs/data-table-programmatic-pagination.txt?raw';
 import scrollVerticalContent from '../../../../content/docs/data-table-scroll-vertical.txt?raw';
 import rowExpansionContent from '../../../../content/docs/data-table-row-expansion.txt?raw';
@@ -220,6 +223,7 @@ const EXAMPLES = [
   { id: 'example-empty-state', label: 'Empty state' },
   { id: 'example-empty-template', label: 'Custom empty template' },
   { id: 'example-templates', label: 'Column templates' },
+  { id: 'example-column-header-footer', label: 'Column header and footer' },
   { id: 'example-caption-summary', label: 'Caption and summary slots' },
   { id: 'example-conditional-style', label: 'Conditional row style' },
   { id: 'example-cell-class', label: 'Conditional cell style' },
@@ -307,6 +311,7 @@ const EXAMPLES = [
     DataTableVirtualScrollDemo,
     DataTableLazyVirtualScrollDemo,
     DataTableResponsiveStackDemo,
+    DataTableColumnHeaderFooterDemo,
   ],
   template: `
     <app-component-doc title="DataTable" slug="data-table" [examples]="examples">
@@ -571,6 +576,14 @@ const EXAMPLES = [
         </div>
       </section>
 
+      <section id="example-column-header-footer" class="mt-10 scroll-mt-24">
+        <app-prose class="block" [content]="columnHeaderFooterContent" />
+        <div class="mt-4">
+          <app-data-table-column-header-footer-demo />
+          <div class="mt-3"><app-code-block [code]="columnHeaderFooterCode" /></div>
+        </div>
+      </section>
+
       <section id="example-caption-summary" class="mt-10 scroll-mt-24">
         <app-prose class="block" [content]="captionSummaryContent" />
         <div class="mt-4">
@@ -792,6 +805,8 @@ export default class DocsDataTable {
   protected readonly paginatorOptionsCode = paginatorOptionsCode;
   protected readonly responsiveStackContent = responsiveStackContent;
   protected readonly responsiveStackCode = responsiveStackCode;
+  protected readonly columnHeaderFooterContent = columnHeaderFooterContent;
+  protected readonly columnHeaderFooterCode = columnHeaderFooterCode;
   protected readonly scrollVerticalContent = scrollVerticalContent;
   protected readonly scrollVerticalCode = scrollVerticalCode;
   protected readonly rowExpansionContent = rowExpansionContent;

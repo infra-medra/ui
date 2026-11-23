@@ -2101,7 +2101,7 @@ describe('DataTableComponent column groups', () => {
   });
 
   // DAT-033.S3
-  it('DAT-033.S3: a table without a #footerGroup template renders no footer element', () => {
+  it('DAT-033.S3: a table without a #footerGroup template and with no column footer or #footer template renders no footer element', () => {
     TestBed.configureTestingModule({ imports: [NoFooterHostComponent] });
     const fixture = TestBed.createComponent(NoFooterHostComponent);
     fixture.detectChanges();
