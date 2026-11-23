@@ -8,6 +8,7 @@ import type { ApiEntry } from '../../../shared/api-entry';
 import { DataTableBasicDemo } from './demos/data-table-basic.demo';
 import { DataTableSelectionSingleDemo } from './demos/data-table-selection-single.demo';
 import { DataTableSelectionMultipleDemo } from './demos/data-table-selection-multiple.demo';
+import { DataTableCellSelectionDemo } from './demos/data-table-cell-selection.demo';
 import { DataTableSortSingleDemo } from './demos/data-table-sort-single.demo';
 import { DataTablePresortDemo } from './demos/data-table-presort.demo';
 import { DataTableRemovableSortDemo } from './demos/data-table-removable-sort.demo';
@@ -50,13 +51,16 @@ import { DataTableEmptyTemplateDemo } from './demos/data-table-empty-template.de
 import { DataTableTemplatesDemo } from './demos/data-table-templates.demo';
 import { DataTableCaptionSummaryDemo } from './demos/data-table-caption-summary.demo';
 import { DataTableConditionalStyleDemo } from './demos/data-table-conditional-style.demo';
+import { DataTableCellClassDemo } from './demos/data-table-cell-class.demo';
 import { DataTableStatefulDemo } from './demos/data-table-stateful.demo';
 import { DataTableExportCsvDemo } from './demos/data-table-export-csv.demo';
 import { DataTableRowReorderEventsDemo } from './demos/data-table-row-reorder-events.demo';
+import { DataTableContextMenuDemo } from './demos/data-table-context-menu.demo';
 
 import basicCode from './demos/data-table-basic.demo.html?raw';
 import selectionSingleCode from './demos/data-table-selection-single.demo.html?raw';
 import selectionMultipleCode from './demos/data-table-selection-multiple.demo.html?raw';
+import cellSelectionCode from './demos/data-table-cell-selection.demo.html?raw';
 import sortSingleCode from './demos/data-table-sort-single.demo.html?raw';
 import presortCode from './demos/data-table-presort.demo.html?raw';
 import removableSortCode from './demos/data-table-removable-sort.demo.html?raw';
@@ -99,14 +103,17 @@ import emptyTemplateCode from './demos/data-table-empty-template.demo.html?raw';
 import templatesCode from './demos/data-table-templates.demo.html?raw';
 import captionSummaryCode from './demos/data-table-caption-summary.demo.html?raw';
 import conditionalStyleCode from './demos/data-table-conditional-style.demo.html?raw';
+import cellClassCode from './demos/data-table-cell-class.demo.html?raw';
 import statefulCode from './demos/data-table-stateful.demo.html?raw';
 import exportCsvCode from './demos/data-table-export-csv.demo.html?raw';
 import rowReorderEventsCode from './demos/data-table-row-reorder-events.demo.html?raw';
+import contextMenuCode from './demos/data-table-context-menu.demo.html?raw';
 import apiEntries from '../../../../content/api/data-table.json';
 import introContent from '../../../../content/docs/data-table-intro.txt?raw';
 import basicContent from '../../../../content/docs/data-table-basic.txt?raw';
 import selectionSingleContent from '../../../../content/docs/data-table-selection-single.txt?raw';
 import selectionMultipleContent from '../../../../content/docs/data-table-selection-multiple.txt?raw';
+import cellSelectionContent from '../../../../content/docs/data-table-cell-selection.txt?raw';
 import sortSingleContent from '../../../../content/docs/data-table-sort-single.txt?raw';
 import presortContent from '../../../../content/docs/data-table-presort.txt?raw';
 import removableSortContent from '../../../../content/docs/data-table-removable-sort.txt?raw';
@@ -149,9 +156,11 @@ import emptyTemplateContent from '../../../../content/docs/data-table-empty-temp
 import templatesContent from '../../../../content/docs/data-table-templates.txt?raw';
 import captionSummaryContent from '../../../../content/docs/data-table-caption-summary.txt?raw';
 import conditionalStyleContent from '../../../../content/docs/data-table-conditional-style.txt?raw';
+import cellClassContent from '../../../../content/docs/data-table-cell-class.txt?raw';
 import statefulContent from '../../../../content/docs/data-table-stateful.txt?raw';
 import exportCsvContent from '../../../../content/docs/data-table-export-csv.txt?raw';
 import rowReorderEventsContent from '../../../../content/docs/data-table-row-reorder-events.txt?raw';
+import contextMenuContent from '../../../../content/docs/data-table-context-menu.txt?raw';
 
 const IMPORT_CODE = `import { DataTableComponent, TableColumnComponent } from '@medra.dev/ui';`;
 
@@ -170,6 +179,7 @@ const EXAMPLES = [
   { id: 'example-basic', label: 'Basic' },
   { id: 'example-selection-single', label: 'Single selection' },
   { id: 'example-selection-multiple', label: 'Multiple selection' },
+  { id: 'example-cell-selection', label: 'Cell selection' },
   { id: 'example-sort-single', label: 'Single sort' },
   { id: 'example-presort', label: 'Presort' },
   { id: 'example-removable-sort', label: 'Removable sort' },
@@ -199,6 +209,7 @@ const EXAMPLES = [
   { id: 'example-templates', label: 'Column templates' },
   { id: 'example-caption-summary', label: 'Caption and summary slots' },
   { id: 'example-conditional-style', label: 'Conditional row style' },
+  { id: 'example-cell-class', label: 'Conditional cell style' },
   { id: 'example-stateful', label: 'Persisted state' },
   { id: 'example-export-csv', label: 'CSV export' },
   { id: 'example-row-reorder-events', label: 'Row reorder and events' },
@@ -215,6 +226,7 @@ const EXAMPLES = [
   { id: 'example-frozen-rows', label: 'Frozen rows' },
   { id: 'example-scroll-horizontal', label: 'Horizontal scroll' },
   { id: 'example-scroll-flexible', label: 'Flexible scroll' },
+  { id: 'example-context-menu', label: 'Context menu' },
 ] as const;
 
 @Component({
@@ -227,6 +239,7 @@ const EXAMPLES = [
     DataTableBasicDemo,
     DataTableSelectionSingleDemo,
     DataTableSelectionMultipleDemo,
+    DataTableCellSelectionDemo,
     DataTableSortSingleDemo,
     DataTablePresortDemo,
     DataTableRemovableSortDemo,
@@ -256,9 +269,11 @@ const EXAMPLES = [
     DataTableTemplatesDemo,
     DataTableCaptionSummaryDemo,
     DataTableConditionalStyleDemo,
+    DataTableCellClassDemo,
     DataTableStatefulDemo,
     DataTableExportCsvDemo,
     DataTableRowReorderEventsDemo,
+    DataTableContextMenuDemo,
     DataTableSelectionRadioDemo,
     DataTableRowAriaLabelDemo,
     DataTableRowTrackByDemo,
@@ -301,6 +316,14 @@ const EXAMPLES = [
         <div class="mt-4">
           <app-data-table-selection-multiple-demo />
           <div class="mt-3"><app-code-block [code]="selectionMultipleCode" /></div>
+        </div>
+      </section>
+
+      <section id="example-cell-selection" class="mt-10 scroll-mt-24">
+        <app-prose class="block" [content]="cellSelectionContent" />
+        <div class="mt-4">
+          <app-data-table-cell-selection-demo />
+          <div class="mt-3"><app-code-block [code]="cellSelectionCode" /></div>
         </div>
       </section>
 
@@ -536,6 +559,14 @@ const EXAMPLES = [
         </div>
       </section>
 
+      <section id="example-cell-class" class="mt-10 scroll-mt-24">
+        <app-prose class="block" [content]="cellClassContent" />
+        <div class="mt-4">
+          <app-data-table-cell-class-demo />
+          <div class="mt-3"><app-code-block [code]="cellClassCode" /></div>
+        </div>
+      </section>
+
       <section id="example-stateful" class="mt-10 scroll-mt-24">
         <app-prose class="block" [content]="statefulContent" />
         <div class="mt-4">
@@ -664,6 +695,14 @@ const EXAMPLES = [
         </div>
       </section>
 
+      <section id="example-context-menu" class="mt-10 scroll-mt-24">
+        <app-prose class="block" [content]="contextMenuContent" />
+        <div class="mt-4">
+          <app-data-table-context-menu-demo />
+          <div class="mt-3"><app-code-block [code]="contextMenuCode" /></div>
+        </div>
+      </section>
+
       <app-api-table api [entries]="apiEntries" />
     </app-component-doc>
   `,
@@ -679,6 +718,8 @@ export default class DocsDataTable {
   protected readonly selectionSingleCode = selectionSingleCode;
   protected readonly selectionMultipleContent = selectionMultipleContent;
   protected readonly selectionMultipleCode = selectionMultipleCode;
+  protected readonly cellSelectionContent = cellSelectionContent;
+  protected readonly cellSelectionCode = cellSelectionCode;
   protected readonly sortSingleContent = sortSingleContent;
   protected readonly sortSingleCode = sortSingleCode;
   protected readonly presortContent = presortContent;
@@ -739,12 +780,16 @@ export default class DocsDataTable {
   protected readonly captionSummaryCode = captionSummaryCode;
   protected readonly conditionalStyleContent = conditionalStyleContent;
   protected readonly conditionalStyleCode = conditionalStyleCode;
+  protected readonly cellClassContent = cellClassContent;
+  protected readonly cellClassCode = cellClassCode;
   protected readonly statefulContent = statefulContent;
   protected readonly statefulCode = statefulCode;
   protected readonly exportCsvContent = exportCsvContent;
   protected readonly exportCsvCode = exportCsvCode;
   protected readonly rowReorderEventsContent = rowReorderEventsContent;
   protected readonly rowReorderEventsCode = rowReorderEventsCode;
+  protected readonly contextMenuContent = contextMenuContent;
+  protected readonly contextMenuCode = contextMenuCode;
   protected readonly selectionRadioContent = selectionRadioContent;
   protected readonly selectionRadioCode = selectionRadioCode;
   protected readonly rowAriaLabelContent = rowAriaLabelContent;

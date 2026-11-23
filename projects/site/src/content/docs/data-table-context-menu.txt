@@ -1,0 +1,3 @@
+## Context menu integration
+
+Bind `[contextMenu]` to a `ContextMenuDirective` reference (`#cm="medContextMenu"`) and `[(contextMenuSelection)]` to track the targeted row. Right-clicking a body row—or pressing `Shift+F10` or the `ContextMenu` key on a focused row—updates `contextMenuSelection`, emits `contextMenuSelect`, and opens the menu.

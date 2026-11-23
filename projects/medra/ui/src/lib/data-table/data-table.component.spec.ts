@@ -1,11 +1,13 @@
 import { Component, DebugElement, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
+import { ContextMenuDirective } from '../context-menu/context-menu.directive';
 import { IconComponent } from '../icon/icon.component';
+import { MenuItem } from '../menu/menu.types';
 import { SelectComponent } from '../select/select.component';
 import { DataTableComponent } from './data-table.component';
 import { TableColumnComponent } from './table-column.component';
-import { TableColumnFilters, TableFilterMatchMode } from './data-table.types';
+import { TableColumnFilters, TableContextMenuSelectEvent, TableFilterMatchMode } from './data-table.types';
 
 interface Product {
   name: string;
@@ -3781,5 +3783,625 @@ describe('DataTableComponent column filters', () => {
       expect(updatedCells[0].classList).not.toContain('bg-surface-0');
       expect(updatedCells[1].classList).not.toContain('bg-surface-0');
     });
+  });
+});
+
+describe('DataTableComponent cell selection', () => {
+  interface CellRow {
+    readonly id: number;
+    readonly name: string;
+    readonly status: string;
+  }
+
+  function createCellHost(configure?: (host: CellSelectionHost) => void) {
+    @Component({
+      standalone: true,
+      imports: [DataTableComponent, TableColumnComponent],
+      template: `
+        <med-data-table
+          [value]="rows()"
+          [cellSelection]="cellSelection"
+          [selectionMode]="selectionMode"
+          [(selection)]="selection"
+          [dataKey]="dataKey"
+          (cellSelect)="selectedEvents.push($event)"
+          (cellUnselect)="unselectedEvents.push($event)"
+          (rowSelect)="rowSelectedEvents.push($event)"
+        >
+          <med-table-column field="name" header="Name" />
+          <med-table-column field="status" header="Status" />
+        </med-data-table>
+      `,
+    })
+    class CellSelectionHost {
+      rows = signal<CellRow[]>([
+        { id: 1, name: 'Widget', status: 'active' },
+        { id: 2, name: 'Gadget', status: 'critical' },
+      ]);
+      cellSelection = true;
+      selectionMode: 'single' | 'multiple' | null = 'single';
+      selection: { row: CellRow; field: string } | readonly { row: CellRow; field: string }[] | null = null;
+      dataKey: string | null = null;
+      selectedEvents: { row: CellRow; field: string }[] = [];
+      unselectedEvents: { row: CellRow; field: string }[] = [];
+      rowSelectedEvents: CellRow[] = [];
+    }
+
+    const fixture = TestBed.createComponent(CellSelectionHost);
+    configure?.(fixture.componentInstance);
+    fixture.detectChanges();
+    return fixture;
+  }
+
+  it('DAT-043.S1: single cell selection selects clicked cell, suppresses row selection attributes, and moves selection on next cell click', () => {
+    const fixture = createCellHost();
+    const host = fixture.componentInstance;
+    const el = fixture.nativeElement as HTMLElement;
+    const rows = Array.from(el.querySelectorAll('tbody tr'));
+    const cells = Array.from(el.querySelectorAll('tbody td'));
+
+    // Row-level aria-selected and tabindex are suppressed in cell selection mode.
+    for (const row of rows) {
+      expect(row.getAttribute('aria-selected')).toBeNull();
+      expect(row.getAttribute('tabindex')).toBeNull();
+    }
+    // Data cells are focusable and initially unselected.
+    for (const cell of cells) {
+      expect(cell.getAttribute('tabindex')).toBe('0');
+      expect(cell.getAttribute('aria-selected')).toBe('false');
+    }
+
+    (cells[1] as HTMLElement).click();
+    fixture.detectChanges();
+
+    expect(cells[1].getAttribute('aria-selected')).toBe('true');
+    expect(cells[0].getAttribute('aria-selected')).toBe('false');
+    expect(host.selection).toEqual({ row: host.rows()[0], field: 'status' });
+    expect(host.selectedEvents).toEqual([{ row: host.rows()[0], field: 'status' }]);
+    expect(host.rowSelectedEvents).toEqual([]);
+
+    // Clicking an already-selected cell in single mode is a no-op.
+    (cells[1] as HTMLElement).click();
+    fixture.detectChanges();
+    expect(host.selectedEvents.length).toBe(1);
+    expect(host.unselectedEvents.length).toBe(0);
+    expect(host.selection).toEqual({ row: host.rows()[0], field: 'status' });
+
+    // Clicking a second cell moves selection to it.
+    (cells[2] as HTMLElement).click();
+    fixture.detectChanges();
+    expect(cells[1].getAttribute('aria-selected')).toBe('false');
+    expect(cells[2].getAttribute('aria-selected')).toBe('true');
+    expect(host.selection).toEqual({ row: host.rows()[1], field: 'name' });
+    expect(host.selectedEvents).toEqual([
+      { row: host.rows()[0], field: 'status' },
+      { row: host.rows()[1], field: 'name' },
+    ]);
+  });
+
+  it('DAT-043.S2: multiple cell selection toggles cells, suppresses row checkbox column, and matches by dataKey across object references', () => {
+    const fixture = createCellHost((h) => {
+      h.selectionMode = 'multiple';
+      h.dataKey = 'id';
+    });
+    const host = fixture.componentInstance;
+    const el = fixture.nativeElement as HTMLElement;
+
+    // Row selection checkbox column is not rendered when cellSelection is enabled.
+    expect(el.querySelector('input[type="checkbox"]')).toBeNull();
+    const cells = Array.from(el.querySelectorAll('tbody td'));
+    expect(cells.length).toBe(4);
+
+    (cells[0] as HTMLElement).click();
+    (cells[3] as HTMLElement).click();
+    fixture.detectChanges();
+
+    expect(cells[0].getAttribute('aria-selected')).toBe('true');
+    expect(cells[3].getAttribute('aria-selected')).toBe('true');
+    expect(host.selection).toEqual([
+      { row: host.rows()[0], field: 'name' },
+      { row: host.rows()[1], field: 'status' },
+    ]);
+    expect(host.selectedEvents.length).toBe(2);
+
+    // Replace rows with fresh references having the same dataKey ids.
+    const clonedRows = host.rows().map((r) => ({ ...r }));
+    host.rows.set(clonedRows);
+    fixture.detectChanges();
+
+    const updatedCells = Array.from(el.querySelectorAll('tbody td'));
+    expect(updatedCells[0].getAttribute('aria-selected')).toBe('true');
+    expect(updatedCells[3].getAttribute('aria-selected')).toBe('true');
+
+    // Clicking an already-selected cell deselects it and emits cellUnselect.
+    (updatedCells[0] as HTMLElement).click();
+    fixture.detectChanges();
+
+    expect(updatedCells[0].getAttribute('aria-selected')).toBe('false');
+    expect(updatedCells[3].getAttribute('aria-selected')).toBe('true');
+    expect(host.selection).toEqual([{ row: expect.objectContaining({ id: 2 }), field: 'status' }]);
+    expect(host.unselectedEvents).toEqual([{ row: clonedRows[0], field: 'name' }]);
+  });
+
+  it('DAT-043.S2: without dataKey, cell row matching compares by object reference', () => {
+    const fixture = createCellHost((h) => {
+      h.selectionMode = 'multiple';
+      h.dataKey = null;
+    });
+    const host = fixture.componentInstance;
+    const el = fixture.nativeElement as HTMLElement;
+    const cells = Array.from(el.querySelectorAll('tbody td'));
+
+    (cells[0] as HTMLElement).click();
+    fixture.detectChanges();
+    expect(cells[0].getAttribute('aria-selected')).toBe('true');
+
+    // New object references with identical fields do not match without dataKey.
+    host.rows.set(host.rows().map((r) => ({ ...r })));
+    fixture.detectChanges();
+
+    const updatedCells = Array.from(el.querySelectorAll('tbody td'));
+    expect(updatedCells[0].getAttribute('aria-selected')).toBe('false');
+  });
+
+  it('DAT-043.S1 / DAT-043.S2: Enter and Space activate cell selection in single and multiple modes', () => {
+    const singleFixture = createCellHost((h) => (h.selectionMode = 'single'));
+    const singleEl = singleFixture.nativeElement as HTMLElement;
+    const singleCells = Array.from(singleEl.querySelectorAll('tbody td'));
+
+    singleCells[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+    singleFixture.detectChanges();
+    expect(singleCells[0].getAttribute('aria-selected')).toBe('true');
+    expect(singleFixture.componentInstance.selectedEvents).toEqual([{ row: singleFixture.componentInstance.rows()[0], field: 'name' }]);
+
+    const multiFixture = createCellHost((h) => (h.selectionMode = 'multiple'));
+    const multiEl = multiFixture.nativeElement as HTMLElement;
+    const multiCells = Array.from(multiEl.querySelectorAll('tbody td'));
+
+    multiCells[1].dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true, cancelable: true }));
+    multiFixture.detectChanges();
+    expect(multiCells[1].getAttribute('aria-selected')).toBe('true');
+    expect(multiFixture.componentInstance.selectedEvents).toEqual([{ row: multiFixture.componentInstance.rows()[0], field: 'status' }]);
+
+    multiCells[1].dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true, cancelable: true }));
+    multiFixture.detectChanges();
+    expect(multiCells[1].getAttribute('aria-selected')).toBe('false');
+    expect(multiFixture.componentInstance.unselectedEvents).toEqual([{ row: multiFixture.componentInstance.rows()[0], field: 'status' }]);
+  });
+
+  it('DAT-043: does not enable cell selection attributes when selectionMode is null', () => {
+    const fixture = createCellHost((h) => (h.selectionMode = null));
+    const el = fixture.nativeElement as HTMLElement;
+    const cells = Array.from(el.querySelectorAll('tbody td'));
+
+    for (const cell of cells) {
+      expect(cell.getAttribute('tabindex')).toBeNull();
+      expect(cell.getAttribute('aria-selected')).toBeNull();
+    }
+
+    (cells[0] as HTMLElement).click();
+    fixture.detectChanges();
+    expect(fixture.componentInstance.selection).toBeNull();
+    expect(fixture.componentInstance.selectedEvents).toEqual([]);
+  });
+
+  it('DAT-043: exportCSV({ selectionOnly: true }) deduplicates rows when multiple cells in the same row are selected', () => {
+    const captureCsv = (fixture: ComponentFixture<unknown>): string => {
+      let capturedCsv = '';
+      const spy = jest.spyOn(globalThis, 'Blob' as never).mockImplementation(((parts: string[]) => {
+        capturedCsv = parts[0];
+        return {} as Blob;
+      }) as never);
+      try {
+        const table = fixture.debugElement.query(By.directive(DataTableComponent)).componentInstance as DataTableComponent<CellRow>;
+        table.exportCSV({ selectionOnly: true });
+      } finally {
+        spy.mockRestore();
+      }
+      return capturedCsv;
+    };
+
+    const fixture = createCellHost((h) => {
+      h.selectionMode = 'multiple';
+    });
+    const cells = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('tbody td'));
+
+    // Select both cells on row 0 and one cell on row 1.
+    (cells[0] as HTMLElement).click();
+    (cells[1] as HTMLElement).click();
+    (cells[3] as HTMLElement).click();
+    fixture.detectChanges();
+
+    expect(captureCsv(fixture)).toBe('Name,Status\nWidget,active\nGadget,critical');
+
+    // Also deduplicate via dataKey when selection entries hold distinct object references for the same key.
+    @Component({
+      standalone: true,
+      imports: [DataTableComponent, TableColumnComponent],
+      template: `
+        <med-data-table [value]="rows()" [cellSelection]="true" selectionMode="multiple" dataKey="id" [selection]="selection()">
+          <med-table-column field="name" header="Name" />
+          <med-table-column field="status" header="Status" />
+        </med-data-table>
+      `,
+    })
+    class KeyedCellExportHost {
+      rows = signal<CellRow[]>([
+        { id: 1, name: 'Widget', status: 'active' },
+        { id: 2, name: 'Gadget', status: 'critical' },
+      ]);
+      selection = signal([
+        { row: { id: 1, name: 'Widget', status: 'active' }, field: 'name' },
+        { row: { id: 1, name: 'Widget', status: 'active' }, field: 'status' },
+        { row: { id: 2, name: 'Gadget', status: 'critical' }, field: 'status' },
+      ]);
+    }
+
+    const keyedFixture = TestBed.createComponent(KeyedCellExportHost);
+    keyedFixture.detectChanges();
+    expect(captureCsv(keyedFixture)).toBe('Name,Status\nWidget,active\nGadget,critical');
+  });
+});
+
+describe('DataTableComponent conditional cell styling', () => {
+  interface StatusRow {
+    readonly id: number;
+    readonly name: string;
+    readonly status: string;
+  }
+
+  it('DAT-044.S1: applies cellClass only to matching body cells alongside alignment, gridlines, and frozen classes', () => {
+    @Component({
+      standalone: true,
+      imports: [DataTableComponent, TableColumnComponent],
+      template: `
+        <med-data-table [value]="rows()" [showGridlines]="true" [cellClass]="cellClass()">
+          <med-table-column field="name" header="Name" [frozen]="true" width="120px" />
+          <med-table-column field="status" header="Status" align="right" />
+        </med-data-table>
+      `,
+    })
+    class CellClassHost {
+      rows = signal<StatusRow[]>([
+        { id: 1, name: 'Widget', status: 'active' },
+        { id: 2, name: 'Gadget', status: 'critical' },
+      ]);
+      cellClass = signal<((row: StatusRow, field: string) => string) | null>((row, field) =>
+        field === 'status' && row.status === 'critical' ? 'bg-red-100' : '',
+      );
+    }
+
+    const fixture = TestBed.createComponent(CellClassHost);
+    fixture.detectChanges();
+
+    const el = fixture.nativeElement as HTMLElement;
+    const headers = Array.from(el.querySelectorAll('thead th'));
+    const bodyRows = Array.from(el.querySelectorAll('tbody tr'));
+    const row0Cells = Array.from(bodyRows[0].querySelectorAll('td'));
+    const row1Cells = Array.from(bodyRows[1].querySelectorAll('td'));
+
+    // Header cells never receive cellClass.
+    for (const th of headers) {
+      expect(th.classList).not.toContain('bg-red-100');
+    }
+
+    // Non-matching row and non-matching column do not receive bg-red-100.
+    expect(row0Cells[0].classList).not.toContain('bg-red-100');
+    expect(row0Cells[1].classList).not.toContain('bg-red-100');
+    expect(row1Cells[0].classList).not.toContain('bg-red-100');
+
+    // Frozen column keeps frozen styling when cellClass is also configured.
+    expect(row1Cells[0].classList).toContain('bg-surface-0');
+    expect(row1Cells[0].classList).toContain('border-r');
+
+    // Matching body cell receives bg-red-100 alongside alignment and gridlines.
+    expect(row1Cells[1].classList).toContain('bg-red-100');
+    expect(row1Cells[1].classList).toContain('text-right');
+    expect(row1Cells[1].classList).toContain('border-x');
+
+    // Updating cellClass to null removes the conditional class.
+    fixture.componentInstance.cellClass.set(null);
+    fixture.detectChanges();
+    expect(row1Cells[1].classList).not.toContain('bg-red-100');
+  });
+
+  it('DAT-044.S1: preserves frozen cell border classes when cellClass styles a frozen column cell', () => {
+    @Component({
+      standalone: true,
+      imports: [DataTableComponent, TableColumnComponent],
+      template: `
+        <med-data-table [value]="rows()" [cellClass]="cellClass">
+          <med-table-column field="status" header="Status" [frozen]="true" alignFrozen="right" width="120px" />
+          <med-table-column field="name" header="Name" />
+        </med-data-table>
+      `,
+    })
+    class FrozenCellClassHost {
+      rows = signal<StatusRow[]>([
+        { id: 1, name: 'Widget', status: 'active' },
+        { id: 2, name: 'Gadget', status: 'critical' },
+      ]);
+      cellClass = (row: StatusRow, field: string) => (field === 'status' && row.status === 'critical' ? 'bg-red-100 font-semibold' : '');
+    }
+
+    const fixture = TestBed.createComponent(FrozenCellClassHost);
+    fixture.detectChanges();
+
+    const bodyRows = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('tbody tr'));
+    const row0Status = bodyRows[0].querySelectorAll('td')[0];
+    const row1Status = bodyRows[1].querySelectorAll('td')[0];
+
+    expect(row0Status.classList).toContain('bg-surface-0');
+    expect(row0Status.classList).toContain('border-l');
+    expect(row0Status.classList).not.toContain('bg-red-100');
+
+    expect(row1Status.classList).toContain('bg-red-100');
+    expect(row1Status.classList).toContain('font-semibold');
+    expect(row1Status.classList).toContain('border-l');
+  });
+});
+
+describe('DataTableComponent context menu integration', () => {
+  interface ContextRow {
+    readonly id: number;
+    readonly name: string;
+    readonly status: string;
+  }
+
+  afterEach(() => {
+    document.querySelectorAll('.cdk-overlay-container').forEach((el) => el.remove());
+  });
+
+  @Component({
+    standalone: true,
+    imports: [DataTableComponent, TableColumnComponent, ContextMenuDirective],
+    template: `
+      <span #cm="medContextMenu" [medContextMenu]="menuItems()" (itemSelect)="activatedItems.push($event)"></span>
+      <med-data-table
+        [value]="rows()"
+        [contextMenu]="linkMenu() ? cm : null"
+        [(contextMenuSelection)]="selectedRow"
+        (contextMenuSelect)="selectEvents.push($event)"
+      >
+        <med-table-column field="name" header="Name" />
+        <med-table-column field="status" header="Status" />
+      </med-data-table>
+    `,
+  })
+  class ContextMenuHost {
+    rows = signal<ContextRow[]>([
+      { id: 1, name: 'Widget', status: 'active' },
+      { id: 2, name: 'Gadget', status: 'paused' },
+    ]);
+    linkMenu = signal(true);
+    selectedRow = signal<ContextRow | null>(null);
+    selectEvents: TableContextMenuSelectEvent<ContextRow>[] = [];
+    activatedItems: MenuItem[] = [];
+    commandSpy = jest.fn();
+    menuItems = signal<MenuItem[]>([
+      { label: 'Inspect', command: this.commandSpy },
+      { label: 'Archive' },
+    ]);
+  }
+
+  function createContextHost(configure?: (h: ContextMenuHost) => void) {
+    const fixture = TestBed.createComponent(ContextMenuHost);
+    configure?.(fixture.componentInstance);
+    fixture.detectChanges();
+    return fixture;
+  }
+
+  function menuPanel(): HTMLElement | null {
+    return document.querySelector('[role="menu"]');
+  }
+
+  it('DAT-045.S1: right-clicking a body row updates contextMenuSelection, emits contextMenuSelect, prevents default, and opens the linked context menu', () => {
+    const fixture = createContextHost();
+    const host = fixture.componentInstance;
+    const rows = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('tbody tr'));
+    const secondRowCells = Array.from(rows[1].querySelectorAll('td'));
+
+    const event = new MouseEvent('contextmenu', { bubbles: true, cancelable: true, clientX: 120, clientY: 80 });
+    secondRowCells[1].dispatchEvent(event);
+    fixture.detectChanges();
+
+    expect(event.defaultPrevented).toBe(true);
+    expect(host.selectedRow()).toEqual(host.rows()[1]);
+    expect(host.selectEvents.length).toBe(1);
+    expect(host.selectEvents[0].originalEvent).toBe(event);
+    expect(host.selectEvents[0].row).toEqual(host.rows()[1]);
+    expect(host.selectEvents[0].field).toBe('status');
+    expect(rows[1].classList).toContain('bg-brand-50');
+
+    const panel = menuPanel();
+    expect(panel).not.toBeNull();
+    expect(panel!.textContent).toContain('Inspect');
+    expect(panel!.textContent).toContain('Archive');
+
+    // Selecting an item from the opened menu runs its command and closes the menu.
+    panel!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+    fixture.detectChanges();
+    expect(host.commandSpy).toHaveBeenCalledTimes(1);
+    expect(host.activatedItems.map((i) => i.label)).toEqual(['Inspect']);
+    expect(menuPanel()).toBeNull();
+  });
+
+  it('DAT-045.S2: Shift+F10 and ContextMenu keydown on a focused body row update contextMenuSelection, emit contextMenuSelect, and open the linked context menu', () => {
+    const fixture = createContextHost();
+    const host = fixture.componentInstance;
+    const rows = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll<HTMLElement>('tbody tr'));
+
+    expect(rows[0].getAttribute('tabindex')).toBe('0');
+    expect(rows[1].getAttribute('tabindex')).toBe('0');
+
+    rows[0].focus();
+    const shiftF10 = new KeyboardEvent('keydown', { key: 'F10', shiftKey: true, bubbles: true, cancelable: true });
+    rows[0].dispatchEvent(shiftF10);
+    fixture.detectChanges();
+
+    expect(shiftF10.defaultPrevented).toBe(true);
+    expect(host.selectedRow()).toEqual(host.rows()[0]);
+    expect(host.selectEvents.length).toBe(1);
+    expect(host.selectEvents[0].originalEvent).toBe(shiftF10);
+    expect(host.selectEvents[0].row).toEqual(host.rows()[0]);
+    expect(menuPanel()).not.toBeNull();
+
+    // Close and trigger ContextMenu key on the second row.
+    menuPanel()!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
+    fixture.detectChanges();
+    expect(menuPanel()).toBeNull();
+
+    rows[1].focus();
+    const contextKey = new KeyboardEvent('keydown', { key: 'ContextMenu', bubbles: true, cancelable: true });
+    rows[1].dispatchEvent(contextKey);
+    fixture.detectChanges();
+
+    expect(contextKey.defaultPrevented).toBe(true);
+    expect(host.selectedRow()).toEqual(host.rows()[1]);
+    expect(host.selectEvents.length).toBe(2);
+    expect(host.selectEvents[1].originalEvent).toBe(contextKey);
+    expect(host.selectEvents[1].row).toEqual(host.rows()[1]);
+    expect(menuPanel()).not.toBeNull();
+  });
+
+  it('DAT-045: leaves native context menu unprevented and does not open an overlay when contextMenu is null', () => {
+    const fixture = createContextHost((h) => h.linkMenu.set(false));
+    const host = fixture.componentInstance;
+    const rows = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll<HTMLElement>('tbody tr'));
+
+    expect(rows[0].getAttribute('tabindex')).toBeNull();
+
+    const event = new MouseEvent('contextmenu', { bubbles: true, cancelable: true, clientX: 40, clientY: 40 });
+    rows[0].querySelector('td')!.dispatchEvent(event);
+    fixture.detectChanges();
+
+    expect(event.defaultPrevented).toBe(false);
+    expect(host.selectedRow()).toEqual(host.rows()[0]);
+    expect(host.selectEvents.length).toBe(1);
+    expect(menuPanel()).toBeNull();
+  });
+
+  it('DAT-045: does not highlight contextMenuSelection row or frozen cells when contextMenu is null', () => {
+    @Component({
+      standalone: true,
+      imports: [DataTableComponent, TableColumnComponent, ContextMenuDirective],
+      template: `
+        <span #cm="medContextMenu" [medContextMenu]="menuItems()"></span>
+        <med-data-table
+          [value]="rows()"
+          [contextMenu]="linkMenu() ? cm : null"
+          [(contextMenuSelection)]="selectedRow"
+          (contextMenuSelect)="selectEvents.push($event)"
+        >
+          <med-table-column field="name" header="Name" [frozen]="true" width="120px" />
+          <med-table-column field="status" header="Status" />
+        </med-data-table>
+      `,
+    })
+    class FrozenContextMenuHost {
+      rows = signal<ContextRow[]>([
+        { id: 1, name: 'Widget', status: 'active' },
+        { id: 2, name: 'Gadget', status: 'paused' },
+      ]);
+      linkMenu = signal(false);
+      selectedRow = signal<ContextRow | null>(null);
+      selectEvents: TableContextMenuSelectEvent<ContextRow>[] = [];
+      menuItems = signal<MenuItem[]>([{ label: 'Inspect' }]);
+    }
+
+    const fixture = TestBed.createComponent(FrozenContextMenuHost);
+    fixture.detectChanges();
+    const host = fixture.componentInstance;
+    const rows = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll<HTMLElement>('tbody tr'));
+    const frozenCell = rows[0].querySelector('td')!;
+
+    const event = new MouseEvent('contextmenu', { bubbles: true, cancelable: true, clientX: 40, clientY: 40 });
+    frozenCell.dispatchEvent(event);
+    fixture.detectChanges();
+
+    expect(event.defaultPrevented).toBe(false);
+    expect(host.selectedRow()).toEqual(host.rows()[0]);
+    expect(host.selectEvents.length).toBe(1);
+    expect(rows[0].classList).not.toContain('bg-brand-50');
+    expect(rows[0].classList).not.toContain('dark:bg-brand-500/10');
+    expect(frozenCell.classList).not.toContain('bg-brand-50');
+    expect(frozenCell.classList).not.toContain('dark:bg-brand-950');
+
+    // Linking a context menu highlights the active contextMenuSelection row and frozen cell; unlinking removes it.
+    host.linkMenu.set(true);
+    fixture.detectChanges();
+    expect(rows[0].classList).toContain('bg-brand-50');
+    expect(frozenCell.classList).toContain('bg-brand-50');
+    expect(frozenCell.classList).toContain('dark:bg-brand-950');
+
+    host.linkMenu.set(false);
+    fixture.detectChanges();
+    expect(rows[0].classList).not.toContain('bg-brand-50');
+    expect(frozenCell.classList).not.toContain('bg-brand-50');
+  });
+
+  it('DAT-045: applies focus-visible outline classes only to focusable body rows', () => {
+    @Component({
+      standalone: true,
+      imports: [DataTableComponent, TableColumnComponent, ContextMenuDirective],
+      template: `
+        <span #cm="medContextMenu" [medContextMenu]="menuItems()"></span>
+        <med-data-table
+          [value]="rows()"
+          [frozenValue]="frozenRows()"
+          [contextMenu]="linkMenu() ? cm : null"
+          [selectionMode]="selectionMode()"
+          [cellSelection]="cellSelection()"
+        >
+          <med-table-column field="name" header="Name" />
+          <med-table-column field="status" header="Status" />
+        </med-data-table>
+      `,
+    })
+    class FocusableRowHost {
+      rows = signal<ContextRow[]>([{ id: 1, name: 'Widget', status: 'active' }]);
+      frozenRows = signal<ContextRow[]>([{ id: 99, name: 'Pinned', status: 'locked' }]);
+      linkMenu = signal(true);
+      selectionMode = signal<'single' | 'multiple' | null>(null);
+      cellSelection = signal(false);
+      menuItems = signal<MenuItem[]>([{ label: 'Inspect' }]);
+    }
+
+    const fixture = TestBed.createComponent(FocusableRowHost);
+    fixture.detectChanges();
+    const host = fixture.componentInstance;
+
+    const getBodyAndFrozenRows = () => {
+      const allRows = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll<HTMLElement>('tbody tr'));
+      return { frozenRow: allRows[0], bodyRow: allRows[1] };
+    };
+
+    let { frozenRow, bodyRow } = getBodyAndFrozenRows();
+    expect(bodyRow.getAttribute('tabindex')).toBe('0');
+    expect(bodyRow.classList).toContain('focus-visible:outline-2');
+    expect(bodyRow.classList).toContain('focus-visible:-outline-offset-2');
+    expect(bodyRow.classList).toContain('focus-visible:outline-brand-500');
+    expect(bodyRow.classList).toContain('dark:focus-visible:outline-brand-400');
+    expect(bodyRow.classList).not.toContain('cursor-pointer');
+
+    // Display-only frozen rows are never focusable and do not receive row focus-visible classes.
+    expect(frozenRow.getAttribute('tabindex')).toBeNull();
+    expect(frozenRow.classList).not.toContain('focus-visible:outline-2');
+
+    // Unlinking contextMenu without row selection removes tabindex and focus-visible classes.
+    host.linkMenu.set(false);
+    fixture.detectChanges();
+    ({ bodyRow } = getBodyAndFrozenRows());
+    expect(bodyRow.getAttribute('tabindex')).toBeNull();
+    expect(bodyRow.classList).not.toContain('focus-visible:outline-2');
+
+    // When cell selection is active, row focus and row focus-visible classes are suppressed in favor of cells.
+    host.linkMenu.set(true);
+    host.selectionMode.set('multiple');
+    host.cellSelection.set(true);
+    fixture.detectChanges();
+    ({ bodyRow } = getBodyAndFrozenRows());
+    expect(bodyRow.getAttribute('tabindex')).toBeNull();
+    expect(bodyRow.classList).not.toContain('focus-visible:outline-2');
   });
 });
