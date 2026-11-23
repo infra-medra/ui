@@ -39,4 +39,32 @@ test.describe('DataTable pagination', () => {
     const background = (name: string) => restored.getByRole('button', { name }).evaluate((el) => getComputedStyle(el).backgroundColor);
     expect(await background('Page 1')).not.toBe(await background('Page 2'));
   });
+
+  test('DAT-049.S1: the paginator-options demo places the top paginator after the caption and before the table header', async ({ page }) => {
+    await page.goto(PAGE);
+    const table = page.locator('app-data-table-paginator-options-demo med-data-table');
+    await table.scrollIntoViewIfNeeded({ timeout: 5_000 });
+    await expect(table.locator('[data-med-paginator-top] med-paginator')).toHaveCount(1);
+
+    const order = await table.evaluate((el) => {
+      const caption = el.querySelector('[data-med-caption]')!;
+      const paginator = el.querySelector('[data-med-paginator-top] med-paginator')!;
+      const header = el.querySelector('thead')!;
+      return {
+        captionBeforePaginator: Boolean(caption.compareDocumentPosition(paginator) & Node.DOCUMENT_POSITION_FOLLOWING),
+        paginatorBeforeHeader: Boolean(paginator.compareDocumentPosition(header) & Node.DOCUMENT_POSITION_FOLLOWING),
+      };
+    });
+    expect(order).toEqual({ captionBeforePaginator: true, paginatorBeforeHeader: true });
+  });
+
+  test('DAT-024.S15: the paginator-options demo shows a paginator above and below the table with a custom page report', async ({ page }) => {
+    await page.goto(PAGE);
+    const demo = page.locator('app-data-table-paginator-options-demo');
+    await demo.scrollIntoViewIfNeeded({ timeout: 5_000 });
+
+    await expect(demo.locator('[data-med-paginator-top] med-paginator')).toHaveCount(1);
+    await expect(demo.locator('med-data-table > med-paginator')).toHaveCount(1);
+    await expect(demo.locator('med-paginator nav').first()).toContainText(/Page \d+ of \d+, rows \d+-\d+ of \d+/);
+  });
 });

@@ -1,0 +1,7 @@
+## Paginator options
+
+`paginatorPosition` places the paginator below the table (`bottom`, the default), above the table header and below the caption (`top`), or in both places (`both`). With `both`, the two paginators always show the same page and page size. Each paginator carries its own accessible name: `paginatorTopAriaLabel` and `paginatorBottomAriaLabel` name the two landmarks, and `paginatorAriaLabel` names a single one.
+
+`currentPageReportTemplate` replaces the "Showing X-Y of Z" report with your own text, using `{first}`, `{last}`, `{totalRecords}`, `{currentPage}`, `{totalPages}` and `{rows}`. `showCurrentPageReport` hides the report entirely. `showFirstLastIcon` adds first and last page buttons, `showJumpToPageInput` adds a page number input, and `pageLinks` limits how many page links show at once.
+
+`pageChange` emits whenever the user changes the page or the page size, with the new `first`, `rows`, zero-based `page` and `pageCount`. Setting `first` from code does not emit it.

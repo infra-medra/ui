@@ -1,0 +1,25 @@
+<med-data-table
+  [value]="equipment"
+  [paginator]="true"
+  [rows]="3"
+  [rowsPerPageOptions]="[3, 5]"
+  paginatorPosition="both"
+  currentPageReportTemplate="Page {currentPage} of {totalPages}, rows {first}-{last} of {totalRecords}"
+  [showFirstLastIcon]="true"
+  [showJumpToPageInput]="true"
+  [pageLinks]="3"
+  [(first)]="first"
+  (pageChange)="onPageChange($event)"
+  ariaLabel="Lab equipment inventory (paginator options)"
+>
+  <ng-template #caption>
+    <div class="flex items-center justify-between gap-4">
+      <span>Lab equipment inventory</span>
+      <span class="text-xs font-normal text-surface-500 dark:text-surface-400">{{ equipment.length }} items</span>
+    </div>
+  </ng-template>
+  <med-table-column field="name" header="Name" />
+  <med-table-column field="category" header="Category" />
+  <med-table-column field="quantity" header="Quantity" align="right" />
+</med-data-table>
+<p class="mt-2 text-sm text-surface-500 dark:text-surface-400">Last page moved to: {{ lastPageNumber }}. First visible row index: {{ first }}</p>

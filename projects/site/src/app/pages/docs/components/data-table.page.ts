@@ -16,6 +16,7 @@ import { DataTableSortMultipleDemo } from './demos/data-table-sort-multiple.demo
 import { DataTableFilterGlobalDemo } from './demos/data-table-filter-global.demo';
 import { DataTableColumnFiltersDemo } from './demos/data-table-column-filters.demo';
 import { DataTablePaginationDemo } from './demos/data-table-pagination.demo';
+import { DataTablePaginatorOptionsDemo } from './demos/data-table-paginator-options.demo';
 import { DataTableProgrammaticPaginationDemo } from './demos/data-table-programmatic-pagination.demo';
 import { DataTableScrollVerticalDemo } from './demos/data-table-scroll-vertical.demo';
 import { DataTableRowExpansionDemo } from './demos/data-table-row-expansion.demo';
@@ -70,6 +71,7 @@ import sortMultipleCode from './demos/data-table-sort-multiple.demo.html?raw';
 import filterGlobalCode from './demos/data-table-filter-global.demo.html?raw';
 import columnFiltersCode from './demos/data-table-column-filters.demo.html?raw';
 import paginationCode from './demos/data-table-pagination.demo.html?raw';
+import paginatorOptionsCode from './demos/data-table-paginator-options.demo.html?raw';
 import programmaticPaginationCode from './demos/data-table-programmatic-pagination.demo.html?raw';
 import scrollVerticalCode from './demos/data-table-scroll-vertical.demo.html?raw';
 import rowExpansionCode from './demos/data-table-row-expansion.demo.html?raw';
@@ -125,6 +127,7 @@ import sortMultipleContent from '../../../../content/docs/data-table-sort-multip
 import filterGlobalContent from '../../../../content/docs/data-table-filter-global.txt?raw';
 import columnFiltersContent from '../../../../content/docs/data-table-column-filters.txt?raw';
 import paginationContent from '../../../../content/docs/data-table-pagination.txt?raw';
+import paginatorOptionsContent from '../../../../content/docs/data-table-paginator-options.txt?raw';
 import programmaticPaginationContent from '../../../../content/docs/data-table-programmatic-pagination.txt?raw';
 import scrollVerticalContent from '../../../../content/docs/data-table-scroll-vertical.txt?raw';
 import rowExpansionContent from '../../../../content/docs/data-table-row-expansion.txt?raw';
@@ -194,6 +197,7 @@ const EXAMPLES = [
   { id: 'example-column-filters', label: 'Column filters' },
   { id: 'example-pagination', label: 'Pagination' },
   { id: 'example-programmatic-pagination', label: 'Programmatic pagination' },
+  { id: 'example-paginator-options', label: 'Paginator options' },
   { id: 'example-scroll-vertical', label: 'Vertical scroll' },
   { id: 'example-row-expansion', label: 'Row expansion' },
   { id: 'example-row-group-subheader', label: 'Row group subheader' },
@@ -256,6 +260,7 @@ const EXAMPLES = [
     DataTableColumnFiltersDemo,
     DataTablePaginationDemo,
     DataTableProgrammaticPaginationDemo,
+    DataTablePaginatorOptionsDemo,
     DataTableScrollVerticalDemo,
     DataTableRowExpansionDemo,
     DataTableRowGroupSubheaderDemo,
@@ -398,6 +403,14 @@ const EXAMPLES = [
         <div class="mt-4">
           <app-data-table-programmatic-pagination-demo />
           <div class="mt-3"><app-code-block [code]="programmaticPaginationCode" /></div>
+        </div>
+      </section>
+
+      <section id="example-paginator-options" class="mt-10 scroll-mt-24">
+        <app-prose class="block" [content]="paginatorOptionsContent" />
+        <div class="mt-4">
+          <app-data-table-paginator-options-demo />
+          <div class="mt-3"><app-code-block [code]="paginatorOptionsCode" /></div>
         </div>
       </section>
 
@@ -762,6 +775,8 @@ export default class DocsDataTable {
   protected readonly paginationCode = paginationCode;
   protected readonly programmaticPaginationContent = programmaticPaginationContent;
   protected readonly programmaticPaginationCode = programmaticPaginationCode;
+  protected readonly paginatorOptionsContent = paginatorOptionsContent;
+  protected readonly paginatorOptionsCode = paginatorOptionsCode;
   protected readonly scrollVerticalContent = scrollVerticalContent;
   protected readonly scrollVerticalCode = scrollVerticalCode;
   protected readonly rowExpansionContent = rowExpansionContent;

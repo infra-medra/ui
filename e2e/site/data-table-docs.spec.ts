@@ -20,6 +20,9 @@ const RESIZE_TOGGLE_GROUPS = ['column-resize', 'column-resize-expand', 'column-t
 /** The examples DAT-024.S10 adds for row editing, cell editing with selection, row-span grouping and expandable row groups, by slug. */
 const ROW_EDITING_AND_GROUPS = ['edit-row', 'edit-cell-selection', 'row-group-rowspan', 'row-group-expandable'];
 
+/** The example DAT-024.S15 adds for paginator position and page report options, by slug. */
+const PAGINATOR_OPTIONS = ['paginator-options'];
+
 interface SectionReport {
   id: string;
   proseLength: number;
@@ -150,6 +153,18 @@ test.describe('DataTable docs page', () => {
   }) => {
     const { anchorIds, sections } = await readPage(page);
     for (const slug of ROW_EDITING_AND_GROUPS) {
+      expect(anchorIds, `no section for "${slug}"`).toContain(`example-${slug}`);
+      const section = sections.find((s) => s.id === `example-${slug}`)!;
+      expect(section.proseLength, `no prose for "${slug}"`).toBeGreaterThan(0);
+      expect(section.demos, `no demo for "${slug}"`).toBe(1);
+      expect(section.codeBlocks, `no code block for "${slug}"`).toBeGreaterThanOrEqual(1);
+    }
+  });
+
+  // DAT-024.S15
+  test('DAT-024.S15: the paginator options example has a section with prose, a demo and a code block', async ({ page }) => {
+    const { anchorIds, sections } = await readPage(page);
+    for (const slug of PAGINATOR_OPTIONS) {
       expect(anchorIds, `no section for "${slug}"`).toContain(`example-${slug}`);
       const section = sections.find((s) => s.id === `example-${slug}`)!;
       expect(section.proseLength, `no prose for "${slug}"`).toBeGreaterThan(0);
