@@ -7,7 +7,7 @@ import { ContextMenuDirective } from '../context-menu/context-menu.directive';
 import { DatePickerComponent } from '../date-picker/date-picker.component';
 import { IconComponent } from '../icon/icon.component';
 import { InputTextDirective } from '../input-text/input-text.directive';
-import { PaginatorComponent } from '../paginator/paginator.component';
+import { PaginatorComponent, PaginatorPageEvent } from '../paginator/paginator.component';
 import { PopoverComponent } from '../popover/popover.component';
 import { SelectComponent } from '../select/select.component';
 import { ProgressSpinnerComponent } from '../progress-spinner/progress-spinner.component';
@@ -549,6 +549,11 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
           <ng-container [ngTemplateOutlet]="capTpl" />
         </div>
       }
+      @if (showPaginator('top')) {
+        <div data-med-paginator-top class="border-b border-surface-200 bg-surface-50 px-4 py-3 dark:border-surface-700 dark:bg-surface-800/50">
+          <ng-container [ngTemplateOutlet]="paginatorTpl" [ngTemplateOutletContext]="{ placement: 'top', label: paginatorLabelFor('top') }" />
+        </div>
+      }
       <div #viewport data-med-scroll-viewport class="relative w-full overflow-x-auto" [class.min-h-0]="flexHeight()" [class.flex-1]="flexHeight()" [class.overflow-y-auto]="scrollActive()" [style.maxHeight]="scrollActive() && !flexHeight() ? viewportMaxHeight() : null" (scroll)="onViewportScroll($event)">
         @if (isSpinnerLoading()) {
           <div class="absolute inset-0 z-10 flex items-center justify-center bg-surface-0/60 dark:bg-surface-800/60">
@@ -756,9 +761,26 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
         </div>
       }
     </div>
-    @if (paginator() && !virtualScroll() && effectiveTotalRecords() > 0) {
-      <med-paginator class="mt-3 block" [totalRecords]="effectiveTotalRecords()" [(rows)]="pageSize" [rowsPerPageOptions]="rowsPerPageOptions()" [(first)]="first" />
+    @if (showPaginator('bottom')) {
+      <ng-container [ngTemplateOutlet]="paginatorTpl" [ngTemplateOutletContext]="{ placement: 'bottom', label: paginatorLabelFor('bottom') }" />
     }
+    <ng-template #paginatorTpl let-placement="placement" let-label="label">
+      <med-paginator
+        [class.mt-3]="placement === 'bottom'"
+        [totalRecords]="effectiveTotalRecords()"
+        [(rows)]="pageSize"
+        [rowsPerPageOptions]="rowsPerPageOptions()"
+        [(first)]="first"
+        [showSummary]="showCurrentPageReport()"
+        [currentPageReportTemplate]="currentPageReportTemplate()"
+        [showFirstLastIcon]="showFirstLastIcon()"
+        [showJumpToPageInput]="showJumpToPageInput()"
+        [pageLinkCount]="pageLinks()"
+        [alwaysShow]="alwaysShowPaginator()"
+        [ariaLabel]="label"
+        (pageChange)="pageChange.emit($event)"
+      />
+    </ng-template>
   `,
 })
 export class DataTableComponent<T> {
@@ -778,6 +800,32 @@ export class DataTableComponent<T> {
   /** The page size in effect: follows `rows()`, and the paginator's "rows per page" select writes to it, so the visible slice and `lazyLoad` follow the user's choice. */
   protected readonly pageSize = linkedSignal(() => this.rows());
   readonly rowsPerPageOptions = input<readonly number[] | null>(null);
+  /**
+   * Where the paginator renders when `paginator` is on: `bottom` (below the table and its summary), `top` (above the
+   * table header and below the caption) or `both`. With `both`, the two paginators share the page and page size.
+   */
+  readonly paginatorPosition = input<'top' | 'bottom' | 'both'>('bottom');
+  /** Shows the "Showing X-Y of Z" page report. */
+  readonly showCurrentPageReport = input(true, { transform: booleanAttribute });
+  /**
+   * Replaces the page report text. The placeholders `{first}`, `{last}`, `{totalRecords}`, `{currentPage}`,
+   * `{totalPages}` and `{rows}` are filled in. Default `null` keeps the built-in "Showing X-Y of Z" report.
+   */
+  readonly currentPageReportTemplate = input<string | null>(null);
+  /** Shows first and last page buttons. */
+  readonly showFirstLastIcon = input(false, { transform: booleanAttribute });
+  /** Shows a page number input for jumping to a page. */
+  readonly showJumpToPageInput = input(false, { transform: booleanAttribute });
+  /** The most page links shown at once. */
+  readonly pageLinks = input(5, { transform: numberAttribute });
+  /** Keeps the paginator rendered when there is only one page. */
+  readonly alwaysShowPaginator = input(true, { transform: booleanAttribute });
+  /** Accessible name of a single paginator's navigation landmark. Ignored when `paginatorPosition` is `both`, where the top and bottom labels apply instead. */
+  readonly paginatorAriaLabel = input('Pagination');
+  /** Accessible name of the top paginator when `paginatorPosition` is `both`. */
+  readonly paginatorTopAriaLabel = input('Pagination, top');
+  /** Accessible name of the bottom paginator when `paginatorPosition` is `both`. */
+  readonly paginatorBottomAriaLabel = input('Pagination, bottom');
   readonly first = model(0);
   /** Row identity key for selection comparisons — see class doc's "dataKey" section. Unset (default): reference equality, unchanged from before this input existed. */
   readonly dataKey = input<string | null>(null);
@@ -900,6 +948,31 @@ export class DataTableComponent<T> {
   readonly class = input('', { alias: 'class' });
 
   readonly lazyLoad = output<TableLazyLoadEvent>();
+  /** Emits when the user changes the page or the page size in a paginator; a host write to `first` does not emit. */
+  readonly pageChange = output<PaginatorPageEvent>();
+
+  /**
+   * Whether a paginator renders at `placement`: the table is paged, has records, follows `paginatorPosition`, and
+   * (unless `alwaysShowPaginator`) has more than one page.
+   */
+  protected showPaginator(placement: 'top' | 'bottom'): boolean {
+    const position = this.paginatorPosition();
+    if (!this.paginator() || this.virtualScroll() || this.effectiveTotalRecords() <= 0) {
+      return false;
+    }
+    if (position !== 'both' && position !== placement) {
+      return false;
+    }
+    return this.alwaysShowPaginator() || Math.ceil(this.effectiveTotalRecords() / Math.max(1, this.pageSize())) > 1;
+  }
+
+  /** Accessible name of the paginator at `placement`: one name for a single paginator, a name per position for `both`. */
+  protected paginatorLabelFor(placement: 'top' | 'bottom'): string {
+    if (this.paginatorPosition() !== 'both') {
+      return this.paginatorAriaLabel();
+    }
+    return placement === 'top' ? this.paginatorTopAriaLabel() : this.paginatorBottomAriaLabel();
+  }
   readonly editComplete = output<{ readonly row: T; readonly field: string; readonly value: unknown }>();
   readonly editCancel = output<{ readonly row: T; readonly field: string }>();
   /** Emitted when a row is saved in `editMode="row"`, with the row and the value of each editable field. */

@@ -5047,3 +5047,229 @@ describe('DataTableComponent lazy virtual scroll edges', () => {
     expect(document.activeElement).toBe(first);
   });
 });
+
+interface PagedRow {
+  id: number;
+  name: string;
+}
+
+const makePagedRows = (count: number): PagedRow[] => Array.from({ length: count }, (_, i) => ({ id: i, name: `Item ${i + 1}` }));
+
+@Component({
+  standalone: true,
+  imports: [DataTableComponent, TableColumnComponent],
+  template: `
+    <med-data-table
+      [value]="rows()"
+      [paginator]="true"
+      [rows]="rowsPerPage()"
+      [first]="firstValue()"
+      [paginatorPosition]="position()"
+      [paginatorAriaLabel]="paginatorLabel()"
+      [paginatorTopAriaLabel]="topLabel()"
+      [paginatorBottomAriaLabel]="bottomLabel()"
+      [showCurrentPageReport]="showReport()"
+      [currentPageReportTemplate]="reportTemplate()"
+      [showFirstLastIcon]="showFirstLast()"
+      [showJumpToPageInput]="showJump()"
+      [pageLinks]="pageLinks()"
+      [alwaysShowPaginator]="alwaysShow()"
+      (pageChange)="events.push($event)"
+    >
+      <ng-template #caption>Products caption</ng-template>
+      <ng-template #summary>Products summary</ng-template>
+      <med-table-column field="name" header="Name">
+        <ng-template let-row>{{ row.name }}</ng-template>
+      </med-table-column>
+    </med-data-table>
+  `,
+})
+class PaginatorOptionsHostComponent {
+  rows = signal<PagedRow[]>(makePagedRows(25));
+  rowsPerPage = signal(10);
+  firstValue = signal(0);
+  position = signal<'top' | 'bottom' | 'both'>('bottom');
+  paginatorLabel = signal('Pagination');
+  topLabel = signal('Pagination, top');
+  bottomLabel = signal('Pagination, bottom');
+  showReport = signal(true);
+  reportTemplate = signal<string | null>(null);
+  showFirstLast = signal(false);
+  showJump = signal(false);
+  pageLinks = signal(5);
+  alwaysShow = signal(true);
+  events: unknown[] = [];
+}
+
+describe('DataTableComponent paginator position and options (DAT-049)', () => {
+  function create(configure?: (host: PaginatorOptionsHostComponent) => void): ComponentFixture<PaginatorOptionsHostComponent> {
+    const fixture = TestBed.createComponent(PaginatorOptionsHostComponent);
+    configure?.(fixture.componentInstance);
+    fixture.detectChanges();
+    return fixture;
+  }
+
+  const paginatorsOf = (fixture: ComponentFixture<PaginatorOptionsHostComponent>): HTMLElement[] =>
+    Array.from(fixture.nativeElement.querySelectorAll('med-paginator')) as HTMLElement[];
+  const navsOf = (fixture: ComponentFixture<PaginatorOptionsHostComponent>): HTMLElement[] =>
+    Array.from(fixture.nativeElement.querySelectorAll('med-paginator nav')) as HTMLElement[];
+  const bodyRowsOf = (fixture: ComponentFixture<PaginatorOptionsHostComponent>): HTMLTableRowElement[] =>
+    Array.from(fixture.nativeElement.querySelectorAll('tbody tr')) as HTMLTableRowElement[];
+  const clickPage = (fixture: ComponentFixture<PaginatorOptionsHostComponent>, paginator: HTMLElement, page: number): void => {
+    paginator.querySelector<HTMLButtonElement>(`button[aria-label="Page ${page}"]`)!.click();
+    fixture.detectChanges();
+  };
+
+  it('DAT-049.S1: paginator above the table renders after the caption and before the table header', () => {
+    const fixture = create((h) => h.position.set('top'));
+    const el = fixture.nativeElement as HTMLElement;
+
+    const paginators = paginatorsOf(fixture);
+    expect(paginators.length).toBe(1);
+    const caption = el.querySelector('[data-med-caption]')!;
+    const header = el.querySelector('thead')!;
+    expect(caption.compareDocumentPosition(paginators[0]) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(paginators[0].compareDocumentPosition(header) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it('DAT-049.S2: both paginators stay in step when the page changes in the top one', () => {
+    const fixture = create((h) => h.position.set('both'));
+    const [top, bottom] = paginatorsOf(fixture);
+
+    clickPage(fixture, top, 3);
+
+    const rows = bodyRowsOf(fixture).map((tr) => tr.textContent ?? '');
+    expect(rows.length).toBe(5);
+    expect(rows[0]).toContain('Item 21');
+    expect(rows[4]).toContain('Item 25');
+    expect(bottom.querySelector('[aria-current="page"]')!.textContent!.trim()).toBe('3');
+  });
+
+  it('DAT-049.S3: the two paginators of a both table have distinct landmark names', () => {
+    const fixture = create((h) => h.position.set('both'));
+    const [top, bottom] = navsOf(fixture);
+
+    expect(top.getAttribute('aria-label')).toBe('Pagination, top');
+    expect(bottom.getAttribute('aria-label')).toBe('Pagination, bottom');
+  });
+
+  it('DAT-049.S3: paginatorTopAriaLabel renames the top paginator', () => {
+    const fixture = create((h) => {
+      h.position.set('both');
+      h.topLabel.set('Pages above');
+    });
+
+    expect(navsOf(fixture)[0].getAttribute('aria-label')).toBe('Pages above');
+  });
+
+  it('DAT-049.S4: currentPageReportTemplate replaces its placeholders', () => {
+    const fixture = create((h) => {
+      h.firstValue.set(10);
+      h.reportTemplate.set('Page {currentPage} of {totalPages}, rows {first}-{last} of {totalRecords} ({rows} per page)');
+    });
+
+    expect(navsOf(fixture)[0].textContent).toContain('Page 2 of 3, rows 11-20 of 25 (10 per page)');
+  });
+
+  it('DAT-049.S5: showCurrentPageReport false hides the page report', () => {
+    const fixture = create((h) => h.showReport.set(false));
+
+    expect(paginatorsOf(fixture).length).toBe(1);
+    expect(navsOf(fixture)[0].textContent).not.toContain('Showing');
+  });
+
+  it('DAT-049.S6: showFirstLastIcon, showJumpToPageInput and pageLinks are forwarded to the paginator', () => {
+    const fixture = create((h) => {
+      h.rows.set(makePagedRows(200));
+      h.showFirstLast.set(true);
+      h.showJump.set(true);
+      h.pageLinks.set(3);
+    });
+    const paginator = paginatorsOf(fixture)[0];
+
+    expect(paginator.querySelector('button[aria-label="First page"]')).not.toBeNull();
+    expect(paginator.querySelector('button[aria-label="Last page"]')).not.toBeNull();
+    expect(paginator.querySelector('input[type="number"]')).not.toBeNull();
+    expect(paginator.querySelectorAll('button[aria-label^="Page "]').length).toBe(3);
+  });
+
+  it('DAT-049.S7: alwaysShowPaginator false renders no paginator for a single page; the default still renders one', () => {
+    const hidden = create((h) => {
+      h.rows.set(makePagedRows(8));
+      h.alwaysShow.set(false);
+    });
+    expect(hidden.nativeElement.querySelector('med-paginator')).toBeNull();
+
+    const shown = create((h) => h.rows.set(makePagedRows(8)));
+    expect(shown.nativeElement.querySelector('med-paginator')).not.toBeNull();
+  });
+
+  it('DAT-049.S8: pageChange emits once for a user page change and not for a host-written first', () => {
+    const fixture = create();
+    const host = fixture.componentInstance;
+
+    clickPage(fixture, paginatorsOf(fixture)[0], 2);
+
+    expect(host.events).toEqual([{ first: 10, rows: 10, page: 1, pageCount: 3 }]);
+
+    host.firstValue.set(20);
+    fixture.detectChanges();
+
+    expect(host.events.length).toBe(1);
+  });
+
+  it('DAT-049.S9: default placement is one paginator after the summary, named "Pagination", with the Showing report', () => {
+    const fixture = create((h) => h.position.set('bottom'));
+    const el = fixture.nativeElement as HTMLElement;
+
+    const paginators = paginatorsOf(fixture);
+    expect(paginators.length).toBe(1);
+    const summary = el.querySelector('[data-med-summary]')!;
+    expect(summary.compareDocumentPosition(paginators[0]) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(navsOf(fixture)[0].getAttribute('aria-label')).toBe('Pagination');
+    expect(navsOf(fixture)[0].textContent).toContain('Showing 1-10 of 25');
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [DataTableComponent, TableColumnComponent],
+  template: `
+    <med-data-table [value]="rows" [paginator]="true" [rows]="10" [lazy]="lazy" [totalRecords]="25" (pageChange)="events.push($event)">
+      <med-table-column field="name" header="Name">
+        <ng-template let-row>{{ row.name }}</ng-template>
+      </med-table-column>
+    </med-data-table>
+  `,
+})
+class PaginatorDefaultsHostComponent {
+  rows = makePagedRows(25);
+  lazy = false;
+  events: unknown[] = [];
+}
+
+describe('DataTableComponent paginator defaults and lazy pageChange (DAT-049)', () => {
+  it('DAT-049.S3/S7/S9: with every paginator input left unset the table keeps its documented defaults', () => {
+    const fixture = TestBed.createComponent(PaginatorDefaultsHostComponent);
+    fixture.componentInstance.rows = makePagedRows(8);
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+
+    const navs = el.querySelectorAll('med-paginator nav');
+    expect(navs.length).toBe(1);
+    expect(navs[0].getAttribute('aria-label')).toBe('Pagination');
+    expect(navs[0].textContent).toContain('Showing 1-8 of 8');
+  });
+
+  it('DAT-049.S8: pageChange also emits when lazy is on', () => {
+    const fixture = TestBed.createComponent(PaginatorDefaultsHostComponent);
+    fixture.componentInstance.lazy = true;
+    fixture.componentInstance.rows = makePagedRows(10);
+    fixture.detectChanges();
+
+    (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>('med-paginator button[aria-label="Page 2"]')!.click();
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.events).toEqual([{ first: 10, rows: 10, page: 1, pageCount: 3 }]);
+  });
+});
