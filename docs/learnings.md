@@ -74,6 +74,22 @@
 **Occurrences:** 1
 **Last seen:** 16
 
+### L-012 [lesson] Keep internal grouping keys on the default comparison
+
+**Statement:** When a column supplies a custom comparator, do not route internal keys such as the row-group field through it; sort those keys with the default comparison and apply custom comparators only to the user's sort entries. Test a grouping key with a comparator that inverts its order, because a default-order test cannot detect the leak.
+**Scope:** capabilities: data-display · stages: tasks, apply, verify
+**Evidence:** add-data-table-column-templates-and-custom-sort
+**Occurrences:** 1
+**Last seen:** 17
+
+### L-013 [lesson] Hide every utility cell when the stacked layout is active
+
+**Statement:** When a layout mode hides content cells, also hide the utility cells (selection, reorder, row actions) in the same mode, including in footer rows. Assert in a test that no utility cell is visible in the stacked layout, because content-only assertions miss them.
+**Scope:** capabilities: data-display · stages: tasks, apply, verify
+**Evidence:** add-data-table-column-templates-and-custom-sort
+**Occurrences:** 1
+**Last seen:** 17
+
 ## Promoted
 
 ### L-002 [lesson] Assert every Then clause when retagging a test with a scenario ID
