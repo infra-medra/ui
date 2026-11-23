@@ -17,3 +17,4 @@
 | 13 | 2026-11-22 | add-data-table-cell-selection-and-context-menu | data-display | +DAT-043 +DAT-044 +DAT-045 ~DAT-024 | Applications using `<med-data-table>` currently can only select entire rows, apply conditional classes at the row lev... |
 | 14 | 2026-11-23 | add-data-table-virtual-scroll | data-display | +DAT-046 +DAT-047 +DAT-048 ~DAT-007 ~DAT-024 | Applications that show thousands of rows in `<med-data-table>` must either page them or render one DOM row per item, ... |
 | 15 | 2026-11-23 | add-data-table-pagination-options | data-display | +DAT-049 ~DAT-024 | Applications that paginate a `<med-data-table>` cannot place the paginator above the table, change its "Showing X-Y o... |
+| 16 | 2026-11-23 | add-data-table-responsive-stack | data-display | +DAT-050 +DAT-051 +DAT-052 ~DAT-024 | Applications that show a `<med-data-table>` on phones and narrow panes can only let it scroll sideways, so a user mus... |
