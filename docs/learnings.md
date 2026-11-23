@@ -10,14 +10,6 @@
 **Occurrences:** 2
 **Last seen:** 11
 
-### L-002 [lesson] Assert every Then clause when retagging a test with a scenario ID
-
-**Statement:** When retagging an existing test with a scenario ID, check that it asserts each Given and Then clause of the scenario, not only the first. Coverage only matches the tag, so an unasserted clause passes it silently.
-**Scope:** capabilities: data-display · stages: tasks, apply, verify
-**Evidence:** extend-data-table-sorting-and-pagination, add-data-table-resize-modes-visibility-groups, add-data-table-pagination-options
-**Occurrences:** 3
-**Last seen:** 15
-
 ### L-003 [lesson] Characterization tasks of existing behavior cannot show red evidence
 
 **Statement:** When a change only documents and tests behavior that already works, write its test tasks so they do not require a red run, or the first apply stops on a blocker. State in tasks.md that the tests are expected green from the start.
@@ -83,5 +75,14 @@
 **Last seen:** 12
 
 ## Promoted
+
+### L-002 [lesson] Assert every Then clause when retagging a test with a scenario ID
+
+**Statement:** When retagging an existing test with a scenario ID, check that it asserts each Given and Then clause of the scenario, not only the first. Coverage only matches the tag, so an unasserted clause passes it silently.
+**Scope:** capabilities: data-display · stages: tasks, apply, verify
+**Evidence:** extend-data-table-sorting-and-pagination, add-data-table-resize-modes-visibility-groups, add-data-table-pagination-options
+**Occurrences:** 3
+**Last seen:** 15
+**Promoted:** Article XI (v1.2)
 
 ## Retired
