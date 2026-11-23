@@ -1,6 +1,8 @@
 export type TableSortOrder = 'asc' | 'desc' | null;
 /** Cell padding and text size of a `med-data-table`. */
 export type TableSize = 'sm' | 'default' | 'lg';
+/** Loading presentation of a `med-data-table`: overlay spinner or skeleton rows. */
+export type TableLoadingMode = 'spinner' | 'skeleton';
 
 export type TableSelectionMode = 'single' | 'multiple' | 'radio' | null;
 export type TableColumnAlign = 'left' | 'center' | 'right';

@@ -1,0 +1,3 @@
+## Custom empty template
+
+Project `<ng-template #empty>` inside `<med-data-table>` to replace the plain `emptyLabel` string with rich empty-state markup. When there are zero visible rows and `loading` is `false`, the template renders inside the spanning empty-state cell across all visible columns; when `#empty` is omitted, `emptyLabel` renders as before.

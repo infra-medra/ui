@@ -43,9 +43,12 @@ import { DataTableEditCellDemo } from './demos/data-table-edit-cell.demo';
 import { DataTableEditRowDemo } from './demos/data-table-edit-row.demo';
 import { DataTableEditCellSelectionDemo } from './demos/data-table-edit-cell-selection.demo';
 import { DataTableLoadingDemo } from './demos/data-table-loading.demo';
+import { DataTableLoadingSkeletonDemo } from './demos/data-table-loading-skeleton.demo';
 import { DataTableLazyDemo } from './demos/data-table-lazy.demo';
 import { DataTableEmptyStateDemo } from './demos/data-table-empty-state.demo';
+import { DataTableEmptyTemplateDemo } from './demos/data-table-empty-template.demo';
 import { DataTableTemplatesDemo } from './demos/data-table-templates.demo';
+import { DataTableCaptionSummaryDemo } from './demos/data-table-caption-summary.demo';
 import { DataTableConditionalStyleDemo } from './demos/data-table-conditional-style.demo';
 import { DataTableStatefulDemo } from './demos/data-table-stateful.demo';
 import { DataTableExportCsvDemo } from './demos/data-table-export-csv.demo';
@@ -89,9 +92,12 @@ import editCellCode from './demos/data-table-edit-cell.demo.html?raw';
 import editRowCode from './demos/data-table-edit-row.demo.html?raw';
 import editCellSelectionCode from './demos/data-table-edit-cell-selection.demo.html?raw';
 import loadingCode from './demos/data-table-loading.demo.html?raw';
+import loadingSkeletonCode from './demos/data-table-loading-skeleton.demo.html?raw';
 import lazyCode from './demos/data-table-lazy.demo.html?raw';
 import emptyStateCode from './demos/data-table-empty-state.demo.html?raw';
+import emptyTemplateCode from './demos/data-table-empty-template.demo.html?raw';
 import templatesCode from './demos/data-table-templates.demo.html?raw';
+import captionSummaryCode from './demos/data-table-caption-summary.demo.html?raw';
 import conditionalStyleCode from './demos/data-table-conditional-style.demo.html?raw';
 import statefulCode from './demos/data-table-stateful.demo.html?raw';
 import exportCsvCode from './demos/data-table-export-csv.demo.html?raw';
@@ -136,9 +142,12 @@ import editCellContent from '../../../../content/docs/data-table-edit-cell.txt?r
 import editRowContent from '../../../../content/docs/data-table-edit-row.txt?raw';
 import editCellSelectionContent from '../../../../content/docs/data-table-edit-cell-selection.txt?raw';
 import loadingContent from '../../../../content/docs/data-table-loading.txt?raw';
+import loadingSkeletonContent from '../../../../content/docs/data-table-loading-skeleton.txt?raw';
 import lazyContent from '../../../../content/docs/data-table-lazy.txt?raw';
 import emptyStateContent from '../../../../content/docs/data-table-empty-state.txt?raw';
+import emptyTemplateContent from '../../../../content/docs/data-table-empty-template.txt?raw';
 import templatesContent from '../../../../content/docs/data-table-templates.txt?raw';
+import captionSummaryContent from '../../../../content/docs/data-table-caption-summary.txt?raw';
 import conditionalStyleContent from '../../../../content/docs/data-table-conditional-style.txt?raw';
 import statefulContent from '../../../../content/docs/data-table-stateful.txt?raw';
 import exportCsvContent from '../../../../content/docs/data-table-export-csv.txt?raw';
@@ -183,9 +192,12 @@ const EXAMPLES = [
   { id: 'example-edit-row', label: 'Row editing' },
   { id: 'example-edit-cell-selection', label: 'Cell editing with selection' },
   { id: 'example-loading', label: 'Loading' },
+  { id: 'example-loading-skeleton', label: 'Skeleton loading' },
   { id: 'example-lazy', label: 'Lazy loading' },
   { id: 'example-empty-state', label: 'Empty state' },
+  { id: 'example-empty-template', label: 'Custom empty template' },
   { id: 'example-templates', label: 'Column templates' },
+  { id: 'example-caption-summary', label: 'Caption and summary slots' },
   { id: 'example-conditional-style', label: 'Conditional row style' },
   { id: 'example-stateful', label: 'Persisted state' },
   { id: 'example-export-csv', label: 'CSV export' },
@@ -237,9 +249,12 @@ const EXAMPLES = [
     DataTableEditRowDemo,
     DataTableEditCellSelectionDemo,
     DataTableLoadingDemo,
+    DataTableLoadingSkeletonDemo,
     DataTableLazyDemo,
     DataTableEmptyStateDemo,
+    DataTableEmptyTemplateDemo,
     DataTableTemplatesDemo,
+    DataTableCaptionSummaryDemo,
     DataTableConditionalStyleDemo,
     DataTableStatefulDemo,
     DataTableExportCsvDemo,
@@ -465,6 +480,14 @@ const EXAMPLES = [
         </div>
       </section>
 
+      <section id="example-loading-skeleton" class="mt-10 scroll-mt-24">
+        <app-prose class="block" [content]="loadingSkeletonContent" />
+        <div class="mt-4">
+          <app-data-table-loading-skeleton-demo />
+          <div class="mt-3"><app-code-block [code]="loadingSkeletonCode" /></div>
+        </div>
+      </section>
+
       <section id="example-lazy" class="mt-10 scroll-mt-24">
         <app-prose class="block" [content]="lazyContent" />
         <div class="mt-4">
@@ -481,11 +504,27 @@ const EXAMPLES = [
         </div>
       </section>
 
+      <section id="example-empty-template" class="mt-10 scroll-mt-24">
+        <app-prose class="block" [content]="emptyTemplateContent" />
+        <div class="mt-4">
+          <app-data-table-empty-template-demo />
+          <div class="mt-3"><app-code-block [code]="emptyTemplateCode" /></div>
+        </div>
+      </section>
+
       <section id="example-templates" class="mt-10 scroll-mt-24">
         <app-prose class="block" [content]="templatesContent" />
         <div class="mt-4">
           <app-data-table-templates-demo />
           <div class="mt-3"><app-code-block [code]="templatesCode" /></div>
+        </div>
+      </section>
+
+      <section id="example-caption-summary" class="mt-10 scroll-mt-24">
+        <app-prose class="block" [content]="captionSummaryContent" />
+        <div class="mt-4">
+          <app-data-table-caption-summary-demo />
+          <div class="mt-3"><app-code-block [code]="captionSummaryCode" /></div>
         </div>
       </section>
 
@@ -686,12 +725,18 @@ export default class DocsDataTable {
   protected readonly editCellSelectionCode = editCellSelectionCode;
   protected readonly loadingContent = loadingContent;
   protected readonly loadingCode = loadingCode;
+  protected readonly loadingSkeletonContent = loadingSkeletonContent;
+  protected readonly loadingSkeletonCode = loadingSkeletonCode;
   protected readonly lazyContent = lazyContent;
   protected readonly lazyCode = lazyCode;
   protected readonly emptyStateContent = emptyStateContent;
   protected readonly emptyStateCode = emptyStateCode;
+  protected readonly emptyTemplateContent = emptyTemplateContent;
+  protected readonly emptyTemplateCode = emptyTemplateCode;
   protected readonly templatesContent = templatesContent;
   protected readonly templatesCode = templatesCode;
+  protected readonly captionSummaryContent = captionSummaryContent;
+  protected readonly captionSummaryCode = captionSummaryCode;
   protected readonly conditionalStyleContent = conditionalStyleContent;
   protected readonly conditionalStyleCode = conditionalStyleCode;
   protected readonly statefulContent = statefulContent;

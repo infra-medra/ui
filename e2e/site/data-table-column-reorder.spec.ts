@@ -56,7 +56,7 @@ test.describe('DataTable column reorder', () => {
     const demo = demoOf(page);
     await expect(demo).toBeAttached();
     await demo.scrollIntoViewIfNeeded();
-    const wrapper = demo.locator('med-data-table > div.overflow-x-auto').first();
+    const wrapper = demo.locator('med-data-table [data-med-scroll-viewport]').first();
 
     const before = await headerLabels(demo);
     const firstHeader = demo.locator('thead th[scope="col"]').nth(0);
