@@ -1,7 +1,0 @@
-# Learnings
-
-## Active
-
-## Promoted
-
-## Retired
