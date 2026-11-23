@@ -1,0 +1,33 @@
+<med-data-table
+  [value]="items"
+  responsiveLayout="stack"
+  [scrollable]="true"
+  dataKey="id"
+  ariaLabel="Orders with column header and footer templates"
+>
+  <med-table-column field="item" header="Item" [sortable]="true" [frozen]="true" width="220px" footer="Total" />
+  <med-table-column field="price" header="Price" [sortable]="true" width="260px">
+    <ng-template #header>
+      <span class="inline-flex items-center gap-2">
+        <med-icon name="tag" variant="mini" class="size-4 text-brand-500" />
+        <span>Price (USD)</span>
+        <button
+          type="button"
+          aria-label="About price"
+          [attr.aria-expanded]="hintOpen()"
+          (click)="toggleHint()"
+          class="rounded p-0.5 text-surface-600 focus-visible:outline-none focus-visible:ring-(--focus-ring-width) focus-visible:ring-offset-(--focus-ring-offset) focus-visible:ring-brand-500 dark:text-surface-300 dark:focus-visible:ring-brand-400"
+        >
+          <med-icon name="magnifying-glass" variant="mini" class="size-4" />
+        </button>
+      </span>
+    </ng-template>
+    <ng-template #footer let-rows>Sum: {{ sumOf(rows) }}</ng-template>
+  </med-table-column>
+  <med-table-column field="status" header="Status" [sortable]="true" sortBy="statusRank" width="260px" />
+  <med-table-column field="version" header="Version" [sortable]="true" [sortCompare]="compareVersions" width="260px" />
+</med-data-table>
+
+@if (hintOpen()) {
+  <p class="mt-2 text-sm text-surface-600 dark:text-surface-300">Prices are listed in US dollars.</p>
+}

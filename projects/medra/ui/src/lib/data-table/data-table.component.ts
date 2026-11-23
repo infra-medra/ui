@@ -213,6 +213,14 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
  * unconditionally quoting every field would still be valid CSV but reads
  * as unnecessary noise for the common all-plain-text-cell case.
  *
+ * **Column header, footer and custom sorting** are declared on `TableColumnComponent`. A
+ * `<ng-template #header>` replaces the `header` text inside the header cell, while keeping the sort
+ * indicator, filter button, resize handle and `aria-sort`; interactive elements inside it (buttons,
+ * links, inputs, `[tabindex]`) do not sort the column. `footer` text or a `<ng-template #footer>`
+ * fills the column's cell in a footer row shown when any visible column has one; the template gets
+ * every filtered and sorted row, across all pages, as `$implicit`. `sortBy` names the row property
+ * the column sorts by, and `sortCompare` supplies a full comparator, taking precedence over it.
+ *
  * **Six opt-in features**, API
  *.
  *
@@ -639,7 +647,11 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
                 (keydown)="onHeaderKeydown($event, col)"
               >
                 <span class="inline-flex items-center gap-1">
-                  {{ col.header() }}
+                  @if (col.headerTemplate(); as headerTpl) {
+                    <ng-container [ngTemplateOutlet]="headerTpl" />
+                  } @else {
+                    {{ col.header() }}
+                  }
                   @if (col.sortable()) {
                     <med-icon name="chevron-down" variant="mini" [class]="sortIconClass(col)" />
                     @if (multiSortPriority(col); as priority) {
@@ -775,9 +787,49 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
             }
           </tbody>
         }
-        @if (footerGroupTemplate(); as fg) {
-          <tfoot #footerGroupFoot class="border-t border-surface-200 bg-surface-50 text-surface-700 dark:border-surface-700 dark:bg-surface-800/50 dark:text-surface-200" [class.sticky]="stickyActive()" [class.bottom-0]="stickyActive()" [class.z-10]="stickyActive()">
-            <ng-container [ngTemplateOutlet]="fg" />
+        @if (footerGroupTemplate() || hasColumnFooter()) {
+          <tfoot #tableFoot class="border-t border-surface-200 bg-surface-50 text-surface-700 dark:border-surface-700 dark:bg-surface-800/50 dark:text-surface-200" [class.sticky]="stickyActive()" [class.bottom-0]="stickyActive()" [class.z-10]="stickyActive()">
+            @if (footerGroupTemplate(); as fg) {
+              <ng-container [ngTemplateOutlet]="fg" />
+            }
+            @if (hasColumnFooter()) {
+              <tr data-med-column-footer [class.block]="stacked()" [attr.role]="stacked() ? 'row' : null">
+                @if (rowReorderActive()) {
+                  <td [attr.role]="stacked() ? 'cell' : null" [class]="utilityCellClass('', true) + ' ' + frozenUtilityClass(null)" [style]="utilityStyle('reorder')" [style.position]="utilityPosition()" [style.left]="utilityLeft('reorder')" [style.z-index]="utilityZIndex()"></td>
+                }
+                @if (hasSelectionColumn()) {
+                  <td [attr.role]="stacked() ? 'cell' : null" [class]="utilityCellClass('') + ' ' + frozenUtilityClass(null)" [class.hidden]="stacked()" [style]="utilityStyle('selection')" [style.position]="utilityPosition()" [style.left]="utilityLeft('selection')" [style.z-index]="utilityZIndex()"></td>
+                }
+                @for (col of visibleColumns(); track col.field()) {
+                  <td
+                    [attr.role]="stacked() ? 'cell' : null"
+                    [class.block]="stacked()"
+                    [class.hidden]="stacked() && !hasFooterContent(col)"
+                    [class]="footerCellClass(col)"
+                    [class.px-2]="cellPadX('px-2')"
+                    [class.px-3]="cellPadX('px-3')"
+                    [class.px-4]="cellPadX('px-4')"
+                    [class.sticky]="isFrozenColumn(col)"
+                    [style.position]="frozenPosition(col)"
+                    [style.left]="frozenEdge(col, 'left')"
+                    [style.right]="frozenEdge(col, 'right')"
+                    [style.z-index]="frozenZIndex(col)"
+                  >
+                    @if (stacked() && hasFooterContent(col) && stackLabelFor(col); as label) {
+                      <span aria-hidden="true" [class]="stackLabelClass(false)">{{ label }}</span>
+                    }
+                    @if (col.footerTemplate(); as footerTpl) {
+                      <ng-container [ngTemplateOutlet]="footerTpl" [ngTemplateOutletContext]="{ $implicit: sortedValue() }" />
+                    } @else {
+                      {{ col.footer() }}
+                    }
+                  </td>
+                }
+                @if (editMode() === 'row') {
+                  <td [attr.role]="stacked() ? 'cell' : null" [class]="utilityCellClass('')" [class.hidden]="stacked()"></td>
+                }
+              </tr>
+            }
           </tfoot>
         }
       </table>
@@ -938,7 +990,7 @@ export class DataTableComponent<T> {
   private readonly tableHead = viewChild<ElementRef<HTMLTableSectionElement>>('tableHead');
   private readonly frozenTopBody = viewChild<ElementRef<HTMLTableSectionElement>>('frozenTopBody');
   private readonly frozenBottomBody = viewChild<ElementRef<HTMLTableSectionElement>>('frozenBottomBody');
-  private readonly footerGroupFoot = viewChild<ElementRef<HTMLTableSectionElement>>('footerGroupFoot');
+  private readonly tableFoot = viewChild<ElementRef<HTMLTableSectionElement>>('tableFoot');
   private readonly viewport = viewChild<ElementRef<HTMLElement>>('viewport');
   /** Height of the sticky `<thead>`, which is where top frozen rows stick; measured in the browser only, so server rendering never touches `ResizeObserver`. */
   protected readonly headerHeight = signal(0);
@@ -1430,7 +1482,7 @@ export class DataTableComponent<T> {
     });
     this.observeSectionHeight(this.frozenTopBody, this.frozenTopHeight);
     this.observeSectionHeight(this.frozenBottomBody, this.frozenBottomHeight);
-    this.observeSectionHeight(this.footerGroupFoot, this.footerHeight);
+    this.observeSectionHeight(this.tableFoot, this.footerHeight);
 
     // A row a key moved focus to before its data arrived takes focus once it renders, but only while the anchor row still holds focus:
     // a click or tab elsewhere in the meantime abandons the move.
@@ -1608,11 +1660,26 @@ export class DataTableComponent<T> {
     return raw === null || raw === undefined ? '' : String(raw);
   }
 
+  /** Default comparison of the row property `field`: nulls and undefined sort last. */
   private compareRows(a: T, b: T, field: string, order: TableSortOrder): number {
     const av = (a as Record<string, unknown>)[field] as string | number | null | undefined;
     const bv = (b as Record<string, unknown>)[field] as string | number | null | undefined;
     const cmp = av === bv ? 0 : av === null || av === undefined ? 1 : bv === null || bv === undefined ? -1 : av < bv ? -1 : 1;
     return order === 'asc' ? cmp : -cmp;
+  }
+
+  /**
+   * Compares rows by the column whose `field` is given: its `sortCompare` when set, otherwise the default comparison of its `sortBy`
+   * (or `field`). Columns are looked up at compare time; a field with no column falls back to the default comparison of the field.
+   */
+  private compareByColumn(a: T, b: T, field: string, order: TableSortOrder): number {
+    const col = this.columns().find((c) => c.field() === field);
+    const compare = col?.sortCompare();
+    if (compare) {
+      const cmp = compare(a, b);
+      return order === 'asc' ? cmp : -cmp;
+    }
+    return this.compareRows(a, b, col?.sortBy() ?? field, order);
   }
 
   /** `rowGroupMode() === 'subheader'`: `groupRowsBy()` becomes the primary sort key ahead of anything else — otherwise same-group rows could scatter and the subheader boundary would fire once per row, see class doc's "rowGroupMode" section. */
@@ -1691,13 +1758,20 @@ export class DataTableComponent<T> {
 
     if (this.sortMode() === 'multiple') {
       const meta = this.multiSortMeta();
-      const effectiveMeta = groupField ? [{ field: groupField, order: 'asc' as TableSortOrder }, ...meta.filter((m) => m.field !== groupField)] : meta;
-      if (effectiveMeta.length === 0) {
+      const effectiveMeta = groupField ? meta.filter((m) => m.field !== groupField) : meta;
+      if (!groupField && effectiveMeta.length === 0) {
         return rows;
       }
       return [...rows].sort((a, b) => {
+        // The subheader grouping key keeps the default comparison, ignoring the column's sortBy/sortCompare.
+        if (groupField) {
+          const groupCmp = this.compareRows(a, b, groupField, 'asc');
+          if (groupCmp !== 0) {
+            return groupCmp;
+          }
+        }
         for (const entry of effectiveMeta) {
-          const cmp = this.compareRows(a, b, entry.field, entry.order);
+          const cmp = this.compareByColumn(a, b, entry.field, entry.order);
           if (cmp !== 0) {
             return cmp;
           }
@@ -1714,13 +1788,13 @@ export class DataTableComponent<T> {
         if (groupCmp !== 0 || !field || !order || field === groupField) {
           return groupCmp;
         }
-        return this.compareRows(a, b, field, order);
+        return this.compareByColumn(a, b, field, order);
       });
     }
     if (!field || !order) {
       return rows;
     }
-    return [...rows].sort((a, b) => this.compareRows(a, b, field, order));
+    return [...rows].sort((a, b) => this.compareByColumn(a, b, field, order));
   });
 
   /** `lazy()`: `value()` is already the current page — no client-side slicing regardless of `paginator()`. */
@@ -1981,6 +2055,25 @@ export class DataTableComponent<T> {
     return mergeClasses(SIZE_PADDING_CLASS[this.size()], this.stacked() ? 'block' : '');
   }
 
+  /** Whether a column footer row renders: at least one visible column has footer content. */
+  protected readonly hasColumnFooter = computed(() => this.visibleColumns().some((col) => this.hasFooterContent(col)));
+
+  /** Whether a column has a footer to show: a `#footer` template or footer text. A column without one gets an empty footer cell. */
+  protected hasFooterContent(col: TableColumnComponent): boolean {
+    return !!col.footerTemplate() || !!col.footer();
+  }
+
+  /** Classes of a column footer cell, aligned and offset like the body cells of its column. */
+  protected footerCellClass(col: TableColumnComponent): string {
+    return mergeClasses(
+      this.verticalPadding(),
+      'font-semibold text-surface-700 dark:text-surface-200',
+      ALIGN_CLASS[col.align()],
+      this.gridClass(),
+      this.frozenCellClass(col, null, 0),
+    );
+  }
+
   protected headerCellClass(col: TableColumnComponent): string {
     return mergeClasses(
       SIZE_PADDING_CLASS[this.size()],
@@ -2173,9 +2266,24 @@ export class DataTableComponent<T> {
   }
 
   protected onHeaderClick(col: TableColumnComponent, event: MouseEvent): void {
-    if (col.sortable() && !this.stacked()) {
+    if (col.sortable() && !this.stacked() && !this.isFromInteractiveContent(event)) {
       this.toggleSort(col.field(), event.shiftKey);
     }
+  }
+
+  /**
+   * Whether `event` came from interactive content inside a header cell: a button, link, field or element with a `tabindex` that the
+   * header template projects. Such an event belongs to that element, so the header does not sort or move the column for it, and it
+   * cancels no default action (Enter and Space still activate the element). The header cell itself does not count.
+   */
+  private isFromInteractiveContent(event: Event): boolean {
+    const header = event.currentTarget as HTMLElement | null;
+    const target = event.target as HTMLElement | null;
+    if (!header || !target) {
+      return false;
+    }
+    const interactive = target.closest<HTMLElement>('button, a[href], input, select, textarea, [tabindex]');
+    return !!interactive && interactive !== header && header.contains(interactive);
   }
 
   /**
@@ -2187,6 +2295,9 @@ export class DataTableComponent<T> {
    * mirrors Shift+click for adding a sort key in `sortMode="multiple"`.
    */
   protected onHeaderKeydown(event: KeyboardEvent, col: TableColumnComponent): void {
+    if (this.isFromInteractiveContent(event)) {
+      return;
+    }
     if (event.altKey && (event.key === 'ArrowLeft' || event.key === 'ArrowRight') && this.isColumnDraggable(col)) {
       event.preventDefault();
       this.moveColumnByKey(col, event.key === 'ArrowLeft' ? -1 : 1);

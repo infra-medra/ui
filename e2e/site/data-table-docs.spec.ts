@@ -26,6 +26,9 @@ const PAGINATOR_OPTIONS = ['paginator-options'];
 /** The example DAT-024.S16 adds for the responsive stacked layout, by slug. */
 const RESPONSIVE_STACK = 'responsive-stack';
 
+/** The example DAT-024.S17 adds for column header and footer templates and custom column sorting, by slug. */
+const COLUMN_HEADER_FOOTER = 'column-header-footer';
+
 interface SectionReport {
   id: string;
   proseLength: number;
@@ -78,6 +81,7 @@ test.describe('DataTable docs page', () => {
     expect(new Set(anchorIds).size, 'duplicate example ids on the page').toBe(anchorIds.length);
     expect(tocIds).toEqual(anchorIds);
     expect(tocIds, 'no index entry for the responsive stack example').toContain(`example-${RESPONSIVE_STACK}`);
+    expect(tocIds, 'no index entry for the column header and footer example').toContain(`example-${COLUMN_HEADER_FOOTER}`);
   });
 
   // DAT-024.S2
@@ -85,6 +89,7 @@ test.describe('DataTable docs page', () => {
     const { tocIds, sections } = await readPage(page);
     expect(tocIds.length, 'the index lists no examples').toBeGreaterThan(0);
     expect(tocIds, 'no index entry for the responsive stack example').toContain(`example-${RESPONSIVE_STACK}`);
+    expect(tocIds, 'no index entry for the column header and footer example').toContain(`example-${COLUMN_HEADER_FOOTER}`);
     for (const id of tocIds) {
       const section = sections.find((s) => s.id === id);
       expect(section, `no section for index entry "${id}"`).toBeDefined();

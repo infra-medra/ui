@@ -13,6 +13,13 @@ export interface TableSortMeta {
   readonly order: TableSortOrder;
 }
 
+/**
+ * Compares two rows for ascending order: a negative number when `a` comes first, a positive one when `b` does, `0` when they tie.
+ * Given to a column's `sortCompare` input; `T` defaults to `any` so a typed row comparator is accepted without a cast.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type TableSortCompare<T = any> = (a: T, b: T) => number;
+
 /** Emitted by `lazyLoad` (`DataTableComponent`'s `lazy` mode) — everything a server-side data source needs to fetch the right page. */
 export interface TableLazyLoadEvent {
   readonly first: number;
