@@ -74,6 +74,14 @@
 **Occurrences:** 1
 **Last seen:** 12
 
+### L-011 [lesson] Confirm a red run fails on behavior before recording it
+
+**Statement:** Run the targeted test alone first and confirm it fails on assertions of the missing behavior, then pass --kind red as a medra flag outside the --run string. A usage or setup error also exits non-zero, and a done task's evidence can never be re-recorded.
+**Scope:** stages: tasks, apply, verify
+**Evidence:** add-data-table-responsive-stack
+**Occurrences:** 1
+**Last seen:** 16
+
 ## Promoted
 
 ### L-002 [lesson] Assert every Then clause when retagging a test with a scenario ID
