@@ -1,0 +1,3 @@
+## Cell selection
+
+Set `cellSelection` alongside `selectionMode="single"` or `"multiple"` to select individual cells instead of entire rows. Each selected entry stores `{ row, field }` in `selection`, and `cellSelect` / `cellUnselect` emit on changes.

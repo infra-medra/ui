@@ -1,0 +1,7 @@
+<med-data-table [value]="equipment" [cellClass]="cellClass" ariaLabel="Lab equipment inventory (conditional cell style)">
+  <med-table-column field="name" header="Name" />
+  <med-table-column field="category" header="Category" />
+  <med-table-column field="quantity" header="Quantity" align="right" />
+  <med-table-column field="status" header="Status" />
+</med-data-table>
+<p class="mt-2 text-sm text-surface-500 dark:text-surface-400">Status cells with low or empty stock receive conditional classes.</p>

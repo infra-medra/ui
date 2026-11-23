@@ -1,0 +1,3 @@
+## Conditional cell style
+
+`cellClass` accepts a `(row, field) => string` function and merges the returned CSS classes into each matching body `<td>` without overriding alignment, gridlines, selection, or frozen-column styles.

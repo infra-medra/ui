@@ -3,6 +3,7 @@ import { NgTemplateOutlet, isPlatformBrowser } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ButtonDirective } from '../button/button.directive';
+import { ContextMenuDirective } from '../context-menu/context-menu.directive';
 import { DatePickerComponent } from '../date-picker/date-picker.component';
 import { IconComponent } from '../icon/icon.component';
 import { InputTextDirective } from '../input-text/input-text.directive';
@@ -16,7 +17,7 @@ import { DOT_SIZE_CLASS, radioRingVariants } from '../radio-button/radio-button.
 import { mergeClasses } from '../utils/merge-classes';
 import { TableColumnComponent } from './table-column.component';
 import { FILTER_MODES_BY_TYPE, isRuleActive, matchesColumnFilter, offeredMatchModes, preselectedMatchMode } from './data-table-column-filter';
-import { TableColumnAlign, TableColumnFilter, TableColumnFilters, TableFilterMatchMode, TableColumnReorderEvent, TableLazyLoadEvent, TableLoadingMode, TableRowEditEvent, TableRowReorderEvent, TableSelectionMode, TableSize, TableSortMeta, TableSortMode, TableSortOrder } from './data-table.types';
+import { TableCellSelection, TableColumnAlign, TableColumnFilter, TableColumnFilters, TableContextMenuSelectEvent, TableFilterMatchMode, TableColumnReorderEvent, TableLazyLoadEvent, TableLoadingMode, TableRowEditEvent, TableRowReorderEvent, TableSelectionMode, TableSize, TableSortMeta, TableSortMode, TableSortOrder } from './data-table.types';
 
 let nextRadioGroupId = 0;
 
@@ -55,6 +56,9 @@ const ALIGN_CLASS: Record<TableColumnAlign, string> = {
   center: 'text-center',
   right: 'text-right',
 };
+
+/** Inset focus ring so outlines on cells and rows stay visible inside the table's `overflow-hidden` wrapper. */
+const INSET_FOCUS_RING_CLASS = 'focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-brand-500 dark:focus-visible:outline-brand-400';
 
 /** Width of the row reorder handle column, in px: exact so the sticky offsets of frozen columns after it are exact. */
 const REORDER_COLUMN_PX = 32;
@@ -278,6 +282,20 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
  * omitted, neither wrapper renders. Optional `<ng-template #empty>` replaces
  * `emptyLabel` inside the spanning empty-state `<td>` when there are zero
  * visible rows and `loading` is false.
+ *
+ * **Cell selection, conditional cell styling, and context menu**:
+ * - **`cellSelection`** (with `selectionMode` `'single'` or `'multiple'`) switches
+ *   selection from rows to individual cells (`TableCellSelection<T>` in `selection`),
+ *   suppresses the row checkbox column and row-level `aria-selected`/`tabindex`,
+ *   makes body `<td>` cells focusable and keyboard-activatable (`Enter`/`Space`),
+ *   and emits `cellSelect` / `cellUnselect`.
+ * - **`cellClass`** (`(row, field) => string`) adds conditional CSS classes to
+ *   individual body `<td>` cells while preserving alignment, gridlines, selection,
+ *   and frozen-column classes.
+ * - **`contextMenu`** accepts a `ContextMenuDirective` reference; right-clicking a
+ *   body row or pressing `Shift+F10` / `ContextMenu` on a focused row suppresses
+ *   the native menu, updates `contextMenuSelection`, emits `contextMenuSelect`
+ *   (`TableContextMenuSelectEvent<T>`), and opens the linked menu via `show()`.
  */
 @Component({
   selector: 'med-data-table',
@@ -308,7 +326,18 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
     <ng-template #dataCells let-row let-i="index" let-frozen="frozen" let-span="span">
       @for (col of visibleColumns(); track col.field()) {
         @if (frozen || span !== 0 || col.field() !== spanColumnField()) {
-        <td [class]="cellClass(col, row, i)" [style]="frozenStyle(col)" [attr.rowspan]="!frozen && span >= 1 && col.field() === spanColumnField() ? span : null" [attr.data-med-editing]="!frozen && isEditingCell(row, col) ? '' : null" (click)="frozen ? null : onCellClick($event, row, col)" (dblclick)="frozen ? null : onCellDblClick($event, row, col)">
+        <td
+          [class]="bodyCellClass(col, row, i, !!frozen)"
+          [style]="frozenStyle(col)"
+          [attr.rowspan]="!frozen && span >= 1 && col.field() === spanColumnField() ? span : null"
+          [attr.data-med-editing]="!frozen && isEditingCell(row, col) ? '' : null"
+          [attr.data-med-field]="!frozen ? col.field() : null"
+          [attr.aria-selected]="!frozen && isCellSelectionActive() ? isCellSelected(row, col.field()) : null"
+          [attr.tabindex]="!frozen && isCellSelectionActive() ? 0 : null"
+          (click)="frozen ? null : onCellClick($event, row, col)"
+          (dblclick)="frozen ? null : onCellDblClick($event, row, col)"
+          (keydown)="frozen ? null : onCellKeydown($event, row, col)"
+        >
           @if (!frozen && isEditingCell(row, col); as editing) {
             <ng-container
               [ngTemplateOutlet]="col.editTemplate()!"
@@ -328,7 +357,7 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
         @if (reorderable()) {
           <td [class]="utilityCellClass('', true) + ' ' + frozenUtilityClass(row, i)" [style]="utilityStyle('reorder')"></td>
         }
-        @if (selectionMode() === 'multiple' || selectionMode() === 'radio') {
+        @if (hasSelectionColumn()) {
           <td [class]="utilityCellClass('') + ' ' + frozenUtilityClass(row, i)" [style]="utilityStyle('selection')"></td>
         }
         <ng-container [ngTemplateOutlet]="dataCells" [ngTemplateOutletContext]="{ $implicit: row, index: i, frozen: true }" />
@@ -358,7 +387,7 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
             @if (reorderable()) {
               <th [class]="utilityCellClass('', true) + ' ' + frozenUtilityClass(null)" [style]="utilityStyle('reorder')"></th>
             }
-            @if (selectionMode() === 'multiple') {
+            @if (!isCellSelectionActive() && selectionMode() === 'multiple') {
               <th [class]="utilityCellClass('') + ' ' + frozenUtilityClass(null)" [style]="utilityStyle('selection')">
                 <span class="relative inline-flex">
                   <input
@@ -379,7 +408,7 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
                 </span>
               </th>
             }
-            @if (selectionMode() === 'radio') {
+            @if (!isCellSelectionActive() && selectionMode() === 'radio') {
               <th [class]="utilityCellClass('') + ' ' + frozenUtilityClass(null)" [style]="utilityStyle('selection')"></th>
             }
             @for (col of visibleColumns(); track col.field()) {
@@ -484,7 +513,7 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
                 @if (reorderable()) {
                   <td [class]="skeletonUtilityCellClass(true)" [style]="utilityStyle('reorder')"><med-skeleton height="1rem" /></td>
                 }
-                @if (selectionMode() === 'multiple' || selectionMode() === 'radio') {
+                @if (hasSelectionColumn()) {
                   <td [class]="skeletonUtilityCellClass()" [style]="utilityStyle('selection')"><med-skeleton height="1rem" /></td>
                 }
                 @for (col of visibleColumns(); track col.field()) {
@@ -523,10 +552,11 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
             @if (!isRowHiddenByGroup(row)) {
             <tr
               [class]="rowClassFor(row, i)"
-              [attr.aria-selected]="selectionMode() ? isSelected(row) : null"
-              [attr.tabindex]="selectionMode() ? 0 : null"
+              [attr.aria-selected]="selectionMode() && !isCellSelectionActive() ? isSelected(row) : null"
+              [attr.tabindex]="(selectionMode() || contextMenu()) && !isCellSelectionActive() ? 0 : null"
               [draggable]="reorderable()"
               (click)="onRowClick(row)"
+              (contextmenu)="onRowContextMenu($event, row)"
               (keydown)="onRowKeydown($event, row)"
               (dragstart)="onRowDragStart(i)"
               (dragover)="onRowDragOver($event)"
@@ -537,7 +567,7 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
                   <med-icon name="bars-3" variant="mini" class="size-4" />
                 </td>
               }
-              @if (selectionMode() === 'multiple') {
+              @if (!isCellSelectionActive() && selectionMode() === 'multiple') {
                 <td [class]="utilityCellClass('') + ' ' + frozenUtilityClass(row, i)" [style]="utilityStyle('selection')">
                   <span class="relative inline-flex">
                     <input
@@ -556,7 +586,7 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
                   </span>
                 </td>
               }
-              @if (selectionMode() === 'radio') {
+              @if (!isCellSelectionActive() && selectionMode() === 'radio') {
                 <td [class]="utilityCellClass('') + ' ' + frozenUtilityClass(row, i)" [style]="utilityStyle('selection')">
                   <span class="relative inline-flex">
                     <input
@@ -660,13 +690,15 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
 export class DataTableComponent<T> {
   readonly value = input<readonly T[]>([]);
   readonly selectionMode = input<TableSelectionMode>(null);
+  /** Enables selecting individual data cells instead of whole rows when `selectionMode` is `'single'` or `'multiple'`. */
+  readonly cellSelection = input(false, { transform: booleanAttribute });
   /** Cell padding and text size: `sm`, `default` or `lg`. */
   readonly size = input<TableSize>('default');
   /** Draws borders between cells. */
   readonly showGridlines = input(false, { transform: booleanAttribute });
   /** Gives alternate body rows a different background. */
   readonly stripedRows = input(false, { transform: booleanAttribute });
-  readonly selection = model<T | readonly T[] | null>(null);
+  readonly selection = model<T | readonly T[] | TableCellSelection<T> | readonly TableCellSelection<T>[] | null>(null);
   readonly paginator = input(false, { transform: booleanAttribute });
   readonly rows = input(10, { transform: numberAttribute });
   /** The page size in effect: follows `rows()`, and the paginator's "rows per page" select writes to it, so the visible slice and `lazyLoad` follow the user's choice. */
@@ -771,7 +803,13 @@ export class DataTableComponent<T> {
   readonly ariaLabel = input<string | null>(null);
   readonly rowTrackBy = input<(row: T, index: number) => unknown>((_row, index) => index);
   readonly rowClass = input<((row: T) => string) | null>(null);
+  /** Returns extra CSS classes to apply to a body cell based on its row and column `field`. */
+  readonly cellClass = input<((row: T, field: string) => string) | null>(null);
   readonly rowAriaLabel = input<((row: T) => string) | null>(null);
+  /** Linked context menu opened when a body row receives a right-click, `Shift+F10`, or `ContextMenu` key. */
+  readonly contextMenu = input<ContextMenuDirective | null>(null);
+  /** The row currently targeted by a context menu invocation. */
+  readonly contextMenuSelection = model<T | null>(null);
   readonly class = input('', { alias: 'class' });
 
   readonly lazyLoad = output<TableLazyLoadEvent>();
@@ -787,6 +825,12 @@ export class DataTableComponent<T> {
   readonly rowGroupCollapse = output<string>();
   readonly rowSelect = output<T>();
   readonly rowUnselect = output<T>();
+  /** Emitted when a cell is selected in `cellSelection` mode. */
+  readonly cellSelect = output<TableCellSelection<T>>();
+  /** Emitted when a cell is unselected in `cellSelection` mode (`selectionMode="multiple"`). */
+  readonly cellUnselect = output<TableCellSelection<T>>();
+  /** Emitted when a context menu is invoked on a body row. */
+  readonly contextMenuSelect = output<TableContextMenuSelectEvent<T>>();
   readonly sort = output<{ readonly field: string | null; readonly order: TableSortOrder; readonly multiSortMeta: readonly TableSortMeta[]; readonly data: readonly T[] }>();
   readonly filter = output<{ readonly value: string; readonly data: readonly T[] }>();
   readonly rowReorder = output<TableRowReorderEvent>();
@@ -1027,7 +1071,7 @@ export class DataTableComponent<T> {
     }
     const cols = this.visibleColumns();
     const idx = cols.findIndex((col) => col.field() === field);
-    const utilityBefore = (this.reorderable() ? 1 : 0) + (this.selectionMode() === 'multiple' || this.selectionMode() === 'radio' ? 1 : 0);
+    const utilityBefore = (this.reorderable() ? 1 : 0) + (this.hasSelectionColumn() ? 1 : 0);
     return { lead: utilityBefore + idx, trail: cols.length - idx - 1 + (this.editMode() === 'row' ? 1 : 0) };
   });
 
@@ -1092,10 +1136,14 @@ export class DataTableComponent<T> {
 
   protected readonly hasFrozenColumn = computed(() => this.visibleColumns().some((col) => col.frozen()));
 
+  protected readonly isCellSelectionActive = computed(() => this.cellSelection() && (this.selectionMode() === 'single' || this.selectionMode() === 'multiple'));
+
+  protected readonly hasSelectionColumn = computed(() => !this.isCellSelectionActive() && (this.selectionMode() === 'multiple' || this.selectionMode() === 'radio'));
+
   /** `true` when the reorder, selection and radio columns freeze on the left: they follow a left-frozen data column. */
   protected readonly utilityFrozen = computed(() => this.visibleColumns().some((col) => col.frozen() && col.alignFrozen() === 'left'));
 
-  private readonly utilityWidth = computed(() => (this.reorderable() ? REORDER_COLUMN_PX : 0) + (this.selectionMode() === 'multiple' || this.selectionMode() === 'radio' ? SELECTION_COLUMN_PX : 0));
+  private readonly utilityWidth = computed(() => (this.reorderable() ? REORDER_COLUMN_PX : 0) + (this.hasSelectionColumn() ? SELECTION_COLUMN_PX : 0));
 
   /** Sticky side and offset of every frozen data column: each offset adds the widths of the frozen columns before it on its edge, the left edge starting after the utility columns. Derived from declared and resized widths, so no layout measurement is needed. */
   private readonly frozenLayout = computed(() => {
@@ -1118,15 +1166,21 @@ export class DataTableComponent<T> {
     return layout;
   });
 
-  protected readonly totalColumnCount = computed(() => this.visibleColumns().length + (this.selectionMode() === 'multiple' || this.selectionMode() === 'radio' ? 1 : 0) + (this.reorderable() ? 1 : 0) + (this.editMode() === 'row' ? 1 : 0));
+  protected readonly totalColumnCount = computed(() => this.visibleColumns().length + (this.hasSelectionColumn() ? 1 : 0) + (this.reorderable() ? 1 : 0) + (this.editMode() === 'row' ? 1 : 0));
 
   protected readonly allSelected = computed(() => {
+    if (this.isCellSelectionActive()) {
+      return false;
+    }
     const rows = this.sortedValue();
     const sel = this.selection();
     return rows.length > 0 && Array.isArray(sel) && rows.every((row) => (sel as readonly T[]).some((r) => this.rowsEqual(r, row)));
   });
 
   protected readonly someSelected = computed(() => {
+    if (this.isCellSelectionActive()) {
+      return false;
+    }
     const sel = this.selection();
     return Array.isArray(sel) && sel.length > 0 && !this.allSelected();
   });
@@ -1245,7 +1299,7 @@ export class DataTableComponent<T> {
     if (row === null) {
       return 'bg-surface-50 dark:bg-surface-800';
     }
-    if (this.isSelected(row)) {
+    if (this.isSelected(row) || this.isContextMenuSelected(row)) {
       return 'bg-brand-50 dark:bg-brand-950';
     }
     return this.stripedRows() && index % 2 === 1
@@ -1286,8 +1340,23 @@ export class DataTableComponent<T> {
     );
   }
 
-  protected cellClass(col: TableColumnComponent, row: T, index: number): string {
-    return mergeClasses(SIZE_PADDING_CLASS[this.size()], 'text-surface-900 dark:text-surface-50', ALIGN_CLASS[col.align()], this.gridClass(), this.frozenCellClass(col, row, index));
+  protected bodyCellClass(col: TableColumnComponent, row: T, index: number, frozen = false): string {
+    // `#dataCells` is rendered via `NgTemplateOutlet`, which updates `$implicit` without marking the embedded view dirty in OnPush mode; reading `pagedValue()` ensures cells refresh when `value` is replaced with the same track indices.
+    if (!frozen) {
+      this.pagedValue();
+    }
+    const cellSelectable = !frozen && this.isCellSelectionActive();
+    const cellSelected = cellSelectable && this.isCellSelected(row, col.field());
+    return mergeClasses(
+      SIZE_PADDING_CLASS[this.size()],
+      'text-surface-900 dark:text-surface-50',
+      ALIGN_CLASS[col.align()],
+      this.gridClass(),
+      this.frozenCellClass(col, row, index),
+      cellSelectable ? `cursor-pointer ${INSET_FOCUS_RING_CLASS}` : '',
+      cellSelected ? (this.frozenLayout().has(col) ? 'bg-brand-50 dark:bg-brand-950' : 'bg-brand-50 dark:bg-brand-500/10') : '',
+      this.cellClass()?.(row, col.field()) ?? '',
+    );
   }
 
   protected skeletonUtilityCellClass(narrow = false): string {
@@ -1302,11 +1371,20 @@ export class DataTableComponent<T> {
 
   /** `interactive` is `false` for frozen rows, which are display-only: no pointer cursor, since they cannot be selected. */
   protected rowClassFor(row: T, index: number, interactive = true): string {
+    // Keep the `@if (!isRowHiddenByGroup(row))` embedded view reactive to `pagedValue()` changes when `@for` reuses rows by index.
+    if (interactive) {
+      this.pagedValue();
+    } else {
+      this.frozenRows();
+    }
     const striped = this.stripedRows() && index % 2 === 1;
+    const cellSelectionActive = this.isCellSelectionActive();
+    const rowFocusable = interactive && Boolean(this.selectionMode() || this.contextMenu()) && !cellSelectionActive;
     return mergeClasses(
       'group border-b border-surface-200 last:border-b-0 dark:border-surface-700',
-      interactive && this.selectionMode() ? 'cursor-pointer' : '',
-      this.isSelected(row)
+      interactive && this.selectionMode() && !cellSelectionActive ? 'cursor-pointer' : '',
+      rowFocusable ? INSET_FOCUS_RING_CLASS : '',
+      this.isSelected(row) || (interactive && this.isContextMenuSelected(row))
         ? 'bg-brand-50 dark:bg-brand-500/10'
         : striped
           ? 'bg-surface-100/70 hover:bg-surface-100 dark:bg-surface-800/60 dark:hover:bg-surface-800'
@@ -1621,9 +1699,40 @@ export class DataTableComponent<T> {
     this.multiSortMeta.set(next === null ? withoutField : [...withoutField.slice(0, existingIndex), { field, order: next }, ...withoutField.slice(existingIndex)]);
   }
 
+  protected isContextMenuSelected(row: T): boolean {
+    if (!this.contextMenu()) {
+      return false;
+    }
+    const sel = this.contextMenuSelection();
+    return sel !== null && this.rowsEqual(sel, row);
+  }
+
   protected isSelected(row: T): boolean {
+    if (this.isCellSelectionActive()) {
+      return false;
+    }
     const sel = this.selection();
     return this.selectionMode() === 'multiple' ? Array.isArray(sel) && (sel as readonly T[]).some((r) => this.rowsEqual(r, row)) : sel !== null && this.rowsEqual(sel as T, row);
+  }
+
+  private isCellSelectionValue(value: unknown): value is TableCellSelection<T> {
+    return typeof value === 'object' && value !== null && 'row' in value && 'field' in value;
+  }
+
+  private cellsEqual(a: TableCellSelection<T>, b: TableCellSelection<T>): boolean {
+    return a.field === b.field && this.rowsEqual(a.row, b.row);
+  }
+
+  protected isCellSelected(row: T, field: string): boolean {
+    if (!this.isCellSelectionActive()) {
+      return false;
+    }
+    const sel = this.selection();
+    const target: TableCellSelection<T> = { row, field };
+    if (this.selectionMode() === 'multiple') {
+      return Array.isArray(sel) && sel.some((entry) => this.isCellSelectionValue(entry) && this.cellsEqual(entry, target));
+    }
+    return this.isCellSelectionValue(sel) && this.cellsEqual(sel, target);
   }
 
   /** `single` and `radio` share the same row selection behavior. */
@@ -1632,9 +1741,30 @@ export class DataTableComponent<T> {
   }
 
   protected onRowClick(row: T): void {
+    if (this.isCellSelectionActive()) {
+      return;
+    }
     if (this.isSingleLike()) {
       this.selectSingle(row);
     }
+  }
+
+  protected onRowContextMenu(event: MouseEvent, row: T): void {
+    if ((event.target as HTMLElement | null)?.closest?.('[data-med-editing]')) {
+      return;
+    }
+    this.invokeRowContextMenu(event, row, event);
+  }
+
+  private invokeRowContextMenu(event: Event, row: T, anchor: MouseEvent | HTMLElement): void {
+    const field = (event.target as HTMLElement | null)?.closest?.<HTMLElement>('td[data-med-field]')?.dataset['medField'];
+    const cm = this.contextMenu();
+    if (cm) {
+      event.preventDefault();
+    }
+    this.contextMenuSelection.set(row);
+    this.contextMenuSelect.emit(field ? { originalEvent: event, row, field } : { originalEvent: event, row });
+    cm?.show(anchor, () => event.preventDefault());
   }
 
   protected onRowKeydown(event: KeyboardEvent, row: T): void {
@@ -1654,6 +1784,13 @@ export class DataTableComponent<T> {
     }
     // Keys pressed inside an edit template belong to it: they must neither select the row nor move the row focus.
     if ((event.target as HTMLElement | null)?.closest?.('[data-med-editing]')) {
+      return;
+    }
+    if (event.key === 'ContextMenu' || (event.shiftKey && event.key === 'F10')) {
+      this.invokeRowContextMenu(event, row, event.currentTarget as HTMLElement);
+      return;
+    }
+    if (this.isCellSelectionActive()) {
       return;
     }
     const mode = this.selectionMode();
@@ -1764,16 +1901,62 @@ export class DataTableComponent<T> {
 
   /** With `editTrigger="click"` a click on an editable cell starts editing it; the event stops here so the row click never selects the row. */
   protected onCellClick(event: MouseEvent, row: T, col: TableColumnComponent): void {
-    // A click inside a cell that is already being edited belongs to the edit template, never to row selection.
+    // A click inside a cell that is already being edited belongs to the edit template, never to row or cell selection.
     if (this.isEditingCell(row, col)) {
       event.stopPropagation();
       return;
     }
-    if (this.editTrigger() !== 'click' || this.editMode() !== 'cell' || !col.editable() || !col.editTemplate()) {
+    if (this.editTrigger() === 'click' && this.editMode() === 'cell' && col.editable() && col.editTemplate()) {
+      event.stopPropagation();
+      this.editingCell.set({ row, field: col.field() });
       return;
     }
-    event.stopPropagation();
-    this.editingCell.set({ row, field: col.field() });
+    if (this.isCellSelectionActive()) {
+      this.activateCellSelection(row, col.field());
+    }
+  }
+
+  protected onCellKeydown(event: KeyboardEvent, row: T, col: TableColumnComponent): void {
+    if (!this.isCellSelectionActive()) {
+      return;
+    }
+    if ((event.target as HTMLElement | null)?.closest?.('[data-med-editing]')) {
+      return;
+    }
+    if (event.target !== event.currentTarget && (event.target as HTMLElement | null)?.closest?.('button, input, select, textarea, a')) {
+      return;
+    }
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      this.activateCellSelection(row, col.field());
+    }
+  }
+
+  private activateCellSelection(row: T, field: string): void {
+    if (this.selectionMode() === 'multiple') {
+      this.toggleCell(row, field);
+    } else {
+      this.selectSingleCell(row, field);
+    }
+  }
+
+  private selectSingleCell(row: T, field: string): void {
+    const next: TableCellSelection<T> = { row, field };
+    const current = this.selection();
+    if (this.isCellSelectionValue(current) && this.cellsEqual(current, next)) {
+      return;
+    }
+    this.selection.set(next);
+    this.cellSelect.emit(next);
+  }
+
+  private toggleCell(row: T, field: string): void {
+    const target: TableCellSelection<T> = { row, field };
+    const currentRaw = this.selection();
+    const current = Array.isArray(currentRaw) ? currentRaw.filter((entry): entry is TableCellSelection<T> => this.isCellSelectionValue(entry)) : [];
+    const isCurrentlySelected = current.some((entry) => this.cellsEqual(entry, target));
+    this.selection.set(isCurrentlySelected ? current.filter((entry) => !this.cellsEqual(entry, target)) : [...current, target]);
+    (isCurrentlySelected ? this.cellUnselect : this.cellSelect).emit(target);
   }
 
   protected onCellDblClick(event: MouseEvent, row: T, col: TableColumnComponent): void {
@@ -1898,7 +2081,18 @@ export class DataTableComponent<T> {
     if (sel === null) {
       return [];
     }
-    return isRowArray(sel) ? sel : [sel];
+    if (this.isCellSelectionActive()) {
+      const entries = Array.isArray(sel) ? sel : [sel];
+      const rows: T[] = [];
+      for (const entry of entries) {
+        if (this.isCellSelectionValue(entry) && !rows.some((r) => this.rowsEqual(r, entry.row))) {
+          rows.push(entry.row);
+        }
+      }
+      return rows;
+    }
+    const rowSel = sel as T | readonly T[];
+    return isRowArray(rowSel) ? rowSel : [rowSel];
   }
 
   protected columnWidth(col: TableColumnComponent): string | null {

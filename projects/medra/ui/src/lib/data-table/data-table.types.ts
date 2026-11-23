@@ -77,3 +77,16 @@ export interface TableColumnFilter {
 
 /** Active column filter rules, keyed by column `field`. */
 export type TableColumnFilters = Readonly<Record<string, TableColumnFilter>>;
+
+/** Cell selection coordinate stored in `selection` and emitted by `cellSelect`/`cellUnselect` when `cellSelection` is active. */
+export interface TableCellSelection<T = unknown> {
+  readonly row: T;
+  readonly field: string;
+}
+
+/** Emitted by `contextMenuSelect` (`DataTableComponent`) when a context menu is invoked on a body row. */
+export interface TableContextMenuSelectEvent<T = unknown> {
+  readonly originalEvent: Event;
+  readonly row: T;
+  readonly field?: string;
+}

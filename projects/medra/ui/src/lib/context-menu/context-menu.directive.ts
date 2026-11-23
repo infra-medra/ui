@@ -93,6 +93,7 @@ const CONTEXT_MENU_POSITIONS: ConnectedPosition[] = [
  */
 @Directive({
   selector: '[medContextMenu]',
+  exportAs: 'medContextMenu',
   standalone: true,
   host: {
     '(contextmenu)': 'onContextMenu($event)',
@@ -175,7 +176,31 @@ export class ContextMenuDirective implements OnDestroy {
     this.open(this.elementRef.nativeElement, undefined, () => event.preventDefault());
   }
 
-  private open(origin: { x: number; y: number } | HTMLElement, positions: ConnectedPosition[] | undefined, preventDefault: () => void): void {
+  /** Opens the context menu programmatically at a pointer event, viewport point, or anchor element. */
+  show(origin: MouseEvent | { x: number; y: number } | HTMLElement, preventDefault?: () => void): void {
+    if (origin instanceof MouseEvent) {
+      const exclusion =
+        origin.currentTarget instanceof HTMLElement
+          ? origin.currentTarget
+          : origin.target instanceof HTMLElement
+            ? origin.target
+            : this.elementRef.nativeElement;
+      this.open({ x: origin.clientX, y: origin.clientY }, CONTEXT_MENU_POSITIONS, preventDefault ?? (() => origin.preventDefault()), exclusion);
+      return;
+    }
+    if (origin instanceof HTMLElement) {
+      this.open(origin, undefined, preventDefault ?? (() => {}), origin);
+      return;
+    }
+    this.open(origin, CONTEXT_MENU_POSITIONS, preventDefault ?? (() => {}));
+  }
+
+  private open(
+    origin: { x: number; y: number } | HTMLElement,
+    positions: ConnectedPosition[] | undefined,
+    preventDefault: () => void,
+    exclusionElement: HTMLElement = this.elementRef.nativeElement,
+  ): void {
     const items = this.medContextMenu();
     if (this.contextMenuDisabled() || items.length === 0) {
       return;
@@ -186,7 +211,7 @@ export class ContextMenuDirective implements OnDestroy {
     const handle = this.overlayService.openConnected<TieredMenuPanelComponent, void>(origin, TieredMenuPanelComponent, {
       panelClass: MENU_PANEL_CLASS,
       positions,
-      exclusionElement: this.elementRef.nativeElement,
+      exclusionElement,
     });
     handle.componentRef.setInput('panelId', this.panelElementId);
     handle.componentRef.setInput('items', items);
