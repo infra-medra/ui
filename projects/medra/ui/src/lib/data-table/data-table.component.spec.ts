@@ -7,7 +7,7 @@ import { MenuItem } from '../menu/menu.types';
 import { SelectComponent } from '../select/select.component';
 import { DataTableComponent } from './data-table.component';
 import { TableColumnComponent } from './table-column.component';
-import { TableColumnFilters, TableContextMenuSelectEvent, TableFilterMatchMode } from './data-table.types';
+import { TableColumnFilters, TableContextMenuSelectEvent, TableFilterMatchMode, TableLazyLoadEvent } from './data-table.types';
 
 interface Product {
   name: string;
@@ -4403,5 +4403,398 @@ describe('DataTableComponent context menu integration', () => {
     ({ bodyRow } = getBodyAndFrozenRows());
     expect(bodyRow.getAttribute('tabindex')).toBeNull();
     expect(bodyRow.classList).not.toContain('focus-visible:outline-2');
+  });
+});
+
+interface VirtualRow {
+  id: number;
+  name: string;
+  score: number;
+}
+
+// jsdom has no layout and renders slowly, so unit tests use 1,000 rows; the 10,000-row scenarios run in Playwright.
+const VIRTUAL_ROW_COUNT = 1000;
+
+const makeVirtualRows = (count: number): VirtualRow[] => Array.from({ length: count }, (_, i) => ({ id: i, name: `Row ${i}`, score: i }));
+
+@Component({
+  standalone: true,
+  imports: [DataTableComponent, TableColumnComponent],
+  template: `
+    <med-data-table
+      [value]="rows()"
+      [virtualScroll]="true"
+      [virtualScrollItemSize]="40"
+      [scrollHeight]="scrollHeight()"
+      [paginator]="paginator()"
+      [rows]="10"
+      [selectionMode]="selectionMode()"
+      [(selection)]="selection"
+      [editMode]="editMode()"
+      [reorderable]="reorderable()"
+      (editComplete)="completed.push($event)"
+      (editCancel)="cancelled.push($event)"
+    >
+      <med-table-column field="name" header="Name" editable>
+        <ng-template let-row>{{ row.name }}</ng-template>
+        <ng-template #editTemplate let-row let-onSave="onSave" let-onCancel="onCancel">
+          <input class="edit-input" [value]="row.name" (keydown.enter)="onSave($any($event.target).value)" (keydown.escape)="onCancel()" />
+        </ng-template>
+      </med-table-column>
+      <med-table-column field="score" header="Score" sortable>
+        <ng-template let-row>{{ row.score }}</ng-template>
+      </med-table-column>
+    </med-data-table>
+  `,
+})
+class VirtualScrollHostComponent {
+  rows = signal<VirtualRow[]>(makeVirtualRows(VIRTUAL_ROW_COUNT));
+  scrollHeight = signal<string | null>('400px');
+  paginator = signal(false);
+  selectionMode = signal<'multiple' | null>(null);
+  selection = signal<unknown>(null);
+  editMode = signal<'cell' | null>(null);
+  reorderable = signal(false);
+  completed: unknown[] = [];
+  cancelled: unknown[] = [];
+}
+
+describe('DataTableComponent virtual scroll', () => {
+  const ITEM_SIZE = 40;
+
+  function create(configure?: (host: VirtualScrollHostComponent) => void): ComponentFixture<VirtualScrollHostComponent> {
+    const fixture = TestBed.createComponent(VirtualScrollHostComponent);
+    configure?.(fixture.componentInstance);
+    fixture.detectChanges();
+    return fixture;
+  }
+
+  const el = (fixture: ComponentFixture<unknown>) => fixture.nativeElement as HTMLElement;
+  const viewport = (fixture: ComponentFixture<unknown>) => el(fixture).querySelector<HTMLElement>('[data-med-scroll-viewport]')!;
+  const bodyRows = (fixture: ComponentFixture<unknown>) => Array.from(el(fixture).querySelectorAll<HTMLElement>('tbody tr:not([aria-hidden="true"])'));
+  const spacerHeights = (fixture: ComponentFixture<unknown>) =>
+    Array.from(el(fixture).querySelectorAll<HTMLElement>('tbody tr[aria-hidden="true"] td')).map((td) => parseFloat(td.style.height) || 0);
+  const rowByText = (fixture: ComponentFixture<unknown>, text: string) => bodyRows(fixture).find((tr) => tr.textContent?.includes(text));
+
+  function scrollTo(fixture: ComponentFixture<unknown>, top: number): void {
+    const vp = viewport(fixture);
+    vp.scrollTop = top;
+    vp.dispatchEvent(new Event('scroll'));
+    fixture.detectChanges();
+  }
+
+  it('DAT-046.S1: renders only the window and sizes the scrollable area to every row', () => {
+    const fixture = create();
+
+    expect(bodyRows(fixture).length).toBeGreaterThan(0);
+    expect(bodyRows(fixture).length).toBeLessThan(100);
+    expect(rowByText(fixture, 'Row 0')).toBeDefined();
+    const spacers = spacerHeights(fixture).reduce((sum, h) => sum + h, 0);
+    expect(spacers + bodyRows(fixture).length * ITEM_SIZE).toBe(VIRTUAL_ROW_COUNT * ITEM_SIZE);
+  });
+
+  it('DAT-046.S3: sorting applies to the whole set and scrolls back to the first row', () => {
+    const fixture = create();
+    scrollTo(fixture, 500 * ITEM_SIZE);
+    expect(viewport(fixture).scrollTop).toBe(500 * ITEM_SIZE);
+
+    const scoreHeader = el(fixture).querySelectorAll<HTMLElement>('th[scope="col"]')[1];
+    scoreHeader.click();
+    fixture.detectChanges();
+    scoreHeader.click();
+    fixture.detectChanges();
+
+    expect(viewport(fixture).scrollTop).toBe(0);
+    expect(bodyRows(fixture)[0].textContent).toContain(`Row ${VIRTUAL_ROW_COUNT - 1}`);
+  });
+
+  it('DAT-046.S4: select-all covers rows that are not rendered', () => {
+    const fixture = create((h) => h.selectionMode.set('multiple'));
+    const host = fixture.componentInstance;
+    expect(rowByText(fixture, `Row ${VIRTUAL_ROW_COUNT - 1}`)).toBeUndefined();
+
+    const selectAll = el(fixture).querySelector<HTMLInputElement>('thead input[type="checkbox"]')!;
+    selectAll.click();
+    fixture.detectChanges();
+
+    expect((host.selection() as unknown[]).length).toBe(VIRTUAL_ROW_COUNT);
+
+    scrollTo(fixture, (VIRTUAL_ROW_COUNT - 1) * ITEM_SIZE);
+    const last = rowByText(fixture, `Row ${VIRTUAL_ROW_COUNT - 1}`)!;
+    expect(last).toBeDefined();
+    expect(last.querySelector<HTMLInputElement>('input[type="checkbox"]')!.checked).toBe(true);
+  });
+
+  it('DAT-046.S5: renders no paginator and does not slice the row set', () => {
+    const fixture = create((h) => h.paginator.set(true));
+
+    expect(el(fixture).querySelector('med-paginator')).toBeNull();
+    expect(bodyRows(fixture).length).toBeGreaterThan(10);
+
+    scrollTo(fixture, 100 * ITEM_SIZE);
+    expect(rowByText(fixture, 'Row 100')).toBeDefined();
+  });
+
+  it('DAT-046.S7: uses a 400 pixel viewport by default and still renders only a window', () => {
+    const fixture = create((h) => h.scrollHeight.set(null));
+    const vp = viewport(fixture);
+
+    expect([vp.style.height, vp.style.maxHeight]).toContain('400px');
+    expect(bodyRows(fixture).length).toBeLessThan(100);
+  });
+
+  it('DAT-046.S8: an open cell edit survives scrolling away and back without committing or cancelling', () => {
+    const fixture = create((h) => h.editMode.set('cell'));
+    const host = fixture.componentInstance;
+
+    rowByText(fixture, 'Row 0')!.querySelector('td')!.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
+    fixture.detectChanges();
+    el(fixture).querySelector<HTMLInputElement>('.edit-input')!.value = 'draft';
+
+    scrollTo(fixture, 500 * ITEM_SIZE);
+    expect(rowByText(fixture, 'Row 500')).toBeDefined();
+    // Rows outside the window other than the edited one are not rendered.
+    expect(bodyRows(fixture).some((tr) => tr.querySelector('td')?.textContent?.trim() === 'Row 1')).toBe(false);
+    scrollTo(fixture, 0);
+
+    const input = el(fixture).querySelector<HTMLInputElement>('.edit-input');
+    expect(input).not.toBeNull();
+    expect(input!.value).toBe('draft');
+    expect(host.completed.length).toBe(0);
+    expect(host.cancelled.length).toBe(0);
+  });
+
+  it('ignores reorderable: no drag handle column and no draggable rows', () => {
+    const fixture = create((h) => h.reorderable.set(true));
+
+    expect(bodyRows(fixture).some((tr) => tr.getAttribute('draggable') === 'true')).toBe(false);
+    expect(el(fixture).querySelector('med-icon[name="bars-3"]')).toBeNull();
+    expect(el(fixture).querySelectorAll('thead tr:first-child th').length).toBe(2);
+    const spacerCell = el(fixture).querySelector<HTMLElement>('tbody tr[aria-hidden="true"] td');
+    expect(spacerCell?.getAttribute('colspan')).toBe('2');
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [DataTableComponent, TableColumnComponent],
+  template: `
+    <med-data-table [value]="rows()" [virtualScroll]="true" [virtualScrollItemSize]="40" scrollHeight="400px" [frozenValue]="frozen()" [lazy]="lazy()" [totalRecords]="totalRecords()">
+      <med-table-column field="name" header="Name">
+        <ng-template let-row>{{ row.name }}</ng-template>
+      </med-table-column>
+    </med-data-table>
+  `,
+})
+class VirtualAriaHostComponent {
+  rows = signal<VirtualRow[]>(makeVirtualRows(VIRTUAL_ROW_COUNT));
+  frozen = signal<VirtualRow[] | null>(null);
+  lazy = signal(false);
+  totalRecords = signal<number | null>(null);
+}
+
+describe('DataTableComponent virtual scroll row positions', () => {
+  function create(configure?: (host: VirtualAriaHostComponent) => void): ComponentFixture<VirtualAriaHostComponent> {
+    const fixture = TestBed.createComponent(VirtualAriaHostComponent);
+    configure?.(fixture.componentInstance);
+    fixture.detectChanges();
+    return fixture;
+  }
+
+  const root = (fixture: ComponentFixture<unknown>) => fixture.nativeElement as HTMLElement;
+  const table = (fixture: ComponentFixture<unknown>) => root(fixture).querySelector('table')!;
+  const dataRows = (fixture: ComponentFixture<unknown>) => Array.from(root(fixture).querySelectorAll<HTMLElement>('tbody tr[aria-rowindex]'));
+
+  function scrollTo(fixture: ComponentFixture<unknown>, top: number): void {
+    const viewport = root(fixture).querySelector<HTMLElement>('[data-med-scroll-viewport]')!;
+    viewport.scrollTop = top;
+    viewport.dispatchEvent(new Event('scroll'));
+    fixture.detectChanges();
+  }
+
+  it('DAT-047.S3: exposes the full row count and the real position of a rendered row', () => {
+    const fixture = create();
+    scrollTo(fixture, 500 * 40);
+
+    expect(table(fixture).getAttribute('aria-rowcount')).toBe(String(VIRTUAL_ROW_COUNT + 1));
+    const row = dataRows(fixture).find((tr) => tr.textContent?.includes('Row 500'))!;
+    expect(row).toBeDefined();
+    // One header row plus the 1-based position of index 500.
+    expect(row.getAttribute('aria-rowindex')).toBe('502');
+  });
+
+  it('DAT-047.S3: counts frozen rows in aria-rowcount and numbers body rows after them', () => {
+    const fixture = create((h) => h.frozen.set([{ id: -1, name: 'Pinned', score: -1 }]));
+
+    expect(table(fixture).getAttribute('aria-rowcount')).toBe(String(VIRTUAL_ROW_COUNT + 2));
+    const first = dataRows(fixture).find((tr) => tr.textContent?.includes('Row 0'))!;
+    expect(first.getAttribute('aria-rowindex')).toBe('3');
+  });
+
+  it('DAT-047.S3: takes the row count from totalRecords in lazy mode', () => {
+    const fixture = create((h) => {
+      h.lazy.set(true);
+      h.totalRecords.set(5000);
+      h.rows.set(makeVirtualRows(5000));
+    });
+
+    expect(table(fixture).getAttribute('aria-rowcount')).toBe('5001');
+  });
+
+  it('DAT-047.S3: does not add row positions without virtualScroll', () => {
+    @Component({
+      standalone: true,
+      imports: [DataTableComponent, TableColumnComponent],
+      template: `<med-data-table [value]="rows"><med-table-column field="name" header="Name" /></med-data-table>`,
+    })
+    class PlainHost {
+      rows = makeVirtualRows(3);
+    }
+    const fixture = TestBed.createComponent(PlainHost);
+    fixture.detectChanges();
+
+    expect(table(fixture).getAttribute('aria-rowcount')).toBeNull();
+    expect(dataRows(fixture).length).toBe(0);
+  });
+});
+
+const LAZY_TOTAL = 100000;
+const LAZY_BLOCK = 50;
+
+@Component({
+  standalone: true,
+  imports: [DataTableComponent, TableColumnComponent],
+  template: `
+    <med-data-table
+      [value]="rows()"
+      [virtualScroll]="true"
+      [virtualScrollItemSize]="40"
+      scrollHeight="400px"
+      [lazy]="true"
+      [totalRecords]="total"
+      [rows]="blockSize"
+      selectionMode="single"
+      [(selection)]="selection"
+      (lazyLoad)="events.push($event)"
+    >
+      <med-table-column field="name" header="Name" sortable>
+        <ng-template let-row>{{ row.name }}</ng-template>
+      </med-table-column>
+      <med-table-column field="score" header="Score">
+        <ng-template let-row>{{ row.score }}</ng-template>
+      </med-table-column>
+    </med-data-table>
+  `,
+})
+class LazyVirtualHostComponent {
+  total = LAZY_TOTAL;
+  blockSize = LAZY_BLOCK;
+  /** A `totalRecords`-sized array in which only the delivered blocks hold rows. */
+  rows = signal<(VirtualRow | null)[]>(Array.from({ length: LAZY_TOTAL }, () => null));
+  selection = signal<unknown>(null);
+  events: TableLazyLoadEvent[] = [];
+
+  deliver(first: number, count: number): void {
+    const next = [...this.rows()];
+    for (let i = first; i < first + count; i++) {
+      next[i] = { id: i, name: `Row ${i}`, score: i };
+    }
+    this.rows.set(next);
+  }
+}
+
+describe('DataTableComponent lazy virtual scroll', () => {
+  function create(configure?: (host: LazyVirtualHostComponent) => void): ComponentFixture<LazyVirtualHostComponent> {
+    const fixture = TestBed.createComponent(LazyVirtualHostComponent);
+    configure?.(fixture.componentInstance);
+    fixture.detectChanges();
+    return fixture;
+  }
+
+  const root = (fixture: ComponentFixture<unknown>) => fixture.nativeElement as HTMLElement;
+  const viewport = (fixture: ComponentFixture<unknown>) => root(fixture).querySelector<HTMLElement>('[data-med-scroll-viewport]')!;
+  const rowAt = (fixture: ComponentFixture<unknown>, index: number) => root(fixture).querySelector<HTMLElement>(`tbody tr[aria-rowindex="${index + 2}"]`);
+  const firsts = (host: LazyVirtualHostComponent) => host.events.map((event) => event.first);
+
+  function scrollToRow(fixture: ComponentFixture<unknown>, index: number): void {
+    const element = viewport(fixture);
+    element.scrollTop = index * 40;
+    element.dispatchEvent(new Event('scroll'));
+    fixture.detectChanges();
+  }
+
+  it('DAT-048.S1: emits the first block and the block after it on init', () => {
+    const fixture = create();
+    const host = fixture.componentInstance;
+
+    expect(host.events[0]).toEqual(expect.objectContaining({ first: 0, rows: LAZY_BLOCK, sortField: null, filter: '', columnFilters: {} }));
+    expect(firsts(host)).toEqual([0, LAZY_BLOCK]);
+  });
+
+  it('DAT-048.S2: requests the block in view once, however often it is scrolled over', () => {
+    const fixture = create();
+    const host = fixture.componentInstance;
+
+    scrollToRow(fixture, 50000);
+    scrollToRow(fixture, 49990);
+    scrollToRow(fixture, 50000);
+    scrollToRow(fixture, 49990);
+    scrollToRow(fixture, 50000);
+
+    expect(firsts(host).filter((first) => first === 50000).length).toBe(1);
+    expect(firsts(host).filter((first) => first === 0).length).toBe(1);
+  });
+
+  it('DAT-048.S3: shows skeleton placeholders that cannot be selected or focused until the data arrives', () => {
+    const fixture = create();
+    const host = fixture.componentInstance;
+    scrollToRow(fixture, 50000);
+
+    const row = rowAt(fixture, 50000)!;
+    expect(row).not.toBeNull();
+    // One skeleton in each of the two visible columns.
+    expect(row.querySelectorAll('med-skeleton').length).toBe(2);
+    expect(row.getAttribute('tabindex')).toBeNull();
+
+    row.querySelector('td')!.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    row.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    fixture.detectChanges();
+    expect(host.selection()).toBeNull();
+
+    host.deliver(50000, LAZY_BLOCK);
+    fixture.detectChanges();
+    const loaded = rowAt(fixture, 50000)!;
+    expect(loaded.querySelectorAll('med-skeleton').length).toBe(0);
+    expect(loaded.textContent).toContain('Row 50000');
+  });
+
+  it('DAT-048.S4: a sort discards the requested blocks, scrolls to the top and requests the first block again', () => {
+    const fixture = create();
+    const host = fixture.componentInstance;
+    scrollToRow(fixture, 50000);
+    expect(firsts(host).filter((first) => first === 50000).length).toBe(1);
+
+    root(fixture).querySelector<HTMLElement>('th[scope="col"]')!.click();
+    fixture.detectChanges();
+
+    expect(viewport(fixture).scrollTop).toBe(0);
+    expect(host.events.some((event) => event.first === 0 && event.sortField === 'name' && event.sortOrder === 'asc')).toBe(true);
+
+    scrollToRow(fixture, 50000);
+    expect(firsts(host).filter((first) => first === 50000).length).toBe(2);
+  });
+
+  it('DAT-048.S5: blocks start at multiples of rows and render over the sparse value', () => {
+    const fixture = create((h) => h.deliver(0, LAZY_BLOCK));
+    const host = fixture.componentInstance;
+    host.events.length = 0;
+
+    expect(rowAt(fixture, 0)!.textContent).toContain('Row 0');
+    scrollToRow(fixture, 120);
+
+    expect(host.events.some((event) => event.first === 100 && event.rows === LAZY_BLOCK)).toBe(true);
+    expect(rowAt(fixture, 120)!.querySelectorAll('med-skeleton').length).toBe(2);
+    scrollToRow(fixture, 0);
+    expect(rowAt(fixture, 0)!.textContent).toContain('Row 0');
   });
 });

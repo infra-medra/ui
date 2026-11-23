@@ -1,0 +1,3 @@
+## Virtual scroll
+
+Set `virtualScroll` to render only the rows that fit the scroll viewport plus a small buffer, while the scrollbar still represents every row. The viewport is `scrollHeight`, or 400 pixels when it is not set, and every row is `virtualScrollItemSize` pixels tall (40 by default), so cell content has to fit that height. Sorting, filtering, selection (including select-all), editing, frozen rows and columns and the context menu work over the whole row set, and the arrow keys, Home and End move focus across rows that are not rendered. `virtualScroll` replaces the paginator.

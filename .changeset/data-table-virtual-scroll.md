@@ -1,0 +1,5 @@
+---
+'@medra.dev/ui': minor
+---
+
+DataTable: add `virtualScroll` and `virtualScrollItemSize` (default `40`) to render only the rows inside the scroll viewport plus a buffer, while the scrollbar still covers every row. The viewport is `scrollHeight`, or 400px when it is unset. Sorting, filtering, selection (select-all included), editing, frozen columns, frozen rows and the context menu work over the whole row set. The paginator is not shown and `first`/`rows` do not slice the rows. `rowGroupMode`, `#rowexpansion` and `reorderable` are ignored in this mode. The table gets `aria-rowcount` and each rendered row gets `aria-rowindex`; ArrowUp, ArrowDown, Home and End scroll the target row into view before focusing it. With `lazy`, `value` is a sparse array of `totalRecords` entries and `lazyLoad` fires once per block of `rows` rows, for the blocks in view and the next block. Rows not loaded yet render as skeleton placeholders, and a change to the sort or filters requests the blocks again from the top.

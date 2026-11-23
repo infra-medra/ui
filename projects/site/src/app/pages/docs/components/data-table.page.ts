@@ -34,6 +34,8 @@ import { DataTableFrozenColumnsBothDemo } from './demos/data-table-frozen-column
 import { DataTableFrozenRowsDemo } from './demos/data-table-frozen-rows.demo';
 import { DataTableScrollHorizontalDemo } from './demos/data-table-scroll-horizontal.demo';
 import { DataTableScrollFlexibleDemo } from './demos/data-table-scroll-flexible.demo';
+import { DataTableVirtualScrollDemo } from './demos/data-table-virtual-scroll.demo';
+import { DataTableLazyVirtualScrollDemo } from './demos/data-table-lazy-virtual-scroll.demo';
 import { DataTableColumnResizeDemo } from './demos/data-table-column-resize.demo';
 import { DataTableColumnResizeExpandDemo } from './demos/data-table-column-resize-expand.demo';
 import { DataTableColumnToggleDemo } from './demos/data-table-column-toggle.demo';
@@ -86,6 +88,8 @@ import frozenColumnsBothCode from './demos/data-table-frozen-columns-both.demo.h
 import frozenRowsCode from './demos/data-table-frozen-rows.demo.html?raw';
 import scrollHorizontalCode from './demos/data-table-scroll-horizontal.demo.html?raw';
 import scrollFlexibleCode from './demos/data-table-scroll-flexible.demo.html?raw';
+import virtualScrollCode from './demos/data-table-virtual-scroll.demo.html?raw';
+import lazyVirtualScrollCode from './demos/data-table-lazy-virtual-scroll.demo.html?raw';
 import columnResizeCode from './demos/data-table-column-resize.demo.html?raw';
 import columnResizeExpandCode from './demos/data-table-column-resize-expand.demo.html?raw';
 import columnToggleCode from './demos/data-table-column-toggle.demo.html?raw';
@@ -139,6 +143,8 @@ import frozenColumnsBothContent from '../../../../content/docs/data-table-frozen
 import frozenRowsContent from '../../../../content/docs/data-table-frozen-rows.txt?raw';
 import scrollHorizontalContent from '../../../../content/docs/data-table-scroll-horizontal.txt?raw';
 import scrollFlexibleContent from '../../../../content/docs/data-table-scroll-flexible.txt?raw';
+import virtualScrollContent from '../../../../content/docs/data-table-virtual-scroll.txt?raw';
+import lazyVirtualScrollContent from '../../../../content/docs/data-table-lazy-virtual-scroll.txt?raw';
 import columnResizeContent from '../../../../content/docs/data-table-column-resize.txt?raw';
 import columnResizeExpandContent from '../../../../content/docs/data-table-column-resize-expand.txt?raw';
 import columnToggleContent from '../../../../content/docs/data-table-column-toggle.txt?raw';
@@ -227,6 +233,8 @@ const EXAMPLES = [
   { id: 'example-scroll-horizontal', label: 'Horizontal scroll' },
   { id: 'example-scroll-flexible', label: 'Flexible scroll' },
   { id: 'example-context-menu', label: 'Context menu' },
+  { id: 'example-virtual-scroll', label: 'Virtual scroll' },
+  { id: 'example-lazy-virtual-scroll', label: 'Lazy virtual scroll' },
 ] as const;
 
 @Component({
@@ -287,6 +295,8 @@ const EXAMPLES = [
     DataTableFrozenRowsDemo,
     DataTableScrollHorizontalDemo,
     DataTableScrollFlexibleDemo,
+    DataTableVirtualScrollDemo,
+    DataTableLazyVirtualScrollDemo,
   ],
   template: `
     <app-component-doc title="DataTable" slug="data-table" [examples]="examples">
@@ -703,6 +713,22 @@ const EXAMPLES = [
         </div>
       </section>
 
+      <section id="example-virtual-scroll" class="mt-10 scroll-mt-24">
+        <app-prose class="block" [content]="virtualScrollContent" />
+        <div class="mt-4">
+          <app-data-table-virtual-scroll-demo />
+          <div class="mt-3"><app-code-block [code]="virtualScrollCode" /></div>
+        </div>
+      </section>
+
+      <section id="example-lazy-virtual-scroll" class="mt-10 scroll-mt-24">
+        <app-prose class="block" [content]="lazyVirtualScrollContent" />
+        <div class="mt-4">
+          <app-data-table-lazy-virtual-scroll-demo />
+          <div class="mt-3"><app-code-block [code]="lazyVirtualScrollCode" /></div>
+        </div>
+      </section>
+
       <app-api-table api [entries]="apiEntries" />
     </app-component-doc>
   `,
@@ -814,4 +840,8 @@ export default class DocsDataTable {
   protected readonly scrollHorizontalCode = scrollHorizontalCode;
   protected readonly scrollFlexibleContent = scrollFlexibleContent;
   protected readonly scrollFlexibleCode = scrollFlexibleCode;
+  protected readonly virtualScrollContent = virtualScrollContent;
+  protected readonly virtualScrollCode = virtualScrollCode;
+  protected readonly lazyVirtualScrollContent = lazyVirtualScrollContent;
+  protected readonly lazyVirtualScrollCode = lazyVirtualScrollCode;
 }
