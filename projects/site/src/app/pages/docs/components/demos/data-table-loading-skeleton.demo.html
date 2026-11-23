@@ -1,0 +1,18 @@
+<div class="flex flex-col gap-3">
+  <div class="flex justify-end">
+    <button medButton type="button" variant="outlined" size="sm" (click)="loading.set(!loading())">
+      {{ loading() ? 'Stop loading' : 'Start loading' }}
+    </button>
+  </div>
+  <med-data-table
+    [value]="equipment"
+    [loading]="loading()"
+    loadingMode="skeleton"
+    loadingLabel="Loading equipment"
+    ariaLabel="Lab equipment inventory (skeleton loading)"
+  >
+    <med-table-column field="name" header="Name" />
+    <med-table-column field="category" header="Category" />
+    <med-table-column field="quantity" header="Quantity" align="right" />
+  </med-data-table>
+</div>

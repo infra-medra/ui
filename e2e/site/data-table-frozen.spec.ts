@@ -8,7 +8,7 @@ const PAGE = '/docs/components/data-table';
  * left and its last column on the right, `frozen-rows` shows a table with a top and a bottom frozen row, and
  * `scroll-horizontal` and `scroll-flexible` show a wide table and a table that fills its parent.
  */
-const wrapperOf = (demo: Locator): Locator => demo.locator('med-data-table > div.overflow-x-auto').first();
+const wrapperOf = (demo: Locator): Locator => demo.locator('med-data-table [data-med-scroll-viewport]').first();
 
 /** Horizontal distance from a cell's edge to the wrapper's matching edge, measured from the live layout. */
 async function edgeGap(cell: Locator, wrapper: Locator, edge: 'left' | 'right'): Promise<number> {
@@ -98,7 +98,7 @@ test.describe('DataTable frozen rows', () => {
     await expect(demo).toBeAttached();
     await demo.scrollIntoViewIfNeeded();
     const table = demo.locator('med-data-table').first();
-    const wrapper = table.locator('> div.overflow-y-auto').first();
+    const wrapper = table.locator('[data-med-scroll-viewport]').first();
     const headerHeight = await table.locator('thead').evaluate((el) => el.getBoundingClientRect().height);
     const frozenRow = table.locator('tbody').first().locator('tr').first();
 
@@ -115,7 +115,7 @@ test.describe('DataTable frozen rows', () => {
     await expect(demo).toBeAttached();
     await demo.scrollIntoViewIfNeeded();
     const table = demo.locator('med-data-table').nth(1);
-    const wrapper = table.locator('> div.overflow-y-auto').first();
+    const wrapper = table.locator('[data-med-scroll-viewport]').first();
     const frozenRow = table.locator('tbody').last().locator('tr').last();
 
     expect(await wrapper.evaluate((el) => el.scrollHeight - el.clientHeight), 'the rows must overflow the wrapper').toBeGreaterThan(50);

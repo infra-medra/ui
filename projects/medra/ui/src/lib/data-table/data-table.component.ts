@@ -10,12 +10,13 @@ import { PaginatorComponent } from '../paginator/paginator.component';
 import { PopoverComponent } from '../popover/popover.component';
 import { SelectComponent } from '../select/select.component';
 import { ProgressSpinnerComponent } from '../progress-spinner/progress-spinner.component';
+import { SkeletonComponent } from '../skeleton/skeleton.component';
 import { checkboxBoxVariants } from '../checkbox/checkbox.styles';
 import { DOT_SIZE_CLASS, radioRingVariants } from '../radio-button/radio-button.styles';
 import { mergeClasses } from '../utils/merge-classes';
 import { TableColumnComponent } from './table-column.component';
 import { FILTER_MODES_BY_TYPE, isRuleActive, matchesColumnFilter, offeredMatchModes, preselectedMatchMode } from './data-table-column-filter';
-import { TableColumnAlign, TableColumnFilter, TableColumnFilters, TableFilterMatchMode, TableColumnReorderEvent, TableLazyLoadEvent, TableRowEditEvent, TableRowReorderEvent, TableSelectionMode, TableSize, TableSortMeta, TableSortMode, TableSortOrder } from './data-table.types';
+import { TableColumnAlign, TableColumnFilter, TableColumnFilters, TableFilterMatchMode, TableColumnReorderEvent, TableLazyLoadEvent, TableLoadingMode, TableRowEditEvent, TableRowReorderEvent, TableSelectionMode, TableSize, TableSortMeta, TableSortMode, TableSortOrder } from './data-table.types';
 
 let nextRadioGroupId = 0;
 
@@ -136,10 +137,13 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
  * layered onto the existing shape without touching what a consumer who
  * uses none of them sees:
  *
- * **`loading`** is purely presentational — a dimmed table with a centered
- * `ProgressSpinnerComponent` overlay, rows kept in place underneath
- * (avoids layout jank vs. clearing the body outright) rather than a
- * blank/empty state.
+ * **`loading`** is purely presentational — when `loadingMode` is `'spinner'`
+ * (the default), a dimmed table with a centered `ProgressSpinnerComponent`
+ * overlay keeps rows in place underneath (avoids layout jank vs. clearing
+ * the body outright). Setting `loadingMode="skeleton"` renders `SkeletonComponent`
+ * placeholder cells across all visible columns (`rows` rows when `paginator`
+ * is enabled, 5 otherwise), sets `aria-busy="true"` on the table, and announces
+ * `loadingLabel` through a polite live region.
  *
  * **`sortMode: 'multiple'`** adds `multiSortMeta` (a model, same
  * two-way-bindable shape as the existing single-column `sortField`/
@@ -267,16 +271,26 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
  * announce the new position through a polite live region whose text `columnMoveAnnouncement`
  * builds (English by default). Header and footer group rows are application-written, so the
  * application owns their `colspan` after a move.
+ *
+ * **Projected slots**: optional `<ng-template #caption>` and
+ * `<ng-template #summary>` render inside the outer bordered wrapper above the
+ * scroll viewport and below the table (before any paginator), respectively; when
+ * omitted, neither wrapper renders. Optional `<ng-template #empty>` replaces
+ * `emptyLabel` inside the spanning empty-state `<td>` when there are zero
+ * visible rows and `loading` is false.
  */
 @Component({
   selector: 'med-data-table',
   standalone: true,
-  imports: [NgTemplateOutlet, ReactiveFormsModule, ButtonDirective, DatePickerComponent, IconComponent, InputTextDirective, PaginatorComponent, PopoverComponent, ProgressSpinnerComponent, SelectComponent],
+  imports: [NgTemplateOutlet, ReactiveFormsModule, ButtonDirective, DatePickerComponent, IconComponent, InputTextDirective, PaginatorComponent, PopoverComponent, ProgressSpinnerComponent, SelectComponent, SkeletonComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'block min-w-0', '[class.flex]': 'flexHeight()', '[class.flex-col]': 'flexHeight()', '[class.h-full]': 'flexHeight()' },
   template: `
     @if (reorderableColumns()) {
       <span class="sr-only" role="status" aria-live="polite">{{ columnAnnouncement() }}</span>
+    }
+    @if (isSkeletonLoading()) {
+      <span class="sr-only" role="status" aria-live="polite">{{ loadingLabel() }}</span>
     }
     @if (filterable()) {
       <div class="mb-3 flex justify-end">
@@ -323,13 +337,19 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
         }
       </tr>
     </ng-template>
-    <div [class]="wrapperClass()" [class.overflow-y-auto]="scrollable()" [style.maxHeight]="scrollable() && !flexHeight() ? scrollHeight() : null">
-      @if (loading()) {
-        <div class="absolute inset-0 z-10 flex items-center justify-center bg-surface-0/60 dark:bg-surface-800/60">
-          <med-progress-spinner [ariaLabel]="loadingLabel()" />
+    <div [class]="wrapperClass()">
+      @if (captionTemplate(); as capTpl) {
+        <div data-med-caption class="border-b border-surface-200 bg-surface-50 px-4 py-3 text-sm font-medium text-surface-900 dark:border-surface-700 dark:bg-surface-800/50 dark:text-surface-100">
+          <ng-container [ngTemplateOutlet]="capTpl" />
         </div>
       }
-      <table [class]="tableClass()" [style.width.px]="tableWidthPx()" [class.table-fixed]="resizableColumns() || hasFrozenColumn()" [class.opacity-50]="loading()" [attr.aria-label]="ariaLabel()">
+      <div data-med-scroll-viewport class="relative w-full overflow-x-auto" [class.min-h-0]="flexHeight()" [class.flex-1]="flexHeight()" [class.overflow-y-auto]="scrollable()" [style.maxHeight]="scrollable() && !flexHeight() ? scrollHeight() : null">
+        @if (isSpinnerLoading()) {
+          <div class="absolute inset-0 z-10 flex items-center justify-center bg-surface-0/60 dark:bg-surface-800/60">
+            <med-progress-spinner [ariaLabel]="loadingLabel()" />
+          </div>
+        }
+        <table [class]="tableClass()" [style.width.px]="tableWidthPx()" [class.table-fixed]="resizableColumns() || hasFrozenColumn()" [class.opacity-50]="isSpinnerLoading()" [attr.aria-busy]="isSkeletonLoading() ? 'true' : null" [attr.aria-label]="ariaLabel()">
         <thead #tableHead [class]="scrollable() ? 'sticky top-0 z-10 bg-surface-50 dark:bg-surface-800' : ''">
           @if (headerGroupTemplate(); as hg) {
             <ng-container [ngTemplateOutlet]="hg" />
@@ -458,6 +478,24 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
           </tbody>
         }
         <tbody>
+          @if (isSkeletonLoading()) {
+            @for (_ of skeletonRows(); track $index) {
+              <tr class="border-b border-surface-200 last:border-b-0 dark:border-surface-700">
+                @if (reorderable()) {
+                  <td [class]="skeletonUtilityCellClass(true)" [style]="utilityStyle('reorder')"><med-skeleton height="1rem" /></td>
+                }
+                @if (selectionMode() === 'multiple' || selectionMode() === 'radio') {
+                  <td [class]="skeletonUtilityCellClass()" [style]="utilityStyle('selection')"><med-skeleton height="1rem" /></td>
+                }
+                @for (col of visibleColumns(); track col.field()) {
+                  <td [class]="skeletonCellClass(col)" [style]="frozenStyle(col)"><med-skeleton height="1rem" /></td>
+                }
+                @if (editMode() === 'row') {
+                  <td [class]="utilityCellClass('')"><med-skeleton height="1rem" /></td>
+                }
+              </tr>
+            }
+          } @else {
           @for (row of pagedValue(); track rowTrackBy()(row, $index); let i = $index) {
             @if (isGroupStart(row, i)) {
               <tr class="border-b border-surface-200 bg-surface-50 font-semibold dark:border-surface-700 dark:bg-surface-800/50">
@@ -583,8 +621,15 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
             }
           } @empty {
             <tr>
-              <td [attr.colspan]="totalColumnCount()" class="px-3 py-8 text-center text-surface-500 dark:text-surface-400">{{ emptyLabel() }}</td>
+              <td [attr.colspan]="totalColumnCount()" class="px-3 py-8 text-center text-surface-500 dark:text-surface-400">
+                @if (emptyTemplate(); as empTpl) {
+                  <ng-container [ngTemplateOutlet]="empTpl" />
+                } @else {
+                  {{ emptyLabel() }}
+                }
+              </td>
             </tr>
+          }
           }
         </tbody>
         @if (frozenRowsPosition() === 'bottom' && frozenRows().length) {
@@ -600,6 +645,12 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
           </tfoot>
         }
       </table>
+      </div>
+      @if (summaryTemplate(); as sumTpl) {
+        <div data-med-summary class="border-t border-surface-200 bg-surface-50 px-4 py-3 text-sm text-surface-700 dark:border-surface-700 dark:bg-surface-800/50 dark:text-surface-200">
+          <ng-container [ngTemplateOutlet]="sumTpl" />
+        </div>
+      }
     </div>
     @if (paginator() && effectiveTotalRecords() > 0) {
       <med-paginator class="mt-3 block" [totalRecords]="effectiveTotalRecords()" [(rows)]="pageSize" [rowsPerPageOptions]="rowsPerPageOptions()" [(first)]="first" />
@@ -653,8 +704,13 @@ export class DataTableComponent<T> {
   readonly globalFilterFields = input<readonly string[] | null>(null);
   /** Debounces committing a keystroke to `globalFilterValue` (and therefore to `filteredValue()`) — the `<input>` itself still reflects every keystroke immediately, see class doc. */
   readonly filterDelay = input(300, { transform: numberAttribute });
-  /** Presentational only — dims the table and overlays a spinner, see class doc. */
+  /** Presentational only — dims the table and overlays a spinner, or renders skeleton rows when `loadingMode` is `'skeleton'`. */
   readonly loading = input(false, { transform: booleanAttribute });
+  /** Controls how `loading` is displayed: `'spinner'` (default overlay) or `'skeleton'` (placeholder rows). */
+  readonly loadingMode = input<TableLoadingMode>('spinner');
+  protected readonly isSpinnerLoading = computed(() => this.loading() && this.loadingMode() === 'spinner');
+  protected readonly isSkeletonLoading = computed(() => this.loading() && this.loadingMode() === 'skeleton');
+  protected readonly skeletonRows = computed(() => Array.from({ length: this.paginator() ? Math.max(1, this.pageSize()) : 5 }, (_, i) => i));
   /** Reinterprets `value()` as "current page only, already filtered/sorted server-side" — see class doc's "lazy" section. */
   readonly lazy = input(false, { transform: booleanAttribute });
   readonly totalRecords = input<number | null>(null);
@@ -761,6 +817,12 @@ export class DataTableComponent<T> {
   protected readonly footerGroupTemplate = contentChild('footerGroup', { read: TemplateRef });
   protected readonly groupHeaderTemplate = contentChild('groupHeader', { read: TemplateRef });
   protected readonly rowExpansionTemplate = contentChild('rowexpansion', { read: TemplateRef });
+  /** Optional `#caption` template rendered above the table header inside the bordered container. */
+  protected readonly captionTemplate = contentChild('caption', { read: TemplateRef });
+  /** Optional `#summary` template rendered below the table and above the paginator inside the bordered container. */
+  protected readonly summaryTemplate = contentChild('summary', { read: TemplateRef });
+  /** Optional `#empty` template rendered inside the empty-state cell instead of `emptyLabel`. */
+  protected readonly emptyTemplate = contentChild('empty', { read: TemplateRef });
   private readonly platformId = inject(PLATFORM_ID);
   private readonly destroyRef = inject(DestroyRef);
   private readonly injector = inject(Injector);
@@ -773,7 +835,7 @@ export class DataTableComponent<T> {
   /** `scrollable` with `scrollHeight="flex"`: the wrapper fills the height of its parent instead of capping at a fixed length. */
   protected readonly flexHeight = computed(() => this.scrollable() && this.scrollHeight() === 'flex');
   protected readonly wrapperClass = computed(() =>
-    mergeClasses('relative w-full overflow-x-auto rounded-lg border border-surface-200 dark:border-surface-700', this.flexHeight() ? 'min-h-0 flex-1' : '', this.class()),
+    mergeClasses('relative w-full overflow-hidden rounded-lg border border-surface-200 dark:border-surface-700', this.flexHeight() ? 'flex min-h-0 flex-1 flex-col' : '', this.class()),
   );
 
   private readonly editingCell = signal<{ row: T; field: string } | null>(null);
@@ -1191,14 +1253,15 @@ export class DataTableComponent<T> {
       : 'bg-surface-0 group-hover:bg-surface-50 dark:bg-surface-800 dark:group-hover:bg-surface-700';
   }
 
+  /** Scroll-facing border classes for a frozen column side. */
+  private frozenBorderClass(side: 'left' | 'right'): string {
+    return `${side === 'left' ? 'border-r' : 'border-l'} border-surface-200 dark:border-surface-700`;
+  }
+
   /** Background and scroll-facing border of a frozen data cell (`row` is `null` in the header). */
   private frozenCellClass(col: TableColumnComponent, row: T | null, index: number): string {
     const placed = this.frozenLayout().get(col);
-    if (!placed) {
-      return '';
-    }
-    const border = placed.side === 'left' ? 'border-r' : 'border-l';
-    return mergeClasses(this.frozenBackground(row, index), border, 'border-surface-200 dark:border-surface-700');
+    return placed ? mergeClasses(this.frozenBackground(row, index), this.frozenBorderClass(placed.side)) : '';
   }
 
   protected groupCellClass(): string {
@@ -1225,6 +1288,16 @@ export class DataTableComponent<T> {
 
   protected cellClass(col: TableColumnComponent, row: T, index: number): string {
     return mergeClasses(SIZE_PADDING_CLASS[this.size()], 'text-surface-900 dark:text-surface-50', ALIGN_CLASS[col.align()], this.gridClass(), this.frozenCellClass(col, row, index));
+  }
+
+  protected skeletonUtilityCellClass(narrow = false): string {
+    return this.utilityCellClass(this.utilityFrozen() ? 'bg-surface-0 dark:bg-surface-800' : '', narrow);
+  }
+
+  protected skeletonCellClass(col: TableColumnComponent): string {
+    const placed = this.frozenLayout().get(col);
+    const frozen = placed ? mergeClasses('sticky z-[1] bg-surface-0 dark:bg-surface-800', this.frozenBorderClass(placed.side)) : '';
+    return mergeClasses(SIZE_PADDING_CLASS[this.size()], ALIGN_CLASS[col.align()], this.gridClass(), frozen);
   }
 
   /** `interactive` is `false` for frozen rows, which are display-only: no pointer cursor, since they cannot be selected. */

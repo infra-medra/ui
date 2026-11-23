@@ -3527,4 +3527,259 @@ describe('DataTableComponent column filters', () => {
       expect(funnelIcon(fixture, 'Released').variant()).not.toBe('solid');
     });
   });
+
+  describe('caption and summary slots', () => {
+    it('DAT-040.S1: renders #caption above the table header and #summary below the table and before the paginator', () => {
+      @Component({
+        standalone: true,
+        imports: [DataTableComponent, TableColumnComponent],
+        template: `
+          <med-data-table [value]="rows" [paginator]="true" [rows]="2">
+            <ng-template #caption>
+              <span data-testid="caption-content">Products inventory</span>
+            </ng-template>
+            <med-table-column field="name" header="Name" />
+            <ng-template #summary>
+              <span data-testid="summary-content">Total: 3 items</span>
+            </ng-template>
+          </med-data-table>
+        `,
+      })
+      class Host {
+        rows = [{ name: 'A' }, { name: 'B' }, { name: 'C' }];
+      }
+
+      const fixture = TestBed.createComponent(Host);
+      fixture.detectChanges();
+
+      const el = fixture.nativeElement as HTMLElement;
+      const caption = el.querySelector('[data-testid="caption-content"]') as HTMLElement | null;
+      const thead = el.querySelector('thead') as HTMLElement | null;
+      const table = el.querySelector('table') as HTMLElement | null;
+      const summary = el.querySelector('[data-testid="summary-content"]') as HTMLElement | null;
+      const paginator = el.querySelector('med-paginator') as HTMLElement | null;
+
+      expect(caption?.textContent).toContain('Products inventory');
+      expect(summary?.textContent).toContain('Total: 3 items');
+      expect(caption).toBeTruthy();
+      expect(thead).toBeTruthy();
+      expect(table).toBeTruthy();
+      expect(summary).toBeTruthy();
+      expect(paginator).toBeTruthy();
+
+      expect(caption!.compareDocumentPosition(thead!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+      expect(table!.compareDocumentPosition(summary!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+      expect(summary!.compareDocumentPosition(paginator!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    });
+
+    it('DAT-040.S2: renders no caption or summary wrapper elements when omitted', () => {
+      @Component({
+        standalone: true,
+        imports: [DataTableComponent, TableColumnComponent],
+        template: `
+          <med-data-table [value]="rows">
+            <med-table-column field="name" header="Name" />
+          </med-data-table>
+        `,
+      })
+      class Host {
+        rows = [{ name: 'A' }];
+      }
+
+      const fixture = TestBed.createComponent(Host);
+      fixture.detectChanges();
+
+      const el = fixture.nativeElement as HTMLElement;
+      expect(el.querySelector('[data-med-caption]')).toBeNull();
+      expect(el.querySelector('[data-med-summary]')).toBeNull();
+    });
+  });
+
+  describe('custom empty template', () => {
+    it('DAT-041.S1: renders #empty template inside spanning empty-state cell instead of emptyLabel', () => {
+      @Component({
+        standalone: true,
+        imports: [DataTableComponent, TableColumnComponent],
+        template: `
+          <med-data-table [value]="rows" [loading]="false">
+            <med-table-column field="name" header="Name" />
+            <med-table-column field="role" header="Role" />
+            <ng-template #empty>
+              <div data-testid="custom-empty">Nothing to display yet</div>
+            </ng-template>
+          </med-data-table>
+        `,
+      })
+      class Host {
+        rows: { name: string; role: string }[] = [];
+      }
+
+      const fixture = TestBed.createComponent(Host);
+      fixture.detectChanges();
+
+      const el = fixture.nativeElement as HTMLElement;
+      const emptyCell = el.querySelector('tbody tr td') as HTMLTableCellElement | null;
+      expect(emptyCell?.getAttribute('colspan')).toBe('2');
+      expect(emptyCell?.querySelector('[data-testid="custom-empty"]')?.textContent).toContain('Nothing to display yet');
+      expect(el.textContent).not.toContain('No results found');
+    });
+
+    it('DAT-041.S2: falls back to emptyLabel when #empty template is omitted', () => {
+      @Component({
+        standalone: true,
+        imports: [DataTableComponent, TableColumnComponent],
+        template: `
+          <med-data-table [value]="rows" [loading]="false" emptyLabel="Custom empty text">
+            <med-table-column field="name" header="Name" />
+          </med-data-table>
+        `,
+      })
+      class Host {
+        rows: { name: string }[] = [];
+      }
+
+      const fixture = TestBed.createComponent(Host);
+      fixture.detectChanges();
+
+      const el = fixture.nativeElement as HTMLElement;
+      expect(el.querySelector('tbody tr td')?.textContent).toContain('Custom empty text');
+    });
+  });
+
+  describe('skeleton loading', () => {
+    it('DAT-042.S1: renders 5 skeleton rows across all visible columns without spinner overlay when loadingMode is skeleton', () => {
+      @Component({
+        standalone: true,
+        imports: [DataTableComponent, TableColumnComponent],
+        template: `
+          <med-data-table [value]="rows" [loading]="true" loadingMode="skeleton" selectionMode="multiple">
+            <med-table-column field="name" header="Name" />
+            <med-table-column field="category" header="Category" />
+            <med-table-column field="price" header="Price" />
+          </med-data-table>
+        `,
+      })
+      class Host {
+        rows: { name: string; category: string; price: number }[] = [];
+      }
+
+      const fixture = TestBed.createComponent(Host);
+      fixture.detectChanges();
+
+      const el = fixture.nativeElement as HTMLElement;
+      const bodyRows = el.querySelectorAll('tbody tr');
+      expect(bodyRows.length).toBe(5);
+      expect(bodyRows[0].querySelectorAll('td').length).toBe(4);
+      expect(bodyRows[0].querySelectorAll('med-skeleton').length).toBe(4);
+      expect(el.querySelector('thead th:nth-child(2)')?.textContent).toContain('Name');
+      expect(el.querySelector('med-progress-spinner')).toBeNull();
+      expect(el.querySelector('table')?.getAttribute('aria-busy')).toBe('true');
+      expect(el.querySelector('[role="status"]')?.textContent).toContain('Loading');
+    });
+
+    it('DAT-042.S1: matches rows input count when paginator is enabled', () => {
+      @Component({
+        standalone: true,
+        imports: [DataTableComponent, TableColumnComponent],
+        template: `
+          <med-data-table [value]="rows" [loading]="true" loadingMode="skeleton" [paginator]="true" [rows]="3">
+            <med-table-column field="name" header="Name" />
+            <med-table-column field="price" header="Price" />
+          </med-data-table>
+        `,
+      })
+      class Host {
+        rows: { name: string; price: number }[] = [];
+      }
+
+      const fixture = TestBed.createComponent(Host);
+      fixture.detectChanges();
+
+      const el = fixture.nativeElement as HTMLElement;
+      expect(el.querySelectorAll('tbody tr').length).toBe(3);
+      expect(el.querySelectorAll('tbody tr:first-child med-skeleton').length).toBe(2);
+    });
+
+    it('DAT-042.S2: removes skeleton placeholders and renders data rows when loading becomes false', () => {
+      @Component({
+        standalone: true,
+        imports: [DataTableComponent, TableColumnComponent],
+        template: `
+          <med-data-table [value]="rows" [loading]="loading()" loadingMode="skeleton">
+            <med-table-column field="name" header="Name" />
+            <med-table-column field="price" header="Price" />
+          </med-data-table>
+        `,
+      })
+      class Host {
+        loading = signal(true);
+        rows = [
+          { name: 'Widget', price: 10 },
+          { name: 'Gadget', price: 20 },
+        ];
+      }
+
+      const fixture = TestBed.createComponent(Host);
+      fixture.detectChanges();
+
+      const el = fixture.nativeElement as HTMLElement;
+      expect(el.querySelectorAll('med-skeleton').length).toBeGreaterThan(0);
+
+      fixture.componentInstance.loading.set(false);
+      fixture.detectChanges();
+
+      expect(el.querySelectorAll('med-skeleton').length).toBe(0);
+      expect(el.querySelector('table')?.getAttribute('aria-busy')).toBeNull();
+      const bodyRows = el.querySelectorAll('tbody tr');
+      expect(bodyRows.length).toBe(2);
+      expect(bodyRows[0].textContent).toContain('Widget');
+      expect(bodyRows[1].textContent).toContain('Gadget');
+    });
+
+    it('DAT-042 / DAT-028: gives frozen skeleton data and utility cells opaque backgrounds and scroll-facing side borders', () => {
+      @Component({
+        standalone: true,
+        imports: [DataTableComponent, TableColumnComponent],
+        template: `
+          <med-data-table [value]="rows" [loading]="true" loadingMode="skeleton" [reorderable]="true" selectionMode="multiple">
+            <med-table-column field="name" header="Name" [frozen]="leftFrozen()" width="120px" />
+            <med-table-column field="category" header="Category" />
+            <med-table-column field="price" header="Price" [frozen]="true" alignFrozen="right" width="100px" />
+          </med-data-table>
+        `,
+      })
+      class Host {
+        leftFrozen = signal(true);
+        rows: { name: string; category: string; price: number }[] = [];
+      }
+
+      const fixture = TestBed.createComponent(Host);
+      fixture.detectChanges();
+
+      const cells = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('tbody tr:first-child td'));
+      expect(cells.length).toBe(5);
+      // Reorder and selection utility cells freeze on the left with an opaque background when a left-frozen column exists.
+      expect(cells[0].classList).toContain('bg-surface-0');
+      expect(cells[1].classList).toContain('bg-surface-0');
+      // Left-frozen data cell gets opaque background and right border.
+      expect(cells[2].classList).toContain('bg-surface-0');
+      expect(cells[2].classList).toContain('border-r');
+      expect(cells[2].classList).toContain('border-surface-200');
+      // Non-frozen data cell gets neither frozen background nor side border.
+      expect(cells[3].classList).not.toContain('bg-surface-0');
+      expect(cells[3].classList).not.toContain('border-r');
+      expect(cells[3].classList).not.toContain('border-l');
+      // Right-frozen data cell gets opaque background and left border.
+      expect(cells[4].classList).toContain('bg-surface-0');
+      expect(cells[4].classList).toContain('border-l');
+      expect(cells[4].classList).toContain('border-surface-200');
+
+      // When only right-frozen columns exist, utility cells do not stick or take an opaque frozen background.
+      fixture.componentInstance.leftFrozen.set(false);
+      fixture.detectChanges();
+      const updatedCells = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('tbody tr:first-child td'));
+      expect(updatedCells[0].classList).not.toContain('bg-surface-0');
+      expect(updatedCells[1].classList).not.toContain('bg-surface-0');
+    });
+  });
 });

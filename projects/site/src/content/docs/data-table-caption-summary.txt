@@ -1,0 +1,3 @@
+## Caption and summary slots
+
+Project `<ng-template #caption>` and `<ng-template #summary>` inside `<med-data-table>` to frame the table with header or summary content. Both slots sit inside the table's bordered container outside the scroll viewport—`caption` above the column headers and `summary` below the table body and footer, before any paginator. When omitted, neither wrapper renders.

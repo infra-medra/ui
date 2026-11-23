@@ -1,0 +1,3 @@
+## Skeleton loading
+
+Set `loadingMode="skeleton"` together with `loading` to render placeholder skeleton cells across every visible column instead of the spinner overlay, keeping column headers in place. When `paginator` is enabled, the skeleton renders `rows` placeholder rows; otherwise it renders five. Once `loading` returns to `false`, data rows (or the empty state) are restored.

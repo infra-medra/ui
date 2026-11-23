@@ -1,0 +1,17 @@
+<med-data-table [value]="equipment" [paginator]="true" [rows]="3" ariaLabel="Lab equipment inventory (caption and summary)">
+  <ng-template #caption>
+    <div class="flex items-center justify-between gap-4">
+      <span>Lab equipment inventory</span>
+      <span class="text-xs font-normal text-surface-500 dark:text-surface-400">{{ equipment.length }} items</span>
+    </div>
+  </ng-template>
+  <med-table-column field="name" header="Name" />
+  <med-table-column field="category" header="Category" />
+  <med-table-column field="quantity" header="Quantity" align="right" />
+  <ng-template #summary>
+    <div class="flex items-center justify-between gap-4">
+      <span>Total units in lab</span>
+      <span class="font-medium">{{ totalQuantity }}</span>
+    </div>
+  </ng-template>
+</med-data-table>
