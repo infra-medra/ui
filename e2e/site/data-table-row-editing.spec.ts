@@ -11,6 +11,14 @@ const PAGE = '/docs/components/data-table';
  */
 const demoOf = (page: import('@playwright/test').Page) => page.locator('app-data-table-edit-row-demo');
 
+/**
+ * Waits until the button is hydrated. The prerendered button carries `jsaction` until Angular attaches its click handler; a click
+ * before that is only replayed later, so a check made right after it could read the server markup.
+ */
+async function hydrated(button: import('@playwright/test').Locator): Promise<void> {
+  await expect(button, 'the edit button did not hydrate').not.toHaveAttribute('jsaction', /.*/, { timeout: 10_000 });
+}
+
 test.describe('DataTable row editing', () => {
   // DAT-024.S10, DAT-035.S1
   test('DAT-035.S1: the edit button shows an input in every editable cell of the row at once', async ({ page }) => {
@@ -21,9 +29,11 @@ test.describe('DataTable row editing', () => {
 
     const firstRow = demo.locator('tbody tr').first();
     await expect(firstRow.locator('input')).toHaveCount(0);
-    await firstRow.getByRole('button', { name: 'Edit row' }).click();
+    const editButton = firstRow.getByRole('button', { name: 'Edit row' });
+    await hydrated(editButton);
+    await editButton.click();
 
-    expect(await firstRow.locator('input').count(), 'every editable cell shows its edit template').toBeGreaterThanOrEqual(2);
+    await expect.poll(() => firstRow.locator('input').count(), { message: 'every editable cell shows its edit template' }).toBeGreaterThanOrEqual(2);
     await expect(firstRow.getByRole('button', { name: 'Save row' })).toBeVisible();
     await expect(demo.locator('tbody tr').nth(1).locator('input')).toHaveCount(0);
   });
@@ -36,7 +46,9 @@ test.describe('DataTable row editing', () => {
     await demo.scrollIntoViewIfNeeded();
 
     const firstRow = demo.locator('tbody tr').first();
-    await firstRow.getByRole('button', { name: 'Edit row' }).click();
+    const editButton = firstRow.getByRole('button', { name: 'Edit row' });
+    await hydrated(editButton);
+    await editButton.click();
     const nameInput = firstRow.locator('input').first();
     await nameInput.fill('Edited name');
     await firstRow.getByRole('button', { name: 'Save row' }).click();
