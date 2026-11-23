@@ -1,5 +1,7 @@
 # Tasks: {change-name}
 
+> {In `tdd` mode:} A `[TEST]` task locks its test files when it is checkpointed red. Write every case of its scenarios before that checkpoint; editing a locked file afterwards needs the user's explicit authorization (`medra task done … --allow-test-edit --reason`).
+
 ## Phase 1: {Setup | first slice name}
 
 - [ ] T001 {[P]} {Imperative action} in `{path}` — verify: {command or observable result}

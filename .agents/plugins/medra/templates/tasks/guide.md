@@ -44,7 +44,8 @@ The title, using the exact change name.
 - In `tdd` mode:
   - Every ADDED or MODIFIED requirement gets a `[TEST]` task that names its scenario IDs and verifies "tests fail (red)".
   - Every implementation task for that requirement declares `after` its test task and verifies "… pass (green)".
-- In `test-after` mode, test tasks are still required per requirement, but need no ordering.
+  - When a `[TEST]` task's coverage can grow (several scenarios, boundary or error cases, a table of inputs), word it so that it lists every case to write before the red checkpoint, and keep the template's note under the title that editing a locked test file afterwards needs the user's authorization. **Why:** the CLI locks the file at red, and a case added later stops the next implementation task until the user decides.
+- In `test-after` mode, test tasks are still required per requirement, but need no ordering. Drop the template's note on locked test files.
 - In `none` mode, every verify clause is a manual check that someone can actually perform.
 
 **Example:**
