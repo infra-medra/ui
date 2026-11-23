@@ -18,14 +18,6 @@
 **Occurrences:** 2
 **Last seen:** 10
 
-### L-004 [preference] Commit the previous change before verifying the next one
-
-**Statement:** Commit or archive the previous change's working-tree files before running verify, so the diff against diff_base holds only the current change's files.
-**Scope:** stages: verify
-**Evidence:** document-row-identity-and-row-labels
-**Occurrences:** 1
-**Last seen:** 6
-
 ### L-005 [lesson] Record green evidence with the task's own verify command
 
 **Statement:** Run the exact command named in a task's verify (for example the Playwright spec, not a Jest subset) when running medra task done. A done task cannot be reopened or have its evidence re-recorded.
@@ -94,3 +86,12 @@
 **Promoted:** Article XI (v1.2)
 
 ## Retired
+
+### L-004 [preference] Commit the previous change before verifying the next one
+
+**Statement:** Commit or archive the previous change's working-tree files before running verify, so the diff against diff_base holds only the current change's files.
+**Scope:** stages: verify
+**Evidence:** document-row-identity-and-row-labels
+**Occurrences:** 1
+**Last seen:** 6
+**Retired:** Stale since sequence 6: every change since then was committed and archived before the next one started, so the verify diff never mixed changes again.
