@@ -57,6 +57,11 @@ export class TableColumnComponent {
   readonly frozen = input(false, { transform: booleanAttribute });
   readonly alignFrozen = input<'left' | 'right'>('left');
   /**
+   * Text shown before each of this column's cells while the table is stacked. Unset, the column's `header` is used; with neither,
+   * the cells show no label. The table adds no text of its own.
+   */
+  readonly stackLabel = input<string | null>(null);
+  /**
    * Shows or hides the column. While `false` the table renders no header, body or footer cell for it and leaves it out of
    * column spans, frozen offsets and CSV export; its sort state, filter matching and resized width are kept, so setting it
    * back to `true` restores the column as it was.

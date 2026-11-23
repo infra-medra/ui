@@ -23,6 +23,9 @@ const ROW_EDITING_AND_GROUPS = ['edit-row', 'edit-cell-selection', 'row-group-ro
 /** The example DAT-024.S15 adds for paginator position and page report options, by slug. */
 const PAGINATOR_OPTIONS = ['paginator-options'];
 
+/** The example DAT-024.S16 adds for the responsive stacked layout, by slug. */
+const RESPONSIVE_STACK = 'responsive-stack';
+
 interface SectionReport {
   id: string;
   proseLength: number;
@@ -74,12 +77,14 @@ test.describe('DataTable docs page', () => {
     expect(tocIds.length, 'the index lists no examples').toBeGreaterThan(0);
     expect(new Set(anchorIds).size, 'duplicate example ids on the page').toBe(anchorIds.length);
     expect(tocIds).toEqual(anchorIds);
+    expect(tocIds, 'no index entry for the responsive stack example').toContain(`example-${RESPONSIVE_STACK}`);
   });
 
   // DAT-024.S2
   test('DAT-024.S2: every example has prose, a live demo and a code block', async ({ page }) => {
     const { tocIds, sections } = await readPage(page);
     expect(tocIds.length, 'the index lists no examples').toBeGreaterThan(0);
+    expect(tocIds, 'no index entry for the responsive stack example').toContain(`example-${RESPONSIVE_STACK}`);
     for (const id of tocIds) {
       const section = sections.find((s) => s.id === id);
       expect(section, `no section for index entry "${id}"`).toBeDefined();
