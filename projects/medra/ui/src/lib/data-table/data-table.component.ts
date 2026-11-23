@@ -744,7 +744,7 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
           </tbody>
         }
         @if (footerGroupTemplate(); as fg) {
-          <tfoot [class]="'border-t border-surface-200 bg-surface-50 text-surface-700 dark:border-surface-700 dark:bg-surface-800/50 dark:text-surface-200' + (scrollActive() ? ' sticky bottom-0 z-10' : '')">
+          <tfoot #footerGroupFoot [class]="'border-t border-surface-200 bg-surface-50 text-surface-700 dark:border-surface-700 dark:bg-surface-800/50 dark:text-surface-200' + (scrollActive() ? ' sticky bottom-0 z-10' : '')">
             <ng-container [ngTemplateOutlet]="fg" />
           </tfoot>
         }
@@ -863,6 +863,7 @@ export class DataTableComponent<T> {
   private readonly tableHead = viewChild<ElementRef<HTMLTableSectionElement>>('tableHead');
   private readonly frozenTopBody = viewChild<ElementRef<HTMLTableSectionElement>>('frozenTopBody');
   private readonly frozenBottomBody = viewChild<ElementRef<HTMLTableSectionElement>>('frozenBottomBody');
+  private readonly footerGroupFoot = viewChild<ElementRef<HTMLTableSectionElement>>('footerGroupFoot');
   private readonly viewport = viewChild<ElementRef<HTMLElement>>('viewport');
   /** Height of the sticky `<thead>`, which is where top frozen rows stick; measured in the browser only, so server rendering never touches `ResizeObserver`. */
   protected readonly headerHeight = signal(0);
@@ -1004,6 +1005,12 @@ export class DataTableComponent<T> {
   private readonly frozenTopHeight = signal(0);
   /** Measured height of the bottom frozen rows, which stay stuck over the bottom of the viewport. */
   private readonly frozenBottomHeight = signal(0);
+  /** Measured height of the `#footerGroup` footer, which stays stuck over the bottom of the viewport; it overlaps the bottom frozen rows rather than stacking under them, since both stick at `bottom: 0`. */
+  private readonly footerHeight = signal(0);
+  /** Absolute index of a row a key moved focus to while its data was not loaded yet; it takes focus when the data arrives. */
+  private readonly pendingFocusIndex = signal<number | null>(null);
+  /** Absolute index of the row that keeps focus while `pendingFocusIndex` waits; it stays rendered so focus never falls to the page. */
+  private readonly focusAnchorIndex = signal<number | null>(null);
 
   /** The viewport height the window is computed from: measured, else the pixel `scrollHeight`, else the 400px default. */
   private readonly effectiveViewportHeight = computed(() => {
@@ -1049,31 +1056,27 @@ export class DataTableComponent<T> {
     const size = Math.max(1, this.virtualScrollItemSize());
     const total = this.effectiveTotalRecords();
     const { start, end } = this.virtualRange();
-    const pinned = this.pinnedEditIndex();
+    // Rows kept rendered outside the window: the row in edit, and the row holding focus while a key waits for unloaded data.
+    const pinned = [...new Set([this.pinnedEditIndex(), this.focusAnchorIndex()])]
+      .filter((index): index is number => index !== null && index >= 0 && index < total && (index < start || index >= end))
+      .sort((a, b) => a - b);
     const entries: VirtualEntry<T>[] = [];
     let slot = 0;
-    const spacer = (from: number, to: number) => {
-      if (to > from) {
-        entries.push({ kind: 'spacer', slot: slot++, height: (to - from) * size });
+    let cursor = 0;
+    const emit = (index: number) => {
+      if (index > cursor) {
+        entries.push({ kind: 'spacer', slot: slot++, height: (index - cursor) * size });
       }
+      entries.push({ kind: 'row', row: rows[index], index });
+      cursor = index + 1;
     };
-    const row = (index: number) => entries.push({ kind: 'row', row: rows[index], index });
-    if (pinned !== null && pinned < start) {
-      spacer(0, pinned);
-      row(pinned);
-      spacer(pinned + 1, start);
-    } else {
-      spacer(0, start);
-    }
+    pinned.filter((index) => index < start).forEach(emit);
     for (let i = start; i < end; i++) {
-      row(i);
+      emit(i);
     }
-    if (pinned !== null && pinned >= end) {
-      spacer(end, pinned);
-      row(pinned);
-      spacer(pinned + 1, total);
-    } else {
-      spacer(end, total);
+    pinned.filter((index) => index >= end).forEach(emit);
+    if (total > cursor) {
+      entries.push({ kind: 'spacer', slot: slot++, height: (total - cursor) * size });
     }
     return entries;
   });
@@ -1101,15 +1104,17 @@ export class DataTableComponent<T> {
   }
 
   /** Moves focus to the row at `index` of the processed set in `virtualScroll` mode: scrolls it into view, then focuses it once it is rendered. */
-  private focusVirtualRow(index: number): void {
+  private focusVirtualRow(index: number, from: number): void {
     const element = this.viewport()?.nativeElement;
     if (!element) {
       return;
     }
+    this.clearPendingFocus();
     const size = Math.max(1, this.virtualScrollItemSize());
     // The sticky header and frozen rows cover the edges of the viewport, so the row must fit between them.
     const coveredTop = this.headerHeight() + this.frozenTopHeight();
-    const coveredBottom = this.frozenBottomHeight();
+    // The bottom frozen rows and the footer both stick at `bottom: 0`, so they overlap: the taller one is what covers the viewport.
+    const coveredBottom = Math.max(this.frozenBottomHeight(), this.footerHeight());
     const rowTop = coveredTop + index * size;
     const rowBottom = rowTop + size;
     const viewHeight = this.effectiveViewportHeight();
@@ -1129,7 +1134,19 @@ export class DataTableComponent<T> {
       rendered.focus({ preventScroll: true });
       return;
     }
+    const target = this.pagedValue()[index];
+    if (target === null || target === undefined) {
+      // A placeholder cannot take focus (DAT-048): the row that has it stays rendered and keeps it until the target's data arrives.
+      this.focusAnchorIndex.set(from);
+      this.pendingFocusIndex.set(index);
+      return;
+    }
     afterNextRender(() => find()?.focus({ preventScroll: true }), { injector: this.injector });
+  }
+
+  private clearPendingFocus(): void {
+    this.pendingFocusIndex.set(null);
+    this.focusAnchorIndex.set(null);
   }
 
   /** Emits `lazyLoad` for every block of the window and the block after it that was not requested yet, which is the preload. */
@@ -1181,7 +1198,7 @@ export class DataTableComponent<T> {
     this.destroyRef.onDestroy(() => observer.disconnect());
   }
 
-  /** Keeps `height` equal to the rendered height of a conditional `<tbody>`, and `0` while it is absent; browser only. */
+  /** Keeps `height` equal to the rendered height of a conditional table section (a frozen-rows `<tbody>` or the `#footerGroup` `<tfoot>`), and `0` while it is absent; browser only. */
   private observeSectionHeight(section: () => ElementRef<HTMLTableSectionElement> | undefined, height: WritableSignal<number>): void {
     effect((onCleanup) => {
       const element = section()?.nativeElement;
@@ -1221,8 +1238,47 @@ export class DataTableComponent<T> {
     });
     this.observeSectionHeight(this.frozenTopBody, this.frozenTopHeight);
     this.observeSectionHeight(this.frozenBottomBody, this.frozenBottomHeight);
+    this.observeSectionHeight(this.footerGroupFoot, this.footerHeight);
 
-    // A new sort or filter changes which rows sit where, so a virtual body returns to its first row.
+    // A row a key moved focus to before its data arrived takes focus once it renders, but only while the anchor row still holds focus:
+    // a click or tab elsewhere in the meantime abandons the move.
+    effect(() => {
+      const pending = this.pendingFocusIndex();
+      if (pending === null) {
+        return;
+      }
+      const row = this.pagedValue()[pending];
+      if (row === null || row === undefined) {
+        return;
+      }
+      untracked(() => {
+        const position = this.bodyRowPosition(pending);
+        afterNextRender(
+          () => {
+            if (this.pendingFocusIndex() !== pending) {
+              return;
+            }
+            const anchor = untracked(this.focusAnchorIndex);
+            const anchorRow = anchor === null ? null : this.host.nativeElement.querySelector<HTMLElement>(`tbody tr[aria-rowindex="${this.bodyRowPosition(anchor)}"]`);
+            if (!anchorRow || this.host.nativeElement.ownerDocument.activeElement !== anchorRow) {
+              this.clearPendingFocus();
+              return;
+            }
+            const target = this.host.nativeElement.querySelector<HTMLElement>(`tbody tr[aria-rowindex="${position}"][tabindex]`);
+            if (!target) {
+              // The target scrolled out of the window: the move is abandoned, and the anchor stays pinned so it keeps focus until the next move.
+              this.pendingFocusIndex.set(null);
+              return;
+            }
+            target.focus({ preventScroll: true });
+            this.clearPendingFocus();
+          },
+          { injector: this.injector },
+        );
+      });
+    });
+
+    // A new sort or filter (or block size in lazy mode) changes which rows sit where, so a virtual body returns to its first row.
     let firstRun = true;
     effect(() => {
       this.sortField();
@@ -1230,12 +1286,17 @@ export class DataTableComponent<T> {
       this.multiSortMeta();
       this.globalFilterValue();
       this.columnFilters();
+      // In lazy virtual mode `rows` is the block size, so a new value makes every requested block stale as well.
+      if (this.lazy()) {
+        this.pageSize();
+      }
       if (firstRun) {
         firstRun = false;
         return;
       }
       untracked(() => {
         if (this.virtualScroll()) {
+          this.clearPendingFocus();
           const element = this.viewport()?.nativeElement;
           if (element) {
             element.scrollTop = 0;
@@ -2176,7 +2237,7 @@ export class DataTableComponent<T> {
       const last = this.effectiveTotalRecords() - 1;
       const target = event.key === 'Home' ? 0 : event.key === 'End' ? last : event.key === 'ArrowDown' ? Math.min(index + 1, last) : Math.max(index - 1, 0);
       if (Number.isInteger(index) && index >= 0 && target >= 0 && target !== index) {
-        this.focusVirtualRow(target);
+        this.focusVirtualRow(target, index);
       }
       return;
     }
