@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, Injector, PLATFORM_ID, TemplateRef, afterNextRender, booleanAttribute, computed, contentChild, contentChildren, effect, ElementRef, inject, input, linkedSignal, model, numberAttribute, output, signal, untracked, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, Injector, PLATFORM_ID, TemplateRef, afterNextRender, booleanAttribute, computed, contentChild, contentChildren, effect, ElementRef, inject, input, linkedSignal, model, numberAttribute, output, signal, untracked, viewChild, WritableSignal } from '@angular/core';
 import { NgTemplateOutlet, isPlatformBrowser } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -45,6 +45,16 @@ const SIZE_PADDING_CLASS: Record<TableSize, string> = {
   lg: 'px-4 py-4',
 };
 
+/** Viewport height of a `virtualScroll` table without `scrollHeight`. */
+const DEFAULT_VIRTUAL_VIEWPORT_PX = 400;
+/** Rows rendered above and below the visible rows in `virtualScroll` mode. */
+const VIRTUAL_BUFFER_ROWS = 5;
+
+/** One item of the virtual body: a spacer standing for rows outside the window, or a row with its absolute index in the processed row set. */
+type VirtualEntry<T> =
+  | { readonly kind: 'spacer'; readonly slot: number; readonly height: number }
+  | { readonly kind: 'row'; readonly row: T | null | undefined; readonly index: number };
+
 const SIZE_TEXT_CLASS: Record<TableSize, string> = {
   sm: 'text-xs',
   default: 'text-sm',
@@ -84,11 +94,6 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
  *
  * **Deliberate scope cuts for v1**, each one sidestepping a specific mapped
  * bug rather than an arbitrary omission:
- * - No virtual scrolling (avoids #18917 "virtual scroll broken combined with
- *   the table" and #17529 "scroller breaks when scrollHeight is flex and
- *   virtualScroll is active" by not having the feature at all). `SelectPanelComponent`
- *   already shows the `CdkVirtualScrollViewport` technique is available in
- *   this codebase if a later version needs it for very large datasets.
  * - No per-column filter row (avoids #16576 "column filter indicator
  *   disappearing"). Per-column filtering is a funnel menu instead: a column
  *   with `columnFilter` gets a header button that opens a popover with a match
@@ -296,6 +301,40 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
  *   body row or pressing `Shift+F10` / `ContextMenu` on a focused row suppresses
  *   the native menu, updates `contextMenuSelection`, emits `contextMenuSelect`
  *   (`TableContextMenuSelectEvent<T>`), and opens the linked menu via `show()`.
+ *
+ * **`virtualScroll`** renders only the rows inside the scroll viewport plus a
+ * buffer of `VIRTUAL_BUFFER_ROWS` on each side. It does not use
+ * `CdkVirtualScrollViewport`, whose transformed content wrapper would break the
+ * sticky header, frozen rows and frozen columns. Instead the table listens to
+ * `scroll` on its own viewport and puts `aria-hidden` spacer rows above and
+ * below the window, sized so the scrollbar still stands for every row. Every
+ * row is `virtualScrollItemSize` pixels high, and body cells clip their
+ * overflow. The viewport is `scrollHeight`, or 400px when that is unset.
+ * - The rows are the whole processed set: sorting, filtering, selection
+ *   (select-all included) and editing work on rows that are not rendered. The
+ *   paginator is not shown and `first`/`rows` do not slice the rows.
+ * - `rowTrackBy`, `rowClass` and `cellClass` get the row's absolute index in
+ *   the processed set. A row in edit stays rendered when it leaves the window,
+ *   so its editor keeps the value typed so far.
+ * - The `<table>` gets `aria-rowcount` and each rendered row gets its
+ *   `aria-rowindex`. ArrowUp, ArrowDown, Home and End scroll the target row
+ *   into view and then focus it.
+ * - `rowGroupMode`, `#rowexpansion` and `reorderable` are ignored in this
+ *   mode, and so is the paginator.
+ *
+ * **`lazy` with `virtualScroll`** loads rows by block instead of by page.
+ * `value` is a sparse array of `totalRecords` entries, in which `null` or
+ * `undefined` marks a row that is not loaded yet; such rows render skeleton
+ * cells and cannot be focused or selected. Each block holds `rows` rows and
+ * starts at a multiple of `rows`. The table emits `lazyLoad` once per block,
+ * with `first` set to the block start and `rows` to the block size plus the
+ * current sort, global filter and column filters, for every block in the
+ * window and for the block after it (preload). It remembers which blocks it
+ * requested and never asks for one twice; the application writes each loaded
+ * block into `value` and keeps any caching, eviction or retry. A change to
+ * the sort, the global filter, the column filters or `rows` forgets the
+ * requested blocks and scrolls back to the top, so the first blocks are
+ * requested again under the new criteria.
  */
 @Component({
   selector: 'med-data-table',
@@ -353,8 +392,8 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
       }
     </ng-template>
     <ng-template #frozenRow let-row let-i="index">
-      <tr [class]="rowClassFor(row, i, false)">
-        @if (reorderable()) {
+      <tr [class]="rowClassFor(row, i, false)" [attr.aria-rowindex]="frozenRowPosition(i)">
+        @if (rowReorderActive()) {
           <td [class]="utilityCellClass('', true) + ' ' + frozenUtilityClass(row, i)" [style]="utilityStyle('reorder')"></td>
         }
         @if (hasSelectionColumn()) {
@@ -366,25 +405,163 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
         }
       </tr>
     </ng-template>
+    <ng-template #bodyRow let-row let-i="index">
+            @if (isGroupStart(row, i)) {
+              <tr class="border-b border-surface-200 bg-surface-50 font-semibold dark:border-surface-700 dark:bg-surface-800/50">
+                <td [attr.colspan]="totalColumnCount()" [class]="groupCellClass()">
+                  @if (isRowGroupToggleable()) {
+                    <button
+                      type="button"
+                      class="mr-2 inline-flex size-6 items-center justify-center rounded align-middle text-surface-600 hover:bg-surface-200 focus-visible:outline-2 focus-visible:outline-brand-500 dark:text-surface-300 dark:hover:bg-surface-700"
+                      [attr.aria-expanded]="!isGroupCollapsed(row)"
+                      [attr.aria-label]="rowGroupToggleLabel()(groupValue(row), !isGroupCollapsed(row))"
+                      (click)="toggleRowGroup(row)"
+                      (keydown.enter)="$event.preventDefault(); toggleRowGroup(row)"
+                    >
+                      <med-icon [name]="isGroupCollapsed(row) ? 'chevron-right' : 'chevron-down'" variant="mini" class="size-4" />
+                    </button>
+                  }
+                  @if (groupHeaderTemplate(); as t) {
+                    <ng-container [ngTemplateOutlet]="t" [ngTemplateOutletContext]="{ $implicit: row }" />
+                  } @else {
+                    {{ groupValue(row) }}
+                  }
+                </td>
+              </tr>
+            }
+            @if (!isRowHiddenByGroup(row)) {
+            <tr
+              [class]="rowClassFor(row, i)"
+              [style.height.px]="virtualScroll() ? virtualScrollItemSize() : null"
+              [attr.aria-rowindex]="bodyRowPosition(i)"
+              [attr.aria-selected]="selectionMode() && !isCellSelectionActive() ? isSelected(row) : null"
+              [attr.tabindex]="(selectionMode() || contextMenu()) && !isCellSelectionActive() ? 0 : null"
+              [draggable]="rowReorderActive()"
+              (click)="onRowClick(row)"
+              (contextmenu)="onRowContextMenu($event, row)"
+              (keydown)="onRowKeydown($event, row)"
+              (dragstart)="onRowDragStart(i)"
+              (dragover)="onRowDragOver($event)"
+              (drop)="onRowDrop(i)"
+            >
+              @if (rowReorderActive()) {
+                <td [class]="utilityCellClass('cursor-move text-surface-400 dark:text-surface-500', true) + ' ' + frozenUtilityClass(row, i)" [style]="utilityStyle('reorder')" (click)="$event.stopPropagation()">
+                  <med-icon name="bars-3" variant="mini" class="size-4" />
+                </td>
+              }
+              @if (!isCellSelectionActive() && selectionMode() === 'multiple') {
+                <td [class]="utilityCellClass('') + ' ' + frozenUtilityClass(row, i)" [style]="utilityStyle('selection')">
+                  <span class="relative inline-flex">
+                    <input
+                      type="checkbox"
+                      class="peer absolute inset-0 size-full cursor-pointer opacity-0"
+                      [checked]="isSelected(row)"
+                      [attr.aria-label]="rowAriaLabel()?.(row) ?? 'Select row'"
+                      (click)="$event.stopPropagation()"
+                      (change)="toggleRow(row)"
+                    />
+                    <span [class]="checkboxBoxClass" aria-hidden="true">
+                      @if (isSelected(row)) {
+                        <med-icon name="check" variant="solid" class="size-3" />
+                      }
+                    </span>
+                  </span>
+                </td>
+              }
+              @if (!isCellSelectionActive() && selectionMode() === 'radio') {
+                <td [class]="utilityCellClass('') + ' ' + frozenUtilityClass(row, i)" [style]="utilityStyle('selection')">
+                  <span class="relative inline-flex">
+                    <input
+                      type="radio"
+                      class="peer absolute inset-0 size-full cursor-pointer opacity-0"
+                      [name]="radioGroupName"
+                      [checked]="isSelected(row)"
+                      [attr.aria-label]="rowAriaLabel()?.(row) ?? 'Select row'"
+                      (click)="$event.stopPropagation()"
+                      (change)="selectSingle(row)"
+                    />
+                    <span [class]="radioRingClass" aria-hidden="true">
+                      @if (isSelected(row)) {
+                        <span [class]="radioDotClass"></span>
+                      }
+                    </span>
+                  </span>
+                </td>
+              }
+              <ng-container [ngTemplateOutlet]="dataCells" [ngTemplateOutletContext]="{ $implicit: row, index: i, span: groupSpans()[i] ?? 1 }" />
+              @if (editMode() === 'row') {
+                <td [class]="utilityCellClass('whitespace-nowrap')" (click)="$event.stopPropagation()">
+                  @if (editingRow() === row) {
+                    <button type="button" [class]="rowActionButtonClass" [attr.aria-label]="saveRowLabel()" (click)="saveRowEdit()">
+                      <med-icon name="check" variant="mini" class="size-4" />
+                    </button>
+                    <button type="button" [class]="rowActionButtonClass" [attr.aria-label]="cancelRowLabel()" (click)="cancelRowEdit()">
+                      <med-icon name="x-mark" variant="mini" class="size-4" />
+                    </button>
+                  } @else {
+                    <button type="button" [class]="rowActionButtonClass" [attr.aria-label]="editRowLabel()" (click)="startRowEdit(row)">
+                      <med-icon name="pencil-square" variant="mini" class="size-4" />
+                    </button>
+                  }
+                </td>
+              }
+            </tr>
+            @if (expansionRowsRender() && isRowExpanded(row, i) && rowExpansionTemplate(); as expTpl) {
+              <tr class="border-b border-surface-200 bg-surface-50/40 dark:border-surface-700 dark:bg-surface-800/30">
+                @if (expansionLayout(); as layout) {
+                  @if (layout.lead > 0) {
+                    <td [attr.colspan]="layout.lead" [class]="expansionCellClass()">
+                      @if (layout.lead >= layout.trail) {
+                        <ng-container [ngTemplateOutlet]="expTpl" [ngTemplateOutletContext]="{ $implicit: row, rowIndex: i }" />
+                      }
+                    </td>
+                  }
+                  @if (layout.trail > 0) {
+                    <td [attr.colspan]="layout.trail" [class]="expansionCellClass()">
+                      @if (layout.lead < layout.trail) {
+                        <ng-container [ngTemplateOutlet]="expTpl" [ngTemplateOutletContext]="{ $implicit: row, rowIndex: i }" />
+                      }
+                    </td>
+                  }
+                } @else {
+                  <td [attr.colspan]="totalColumnCount()" [class]="expansionCellClass()">
+                    <ng-container [ngTemplateOutlet]="expTpl" [ngTemplateOutletContext]="{ $implicit: row, rowIndex: i }" />
+                  </td>
+                }
+              </tr>
+            }
+            }
+    </ng-template>
+    <ng-template #emptyRow>
+            <tr>
+              <td [attr.colspan]="totalColumnCount()" class="px-3 py-8 text-center text-surface-500 dark:text-surface-400">
+                @if (emptyTemplate(); as empTpl) {
+                  <ng-container [ngTemplateOutlet]="empTpl" />
+                } @else {
+                  {{ emptyLabel() }}
+                }
+              </td>
+            </tr>
+    </ng-template>
     <div [class]="wrapperClass()">
       @if (captionTemplate(); as capTpl) {
         <div data-med-caption class="border-b border-surface-200 bg-surface-50 px-4 py-3 text-sm font-medium text-surface-900 dark:border-surface-700 dark:bg-surface-800/50 dark:text-surface-100">
           <ng-container [ngTemplateOutlet]="capTpl" />
         </div>
       }
-      <div data-med-scroll-viewport class="relative w-full overflow-x-auto" [class.min-h-0]="flexHeight()" [class.flex-1]="flexHeight()" [class.overflow-y-auto]="scrollable()" [style.maxHeight]="scrollable() && !flexHeight() ? scrollHeight() : null">
+      <div #viewport data-med-scroll-viewport class="relative w-full overflow-x-auto" [class.min-h-0]="flexHeight()" [class.flex-1]="flexHeight()" [class.overflow-y-auto]="scrollActive()" [style.maxHeight]="scrollActive() && !flexHeight() ? viewportMaxHeight() : null" (scroll)="onViewportScroll($event)">
         @if (isSpinnerLoading()) {
           <div class="absolute inset-0 z-10 flex items-center justify-center bg-surface-0/60 dark:bg-surface-800/60">
             <med-progress-spinner [ariaLabel]="loadingLabel()" />
           </div>
         }
-        <table [class]="tableClass()" [style.width.px]="tableWidthPx()" [class.table-fixed]="resizableColumns() || hasFrozenColumn()" [class.opacity-50]="isSpinnerLoading()" [attr.aria-busy]="isSkeletonLoading() ? 'true' : null" [attr.aria-label]="ariaLabel()">
-        <thead #tableHead [class]="scrollable() ? 'sticky top-0 z-10 bg-surface-50 dark:bg-surface-800' : ''">
+        <table [class]="tableClass()" [style.width.px]="tableWidthPx()" [class.table-fixed]="resizableColumns() || hasFrozenColumn()" [class.opacity-50]="isSpinnerLoading()" [attr.aria-busy]="isSkeletonLoading() ? 'true' : null" [attr.aria-label]="ariaLabel()" [attr.aria-rowcount]="ariaRowCount()">
+        <thead #tableHead [class]="scrollActive() ? 'sticky top-0 z-10 bg-surface-50 dark:bg-surface-800' : ''">
           @if (headerGroupTemplate(); as hg) {
             <ng-container [ngTemplateOutlet]="hg" />
           }
           <tr class="border-b border-surface-200 bg-surface-50 dark:border-surface-700 dark:bg-surface-800/50">
-            @if (reorderable()) {
+            @if (rowReorderActive()) {
               <th [class]="utilityCellClass('', true) + ' ' + frozenUtilityClass(null)" [style]="utilityStyle('reorder')"></th>
             }
             @if (!isCellSelectionActive() && selectionMode() === 'multiple') {
@@ -500,7 +677,7 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
           </tr>
         </thead>
         @if (frozenRowsPosition() === 'top' && frozenRows().length) {
-          <tbody [class]="scrollable() ? 'sticky z-[5] bg-surface-0 dark:bg-surface-800' : ''" [style.top.px]="scrollable() ? headerHeight() : null">
+          <tbody #frozenTopBody [class]="scrollActive() ? 'sticky z-[5] bg-surface-0 dark:bg-surface-800' : ''" [style.top.px]="scrollActive() ? headerHeight() : null">
             @for (row of frozenRows(); track $index; let i = $index) {
               <ng-container [ngTemplateOutlet]="frozenRow" [ngTemplateOutletContext]="{ $implicit: row, index: i }" />
             }
@@ -510,7 +687,7 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
           @if (isSkeletonLoading()) {
             @for (_ of skeletonRows(); track $index) {
               <tr class="border-b border-surface-200 last:border-b-0 dark:border-surface-700">
-                @if (reorderable()) {
+                @if (rowReorderActive()) {
                   <td [class]="skeletonUtilityCellClass(true)" [style]="utilityStyle('reorder')"><med-skeleton height="1rem" /></td>
                 }
                 @if (hasSelectionColumn()) {
@@ -524,153 +701,50 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
                 }
               </tr>
             }
+          } @else if (virtualScroll()) {
+            @for (entry of virtualEntries(); track trackVirtualEntry(entry)) {
+              @if (entry.kind === 'spacer') {
+                <tr aria-hidden="true">
+                  <td [attr.colspan]="totalColumnCount()" class="border-0 p-0" [style.height.px]="entry.height"></td>
+                </tr>
+              } @else if (entry.row !== null && entry.row !== undefined) {
+                <ng-container [ngTemplateOutlet]="bodyRow" [ngTemplateOutletContext]="{ $implicit: entry.row, index: entry.index }" />
+              } @else {
+                <tr data-med-placeholder aria-busy="true" class="border-b border-surface-200 dark:border-surface-700" [style.height.px]="virtualScrollItemSize()" [attr.aria-rowindex]="bodyRowPosition(entry.index)">
+                  @if (rowReorderActive()) {
+                    <td [class]="skeletonUtilityCellClass(true)" [style]="utilityStyle('reorder')"><med-skeleton height="1rem" /></td>
+                  }
+                  @if (hasSelectionColumn()) {
+                    <td [class]="skeletonUtilityCellClass()" [style]="utilityStyle('selection')"><med-skeleton height="1rem" /></td>
+                  }
+                  @for (col of visibleColumns(); track col.field()) {
+                    <td [class]="skeletonCellClass(col)" [style]="frozenStyle(col)"><med-skeleton height="1rem" /></td>
+                  }
+                  @if (editMode() === 'row') {
+                    <td [class]="utilityCellClass('')"><med-skeleton height="1rem" /></td>
+                  }
+                </tr>
+              }
+            } @empty {
+              <ng-container [ngTemplateOutlet]="emptyRow" />
+            }
           } @else {
           @for (row of pagedValue(); track rowTrackBy()(row, $index); let i = $index) {
-            @if (isGroupStart(row, i)) {
-              <tr class="border-b border-surface-200 bg-surface-50 font-semibold dark:border-surface-700 dark:bg-surface-800/50">
-                <td [attr.colspan]="totalColumnCount()" [class]="groupCellClass()">
-                  @if (isRowGroupToggleable()) {
-                    <button
-                      type="button"
-                      class="mr-2 inline-flex size-6 items-center justify-center rounded align-middle text-surface-600 hover:bg-surface-200 focus-visible:outline-2 focus-visible:outline-brand-500 dark:text-surface-300 dark:hover:bg-surface-700"
-                      [attr.aria-expanded]="!isGroupCollapsed(row)"
-                      [attr.aria-label]="rowGroupToggleLabel()(groupValue(row), !isGroupCollapsed(row))"
-                      (click)="toggleRowGroup(row)"
-                      (keydown.enter)="$event.preventDefault(); toggleRowGroup(row)"
-                    >
-                      <med-icon [name]="isGroupCollapsed(row) ? 'chevron-right' : 'chevron-down'" variant="mini" class="size-4" />
-                    </button>
-                  }
-                  @if (groupHeaderTemplate(); as t) {
-                    <ng-container [ngTemplateOutlet]="t" [ngTemplateOutletContext]="{ $implicit: row }" />
-                  } @else {
-                    {{ groupValue(row) }}
-                  }
-                </td>
-              </tr>
-            }
-            @if (!isRowHiddenByGroup(row)) {
-            <tr
-              [class]="rowClassFor(row, i)"
-              [attr.aria-selected]="selectionMode() && !isCellSelectionActive() ? isSelected(row) : null"
-              [attr.tabindex]="(selectionMode() || contextMenu()) && !isCellSelectionActive() ? 0 : null"
-              [draggable]="reorderable()"
-              (click)="onRowClick(row)"
-              (contextmenu)="onRowContextMenu($event, row)"
-              (keydown)="onRowKeydown($event, row)"
-              (dragstart)="onRowDragStart(i)"
-              (dragover)="onRowDragOver($event)"
-              (drop)="onRowDrop(i)"
-            >
-              @if (reorderable()) {
-                <td [class]="utilityCellClass('cursor-move text-surface-400 dark:text-surface-500', true) + ' ' + frozenUtilityClass(row, i)" [style]="utilityStyle('reorder')" (click)="$event.stopPropagation()">
-                  <med-icon name="bars-3" variant="mini" class="size-4" />
-                </td>
-              }
-              @if (!isCellSelectionActive() && selectionMode() === 'multiple') {
-                <td [class]="utilityCellClass('') + ' ' + frozenUtilityClass(row, i)" [style]="utilityStyle('selection')">
-                  <span class="relative inline-flex">
-                    <input
-                      type="checkbox"
-                      class="peer absolute inset-0 size-full cursor-pointer opacity-0"
-                      [checked]="isSelected(row)"
-                      [attr.aria-label]="rowAriaLabel()?.(row) ?? 'Select row'"
-                      (click)="$event.stopPropagation()"
-                      (change)="toggleRow(row)"
-                    />
-                    <span [class]="checkboxBoxClass" aria-hidden="true">
-                      @if (isSelected(row)) {
-                        <med-icon name="check" variant="solid" class="size-3" />
-                      }
-                    </span>
-                  </span>
-                </td>
-              }
-              @if (!isCellSelectionActive() && selectionMode() === 'radio') {
-                <td [class]="utilityCellClass('') + ' ' + frozenUtilityClass(row, i)" [style]="utilityStyle('selection')">
-                  <span class="relative inline-flex">
-                    <input
-                      type="radio"
-                      class="peer absolute inset-0 size-full cursor-pointer opacity-0"
-                      [name]="radioGroupName"
-                      [checked]="isSelected(row)"
-                      [attr.aria-label]="rowAriaLabel()?.(row) ?? 'Select row'"
-                      (click)="$event.stopPropagation()"
-                      (change)="selectSingle(row)"
-                    />
-                    <span [class]="radioRingClass" aria-hidden="true">
-                      @if (isSelected(row)) {
-                        <span [class]="radioDotClass"></span>
-                      }
-                    </span>
-                  </span>
-                </td>
-              }
-              <ng-container [ngTemplateOutlet]="dataCells" [ngTemplateOutletContext]="{ $implicit: row, index: i, span: groupSpans()[i] ?? 1 }" />
-              @if (editMode() === 'row') {
-                <td [class]="utilityCellClass('whitespace-nowrap')" (click)="$event.stopPropagation()">
-                  @if (editingRow() === row) {
-                    <button type="button" [class]="rowActionButtonClass" [attr.aria-label]="saveRowLabel()" (click)="saveRowEdit()">
-                      <med-icon name="check" variant="mini" class="size-4" />
-                    </button>
-                    <button type="button" [class]="rowActionButtonClass" [attr.aria-label]="cancelRowLabel()" (click)="cancelRowEdit()">
-                      <med-icon name="x-mark" variant="mini" class="size-4" />
-                    </button>
-                  } @else {
-                    <button type="button" [class]="rowActionButtonClass" [attr.aria-label]="editRowLabel()" (click)="startRowEdit(row)">
-                      <med-icon name="pencil-square" variant="mini" class="size-4" />
-                    </button>
-                  }
-                </td>
-              }
-            </tr>
-            @if (expansionRowsRender() && isRowExpanded(row, i) && rowExpansionTemplate(); as expTpl) {
-              <tr class="border-b border-surface-200 bg-surface-50/40 dark:border-surface-700 dark:bg-surface-800/30">
-                @if (expansionLayout(); as layout) {
-                  @if (layout.lead > 0) {
-                    <td [attr.colspan]="layout.lead" [class]="expansionCellClass()">
-                      @if (layout.lead >= layout.trail) {
-                        <ng-container [ngTemplateOutlet]="expTpl" [ngTemplateOutletContext]="{ $implicit: row, rowIndex: i }" />
-                      }
-                    </td>
-                  }
-                  @if (layout.trail > 0) {
-                    <td [attr.colspan]="layout.trail" [class]="expansionCellClass()">
-                      @if (layout.lead < layout.trail) {
-                        <ng-container [ngTemplateOutlet]="expTpl" [ngTemplateOutletContext]="{ $implicit: row, rowIndex: i }" />
-                      }
-                    </td>
-                  }
-                } @else {
-                  <td [attr.colspan]="totalColumnCount()" [class]="expansionCellClass()">
-                    <ng-container [ngTemplateOutlet]="expTpl" [ngTemplateOutletContext]="{ $implicit: row, rowIndex: i }" />
-                  </td>
-                }
-              </tr>
-            }
-            }
+            <ng-container [ngTemplateOutlet]="bodyRow" [ngTemplateOutletContext]="{ $implicit: row, index: i }" />
           } @empty {
-            <tr>
-              <td [attr.colspan]="totalColumnCount()" class="px-3 py-8 text-center text-surface-500 dark:text-surface-400">
-                @if (emptyTemplate(); as empTpl) {
-                  <ng-container [ngTemplateOutlet]="empTpl" />
-                } @else {
-                  {{ emptyLabel() }}
-                }
-              </td>
-            </tr>
+            <ng-container [ngTemplateOutlet]="emptyRow" />
           }
           }
         </tbody>
         @if (frozenRowsPosition() === 'bottom' && frozenRows().length) {
-          <tbody [class]="scrollable() ? 'sticky bottom-0 z-[5] bg-surface-0 dark:bg-surface-800' : ''">
+          <tbody #frozenBottomBody [class]="scrollActive() ? 'sticky bottom-0 z-[5] bg-surface-0 dark:bg-surface-800' : ''">
             @for (row of frozenRows(); track $index; let i = $index) {
               <ng-container [ngTemplateOutlet]="frozenRow" [ngTemplateOutletContext]="{ $implicit: row, index: i }" />
             }
           </tbody>
         }
         @if (footerGroupTemplate(); as fg) {
-          <tfoot [class]="'border-t border-surface-200 bg-surface-50 text-surface-700 dark:border-surface-700 dark:bg-surface-800/50 dark:text-surface-200' + (scrollable() ? ' sticky bottom-0 z-10' : '')">
+          <tfoot [class]="'border-t border-surface-200 bg-surface-50 text-surface-700 dark:border-surface-700 dark:bg-surface-800/50 dark:text-surface-200' + (scrollActive() ? ' sticky bottom-0 z-10' : '')">
             <ng-container [ngTemplateOutlet]="fg" />
           </tfoot>
         }
@@ -682,7 +756,7 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
         </div>
       }
     </div>
-    @if (paginator() && effectiveTotalRecords() > 0) {
+    @if (paginator() && !virtualScroll() && effectiveTotalRecords() > 0) {
       <med-paginator class="mt-3 block" [totalRecords]="effectiveTotalRecords()" [(rows)]="pageSize" [rowsPerPageOptions]="rowsPerPageOptions()" [(first)]="first" />
     }
   `,
@@ -743,7 +817,7 @@ export class DataTableComponent<T> {
   protected readonly isSpinnerLoading = computed(() => this.loading() && this.loadingMode() === 'spinner');
   protected readonly isSkeletonLoading = computed(() => this.loading() && this.loadingMode() === 'skeleton');
   protected readonly skeletonRows = computed(() => Array.from({ length: this.paginator() ? Math.max(1, this.pageSize()) : 5 }, (_, i) => i));
-  /** Reinterprets `value()` as "current page only, already filtered/sorted server-side" — see class doc's "lazy" section. */
+  /** Reinterprets `value()` as "current page only, already filtered/sorted server-side", or with `virtualScroll` as a sparse array loaded by block — see class doc's "lazy" sections. */
   readonly lazy = input(false, { transform: booleanAttribute });
   readonly totalRecords = input<number | null>(null);
   /** `'cell'` edits one cell at a time; `'row'` adds an actions column and edits every editable cell of a row together. */
@@ -786,10 +860,22 @@ export class DataTableComponent<T> {
   /** Where the `frozenValue` rows sit: directly under the header (`top`) or after the rows from `value` (`bottom`). */
   readonly frozenRowsPosition = input<'top' | 'bottom'>('top');
   protected readonly frozenRows = computed(() => this.frozenValue() ?? []);
-  private readonly tableHead = viewChild<ElementRef<HTMLElement>>('tableHead');
+  private readonly tableHead = viewChild<ElementRef<HTMLTableSectionElement>>('tableHead');
+  private readonly frozenTopBody = viewChild<ElementRef<HTMLTableSectionElement>>('frozenTopBody');
+  private readonly frozenBottomBody = viewChild<ElementRef<HTMLTableSectionElement>>('frozenBottomBody');
+  private readonly viewport = viewChild<ElementRef<HTMLElement>>('viewport');
   /** Height of the sticky `<thead>`, which is where top frozen rows stick; measured in the browser only, so server rendering never touches `ResizeObserver`. */
   protected readonly headerHeight = signal(0);
   readonly scrollHeight = input<string | null>(null);
+  /**
+   * Renders only the rows that intersect the scroll viewport, plus a small buffer, while the scrollbar still represents every row.
+   * The viewport is `scrollHeight` (400px when unset). Replaces the paginator: `paginator`, `first` and `rows` no longer slice the rows.
+   * Browsers cap the height of one element (about 17.9 million pixels in Firefox), which limits a table to roughly 440,000 rows at 40px.
+   * `rowGroupMode`, `#rowexpansion` and `reorderable` are ignored in this mode, and variable row heights are not supported.
+   */
+  readonly virtualScroll = input(false, { transform: booleanAttribute });
+  /** Height in pixels of every body row in `virtualScroll` mode. Cell content must fit it: the cells clip their overflow, because a taller row would shift every scroll offset. */
+  readonly virtualScrollItemSize = input(40, { transform: numberAttribute });
   readonly stateKey = input<string | null>(null);
   readonly stateStorage = input<'session' | 'local'>('session');
   readonly expandedRowKeys = model<Record<string, boolean>>({});
@@ -877,7 +963,11 @@ export class DataTableComponent<T> {
   /** Shared `name` of the row radios, unique per table instance so two tables on a page keep independent groups. */
   protected readonly radioGroupName = `med-data-table-radio-${nextRadioGroupId++}`;
   /** `scrollable` with `scrollHeight="flex"`: the wrapper fills the height of its parent instead of capping at a fixed length. */
-  protected readonly flexHeight = computed(() => this.scrollable() && this.scrollHeight() === 'flex');
+  protected readonly flexHeight = computed(() => this.scrollActive() && this.scrollHeight() === 'flex');
+  /** The body scrolls inside the table: `scrollable`, or `virtualScroll`, which always needs a bounded viewport. */
+  protected readonly scrollActive = computed(() => this.scrollable() || this.virtualScroll());
+  /** Height cap of the scroll viewport; `virtualScroll` without `scrollHeight` falls back to 400px so a large `value` is never rendered whole. */
+  protected readonly viewportMaxHeight = computed(() => this.scrollHeight() ?? (this.virtualScroll() ? `${DEFAULT_VIRTUAL_VIEWPORT_PX}px` : null));
   protected readonly wrapperClass = computed(() =>
     mergeClasses('relative w-full overflow-hidden rounded-lg border border-surface-200 dark:border-surface-700', this.flexHeight() ? 'flex min-h-0 flex-1 flex-col' : '', this.class()),
   );
@@ -906,12 +996,214 @@ export class DataTableComponent<T> {
   private filterDebounceHandle: ReturnType<typeof setTimeout> | null = null;
   private draggedRowIndex: number | null = null;
 
+  /** Scroll offset of the viewport in `virtualScroll` mode; written by the scroll listener. */
+  private readonly viewportScrollTop = signal(0);
+  /** Measured height of the viewport; `0` until measured, and wherever the environment reports no layout. */
+  private readonly measuredViewportHeight = signal(0);
+  /** Measured height of the top frozen rows, which sit between the header and the first body row and stay stuck under the header. */
+  private readonly frozenTopHeight = signal(0);
+  /** Measured height of the bottom frozen rows, which stay stuck over the bottom of the viewport. */
+  private readonly frozenBottomHeight = signal(0);
+
+  /** The viewport height the window is computed from: measured, else the pixel `scrollHeight`, else the 400px default. */
+  private readonly effectiveViewportHeight = computed(() => {
+    const measured = this.measuredViewportHeight();
+    if (measured > 0) {
+      return measured;
+    }
+    const declared = parseFloat(this.scrollHeight() ?? '');
+    return /px\s*$/.test(this.scrollHeight() ?? '') && declared > 0 ? declared : DEFAULT_VIRTUAL_VIEWPORT_PX;
+  });
+
+  /** Index range `[start, end)` of the processed rows rendered in `virtualScroll` mode: the rows in view plus `VIRTUAL_BUFFER_ROWS` on each side. */
+  protected readonly virtualRange = computed(() => this.rangeAt(this.viewportScrollTop()));
+
+  /** The window `[start, end)` for a viewport scrolled to `scrollTop`. */
+  private rangeAt(scrollTop: number): { readonly start: number; readonly end: number } {
+    const size = Math.max(1, this.virtualScrollItemSize());
+    const total = this.effectiveTotalRecords();
+    const offset = Math.max(0, scrollTop - this.headerHeight() - this.frozenTopHeight());
+    const firstVisible = Math.floor(offset / size);
+    const lastVisible = Math.ceil((offset + this.effectiveViewportHeight()) / size);
+    const start = Math.min(total, Math.max(0, firstVisible - VIRTUAL_BUFFER_ROWS));
+    const end = Math.min(total, Math.max(start, lastVisible + VIRTUAL_BUFFER_ROWS));
+    return { start, end };
+  }
+
+  /** Absolute index of the row in edit, which stays rendered outside the window so its editor keeps the value typed so far. */
+  private readonly pinnedEditIndex = computed(() => {
+    const editing = this.editMode() === 'row' ? this.editingRow() : this.editingCell()?.row;
+    if (editing === null || editing === undefined) {
+      return null;
+    }
+    const index = this.pagedValue().indexOf(editing);
+    return index === -1 ? null : index;
+  });
+
+  /** What the virtual body renders in order: spacers for the rows outside the window and the rows inside it, so everything adds up to every row times `virtualScrollItemSize`. */
+  protected readonly virtualEntries = computed<readonly VirtualEntry<T>[]>(() => {
+    if (!this.virtualScroll()) {
+      return [];
+    }
+    const rows = this.pagedValue();
+    const size = Math.max(1, this.virtualScrollItemSize());
+    const total = this.effectiveTotalRecords();
+    const { start, end } = this.virtualRange();
+    const pinned = this.pinnedEditIndex();
+    const entries: VirtualEntry<T>[] = [];
+    let slot = 0;
+    const spacer = (from: number, to: number) => {
+      if (to > from) {
+        entries.push({ kind: 'spacer', slot: slot++, height: (to - from) * size });
+      }
+    };
+    const row = (index: number) => entries.push({ kind: 'row', row: rows[index], index });
+    if (pinned !== null && pinned < start) {
+      spacer(0, pinned);
+      row(pinned);
+      spacer(pinned + 1, start);
+    } else {
+      spacer(0, start);
+    }
+    for (let i = start; i < end; i++) {
+      row(i);
+    }
+    if (pinned !== null && pinned >= end) {
+      spacer(end, pinned);
+      row(pinned);
+      spacer(pinned + 1, total);
+    } else {
+      spacer(end, total);
+    }
+    return entries;
+  });
+
+  /** Rows in `<thead>`, measured with the header height: the column header row plus any `#headerGroup` rows. */
+  private readonly headerRowCount = signal(1);
+
+  /** `aria-rowcount` in `virtualScroll` mode: header rows, frozen rows and every row of the set, rendered or not. */
+  protected readonly ariaRowCount = computed(() => (this.virtualScroll() ? this.headerRowCount() + this.frozenRows().length + this.effectiveTotalRecords() : null));
+
+  /** Rows that sit between the header and the first body row: the frozen rows when they are at the top. */
+  private readonly rowsBeforeBody = computed(() => this.headerRowCount() + (this.frozenRowsPosition() === 'top' ? this.frozenRows().length : 0));
+
+  /** 1-based `aria-rowindex` of the body row at `index` of the processed set; `null` without `virtualScroll`. */
+  protected bodyRowPosition(index: number): number | null {
+    return this.virtualScroll() ? this.rowsBeforeBody() + index + 1 : null;
+  }
+
+  /** 1-based `aria-rowindex` of the frozen row at `index`; `null` without `virtualScroll`. */
+  protected frozenRowPosition(index: number): number | null {
+    if (!this.virtualScroll()) {
+      return null;
+    }
+    return this.frozenRowsPosition() === 'top' ? this.headerRowCount() + index + 1 : this.headerRowCount() + this.effectiveTotalRecords() + index + 1;
+  }
+
+  /** Moves focus to the row at `index` of the processed set in `virtualScroll` mode: scrolls it into view, then focuses it once it is rendered. */
+  private focusVirtualRow(index: number): void {
+    const element = this.viewport()?.nativeElement;
+    if (!element) {
+      return;
+    }
+    const size = Math.max(1, this.virtualScrollItemSize());
+    // The sticky header and frozen rows cover the edges of the viewport, so the row must fit between them.
+    const coveredTop = this.headerHeight() + this.frozenTopHeight();
+    const coveredBottom = this.frozenBottomHeight();
+    const rowTop = coveredTop + index * size;
+    const rowBottom = rowTop + size;
+    const viewHeight = this.effectiveViewportHeight();
+    let top = element.scrollTop;
+    if (rowTop < top + coveredTop) {
+      top = rowTop - coveredTop;
+    } else if (rowBottom > top + viewHeight - coveredBottom) {
+      top = rowBottom - viewHeight + coveredBottom;
+    }
+    element.scrollTop = top;
+    this.viewportScrollTop.set(element.scrollTop);
+    const position = this.bodyRowPosition(index);
+    const find = () => this.host.nativeElement.querySelector<HTMLElement>(`tbody tr[aria-rowindex="${position}"][tabindex]`);
+    // A row already in the window takes focus at once; waiting for a render that may not come would drop the key press.
+    const rendered = find();
+    if (rendered) {
+      rendered.focus({ preventScroll: true });
+      return;
+    }
+    afterNextRender(() => find()?.focus({ preventScroll: true }), { injector: this.injector });
+  }
+
+  /** Emits `lazyLoad` for every block of the window and the block after it that was not requested yet, which is the preload. */
+  private requestVisibleBlocks(requested: Set<number>, range: { readonly start: number; readonly end: number }, total: number): void {
+    if (total <= 0) {
+      return;
+    }
+    const blockSize = Math.max(1, this.pageSize());
+    const lastBlock = Math.floor((total - 1) / blockSize);
+    const from = Math.floor(range.start / blockSize);
+    const to = Math.min(lastBlock, Math.floor(Math.max(range.end - 1, 0) / blockSize) + 1);
+    for (let block = from; block <= to; block++) {
+      if (requested.has(block)) {
+        continue;
+      }
+      requested.add(block);
+      this.lazyLoad.emit({
+        first: block * blockSize,
+        rows: blockSize,
+        sortField: this.sortField(),
+        sortOrder: this.sortOrder(),
+        multiSortMeta: this.multiSortMeta(),
+        filter: this.globalFilterValue(),
+        columnFilters: this.columnFilters(),
+      });
+    }
+  }
+
+  protected trackVirtualEntry(entry: VirtualEntry<T>): unknown {
+    if (entry.kind === 'spacer') {
+      return `spacer-${entry.slot}`;
+    }
+    return entry.row === null || entry.row === undefined ? `slot-${entry.index}` : this.rowTrackBy()(entry.row, entry.index);
+  }
+
+  protected onViewportScroll(event: Event): void {
+    if (this.virtualScroll()) {
+      this.viewportScrollTop.set((event.target as HTMLElement).scrollTop);
+    }
+  }
+
+  private observeViewportHeight(): void {
+    const element = this.viewport()?.nativeElement;
+    if (!element || typeof ResizeObserver === 'undefined') {
+      return;
+    }
+    const observer = new ResizeObserver(() => this.measuredViewportHeight.set(element.clientHeight));
+    observer.observe(element);
+    this.destroyRef.onDestroy(() => observer.disconnect());
+  }
+
+  /** Keeps `height` equal to the rendered height of a conditional `<tbody>`, and `0` while it is absent; browser only. */
+  private observeSectionHeight(section: () => ElementRef<HTMLTableSectionElement> | undefined, height: WritableSignal<number>): void {
+    effect((onCleanup) => {
+      const element = section()?.nativeElement;
+      if (!element || !isPlatformBrowser(this.platformId) || typeof ResizeObserver === 'undefined') {
+        height.set(0);
+        return;
+      }
+      const observer = new ResizeObserver(() => height.set(element.getBoundingClientRect().height));
+      observer.observe(element);
+      onCleanup(() => observer.disconnect());
+    });
+  }
+
   private observeHeaderHeight(): void {
     const head = this.tableHead()?.nativeElement;
     if (!head || typeof ResizeObserver === 'undefined') {
       return;
     }
-    const observer = new ResizeObserver(() => this.headerHeight.set(head.getBoundingClientRect().height));
+    const observer = new ResizeObserver(() => {
+      this.headerHeight.set(head.getBoundingClientRect().height);
+      this.headerRowCount.set(Math.max(1, head.rows.length));
+    });
     observer.observe(head);
     this.destroyRef.onDestroy(() => observer.disconnect());
   }
@@ -925,6 +1217,32 @@ export class DataTableComponent<T> {
     afterNextRender(() => {
       this.browserReady.set(true);
       this.observeHeaderHeight();
+      this.observeViewportHeight();
+    });
+    this.observeSectionHeight(this.frozenTopBody, this.frozenTopHeight);
+    this.observeSectionHeight(this.frozenBottomBody, this.frozenBottomHeight);
+
+    // A new sort or filter changes which rows sit where, so a virtual body returns to its first row.
+    let firstRun = true;
+    effect(() => {
+      this.sortField();
+      this.sortOrder();
+      this.multiSortMeta();
+      this.globalFilterValue();
+      this.columnFilters();
+      if (firstRun) {
+        firstRun = false;
+        return;
+      }
+      untracked(() => {
+        if (this.virtualScroll()) {
+          const element = this.viewport()?.nativeElement;
+          if (element) {
+            element.scrollTop = 0;
+          }
+          this.viewportScrollTop.set(0);
+        }
+      });
     });
 
     effect(() => {
@@ -951,7 +1269,7 @@ export class DataTableComponent<T> {
     });
 
     effect(() => {
-      if (!this.lazy()) {
+      if (!this.lazy() || this.virtualScroll()) {
         return;
       }
       // Reads every signal a lazy data source needs to react to — this is
@@ -964,6 +1282,27 @@ export class DataTableComponent<T> {
         multiSortMeta: this.multiSortMeta(),
         filter: this.globalFilterValue(),
         columnFilters: this.columnFilters(),
+      });
+    });
+
+    // `lazy` with `virtualScroll` requests rows by block as the window moves; see `requestVisibleBlocks`.
+    const requestedBlocks = new Set<number>();
+    let lastRequestKey: readonly unknown[] | null = null;
+    effect(() => {
+      if (!this.lazy() || !this.virtualScroll()) {
+        return;
+      }
+      const key = [this.sortField(), this.sortOrder(), this.multiSortMeta(), this.globalFilterValue(), this.columnFilters(), this.pageSize()];
+      const range = this.virtualRange();
+      const total = this.effectiveTotalRecords();
+      untracked(() => {
+        // A new sort or filter makes every loaded block stale: forget them, and ask for the first screen, which the scroll reset is about to show.
+        const changed = lastRequestKey === null || key.some((value, i) => value !== lastRequestKey![i]);
+        lastRequestKey = key;
+        if (changed) {
+          requestedBlocks.clear();
+        }
+        this.requestVisibleBlocks(requestedBlocks, changed ? this.rangeAt(0) : range, total);
       });
     });
 
@@ -1024,12 +1363,17 @@ export class DataTableComponent<T> {
   }
 
   /** `rowGroupMode() === 'subheader'`: `groupRowsBy()` becomes the primary sort key ahead of anything else — otherwise same-group rows could scatter and the subheader boundary would fire once per row, see class doc's "rowGroupMode" section. */
-  private readonly effectiveGroupField = computed(() => (this.rowGroupMode() ? this.groupRowsBy() : null));
+  private readonly effectiveGroupField = computed(() => (this.effectiveRowGroupMode() ? this.groupRowsBy() : null));
+
+  /** `rowGroupMode`, except that `virtualScroll` ignores grouping: group boundaries and spans need neighbouring rows that may not be rendered. */
+  private readonly effectiveRowGroupMode = computed(() => (this.virtualScroll() ? null : this.rowGroupMode()));
+  /** `reorderable`, except that `virtualScroll` ignores row reorder: a drag needs its drop target rendered, and the window moves while dragging. */
+  protected readonly rowReorderActive = computed(() => this.reorderable() && !this.virtualScroll());
 
   /** The visible column row-span grouping merges: `rowGroupMode() === 'rowspan'` and `groupRowsBy()` naming a visible column's field, otherwise `null` and nothing merges. */
   protected readonly spanColumnField = computed(() => {
     const field = this.groupRowsBy();
-    if (this.rowGroupMode() !== 'rowspan' || !field) {
+    if (this.effectiveRowGroupMode() !== 'rowspan' || !field) {
       return null;
     }
     return this.visibleColumns().some((col) => col.field() === field) ? field : null;
@@ -1071,12 +1415,15 @@ export class DataTableComponent<T> {
     }
     const cols = this.visibleColumns();
     const idx = cols.findIndex((col) => col.field() === field);
-    const utilityBefore = (this.reorderable() ? 1 : 0) + (this.hasSelectionColumn() ? 1 : 0);
+    const utilityBefore = (this.rowReorderActive() ? 1 : 0) + (this.hasSelectionColumn() ? 1 : 0);
     return { lead: utilityBefore + idx, trail: cols.length - idx - 1 + (this.editMode() === 'row' ? 1 : 0) };
   });
 
   /** `false` when row-span grouping leaves the expansion row no column to render in (the merged column is the only one): the row is skipped and does not count toward a rowspan. */
   protected readonly expansionRowsRender = computed(() => {
+    if (this.virtualScroll()) {
+      return false;
+    }
     const layout = this.expansionLayout();
     return !layout || layout.lead + layout.trail > 0;
   });
@@ -1125,7 +1472,7 @@ export class DataTableComponent<T> {
 
   /** `lazy()`: `value()` is already the current page — no client-side slicing regardless of `paginator()`. */
   protected readonly pagedValue = computed(() => {
-    if (this.lazy() || !this.paginator()) {
+    if (this.lazy() || !this.paginator() || this.virtualScroll()) {
       return this.sortedValue();
     }
     const start = this.first();
@@ -1143,7 +1490,7 @@ export class DataTableComponent<T> {
   /** `true` when the reorder, selection and radio columns freeze on the left: they follow a left-frozen data column. */
   protected readonly utilityFrozen = computed(() => this.visibleColumns().some((col) => col.frozen() && col.alignFrozen() === 'left'));
 
-  private readonly utilityWidth = computed(() => (this.reorderable() ? REORDER_COLUMN_PX : 0) + (this.hasSelectionColumn() ? SELECTION_COLUMN_PX : 0));
+  private readonly utilityWidth = computed(() => (this.rowReorderActive() ? REORDER_COLUMN_PX : 0) + (this.hasSelectionColumn() ? SELECTION_COLUMN_PX : 0));
 
   /** Sticky side and offset of every frozen data column: each offset adds the widths of the frozen columns before it on its edge, the left edge starting after the utility columns. Derived from declared and resized widths, so no layout measurement is needed. */
   private readonly frozenLayout = computed(() => {
@@ -1166,13 +1513,16 @@ export class DataTableComponent<T> {
     return layout;
   });
 
-  protected readonly totalColumnCount = computed(() => this.visibleColumns().length + (this.hasSelectionColumn() ? 1 : 0) + (this.reorderable() ? 1 : 0) + (this.editMode() === 'row' ? 1 : 0));
+  protected readonly totalColumnCount = computed(() => this.visibleColumns().length + (this.hasSelectionColumn() ? 1 : 0) + (this.rowReorderActive() ? 1 : 0) + (this.editMode() === 'row' ? 1 : 0));
+
+  /** The processed rows that hold data: with `lazy` and `virtualScroll`, `value` is sparse and its `null` or `undefined` entries are rows not loaded yet. */
+  private readonly loadedRows = computed(() => (this.lazy() && this.virtualScroll() ? this.sortedValue().filter((row) => row !== null && row !== undefined) : this.sortedValue()));
 
   protected readonly allSelected = computed(() => {
     if (this.isCellSelectionActive()) {
       return false;
     }
-    const rows = this.sortedValue();
+    const rows = this.loadedRows();
     const sel = this.selection();
     return rows.length > 0 && Array.isArray(sel) && rows.every((row) => (sel as readonly T[]).some((r) => this.rowsEqual(r, row)));
   });
@@ -1206,7 +1556,7 @@ export class DataTableComponent<T> {
 
   /** `true` when subheader rows carry a collapse toggle: `rowGroupMode="subheader"`, `expandableRowGroups` and a `groupRowsBy` field. */
   protected isRowGroupToggleable(): boolean {
-    return this.rowGroupMode() === 'subheader' && this.expandableRowGroups() && !!this.groupRowsBy();
+    return this.effectiveRowGroupMode() === 'subheader' && this.expandableRowGroups() && !!this.groupRowsBy();
   }
 
   /** `true` when `row` belongs to a group whose value is in the `expandedRowGroups` model (the collapsed ones). */
@@ -1234,7 +1584,7 @@ export class DataTableComponent<T> {
 
   /** A group boundary starts at `index` when `rowGroupMode()` is on and either it's the first row or the previous row's group value differs. */
   protected isGroupStart(row: T, index: number): boolean {
-    const field = this.rowGroupMode() === 'subheader' ? this.effectiveGroupField() : null;
+    const field = this.effectiveRowGroupMode() === 'subheader' ? this.effectiveGroupField() : null;
     if (!field) {
       return false;
     }
@@ -1283,7 +1633,7 @@ export class DataTableComponent<T> {
     const style: Record<string, string> = { width: `${px}px`, 'min-width': `${px}px`, 'max-width': `${px}px` };
     if (this.utilityFrozen()) {
       style['position'] = 'sticky';
-      style['left'] = `${kind === 'selection' && this.reorderable() ? REORDER_COLUMN_PX : 0}px`;
+      style['left'] = `${kind === 'selection' && this.rowReorderActive() ? REORDER_COLUMN_PX : 0}px`;
       style['z-index'] = '1';
     }
     return style;
@@ -1352,6 +1702,7 @@ export class DataTableComponent<T> {
       'text-surface-900 dark:text-surface-50',
       ALIGN_CLASS[col.align()],
       this.gridClass(),
+      this.virtualScroll() ? 'truncate' : '',
       this.frozenCellClass(col, row, index),
       cellSelectable ? `cursor-pointer ${INSET_FOCUS_RING_CLASS}` : '',
       cellSelected ? (this.frozenLayout().has(col) ? 'bg-brand-50 dark:bg-brand-950' : 'bg-brand-50 dark:bg-brand-500/10') : '',
@@ -1816,9 +2167,19 @@ export class DataTableComponent<T> {
     }
   }
 
-  /** Moves focus between the focusable body rows of the current page, without changing the selection and without wrapping. */
+  /** Moves focus between the focusable body rows of the current page (or of the whole row set with `virtualScroll`), without changing the selection and without wrapping. */
   private moveRowFocus(event: KeyboardEvent): void {
     const current = event.currentTarget as HTMLElement;
+    if (this.virtualScroll()) {
+      // The rows outside the window are not in the DOM, so the move runs over the whole row set and scrolls its target into view.
+      const index = Number(current.getAttribute('aria-rowindex')) - this.rowsBeforeBody() - 1;
+      const last = this.effectiveTotalRecords() - 1;
+      const target = event.key === 'Home' ? 0 : event.key === 'End' ? last : event.key === 'ArrowDown' ? Math.min(index + 1, last) : Math.max(index - 1, 0);
+      if (Number.isInteger(index) && index >= 0 && target >= 0 && target !== index) {
+        this.focusVirtualRow(target);
+      }
+      return;
+    }
     const rows = Array.from(current.parentElement?.querySelectorAll<HTMLElement>(':scope > tr[tabindex]') ?? []);
     const index = rows.indexOf(current);
     if (index === -1) {
@@ -1845,7 +2206,7 @@ export class DataTableComponent<T> {
   }
 
   protected toggleSelectAll(): void {
-    this.selection.set(this.allSelected() ? [] : [...this.sortedValue()]);
+    this.selection.set(this.allSelected() ? [] : [...this.loadedRows()]);
   }
 
   protected onFilterInput(event: Event): void {
@@ -2058,7 +2419,7 @@ export class DataTableComponent<T> {
    * a plain method rather than a rendered button.
    */
   exportCSV(options?: { readonly selectionOnly?: boolean }): void {
-    const rows = options?.selectionOnly ? this.selectionAsArray() : this.sortedValue();
+    const rows = options?.selectionOnly ? this.selectionAsArray() : this.loadedRows();
     const cols = this.visibleColumns();
     const sep = this.csvSeparator();
     const escape = (value: string): string => (value.includes(sep) || value.includes('"') || value.includes('\n') ? `"${value.replace(/"/g, '""')}"` : value);

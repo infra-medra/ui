@@ -1,0 +1,16 @@
+<med-data-table
+  [value]="rows"
+  [frozenValue]="pinned"
+  [virtualScroll]="true"
+  [virtualScrollItemSize]="40"
+  selectionMode="single"
+  dataKey="id"
+  [(selection)]="selected"
+  ariaLabel="Ten thousand rows (virtual scroll)"
+>
+  <med-table-column field="name" header="Name" sortable />
+  <med-table-column field="score" header="Score" sortable align="right" />
+</med-data-table>
+<p class="mt-2 text-sm text-surface-500 dark:text-surface-400">
+  Selected: {{ selectedLabel() }}. Use the arrow keys, Home and End to move through all 10,000 rows.
+</p>

@@ -1,0 +1,15 @@
+<med-data-table
+  [value]="rows()"
+  [virtualScroll]="true"
+  [virtualScrollItemSize]="40"
+  [lazy]="true"
+  [totalRecords]="total"
+  [rows]="blockSize"
+  scrollHeight="400px"
+  ariaLabel="One hundred thousand customers (lazy virtual scroll)"
+  (lazyLoad)="onLazyLoad($event)"
+>
+  <med-table-column field="name" header="Name" />
+  <med-table-column field="plan" header="Plan" />
+</med-data-table>
+<p class="mt-2 text-sm text-surface-500 dark:text-surface-400" data-testid="lazy-requests">Requested blocks (first row index): {{ requests().join(', ') }}</p>

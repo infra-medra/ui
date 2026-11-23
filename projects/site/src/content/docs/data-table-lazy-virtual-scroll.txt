@@ -1,0 +1,3 @@
+## Lazy virtual scroll
+
+Combine `lazy` and `virtualScroll` to browse a server-backed list as one continuous scroll. Set `totalRecords` to the full count and keep `value` as an array of that many entries, writing each block of rows at its row indices; an entry that is `null` or `undefined` is a row that has not arrived yet and shows a skeleton placeholder. The table emits `lazyLoad` once per block of `rows` rows as the user scrolls, and asks for the next block ahead of time. A new sort or filter discards every requested block and starts again from the first row.
