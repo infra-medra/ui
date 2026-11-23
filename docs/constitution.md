@@ -1,9 +1,9 @@
 # Constitution
 
 **Status:** ratified
-**Version:** 1.1
+**Version:** 1.2
 **Ratified:** 2026-11-19
-**Last amended:** 2026-11-19
+**Last amended:** 2026-11-23
 
 ## Articles
 
@@ -74,9 +74,17 @@ The `@medra.dev/ui` major version MUST equal the Angular major that the reposito
 **Gate:** Does this change keep the `@medra.dev/ui` major equal to the repository's Angular major, use no `major` changeset unless it also moves the Angular baseline, and keep the peer ranges on that Angular major?
 **Rationale:** Consumers pick the library version from their Angular version, and an unmanaged major (the package is still 0.x while targeting Angular 21) hides which Angular a release supports.
 
+### Article XI: Tests assert every clause of the scenario they cover
+
+Every test tagged with a scenario ID MUST assert each Given and Then clause of that scenario, including the library's own defaults when the scenario relies on them, with the inputs left unset. A test MUST NOT satisfy a Given clause by passing the expected value in from its host.
+
+**Gate:** Does every test tagged with a scenario ID assert each Given and Then clause of that scenario, with defaults left unset where the scenario relies on them?
+**Rationale:** Coverage matches only the scenario tag, so an unasserted clause passes silently. This was found in extend-data-table-sorting-and-pagination, add-data-table-resize-modes-visibility-groups and add-data-table-pagination-options.
+
 ## Amendments
 
 | Version | Date | Change | Source |
 |---|---|---|---|
 | 1.0 | 2026-11-19 | Initial constitution | init |
 | 1.1 | 2026-11-19 | Add Article X (version follows Angular major); retire IX into VII | init |
+| 1.2 | 2026-11-23 | Add Article XI (tests assert every clause of the scenario they cover), promoted from L-002 (Tiago Cavalli) | L-002 |
