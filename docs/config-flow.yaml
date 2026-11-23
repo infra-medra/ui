@@ -19,3 +19,18 @@ learning:
   promote_after: 3
   stale_after: 10
   context_max: 10
+apply:
+  granularity: batch
+  batch_max_tasks: 4
+  batch_scope: cross-phase
+  inline_max_tasks: 3
+models:                         # optional per-runtime or flat model tiers (default: inherit)
+  default: inherit
+  claude:
+    apply: haiku
+    verify: opus
+    archive: haiku
+  antigravity:
+    apply: flash
+    verify: pro
+    archive: flash
