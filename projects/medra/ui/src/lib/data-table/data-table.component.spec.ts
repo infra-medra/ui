@@ -4798,3 +4798,252 @@ describe('DataTableComponent lazy virtual scroll', () => {
     expect(rowAt(fixture, 0)!.textContent).toContain('Row 0');
   });
 });
+
+@Component({
+  standalone: true,
+  imports: [DataTableComponent, TableColumnComponent],
+  template: `
+    <med-data-table
+      [value]="rows"
+      [virtualScroll]="true"
+      [virtualScrollItemSize]="40"
+      scrollHeight="400px"
+      selectionMode="single"
+      dataKey="id"
+      [rowGroupMode]="rowGroupMode"
+      groupRowsBy="team"
+      [expandedRowKeys]="expandedRowKeys"
+      [frozenValue]="frozen"
+      frozenRowsPosition="bottom"
+    >
+      <med-table-column field="name" header="Name">
+        <ng-template let-row>{{ row.name }}</ng-template>
+      </med-table-column>
+      <ng-template #rowexpansion let-row>
+        <div class="virtual-expansion">Detail {{ row.name }}</div>
+      </ng-template>
+      @if (withFooter) {
+        <ng-template #footerGroup>
+          <tr><td>Footer</td></tr>
+        </ng-template>
+      }
+    </med-data-table>
+  `,
+})
+class VirtualGuardHostComponent {
+  rows = makeVirtualRows(VIRTUAL_ROW_COUNT).map((row) => ({ ...row, team: row.id < 500 ? 'A' : 'B' }));
+  rowGroupMode: 'subheader' | 'rowspan' | null = null;
+  expandedRowKeys: Record<string, boolean> = {};
+  withFooter = false;
+  frozen: VirtualRow[] | null = null;
+}
+
+describe('DataTableComponent virtual scroll guards and edges', () => {
+  const root = (fixture: ComponentFixture<unknown>) => fixture.nativeElement as HTMLElement;
+  const viewport = (fixture: ComponentFixture<unknown>) => root(fixture).querySelector<HTMLElement>('[data-med-scroll-viewport]')!;
+  const rowAt = (fixture: ComponentFixture<unknown>, index: number) => root(fixture).querySelector<HTMLElement>(`tbody tr[aria-rowindex="${index + 2}"]`);
+  const press = (row: HTMLElement, key: string) => row.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true }));
+
+  afterEach(() => {
+    document.body.innerHTML = '';
+  });
+
+  it('ignores rowGroupMode: no subheader rows between the body rows', () => {
+    const fixture = TestBed.createComponent(VirtualGuardHostComponent);
+    fixture.componentInstance.rowGroupMode = 'subheader';
+    fixture.detectChanges();
+
+    const unpositioned = Array.from(root(fixture).querySelectorAll<HTMLElement>('tbody tr:not([aria-hidden="true"])')).filter((tr) => !tr.hasAttribute('aria-rowindex'));
+    expect(unpositioned.length).toBe(0);
+    expect(rowAt(fixture, 0)).not.toBeNull();
+  });
+
+  it('ignores #rowexpansion: an expanded row renders no expansion row', () => {
+    const fixture = TestBed.createComponent(VirtualGuardHostComponent);
+    fixture.componentInstance.expandedRowKeys = { '0': true };
+    fixture.detectChanges();
+
+    expect(rowAt(fixture, 0)).not.toBeNull();
+    expect(root(fixture).querySelector('.virtual-expansion')).toBeNull();
+  });
+
+  /** Runs `body` with section heights reported by tag name; jsdom has no layout and never fires ResizeObserver. */
+  function withSectionHeights(heights: Record<string, number>, body: () => void): void {
+    const originalObserver = globalThis.ResizeObserver;
+    const rect = jest.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (this: HTMLElement) {
+      const height = heights[this.tagName] ?? 0;
+      return { height, width: 0, top: 0, left: 0, right: 0, bottom: height, x: 0, y: 0, toJSON: () => ({}) } as DOMRect;
+    });
+    // Reports each element once, as soon as it is observed.
+    (globalThis as { ResizeObserver: unknown }).ResizeObserver = class {
+      constructor(private readonly callback: () => void) {}
+      observe(): void {
+        this.callback();
+      }
+      unobserve(): void {}
+      disconnect(): void {}
+    };
+    try {
+      body();
+    } finally {
+      rect.mockRestore();
+      (globalThis as { ResizeObserver: unknown }).ResizeObserver = originalObserver;
+    }
+  }
+
+  /** Focuses the first row, presses End and returns the resulting scroll offset. */
+  function endScrollTop(configure: (host: VirtualGuardHostComponent) => void): number {
+    const fixture = TestBed.createComponent(VirtualGuardHostComponent);
+    configure(fixture.componentInstance);
+    document.body.appendChild(fixture.nativeElement);
+    fixture.detectChanges();
+    fixture.detectChanges();
+
+    const first = rowAt(fixture, 0)!;
+    first.focus();
+    press(first, 'End');
+    fixture.detectChanges();
+
+    expect(document.activeElement).toBe(rowAt(fixture, VIRTUAL_ROW_COUNT - 1));
+    return viewport(fixture).scrollTop;
+  }
+
+  it('DAT-047.S2: End keeps the last row above a sticky #footerGroup footer', () => {
+    const HEADER = 40;
+    const FOOTER = 32;
+    withSectionHeights({ THEAD: HEADER, TFOOT: FOOTER }, () => {
+      // The row's bottom edge sits at the viewport's bottom edge minus the footer: header + 1000 rows - (400 - footer).
+      expect(endScrollTop((h) => (h.withFooter = true))).toBe(HEADER + VIRTUAL_ROW_COUNT * 40 - 400 + FOOTER);
+    });
+  });
+
+  it('DAT-047.S2: bottom frozen rows and the footer overlap, so only the taller one is kept clear', () => {
+    const HEADER = 40;
+    const FROZEN = 48;
+    const FOOTER = 32;
+    withSectionHeights({ THEAD: HEADER, TBODY: FROZEN, TFOOT: FOOTER }, () => {
+      const top = endScrollTop((h) => {
+        h.withFooter = true;
+        h.frozen = [{ id: -1, name: 'Pinned', score: -1 }];
+      });
+      expect(top).toBe(HEADER + VIRTUAL_ROW_COUNT * 40 - 400 + FROZEN);
+    });
+  });
+
+  it('DAT-047.S3: takes the row count from totalRecords, not from the length of value, in lazy mode', () => {
+    const fixture = TestBed.createComponent(VirtualAriaHostComponent);
+    fixture.componentInstance.lazy.set(true);
+    fixture.componentInstance.totalRecords.set(5000);
+    fixture.componentInstance.rows.set(makeVirtualRows(100));
+    fixture.detectChanges();
+
+    expect(root(fixture).querySelector('table')!.getAttribute('aria-rowcount')).toBe('5001');
+  });
+});
+
+describe('DataTableComponent lazy virtual scroll edges', () => {
+  const root = (fixture: ComponentFixture<unknown>) => fixture.nativeElement as HTMLElement;
+  const viewport = (fixture: ComponentFixture<unknown>) => root(fixture).querySelector<HTMLElement>('[data-med-scroll-viewport]')!;
+  const rowAt = (fixture: ComponentFixture<unknown>, index: number) => root(fixture).querySelector<HTMLElement>(`tbody tr[aria-rowindex="${index + 2}"]`);
+
+  function scrollToRow(fixture: ComponentFixture<unknown>, index: number): void {
+    const element = viewport(fixture);
+    element.scrollTop = index * 40;
+    element.dispatchEvent(new Event('scroll'));
+    fixture.detectChanges();
+  }
+
+  afterEach(() => {
+    document.body.innerHTML = '';
+  });
+
+  it('DAT-048: a new rows value discards the requested blocks and scrolls back to the top', () => {
+    const fixture = TestBed.createComponent(LazyVirtualHostComponent);
+    fixture.detectChanges();
+    const host = fixture.componentInstance;
+    scrollToRow(fixture, 50000);
+    host.events.length = 0;
+
+    host.blockSize = 100;
+    fixture.changeDetectorRef.markForCheck();
+    fixture.detectChanges();
+
+    expect(viewport(fixture).scrollTop).toBe(0);
+    expect(host.events.some((event) => event.first === 0 && event.rows === 100)).toBe(true);
+  });
+
+  it('DAT-048: End onto an unloaded row keeps focus on the current row, then moves it once the data arrives', () => {
+    const fixture = TestBed.createComponent(LazyVirtualHostComponent);
+    fixture.componentInstance.deliver(0, LAZY_BLOCK);
+    document.body.appendChild(fixture.nativeElement);
+    fixture.detectChanges();
+    const host = fixture.componentInstance;
+
+    const first = rowAt(fixture, 0)!;
+    first.focus();
+    first.dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true, cancelable: true }));
+    fixture.detectChanges();
+
+    const last = LAZY_TOTAL - 1;
+    expect(rowAt(fixture, last)!.getAttribute('tabindex')).toBeNull();
+    // The row that had focus left the window but stays rendered and focused, so focus never falls to the page.
+    expect(rowAt(fixture, 0)).toBe(first);
+    expect(document.activeElement).toBe(first);
+
+    host.deliver(last - (last % LAZY_BLOCK), LAZY_BLOCK);
+    fixture.detectChanges();
+    fixture.detectChanges();
+
+    expect(document.activeElement).toBe(rowAt(fixture, last));
+    expect(rowAt(fixture, 0)).toBeNull();
+  });
+
+  it('DAT-048: focus moved elsewhere before the data arrives abandons the pending move', () => {
+    const fixture = TestBed.createComponent(LazyVirtualHostComponent);
+    fixture.componentInstance.deliver(0, LAZY_BLOCK);
+    document.body.appendChild(fixture.nativeElement);
+    fixture.detectChanges();
+    const host = fixture.componentInstance;
+
+    const first = rowAt(fixture, 0)!;
+    first.focus();
+    first.dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true, cancelable: true }));
+    fixture.detectChanges();
+
+    // The user moves focus to another element of the table (here the scroll viewport) before the block arrives.
+    const elsewhere = viewport(fixture);
+    elsewhere.tabIndex = 0;
+    elsewhere.focus();
+
+    const last = LAZY_TOTAL - 1;
+    host.deliver(last - (last % LAZY_BLOCK), LAZY_BLOCK);
+    fixture.detectChanges();
+    fixture.detectChanges();
+
+    expect(document.activeElement).toBe(elsewhere);
+  });
+
+  it('DAT-048: when the target scrolled out of the window before its data arrives, the focused row stays rendered and focused', () => {
+    const fixture = TestBed.createComponent(LazyVirtualHostComponent);
+    fixture.componentInstance.deliver(0, LAZY_BLOCK);
+    document.body.appendChild(fixture.nativeElement);
+    fixture.detectChanges();
+    const host = fixture.componentInstance;
+
+    const first = rowAt(fixture, 0)!;
+    first.focus();
+    first.dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true, cancelable: true }));
+    fixture.detectChanges();
+
+    // The user scrolls away from the End target, so it is no longer rendered when its block arrives.
+    scrollToRow(fixture, 50000);
+    const last = LAZY_TOTAL - 1;
+    host.deliver(last - (last % LAZY_BLOCK), LAZY_BLOCK);
+    fixture.detectChanges();
+    fixture.detectChanges();
+
+    expect(rowAt(fixture, last)).toBeNull();
+    expect(rowAt(fixture, 0)).toBe(first);
+    expect(document.activeElement).toBe(first);
+  });
+});
