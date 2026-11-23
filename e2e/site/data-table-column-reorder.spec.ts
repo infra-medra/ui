@@ -16,6 +16,14 @@ async function headerLabels(demo: Locator): Promise<string[]> {
   return labels.map((label) => label.trim());
 }
 
+/**
+ * Waits until the demo's headers are hydrated. A prerendered header carries `jsaction` until Angular attaches its drag and
+ * keydown handlers; a drag or key before that is lost or only replayed later, so a check right after it could read the old order.
+ */
+async function hydrated(demo: Locator): Promise<void> {
+  await expect(demo.locator('thead th[scope="col"][jsaction]'), 'the headers did not hydrate').toHaveCount(0, { timeout: 10_000 });
+}
+
 /** Horizontal distance from a cell's left edge to its wrapper's left edge, from the live layout. */
 async function leftGap(cell: Locator, wrapper: Locator): Promise<number> {
   const cellBox = await cell.boundingBox();
@@ -40,10 +48,10 @@ test.describe('DataTable column reorder', () => {
     // Move the third column (free, reorderable) onto the fourth.
     const from = demo.locator('thead th[scope="col"]').nth(2);
     const to = demo.locator('thead th[scope="col"]').nth(3);
+    await hydrated(demo);
     await from.dragTo(to);
 
-    const after = await headerLabels(demo);
-    expect(after).toEqual([before[0], before[1], before[3], before[2], ...before.slice(4)]);
+    await expect.poll(() => headerLabels(demo)).toEqual([before[0], before[1], before[3], before[2], ...before.slice(4)]);
 
     const firstBodyRowAfter = await demo.locator('tbody tr').first().locator('td').allInnerTexts();
     expect(firstBodyRowAfter[2]).toBe(firstBodyRowBefore[3]);
@@ -61,10 +69,10 @@ test.describe('DataTable column reorder', () => {
     const before = await headerLabels(demo);
     const firstHeader = demo.locator('thead th[scope="col"]').nth(0);
     const secondHeader = demo.locator('thead th[scope="col"]').nth(1);
+    await hydrated(demo);
     await firstHeader.dragTo(secondHeader);
 
-    const after = await headerLabels(demo);
-    expect(after.slice(0, 2)).toEqual([before[1], before[0]]);
+    await expect.poll(async () => (await headerLabels(demo)).slice(0, 2)).toEqual([before[1], before[0]]);
 
     await expect(demo.locator('thead th[scope="col"]').nth(0)).toHaveCSS('position', 'sticky');
     await expect(demo.locator('thead th[scope="col"]').nth(1)).toHaveCSS('position', 'sticky');
@@ -89,11 +97,11 @@ test.describe('DataTable column reorder', () => {
 
     const before = await headerLabels(demo);
     const header = demo.locator('thead th[scope="col"]').nth(2);
+    await hydrated(demo);
     await header.focus();
     await page.keyboard.press('Alt+ArrowRight');
 
-    const after = await headerLabels(demo);
-    expect(after).toEqual([before[0], before[1], before[3], before[2], ...before.slice(4)]);
+    await expect.poll(() => headerLabels(demo)).toEqual([before[0], before[1], before[3], before[2], ...before.slice(4)]);
 
     const movedHeader = demo.locator('thead th[scope="col"]').nth(3);
     await expect(movedHeader).toContainText(before[2]);
