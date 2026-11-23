@@ -16,3 +16,4 @@
 | 12 | 2026-11-22 | add-data-table-slots-and-skeleton | data-display | +DAT-040 +DAT-041 +DAT-042 ~DAT-007 ~DAT-024 | Applications using `<med-data-table>` currently have no way to render a table-level caption bar, a bottom summary bar... |
 | 13 | 2026-11-22 | add-data-table-cell-selection-and-context-menu | data-display | +DAT-043 +DAT-044 +DAT-045 ~DAT-024 | Applications using `<med-data-table>` currently can only select entire rows, apply conditional classes at the row lev... |
 | 14 | 2026-11-23 | add-data-table-virtual-scroll | data-display | +DAT-046 +DAT-047 +DAT-048 ~DAT-007 ~DAT-024 | Applications that show thousands of rows in `<med-data-table>` must either page them or render one DOM row per item, ... |
+| 15 | 2026-11-23 | add-data-table-pagination-options | data-display | +DAT-049 ~DAT-024 | Applications that paginate a `<med-data-table>` cannot place the paginator above the table, change its "Showing X-Y o... |
