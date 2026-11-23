@@ -5273,3 +5273,541 @@ describe('DataTableComponent paginator defaults and lazy pageChange (DAT-049)', 
     expect(fixture.componentInstance.events).toEqual([{ first: 10, rows: 10, page: 1, pageCount: 3 }]);
   });
 });
+
+/**
+ * Controllable `window.matchMedia` for the responsive stack. jsdom has no media queries, so this mock
+ * evaluates the `(width < Npx)` form the table builds from `breakpoint` against a width the test sets,
+ * and fires `change` on every registered list when the test resizes the viewport.
+ */
+type MediaChangeListener = (event: { matches: boolean; media: string }) => void;
+
+class ViewportMock {
+  width = 1280;
+  private readonly lists: { media: string; matches: boolean; listeners: Set<MediaChangeListener> }[] = [];
+
+  install(): void {
+    this.width = 1280;
+    this.lists.length = 0;
+    window.matchMedia = jest.fn((media: string) => {
+      const entry = { media, matches: this.matches(media), listeners: new Set<MediaChangeListener>() };
+      this.lists.push(entry);
+      return {
+        media,
+        onchange: null,
+        get matches() {
+          return entry.matches;
+        },
+        addEventListener: (_type: string, listener: MediaChangeListener) => entry.listeners.add(listener),
+        removeEventListener: (_type: string, listener: MediaChangeListener) => entry.listeners.delete(listener),
+        addListener: (listener: MediaChangeListener) => entry.listeners.add(listener),
+        removeListener: (listener: MediaChangeListener) => entry.listeners.delete(listener),
+        dispatchEvent: () => true,
+      } as unknown as MediaQueryList;
+    }) as unknown as typeof window.matchMedia;
+  }
+
+  uninstall(): void {
+    delete (window as { matchMedia?: unknown }).matchMedia;
+    this.lists.length = 0;
+  }
+
+  resize(width: number): void {
+    this.width = width;
+    for (const entry of this.lists) {
+      entry.matches = this.matches(entry.media);
+      for (const listener of entry.listeners) {
+        listener({ matches: entry.matches, media: entry.media });
+      }
+    }
+  }
+
+  private matches(media: string): boolean {
+    const match = /\(width\s*<\s*(\d+(?:\.\d+)?)px\)/.exec(media);
+    return match ? this.width < Number(match[1]) : false;
+  }
+}
+
+interface StackPerson {
+  name: string;
+  role: string;
+  team: string;
+}
+
+const STACK_PEOPLE: StackPerson[] = [
+  { name: 'Ada', role: 'Engineer', team: 'Analytical' },
+  { name: 'Grace', role: 'Admiral', team: 'Analytical' },
+  { name: 'Alan', role: 'Engineer', team: 'Logic' },
+];
+
+/** Shared column markup for the stack hosts; each optional piece is switched by a host flag. */
+const STACK_COLUMNS = `
+  <med-table-column field="name" header="Name" [sortable]="true" [frozen]="nameFrozen" [stackLabel]="nameLabel" [editable]="true">
+    <ng-template let-row>{{ row.name }}</ng-template>
+    <ng-template #editTemplate let-row let-onSave="onSave" let-onCancel="onCancel">
+      <input class="edit-input" [value]="row.name" (keydown.enter)="onSave($any($event.target).value)" (keydown.escape)="onCancel()" />
+    </ng-template>
+  </med-table-column>
+  <med-table-column field="role" [header]="roleHeader" [visible]="roleVisible">
+    <ng-template let-row>{{ row.role }}</ng-template>
+  </med-table-column>
+  @if (showTeam) {
+    <med-table-column field="team" header="Team">
+      <ng-template let-row>{{ row.team }}</ng-template>
+    </med-table-column>
+  }
+  @if (showHeaderGroup) {
+    <ng-template #headerGroup><tr><th colspan="3">Group</th></tr></ng-template>
+  }
+  @if (showExpansion) {
+    <ng-template #rowexpansion let-row><div class="expanded-detail">Detail: {{ row.name }}</div></ng-template>
+  }
+`;
+
+@Component({
+  standalone: true,
+  imports: [DataTableComponent, TableColumnComponent],
+  template: `
+    <med-data-table
+      class="consumer-table"
+      [value]="people"
+      [responsiveLayout]="responsiveLayout"
+      [breakpoint]="breakpoint"
+      [virtualScroll]="virtualScroll"
+      [selectionMode]="selectionMode"
+      [(selection)]="selection"
+      [reorderable]="reorderable"
+      [resizableColumns]="resizableColumns"
+      [reorderableColumns]="reorderableColumns"
+      [rowGroupMode]="rowGroupMode"
+      [groupRowsBy]="groupRowsBy"
+      [editMode]="editMode"
+      [scrollable]="scrollable"
+      [scrollHeight]="scrollHeight"
+      [frozenValue]="frozenValue"
+      [sortField]="sortField"
+      [sortOrder]="sortOrder"
+      [dataKey]="dataKey"
+      [(expandedRowKeys)]="expandedRowKeys"
+      (sort)="onSort($event)"
+      ariaLabel="People"
+    >
+      ${STACK_COLUMNS}
+    </med-data-table>
+  `,
+})
+class StackHostComponent {
+  people: StackPerson[] = STACK_PEOPLE;
+  responsiveLayout: 'scroll' | 'stack' = 'stack';
+  breakpoint = '960px';
+  virtualScroll = false;
+  selectionMode: 'multiple' | null = null;
+  selection: StackPerson[] = [];
+  reorderable = false;
+  resizableColumns = false;
+  reorderableColumns = false;
+  rowGroupMode: 'subheader' | 'rowspan' | null = null;
+  groupRowsBy: string | null = null;
+  editMode: 'row' | null = null;
+  scrollable = false;
+  scrollHeight: string | null = null;
+  frozenValue: StackPerson[] | null = null;
+  sortField: string | null = null;
+  sortOrder: 'asc' | 'desc' | null = null;
+  dataKey: string | null = null;
+  expandedRowKeys: Record<string, boolean> = {};
+  nameFrozen = false;
+  nameLabel: string | null = null;
+  roleHeader = 'Role';
+  roleVisible = true;
+  showTeam = false;
+  showHeaderGroup = false;
+  showExpansion = false;
+  onSort = jest.fn();
+}
+
+/** No layout input bound at all, so `responsiveLayout`, `breakpoint` and `stackLabel` keep their defaults. */
+@Component({
+  standalone: true,
+  imports: [DataTableComponent, TableColumnComponent],
+  template: `
+    <med-data-table [value]="people">
+      <med-table-column field="name" header="Name" />
+      <med-table-column field="role" header="Role" />
+    </med-data-table>
+  `,
+})
+class UnsetLayoutHostComponent {
+  people = STACK_PEOPLE;
+}
+
+/** `responsiveLayout="stack"` with `breakpoint` left unset, so the 960px default applies. */
+@Component({
+  standalone: true,
+  imports: [DataTableComponent, TableColumnComponent],
+  template: `
+    <med-data-table [value]="people" responsiveLayout="stack">
+      <med-table-column field="name" header="Name" />
+      <med-table-column field="role" header="Role" />
+    </med-data-table>
+  `,
+})
+class StackOnlyHostComponent {
+  people = STACK_PEOPLE;
+}
+
+function stackHeaderCells(root: HTMLElement): HTMLElement[] {
+  return Array.from(root.querySelectorAll<HTMLElement>('thead th'));
+}
+
+function stackBodyRows(root: HTMLElement): HTMLElement[] {
+  return Array.from(root.querySelectorAll<HTMLElement>('tbody tr'));
+}
+
+function stackTable(root: HTMLElement): HTMLTableElement {
+  return root.querySelector('table') as HTMLTableElement;
+}
+
+/** Stack labels are the `aria-hidden` element that is a direct child of a body cell. */
+function stackLabel(cell: HTMLElement): HTMLElement | null {
+  return cell.querySelector<HTMLElement>(':scope > [aria-hidden="true"]');
+}
+
+function stackLabelTexts(root: HTMLElement): string[] {
+  return Array.from(root.querySelectorAll<HTMLElement>('tbody td > [aria-hidden="true"]')).map((label) => label.textContent?.trim() ?? '');
+}
+
+/** A cell's value without its stack label. */
+function stackCellValue(cell: HTMLElement): string {
+  const clone = cell.cloneNode(true) as HTMLElement;
+  clone.querySelectorAll('[aria-hidden="true"]').forEach((node) => node.remove());
+  return clone.textContent?.trim() ?? '';
+}
+
+function stackCells(row: HTMLElement): HTMLElement[] {
+  return Array.from(row.querySelectorAll<HTMLElement>('td'));
+}
+
+function createStackTable(configure?: (host: StackHostComponent) => void): ComponentFixture<StackHostComponent> {
+  const fixture = TestBed.createComponent(StackHostComponent);
+  configure?.(fixture.componentInstance);
+  fixture.detectChanges();
+  return fixture;
+}
+
+describe('DataTableComponent responsive stack (DAT-050 to DAT-052)', () => {
+  const viewport = new ViewportMock();
+
+  beforeEach(() => viewport.install());
+  afterEach(() => viewport.uninstall());
+
+  describe('layout (DAT-050)', () => {
+    it('DAT-050.S1: with responsiveLayout, breakpoint and stackLabel unset, the table keeps the scroll layout at 400px', () => {
+      viewport.resize(400);
+      const fixture = TestBed.createComponent(UnsetLayoutHostComponent);
+      fixture.detectChanges();
+      const root = fixture.nativeElement as HTMLElement;
+
+      expect(stackTable(root).getAttribute('role')).toBeNull();
+      expect(stackLabelTexts(root)).toEqual([]);
+      expect(root.querySelector('[data-med-scroll-viewport]')?.classList.contains('overflow-x-auto')).toBe(true);
+    });
+
+    it('DAT-050.S2: stack mode with the default breakpoint labels each cell with its header at 800px', () => {
+      viewport.resize(800);
+      const fixture = TestBed.createComponent(StackOnlyHostComponent);
+      fixture.detectChanges();
+      const root = fixture.nativeElement as HTMLElement;
+      // Each row being a block is a CSS rule jsdom cannot measure; the e2e spec verifies the geometry at 400px.
+      const rows = stackBodyRows(root);
+
+      expect(rows.map((row) => stackCells(row).map((cell) => stackLabel(cell)?.textContent?.trim()))).toEqual([
+        ['Name', 'Role'],
+        ['Name', 'Role'],
+        ['Name', 'Role'],
+      ]);
+      expect(rows.map((row) => stackCells(row).map(stackCellValue))).toEqual([
+        ['Ada', 'Engineer'],
+        ['Grace', 'Admiral'],
+        ['Alan', 'Engineer'],
+      ]);
+    });
+
+    it('DAT-050.S3: a viewport exactly at the breakpoint stays unstacked at 600px', () => {
+      viewport.resize(600);
+      const fixture = createStackTable((host) => {
+        host.breakpoint = '600px';
+      });
+      const root = fixture.nativeElement as HTMLElement;
+
+      expect(stackTable(root).getAttribute('role')).toBeNull();
+      expect(stackLabelTexts(root)).toEqual([]);
+    });
+
+    it('DAT-050.S4: the table unstacks at 1200px and stacks again at 800px without being re-created', () => {
+      viewport.resize(800);
+      const fixture = createStackTable();
+      const root = fixture.nativeElement as HTMLElement;
+      const table = stackTable(root);
+      expect(stackLabelTexts(root).length).toBeGreaterThan(0);
+
+      viewport.resize(1200);
+      fixture.detectChanges();
+      expect(stackLabelTexts(root)).toEqual([]);
+
+      viewport.resize(800);
+      fixture.detectChanges();
+      expect(stackLabelTexts(root).length).toBeGreaterThan(0);
+      expect(stackTable(root)).toBe(table);
+    });
+
+    it('DAT-050.S5: a stackLabel overrides the header and a column with neither shows no label', () => {
+      viewport.resize(800);
+      const fixture = createStackTable((host) => {
+        host.nameLabel = 'Full name';
+        host.roleHeader = '';
+      });
+      const rows = stackBodyRows(fixture.nativeElement as HTMLElement);
+
+      for (const row of rows) {
+        const cells = stackCells(row);
+        expect(stackLabel(cells[0])?.textContent?.trim()).toBe('Full name');
+        expect(stackLabel(cells[1])).toBeNull();
+      }
+    });
+
+    it('DAT-050.S6: an invalid breakpoint and virtualScroll each keep the table unstacked at 400px', () => {
+      viewport.resize(400);
+      const invalid = createStackTable((host) => {
+        host.breakpoint = 'wide';
+      });
+      expect(stackTable(invalid.nativeElement).getAttribute('role')).toBeNull();
+      expect(stackLabelTexts(invalid.nativeElement)).toEqual([]);
+
+      const virtual = createStackTable((host) => {
+        host.virtualScroll = true;
+      });
+      expect(stackTable(virtual.nativeElement).getAttribute('role')).toBeNull();
+      expect(stackLabelTexts(virtual.nativeElement)).toEqual([]);
+    });
+  });
+
+  describe('semantics and appearance (DAT-051)', () => {
+    it('DAT-051.S1: a stacked table with two columns and one row carries explicit table, rowgroup, row, columnheader and cell roles', () => {
+      viewport.resize(800);
+      const fixture = createStackTable((host) => {
+        host.people = [STACK_PEOPLE[0]];
+      });
+      const root = fixture.nativeElement as HTMLElement;
+
+      expect(stackTable(root).getAttribute('role')).toBe('table');
+      root.querySelectorAll('thead, tbody').forEach((group) => expect(group.getAttribute('role')).toBe('rowgroup'));
+      expect(root.querySelector('thead tr')?.getAttribute('role')).toBe('row');
+      expect(stackBodyRows(root).map((row) => row.getAttribute('role'))).toEqual(['row']);
+      expect(stackHeaderCells(root).map((th) => th.getAttribute('role'))).toEqual(['columnheader', 'columnheader']);
+      expect(stackCells(stackBodyRows(root)[0]).map((td) => td.getAttribute('role'))).toEqual(['cell', 'cell']);
+    });
+
+    it('DAT-051.S2: the header row stays in the DOM and accessibility tree but is visually hidden and takes no space', () => {
+      viewport.resize(800);
+      const fixture = createStackTable();
+      const headerRow = (fixture.nativeElement as HTMLElement).querySelector<HTMLElement>('thead tr')!;
+
+      expect(headerRow.isConnected).toBe(true);
+      expect(getComputedStyle(headerRow).display).not.toBe('none');
+      expect(headerRow.getAttribute('aria-hidden')).not.toBe('true');
+      expect(headerRow.classList.contains('sr-only')).toBe(true);
+    });
+
+    it('DAT-051.S3: the label of a body cell is aria-hidden', () => {
+      viewport.resize(800);
+      const fixture = createStackTable();
+      const firstCell = stackCells(stackBodyRows(fixture.nativeElement as HTMLElement)[0])[0];
+      const label = stackLabel(firstCell);
+
+      expect(label?.getAttribute('aria-hidden')).toBe('true');
+      expect(label?.textContent?.trim()).toBe('Name');
+    });
+
+    it('DAT-051.S4: at or above the breakpoint no stack roles and no labels are present', () => {
+      viewport.resize(1200);
+      const fixture = createStackTable();
+      const root = fixture.nativeElement as HTMLElement;
+
+      expect(stackTable(root).getAttribute('role')).toBeNull();
+      expect(root.querySelectorAll('[role="row"], [role="cell"], [role="columnheader"]')).toHaveLength(0);
+      expect(stackLabelTexts(root)).toEqual([]);
+    });
+
+    it('DAT-051.S5: row separators, label text and row background carry dark-scheme tokens, and the consumer class merges onto the root', () => {
+      viewport.resize(800);
+      const fixture = createStackTable();
+      const root = fixture.nativeElement as HTMLElement;
+      // Light and dark colours are CSS; the unit test checks the paired token classes, the e2e spec checks computed colours.
+      const row = stackBodyRows(root)[0];
+      const label = stackLabel(stackCells(row)[0])!;
+
+      expect(row.className).toMatch(/dark:border-surface-/);
+      expect(row.className).toMatch(/dark:bg-surface-/);
+      expect(label.className).toMatch(/text-surface-/);
+      expect(label.className).toMatch(/dark:text-surface-/);
+      expect(root.querySelector('div.consumer-table')?.classList.contains('rounded-lg')).toBe(true);
+    });
+  });
+
+  describe('other features while stacked (DAT-052)', () => {
+    it('DAT-052.S1: header clicks and Enter do not sort, the header leaves the tab order and keeps aria-sort', () => {
+      viewport.resize(800);
+      const fixture = createStackTable((host) => {
+        host.sortField = 'name';
+        host.sortOrder = 'asc';
+      });
+      const root = fixture.nativeElement as HTMLElement;
+      const nameHeader = stackHeaderCells(root)[0];
+
+      nameHeader.click();
+      nameHeader.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+      fixture.detectChanges();
+
+      expect(fixture.componentInstance.onSort).not.toHaveBeenCalled();
+      expect(fixture.componentInstance.sortOrder).toBe('asc');
+      expect(['-1', null]).toContain(nameHeader.getAttribute('tabindex'));
+      expect(nameHeader.getAttribute('aria-sort')).toBe('ascending');
+    });
+
+    it('DAT-052.S2: frozen column and frozen row are not sticky, appear in normal order and are labelled', () => {
+      viewport.resize(800);
+      const fixture = createStackTable((host) => {
+        host.nameFrozen = true;
+        host.frozenValue = [{ name: 'Total', role: 'All', team: '-' }];
+      });
+      const root = fixture.nativeElement as HTMLElement;
+      const rows = stackBodyRows(root);
+
+      expect(root.querySelectorAll('.sticky')).toHaveLength(0);
+      expect(rows.map((row) => stackCellValue(stackCells(row)[0]))).toEqual(['Total', 'Ada', 'Grace', 'Alan']);
+      expect(stackLabel(stackCells(rows[0])[0])?.textContent?.trim()).toBe('Name');
+    });
+
+    it('DAT-052.S3: resize handles and draggable headers are gone and the hidden column renders nothing', () => {
+      viewport.resize(800);
+      const fixture = createStackTable((host) => {
+        host.resizableColumns = true;
+        host.reorderableColumns = true;
+        host.roleVisible = false;
+      });
+      const root = fixture.nativeElement as HTMLElement;
+
+      expect(root.querySelectorAll('[data-col-resize-handle="true"]')).toHaveLength(0);
+      expect(root.querySelectorAll('thead th[draggable="true"]')).toHaveLength(0);
+      expect(stackHeaderCells(root).map((th) => th.textContent?.trim())).toEqual(['Name']);
+      expect(stackBodyRows(root).map((row) => stackCells(row).length)).toEqual([1, 1, 1]);
+    });
+
+    it('DAT-052.S4: checking and expanding a row selects it, hides its checkbox label and drops the reorder handle; the expansion spans the row', () => {
+      viewport.resize(800);
+      const fixture = createStackTable((host) => {
+        host.selectionMode = 'multiple';
+        host.reorderable = true;
+        host.showExpansion = true;
+        host.dataKey = 'name';
+        host.expandedRowKeys = { Ada: true };
+      });
+      const root = fixture.nativeElement as HTMLElement;
+      const checkbox = root.querySelector<HTMLInputElement>('tbody tr input[type="checkbox"]')!;
+      checkbox.checked = true;
+      checkbox.dispatchEvent(new Event('change'));
+      fixture.detectChanges();
+
+      const firstRow = stackBodyRows(root)[0];
+      expect(fixture.componentInstance.selection.map((person) => person.name)).toEqual(['Ada']);
+      expect(firstRow.getAttribute('aria-selected')).toBe('true');
+      expect(stackLabel(stackCells(firstRow)[0])).toBeNull();
+      expect(root.querySelectorAll('tbody med-icon[name="bars-3"]')).toHaveLength(0);
+
+      const expansionCell = root.querySelector('.expanded-detail')!.closest('td') as HTMLTableCellElement;
+      expect(firstRow.nextElementSibling?.contains(expansionCell)).toBe(true);
+      expect(expansionCell.colSpan).toBe(stackHeaderCells(root).length);
+    });
+
+    it('DAT-052.S5: a subheader row spans the full width, and a row-span table shows the group value in every row with no merged cell', () => {
+      viewport.resize(800);
+      const subheader = createStackTable((host) => {
+        host.showTeam = true;
+        host.rowGroupMode = 'subheader';
+        host.groupRowsBy = 'team';
+      });
+      const groupRows = Array.from((subheader.nativeElement as HTMLElement).querySelectorAll<HTMLTableCellElement>('tbody td[colspan]'));
+
+      expect(groupRows).toHaveLength(2);
+      expect(groupRows.map((cell) => cell.colSpan)).toEqual([3, 3]);
+
+      const rowspan = createStackTable((host) => {
+        host.showTeam = true;
+        host.rowGroupMode = 'rowspan';
+        host.groupRowsBy = 'team';
+      });
+      const root = rowspan.nativeElement as HTMLElement;
+
+      expect(root.querySelectorAll('tbody td[rowspan]')).toHaveLength(0);
+      expect(stackBodyRows(root).map((row) => stackCellValue(stackCells(row)[2]))).toEqual(['Analytical', 'Analytical', 'Logic']);
+    });
+
+    it('DAT-052.S6: the body scrolls within 300px with a header that is not sticky, and the header group is visually hidden and labels nothing', () => {
+      viewport.resize(800);
+      const fixture = createStackTable((host) => {
+        host.scrollable = true;
+        host.scrollHeight = '300px';
+        host.showHeaderGroup = true;
+      });
+      const root = fixture.nativeElement as HTMLElement;
+      const scrollViewport = root.querySelector<HTMLElement>('[data-med-scroll-viewport]')!;
+      const groupRow = Array.from(root.querySelectorAll<HTMLElement>('thead tr')).find((tr) => tr.textContent?.includes('Group'))!;
+
+      expect(scrollViewport.style.maxHeight).toBe('300px');
+      expect(scrollViewport.classList.contains('overflow-y-auto')).toBe(true);
+      expect(root.querySelector('thead')?.className).not.toContain('sticky');
+      expect(groupRow.classList.contains('sr-only')).toBe(true);
+      expect(stackLabelTexts(root)).not.toContain('Group');
+    });
+
+    it('DAT-052.S7: editing shows the edit template under the label, and the actions cell keeps its buttons with no label', () => {
+      viewport.resize(800);
+      const fixture = createStackTable((host) => {
+        host.editMode = 'row';
+      });
+      const root = fixture.nativeElement as HTMLElement;
+      root.querySelector<HTMLButtonElement>('tbody button[aria-label="Edit row"]')!.click();
+      fixture.detectChanges();
+
+      const firstRow = stackBodyRows(root)[0];
+      const nameCell = stackCells(firstRow)[0];
+      const input = nameCell.querySelector('.edit-input')!;
+      const label = stackLabel(nameCell)!;
+      expect(label.textContent?.trim()).toBe('Name');
+      expect(label.compareDocumentPosition(input) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+
+      const actionsCell = stackCells(firstRow).at(-1)!;
+      expect(actionsCell.querySelectorAll('button').length).toBeGreaterThan(0);
+      expect(stackLabel(actionsCell)).toBeNull();
+    });
+
+    it('DAT-052.S8: widening past the breakpoint restores the sticky column, the sort click and the resize handle', () => {
+      viewport.resize(800);
+      const fixture = createStackTable((host) => {
+        host.nameFrozen = true;
+        host.resizableColumns = true;
+      });
+      const root = fixture.nativeElement as HTMLElement;
+      expect(root.querySelectorAll('[data-col-resize-handle="true"]')).toHaveLength(0);
+
+      viewport.resize(1000);
+      fixture.detectChanges();
+
+      expect(stackCells(stackBodyRows(root)[0])[0].classList.contains('sticky')).toBe(true);
+      stackHeaderCells(root)[0].click();
+      fixture.detectChanges();
+      expect(fixture.componentInstance.onSort).toHaveBeenCalled();
+      expect(root.querySelector('[data-col-resize-handle="true"]')).not.toBeNull();
+    });
+  });
+});

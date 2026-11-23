@@ -1,0 +1,68 @@
+<med-data-table
+  [value]="people"
+  responsiveLayout="stack"
+  [resizableColumns]="true"
+  [reorderableColumns]="true"
+  [scrollable]="true"
+  scrollHeight="320px"
+  dataKey="id"
+  ariaLabel="Team members (responsive stack layout)"
+>
+  <med-table-column field="name" header="Name" stackLabel="Full name" [sortable]="true" [frozen]="true" width="200px" />
+  <med-table-column field="role" header="Role" [sortable]="true" width="160px" />
+  <med-table-column field="team" header="Team" width="160px" />
+  <med-table-column field="location" width="160px" />
+</med-data-table>
+
+<med-data-table
+  [value]="shifts"
+  [frozenValue]="onCall"
+  responsiveLayout="stack"
+  rowGroupMode="subheader"
+  groupRowsBy="team"
+  [resizableColumns]="true"
+  [reorderableColumns]="true"
+  [scrollable]="true"
+  scrollHeight="300px"
+  dataKey="id"
+  [(expandedRowKeys)]="expandedShifts"
+  ariaLabel="Lab shifts (responsive stack with other features)"
+  class="mt-6"
+>
+  <ng-template #headerGroup>
+    <tr>
+      <th colspan="2" class="px-3 py-2 text-center font-semibold">Person</th>
+      <th colspan="2" class="px-3 py-2 text-center font-semibold">Schedule</th>
+    </tr>
+  </ng-template>
+  <ng-template #groupHeader let-row>
+    <span class="font-semibold text-surface-700 dark:text-surface-200">{{ row.team }}</span>
+  </ng-template>
+  <med-table-column field="name" header="Name" [sortable]="true" [frozen]="true" width="200px" />
+  <med-table-column field="team" header="Team" width="160px" />
+  <med-table-column field="shift" header="Shift" width="160px" />
+  <med-table-column field="room" header="Room" width="160px" />
+  <med-table-column field="badge" header="Badge" [visible]="false" />
+  <ng-template #rowexpansion let-row>
+    <p class="text-sm text-surface-700 dark:text-surface-200">{{ row.name }} covers {{ row.room }} during the {{ row.shift }} shift.</p>
+  </ng-template>
+</med-data-table>
+
+<med-data-table
+  [value]="rooms()"
+  responsiveLayout="stack"
+  editMode="row"
+  dataKey="id"
+  ariaLabel="Lab rooms (responsive stack with row editing)"
+  class="mt-6"
+  (rowEditComplete)="onRoomEditComplete($event)"
+>
+  <med-table-column field="room" header="Room" />
+  <med-table-column field="supervisor" header="Supervisor" editable>
+    <ng-template let-row>{{ row.supervisor }}</ng-template>
+    <ng-template #editTemplate let-row let-onChange="onChange">
+      <input medInputText class="h-7 w-full text-sm" aria-label="Supervisor" [value]="row.supervisor" (input)="onChange($any($event.target).value)" />
+    </ng-template>
+  </med-table-column>
+  <med-table-column field="capacity" header="Capacity" />
+</med-data-table>

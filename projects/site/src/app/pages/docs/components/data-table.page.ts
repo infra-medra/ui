@@ -59,6 +59,7 @@ import { DataTableStatefulDemo } from './demos/data-table-stateful.demo';
 import { DataTableExportCsvDemo } from './demos/data-table-export-csv.demo';
 import { DataTableRowReorderEventsDemo } from './demos/data-table-row-reorder-events.demo';
 import { DataTableContextMenuDemo } from './demos/data-table-context-menu.demo';
+import { DataTableResponsiveStackDemo } from './demos/data-table-responsive-stack.demo';
 
 import basicCode from './demos/data-table-basic.demo.html?raw';
 import selectionSingleCode from './demos/data-table-selection-single.demo.html?raw';
@@ -72,6 +73,7 @@ import filterGlobalCode from './demos/data-table-filter-global.demo.html?raw';
 import columnFiltersCode from './demos/data-table-column-filters.demo.html?raw';
 import paginationCode from './demos/data-table-pagination.demo.html?raw';
 import paginatorOptionsCode from './demos/data-table-paginator-options.demo.html?raw';
+import responsiveStackCode from './demos/data-table-responsive-stack.demo.html?raw';
 import programmaticPaginationCode from './demos/data-table-programmatic-pagination.demo.html?raw';
 import scrollVerticalCode from './demos/data-table-scroll-vertical.demo.html?raw';
 import rowExpansionCode from './demos/data-table-row-expansion.demo.html?raw';
@@ -128,6 +130,7 @@ import filterGlobalContent from '../../../../content/docs/data-table-filter-glob
 import columnFiltersContent from '../../../../content/docs/data-table-column-filters.txt?raw';
 import paginationContent from '../../../../content/docs/data-table-pagination.txt?raw';
 import paginatorOptionsContent from '../../../../content/docs/data-table-paginator-options.txt?raw';
+import responsiveStackContent from '../../../../content/docs/data-table-responsive-stack.txt?raw';
 import programmaticPaginationContent from '../../../../content/docs/data-table-programmatic-pagination.txt?raw';
 import scrollVerticalContent from '../../../../content/docs/data-table-scroll-vertical.txt?raw';
 import rowExpansionContent from '../../../../content/docs/data-table-row-expansion.txt?raw';
@@ -236,6 +239,7 @@ const EXAMPLES = [
   { id: 'example-frozen-rows', label: 'Frozen rows' },
   { id: 'example-scroll-horizontal', label: 'Horizontal scroll' },
   { id: 'example-scroll-flexible', label: 'Flexible scroll' },
+  { id: 'example-responsive-stack', label: 'Responsive stack' },
   { id: 'example-context-menu', label: 'Context menu' },
   { id: 'example-virtual-scroll', label: 'Virtual scroll' },
   { id: 'example-lazy-virtual-scroll', label: 'Lazy virtual scroll' },
@@ -302,6 +306,7 @@ const EXAMPLES = [
     DataTableScrollFlexibleDemo,
     DataTableVirtualScrollDemo,
     DataTableLazyVirtualScrollDemo,
+    DataTableResponsiveStackDemo,
   ],
   template: `
     <app-component-doc title="DataTable" slug="data-table" [examples]="examples">
@@ -718,6 +723,14 @@ const EXAMPLES = [
         </div>
       </section>
 
+      <section id="example-responsive-stack" class="mt-10 scroll-mt-24">
+        <app-prose class="block" [content]="responsiveStackContent" />
+        <div class="mt-4">
+          <app-data-table-responsive-stack-demo />
+          <div class="mt-3"><app-code-block [code]="responsiveStackCode" /></div>
+        </div>
+      </section>
+
       <section id="example-context-menu" class="mt-10 scroll-mt-24">
         <app-prose class="block" [content]="contextMenuContent" />
         <div class="mt-4">
@@ -777,6 +790,8 @@ export default class DocsDataTable {
   protected readonly programmaticPaginationCode = programmaticPaginationCode;
   protected readonly paginatorOptionsContent = paginatorOptionsContent;
   protected readonly paginatorOptionsCode = paginatorOptionsCode;
+  protected readonly responsiveStackContent = responsiveStackContent;
+  protected readonly responsiveStackCode = responsiveStackCode;
   protected readonly scrollVerticalContent = scrollVerticalContent;
   protected readonly scrollVerticalCode = scrollVerticalCode;
   protected readonly rowExpansionContent = rowExpansionContent;

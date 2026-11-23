@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, Injector, PLATFORM_ID, TemplateRef, afterNextRender, booleanAttribute, computed, contentChild, contentChildren, effect, ElementRef, inject, input, linkedSignal, model, numberAttribute, output, signal, untracked, viewChild, WritableSignal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, Injector, PLATFORM_ID, TemplateRef, afterEveryRender, afterNextRender, booleanAttribute, computed, contentChild, contentChildren, effect, ElementRef, inject, input, linkedSignal, model, numberAttribute, output, signal, untracked, viewChild, WritableSignal } from '@angular/core';
 import { NgTemplateOutlet, isPlatformBrowser } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -18,6 +18,9 @@ import { mergeClasses } from '../utils/merge-classes';
 import { TableColumnComponent } from './table-column.component';
 import { FILTER_MODES_BY_TYPE, isRuleActive, matchesColumnFilter, offeredMatchModes, preselectedMatchMode } from './data-table-column-filter';
 import { TableCellSelection, TableColumnAlign, TableColumnFilter, TableColumnFilters, TableContextMenuSelectEvent, TableFilterMatchMode, TableColumnReorderEvent, TableLazyLoadEvent, TableLoadingMode, TableRowEditEvent, TableRowReorderEvent, TableSelectionMode, TableSize, TableSortMeta, TableSortMode, TableSortOrder } from './data-table.types';
+
+/** A number followed by a unit, the only `breakpoint` form a media query takes here (`960px`, `40em`). */
+const CSS_LENGTH_PATTERN = /^\d*\.?\d+(px|em|rem|vw|vh|ch|ex|cm|mm|in|pt|pc)$/;
 
 let nextRadioGroupId = 0;
 
@@ -101,10 +104,12 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
  *   buttons. The rules live in the two-way `columnFilters` model, whose state
  *   (not a DOM indicator) drives the funnel's active look, and combine with
  *   the global filter (`filterable`).
- * - No `responsiveLayout="stack"` mode (avoids #16510, a regression in the
- *   original) — instead the table wrapper scrolls horizontally past the
- *   viewport (`overflow-x-auto`), the same M3-aligned pattern
- *   `TabsComponent` already uses for its own overflow.
+ * - `responsiveLayout="stack"` is opt-in. Below `breakpoint` (default `960px`)
+ *   each body row renders as a block and each cell shows its column label
+ *   (`stackLabel`, else `header`). By default, and at or above `breakpoint`,
+ *   the table wrapper scrolls horizontally past the viewport
+ *   (`overflow-x-auto`), the same M3-aligned pattern `TabsComponent` already
+ *   uses for its own overflow. `virtualScroll` always keeps the table unstacked.
  * None of these are dead ends — each layers on top of this API without a
  * breaking change if a later version needs it.
  *
@@ -366,8 +371,17 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
       @for (col of visibleColumns(); track col.field()) {
         @if (frozen || span !== 0 || col.field() !== spanColumnField()) {
         <td
+          [attr.role]="stacked() ? 'cell' : null"
+          [class.block]="stacked()"
           [class]="bodyCellClass(col, row, i, !!frozen)"
-          [style]="frozenStyle(col)"
+          [class.sticky]="isFrozenColumn(col)"
+          [class.px-2]="cellPadX('px-2')"
+          [class.px-3]="cellPadX('px-3')"
+          [class.px-4]="cellPadX('px-4')"
+          [style.position]="frozenPosition(col)"
+          [style.left]="frozenEdge(col, 'left')"
+          [style.right]="frozenEdge(col, 'right')"
+          [style.z-index]="frozenZIndex(col)"
           [attr.rowspan]="!frozen && span >= 1 && col.field() === spanColumnField() ? span : null"
           [attr.data-med-editing]="!frozen && isEditingCell(row, col) ? '' : null"
           [attr.data-med-field]="!frozen ? col.field() : null"
@@ -377,6 +391,9 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
           (dblclick)="frozen ? null : onCellDblClick($event, row, col)"
           (keydown)="frozen ? null : onCellKeydown($event, row, col)"
         >
+          @if (stacked() && stackLabelFor(col); as label) {
+            <span aria-hidden="true" [class]="stackLabelClass(!frozen && isEditingCell(row, col))">{{ label }}</span>
+          }
           @if (!frozen && isEditingCell(row, col); as editing) {
             <ng-container
               [ngTemplateOutlet]="col.editTemplate()!"
@@ -392,23 +409,23 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
       }
     </ng-template>
     <ng-template #frozenRow let-row let-i="index">
-      <tr [class]="rowClassFor(row, i, false)" [attr.aria-rowindex]="frozenRowPosition(i)">
+      <tr [class]="rowClassFor(row, i, false)" [class.block]="stacked()" [class.px-2]="rowPadX('px-2')" [class.px-3]="rowPadX('px-3')" [class.px-4]="rowPadX('px-4')" [attr.role]="stacked() ? 'row' : null" [attr.aria-rowindex]="frozenRowPosition(i)">
         @if (rowReorderActive()) {
-          <td [class]="utilityCellClass('', true) + ' ' + frozenUtilityClass(row, i)" [style]="utilityStyle('reorder')"></td>
+          <td [attr.role]="stacked() ? 'cell' : null" [class]="utilityCellClass('', true) + ' ' + frozenUtilityClass(row, i)" [style]="utilityStyle('reorder')" [style.position]="utilityPosition()" [style.left]="utilityLeft('reorder')" [style.z-index]="utilityZIndex()"></td>
         }
         @if (hasSelectionColumn()) {
-          <td [class]="utilityCellClass('') + ' ' + frozenUtilityClass(row, i)" [style]="utilityStyle('selection')"></td>
+          <td [attr.role]="stacked() ? 'cell' : null" [class]="utilityCellClass('') + ' ' + frozenUtilityClass(row, i)" [style]="utilityStyle('selection')" [style.position]="utilityPosition()" [style.left]="utilityLeft('selection')" [style.z-index]="utilityZIndex()"></td>
         }
         <ng-container [ngTemplateOutlet]="dataCells" [ngTemplateOutletContext]="{ $implicit: row, index: i, frozen: true }" />
         @if (editMode() === 'row') {
-          <td [class]="utilityCellClass('')"></td>
+          <td [attr.role]="stacked() ? 'cell' : null" [class]="utilityCellClass('')"></td>
         }
       </tr>
     </ng-template>
     <ng-template #bodyRow let-row let-i="index">
             @if (isGroupStart(row, i)) {
-              <tr class="border-b border-surface-200 bg-surface-50 font-semibold dark:border-surface-700 dark:bg-surface-800/50">
-                <td [attr.colspan]="totalColumnCount()" [class]="groupCellClass()">
+              <tr class="border-b border-surface-200 bg-surface-50 font-semibold dark:border-surface-700 dark:bg-surface-800/50" [class.block]="stacked()" [attr.role]="stacked() ? 'row' : null">
+                <td [attr.role]="stacked() ? 'cell' : null" [attr.colspan]="totalColumnCount()" [class]="groupCellClass()">
                   @if (isRowGroupToggleable()) {
                     <button
                       type="button"
@@ -432,6 +449,11 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
             @if (!isRowHiddenByGroup(row)) {
             <tr
               [class]="rowClassFor(row, i)"
+              [class.block]="stacked()"
+              [class.px-2]="rowPadX('px-2')"
+              [class.px-3]="rowPadX('px-3')"
+              [class.px-4]="rowPadX('px-4')"
+              [attr.role]="stacked() ? 'row' : null"
               [style.height.px]="virtualScroll() ? virtualScrollItemSize() : null"
               [attr.aria-rowindex]="bodyRowPosition(i)"
               [attr.aria-selected]="selectionMode() && !isCellSelectionActive() ? isSelected(row) : null"
@@ -445,12 +467,12 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
               (drop)="onRowDrop(i)"
             >
               @if (rowReorderActive()) {
-                <td [class]="utilityCellClass('cursor-move text-surface-400 dark:text-surface-500', true) + ' ' + frozenUtilityClass(row, i)" [style]="utilityStyle('reorder')" (click)="$event.stopPropagation()">
+                <td [attr.role]="stacked() ? 'cell' : null" [class]="utilityCellClass('cursor-move text-surface-400 dark:text-surface-500', true) + ' ' + frozenUtilityClass(row, i)" [style]="utilityStyle('reorder')" [style.position]="utilityPosition()" [style.left]="utilityLeft('reorder')" [style.z-index]="utilityZIndex()" (click)="$event.stopPropagation()">
                   <med-icon name="bars-3" variant="mini" class="size-4" />
                 </td>
               }
               @if (!isCellSelectionActive() && selectionMode() === 'multiple') {
-                <td [class]="utilityCellClass('') + ' ' + frozenUtilityClass(row, i)" [style]="utilityStyle('selection')">
+                <td [attr.role]="stacked() ? 'cell' : null" [class]="utilityCellClass('') + ' ' + frozenUtilityClass(row, i)" [style]="utilityStyle('selection')" [style.position]="utilityPosition()" [style.left]="utilityLeft('selection')" [style.z-index]="utilityZIndex()">
                   <span class="relative inline-flex">
                     <input
                       type="checkbox"
@@ -469,7 +491,7 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
                 </td>
               }
               @if (!isCellSelectionActive() && selectionMode() === 'radio') {
-                <td [class]="utilityCellClass('') + ' ' + frozenUtilityClass(row, i)" [style]="utilityStyle('selection')">
+                <td [attr.role]="stacked() ? 'cell' : null" [class]="utilityCellClass('') + ' ' + frozenUtilityClass(row, i)" [style]="utilityStyle('selection')" [style.position]="utilityPosition()" [style.left]="utilityLeft('selection')" [style.z-index]="utilityZIndex()">
                   <span class="relative inline-flex">
                     <input
                       type="radio"
@@ -490,7 +512,7 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
               }
               <ng-container [ngTemplateOutlet]="dataCells" [ngTemplateOutletContext]="{ $implicit: row, index: i, span: groupSpans()[i] ?? 1 }" />
               @if (editMode() === 'row') {
-                <td [class]="utilityCellClass('whitespace-nowrap')" (click)="$event.stopPropagation()">
+                <td [attr.role]="stacked() ? 'cell' : null" [class]="utilityCellClass('whitespace-nowrap')" (click)="$event.stopPropagation()">
                   @if (editingRow() === row) {
                     <button type="button" [class]="rowActionButtonClass" [attr.aria-label]="saveRowLabel()" (click)="saveRowEdit()">
                       <med-icon name="check" variant="mini" class="size-4" />
@@ -507,24 +529,24 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
               }
             </tr>
             @if (expansionRowsRender() && isRowExpanded(row, i) && rowExpansionTemplate(); as expTpl) {
-              <tr class="border-b border-surface-200 bg-surface-50/40 dark:border-surface-700 dark:bg-surface-800/30">
+              <tr class="border-b border-surface-200 bg-surface-50/40 dark:border-surface-700 dark:bg-surface-800/30" [class.block]="stacked()" [attr.role]="stacked() ? 'row' : null">
                 @if (expansionLayout(); as layout) {
                   @if (layout.lead > 0) {
-                    <td [attr.colspan]="layout.lead" [class]="expansionCellClass()">
+                    <td [attr.colspan]="layout.lead" [class]="expansionCellClass()" [attr.role]="stacked() ? 'cell' : null">
                       @if (layout.lead >= layout.trail) {
                         <ng-container [ngTemplateOutlet]="expTpl" [ngTemplateOutletContext]="{ $implicit: row, rowIndex: i }" />
                       }
                     </td>
                   }
                   @if (layout.trail > 0) {
-                    <td [attr.colspan]="layout.trail" [class]="expansionCellClass()">
+                    <td [attr.colspan]="layout.trail" [class]="expansionCellClass()" [attr.role]="stacked() ? 'cell' : null">
                       @if (layout.lead < layout.trail) {
                         <ng-container [ngTemplateOutlet]="expTpl" [ngTemplateOutletContext]="{ $implicit: row, rowIndex: i }" />
                       }
                     </td>
                   }
                 } @else {
-                  <td [attr.colspan]="totalColumnCount()" [class]="expansionCellClass()">
+                  <td [attr.colspan]="totalColumnCount()" [class]="expansionCellClass()" [attr.role]="stacked() ? 'cell' : null">
                     <ng-container [ngTemplateOutlet]="expTpl" [ngTemplateOutletContext]="{ $implicit: row, rowIndex: i }" />
                   </td>
                 }
@@ -533,8 +555,8 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
             }
     </ng-template>
     <ng-template #emptyRow>
-            <tr>
-              <td [attr.colspan]="totalColumnCount()" class="px-3 py-8 text-center text-surface-500 dark:text-surface-400">
+            <tr [class.block]="stacked()" [attr.role]="stacked() ? 'row' : null">
+              <td [attr.role]="stacked() ? 'cell' : null" [attr.colspan]="totalColumnCount()" [class.block]="stacked()" class="px-3 py-8 text-center text-surface-500 dark:text-surface-400">
                 @if (emptyTemplate(); as empTpl) {
                   <ng-container [ngTemplateOutlet]="empTpl" />
                 } @else {
@@ -560,17 +582,17 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
             <med-progress-spinner [ariaLabel]="loadingLabel()" />
           </div>
         }
-        <table [class]="tableClass()" [style.width.px]="tableWidthPx()" [class.table-fixed]="resizableColumns() || hasFrozenColumn()" [class.opacity-50]="isSpinnerLoading()" [attr.aria-busy]="isSkeletonLoading() ? 'true' : null" [attr.aria-label]="ariaLabel()" [attr.aria-rowcount]="ariaRowCount()">
-        <thead #tableHead [class]="scrollActive() ? 'sticky top-0 z-10 bg-surface-50 dark:bg-surface-800' : ''">
+        <table [class]="tableClass()" [class.block]="stacked()" [attr.role]="stacked() ? 'table' : null" [style.width.px]="tableWidthPx()" [class.table-fixed]="resizableColumns() || hasFrozenColumn()" [class.opacity-50]="isSpinnerLoading()" [attr.aria-busy]="isSkeletonLoading() ? 'true' : null" [attr.aria-label]="ariaLabel()" [attr.aria-rowcount]="ariaRowCount()">
+        <thead #tableHead [class.block]="stacked()" [attr.role]="stacked() ? 'rowgroup' : null" [class.sticky]="stickyActive()" [class.top-0]="stickyActive()" [class.z-10]="stickyActive()" [class.bg-surface-50]="stickyActive()" [class.dark:bg-surface-800]="stickyActive()">
           @if (headerGroupTemplate(); as hg) {
             <ng-container [ngTemplateOutlet]="hg" />
           }
-          <tr class="border-b border-surface-200 bg-surface-50 dark:border-surface-700 dark:bg-surface-800/50">
+          <tr data-med-header-row class="border-b border-surface-200 bg-surface-50 dark:border-surface-700 dark:bg-surface-800/50" [class.sr-only]="stacked()" [attr.role]="stacked() ? 'row' : null">
             @if (rowReorderActive()) {
-              <th [class]="utilityCellClass('', true) + ' ' + frozenUtilityClass(null)" [style]="utilityStyle('reorder')"></th>
+              <th [attr.role]="stacked() ? 'columnheader' : null" [class]="utilityCellClass('', true) + ' ' + frozenUtilityClass(null)" [style]="utilityStyle('reorder')" [style.position]="utilityPosition()" [style.left]="utilityLeft('reorder')" [style.z-index]="utilityZIndex()"></th>
             }
             @if (!isCellSelectionActive() && selectionMode() === 'multiple') {
-              <th [class]="utilityCellClass('') + ' ' + frozenUtilityClass(null)" [style]="utilityStyle('selection')">
+              <th [attr.role]="stacked() ? 'columnheader' : null" [class]="utilityCellClass('') + ' ' + frozenUtilityClass(null)" [style]="utilityStyle('selection')" [style.position]="utilityPosition()" [style.left]="utilityLeft('selection')" [style.z-index]="utilityZIndex()">
                 <span class="relative inline-flex">
                   <input
                     type="checkbox"
@@ -591,17 +613,22 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
               </th>
             }
             @if (!isCellSelectionActive() && selectionMode() === 'radio') {
-              <th [class]="utilityCellClass('') + ' ' + frozenUtilityClass(null)" [style]="utilityStyle('selection')"></th>
+              <th [attr.role]="stacked() ? 'columnheader' : null" [class]="utilityCellClass('') + ' ' + frozenUtilityClass(null)" [style]="utilityStyle('selection')" [style.position]="utilityPosition()" [style.left]="utilityLeft('selection')" [style.z-index]="utilityZIndex()"></th>
             }
             @for (col of visibleColumns(); track col.field()) {
               <th
                 scope="col"
+                [attr.role]="stacked() ? 'columnheader' : null"
                 [style.width]="columnWidth(col)"
-                [style]="frozenStyle(col)"
                 [class]="headerCellClass(col)"
+                [class.sticky]="isFrozenColumn(col)"
+                [style.position]="frozenPosition(col)"
+                [style.left]="frozenEdge(col, 'left')"
+                [style.right]="frozenEdge(col, 'right')"
+                [style.z-index]="frozenZIndex(col)"
                 [class.relative]="resizableColumns()"
                 [attr.aria-sort]="ariaSortFor(col)"
-                [attr.tabindex]="col.sortable() || isColumnDraggable(col) ? 0 : null"
+                [attr.tabindex]="(col.sortable() && !stacked()) || isColumnDraggable(col) ? 0 : null"
                 [attr.draggable]="isColumnDraggable(col) ? 'true' : null"
                 (dragstart)="onColDragStart($event, col)"
                 (dragover)="onColDragOver($event, col)"
@@ -677,32 +704,32 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
               </th>
             }
             @if (editMode() === 'row') {
-              <th scope="col" [class]="utilityCellClass('')"><span class="sr-only">{{ rowActionsHeaderLabel() }}</span></th>
+              <th scope="col" [attr.role]="stacked() ? 'columnheader' : null" [class]="utilityCellClass('')"><span class="sr-only">{{ rowActionsHeaderLabel() }}</span></th>
             }
           </tr>
         </thead>
         @if (frozenRowsPosition() === 'top' && frozenRows().length) {
-          <tbody #frozenTopBody [class]="scrollActive() ? 'sticky z-[5] bg-surface-0 dark:bg-surface-800' : ''" [style.top.px]="scrollActive() ? headerHeight() : null">
+          <tbody #frozenTopBody [class.block]="stacked()" [attr.role]="stacked() ? 'rowgroup' : null" [class.sticky]="stickyActive()" [class.bg-surface-0]="stickyActive()" [class.dark:bg-surface-800]="stickyActive()" [style.z-index]="stickyActive() ? '5' : null" [style.top.px]="stickyActive() ? headerHeight() : null">
             @for (row of frozenRows(); track $index; let i = $index) {
               <ng-container [ngTemplateOutlet]="frozenRow" [ngTemplateOutletContext]="{ $implicit: row, index: i }" />
             }
           </tbody>
         }
-        <tbody>
+        <tbody [class.block]="stacked()" [attr.role]="stacked() ? 'rowgroup' : null">
           @if (isSkeletonLoading()) {
             @for (_ of skeletonRows(); track $index) {
-              <tr class="border-b border-surface-200 last:border-b-0 dark:border-surface-700">
+              <tr class="border-b border-surface-200 last:border-b-0 dark:border-surface-700" [attr.role]="stacked() ? 'row' : null">
                 @if (rowReorderActive()) {
-                  <td [class]="skeletonUtilityCellClass(true)" [style]="utilityStyle('reorder')"><med-skeleton height="1rem" /></td>
+                  <td [attr.role]="stacked() ? 'cell' : null" [class]="skeletonUtilityCellClass(true)" [style]="utilityStyle('reorder')" [style.position]="utilityPosition()" [style.left]="utilityLeft('reorder')" [style.z-index]="utilityZIndex()"><med-skeleton height="1rem" /></td>
                 }
                 @if (hasSelectionColumn()) {
-                  <td [class]="skeletonUtilityCellClass()" [style]="utilityStyle('selection')"><med-skeleton height="1rem" /></td>
+                  <td [attr.role]="stacked() ? 'cell' : null" [class]="skeletonUtilityCellClass()" [style]="utilityStyle('selection')" [style.position]="utilityPosition()" [style.left]="utilityLeft('selection')" [style.z-index]="utilityZIndex()"><med-skeleton height="1rem" /></td>
                 }
                 @for (col of visibleColumns(); track col.field()) {
-                  <td [class]="skeletonCellClass(col)" [style]="frozenStyle(col)"><med-skeleton height="1rem" /></td>
+                  <td [attr.role]="stacked() ? 'cell' : null" [class]="skeletonCellClass(col)" [class.sticky]="isFrozenColumn(col)" [style.position]="frozenPosition(col)" [style.left]="frozenEdge(col, 'left')" [style.right]="frozenEdge(col, 'right')" [style.z-index]="frozenZIndex(col)"><med-skeleton height="1rem" /></td>
                 }
                 @if (editMode() === 'row') {
-                  <td [class]="utilityCellClass('')"><med-skeleton height="1rem" /></td>
+                  <td [attr.role]="stacked() ? 'cell' : null" [class]="utilityCellClass('')"><med-skeleton height="1rem" /></td>
                 }
               </tr>
             }
@@ -717,16 +744,16 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
               } @else {
                 <tr data-med-placeholder aria-busy="true" class="border-b border-surface-200 dark:border-surface-700" [style.height.px]="virtualScrollItemSize()" [attr.aria-rowindex]="bodyRowPosition(entry.index)">
                   @if (rowReorderActive()) {
-                    <td [class]="skeletonUtilityCellClass(true)" [style]="utilityStyle('reorder')"><med-skeleton height="1rem" /></td>
+                    <td [attr.role]="stacked() ? 'cell' : null" [class]="skeletonUtilityCellClass(true)" [style]="utilityStyle('reorder')" [style.position]="utilityPosition()" [style.left]="utilityLeft('reorder')" [style.z-index]="utilityZIndex()"><med-skeleton height="1rem" /></td>
                   }
                   @if (hasSelectionColumn()) {
-                    <td [class]="skeletonUtilityCellClass()" [style]="utilityStyle('selection')"><med-skeleton height="1rem" /></td>
+                    <td [attr.role]="stacked() ? 'cell' : null" [class]="skeletonUtilityCellClass()" [style]="utilityStyle('selection')" [style.position]="utilityPosition()" [style.left]="utilityLeft('selection')" [style.z-index]="utilityZIndex()"><med-skeleton height="1rem" /></td>
                   }
                   @for (col of visibleColumns(); track col.field()) {
-                    <td [class]="skeletonCellClass(col)" [style]="frozenStyle(col)"><med-skeleton height="1rem" /></td>
+                    <td [attr.role]="stacked() ? 'cell' : null" [class]="skeletonCellClass(col)" [class.sticky]="isFrozenColumn(col)" [style.position]="frozenPosition(col)" [style.left]="frozenEdge(col, 'left')" [style.right]="frozenEdge(col, 'right')" [style.z-index]="frozenZIndex(col)"><med-skeleton height="1rem" /></td>
                   }
                   @if (editMode() === 'row') {
-                    <td [class]="utilityCellClass('')"><med-skeleton height="1rem" /></td>
+                    <td [attr.role]="stacked() ? 'cell' : null" [class]="utilityCellClass('')"><med-skeleton height="1rem" /></td>
                   }
                 </tr>
               }
@@ -742,14 +769,14 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
           }
         </tbody>
         @if (frozenRowsPosition() === 'bottom' && frozenRows().length) {
-          <tbody #frozenBottomBody [class]="scrollActive() ? 'sticky bottom-0 z-[5] bg-surface-0 dark:bg-surface-800' : ''">
+          <tbody #frozenBottomBody [class.block]="stacked()" [attr.role]="stacked() ? 'rowgroup' : null" [class.sticky]="stickyActive()" [class.bottom-0]="stickyActive()" [class.bg-surface-0]="stickyActive()" [class.dark:bg-surface-800]="stickyActive()" [style.z-index]="stickyActive() ? '5' : null">
             @for (row of frozenRows(); track $index; let i = $index) {
               <ng-container [ngTemplateOutlet]="frozenRow" [ngTemplateOutletContext]="{ $implicit: row, index: i }" />
             }
           </tbody>
         }
         @if (footerGroupTemplate(); as fg) {
-          <tfoot #footerGroupFoot [class]="'border-t border-surface-200 bg-surface-50 text-surface-700 dark:border-surface-700 dark:bg-surface-800/50 dark:text-surface-200' + (scrollActive() ? ' sticky bottom-0 z-10' : '')">
+          <tfoot #footerGroupFoot class="border-t border-surface-200 bg-surface-50 text-surface-700 dark:border-surface-700 dark:bg-surface-800/50 dark:text-surface-200" [class.sticky]="stickyActive()" [class.bottom-0]="stickyActive()" [class.z-10]="stickyActive()">
             <ng-container [ngTemplateOutlet]="fg" />
           </tfoot>
         }
@@ -925,6 +952,15 @@ export class DataTableComponent<T> {
   readonly virtualScroll = input(false, { transform: booleanAttribute });
   /** Height in pixels of every body row in `virtualScroll` mode. Cell content must fit it: the cells clip their overflow, because a taller row would shift every scroll offset. */
   readonly virtualScrollItemSize = input(40, { transform: numberAttribute });
+  /**
+   * `scroll` (default) keeps the horizontal scroll layout. `stack` renders each body row as a block below `breakpoint`, with every
+   * data cell labelled by its column (`stackLabel`, else `header`). At or above `breakpoint` the table renders as `scroll` does.
+   * While stacked, sorting, frozen columns and rows, column resize and reorder, row reorder and row-span merging are inactive;
+   * selection, expansion, editing and `scrollable` keep working.
+   */
+  readonly responsiveLayout = input<'scroll' | 'stack'>('scroll');
+  /** The viewport width below which a `stack` table stacks, as a CSS length such as `960px`. A value that is not a length keeps the table unstacked. */
+  readonly breakpoint = input('960px');
   readonly stateKey = input<string | null>(null);
   readonly stateStorage = input<'session' | 'local'>('session');
   readonly expandedRowKeys = model<Record<string, boolean>>({});
@@ -1028,6 +1064,27 @@ export class DataTableComponent<T> {
   /** Optional `#empty` template rendered inside the empty-state cell instead of `emptyLabel`. */
   protected readonly emptyTemplate = contentChild('empty', { read: TemplateRef });
   private readonly platformId = inject(PLATFORM_ID);
+  /** Bumped by the breakpoint query's `change` event, so `stacked` re-reads the query when the viewport crosses `breakpoint`. */
+  private readonly mediaChanges = signal(0);
+  /** The breakpoint query; `null` on the server, without `matchMedia`, or when `breakpoint` is not a CSS length. */
+  private readonly breakpointQuery = computed<MediaQueryList | null>(() => {
+    const length = this.breakpoint().trim();
+    if (!isPlatformBrowser(this.platformId) || typeof window.matchMedia !== 'function' || !CSS_LENGTH_PATTERN.test(length)) {
+      return null;
+    }
+    return window.matchMedia(`(width < ${length})`);
+  });
+  /**
+   * True while the table is stacked: `responsiveLayout` is `stack`, the viewport is narrower than `breakpoint` and `virtualScroll` is off.
+   * Every feature the stacked layout switches off reads this at the point of use, so it returns when the viewport widens.
+   * It stays false until the first render has completed (`browserReady`), so server rendering and the first client render are both
+   * unstacked and hydration reconciles identical markup; the table stacks in the render that follows.
+   */
+  protected readonly stacked = computed(() => {
+    this.mediaChanges();
+    const query = this.breakpointQuery();
+    return this.browserReady() && this.responsiveLayout() === 'stack' && !this.virtualScroll() && query !== null && query.matches;
+  });
   private readonly destroyRef = inject(DestroyRef);
   private readonly injector = inject(Injector);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
@@ -1040,6 +1097,8 @@ export class DataTableComponent<T> {
   protected readonly flexHeight = computed(() => this.scrollActive() && this.scrollHeight() === 'flex');
   /** The body scrolls inside the table: `scrollable`, or `virtualScroll`, which always needs a bounded viewport. */
   protected readonly scrollActive = computed(() => this.scrollable() || this.virtualScroll());
+  /** The body or header is sticky: it scrolls inside the table and is not stacked. */
+  protected readonly stickyActive = computed(() => this.scrollActive() && !this.stacked());
   /** Height cap of the scroll viewport; `virtualScroll` without `scrollHeight` falls back to 400px so a large `value` is never rendered whole. */
   protected readonly viewportMaxHeight = computed(() => this.scrollHeight() ?? (this.virtualScroll() ? `${DEFAULT_VIRTUAL_VIEWPORT_PX}px` : null));
   protected readonly wrapperClass = computed(() =>
@@ -1285,6 +1344,55 @@ export class DataTableComponent<T> {
     });
   }
 
+  /**
+   * Hides the consumer's `#headerGroup` rows while stacked and gives them explicit table roles. Their `<tr>` is supplied by the
+   * application and carries no class of its own, so the component adds `sr-only` to it, plus `role="row"` on the row and
+   * `columnheader` or `cell` on each of its cells, because the stacked `display` override can drop their implicit semantics.
+   * Everything is removed again when the table unstacks. Only the class and the roles the component added are removed: a role the
+   * application wrote itself is never set or cleared.
+   */
+  private syncHeaderGroupVisibility(): void {
+    const head = this.tableHead()?.nativeElement;
+    if (!head) {
+      return;
+    }
+    const stacked = this.stacked();
+    for (const row of Array.from(head.rows)) {
+      if (row.hasAttribute('data-med-header-row')) {
+        continue;
+      }
+      if (stacked) {
+        if (!row.hasAttribute('data-med-stack-hidden')) {
+          row.classList.add('sr-only');
+          row.setAttribute('data-med-stack-hidden', '');
+        }
+        // Runs on every render while stacked, so a cell the application adds to the row later also gets its role.
+        this.addStackRole(row, 'row');
+        for (const cell of Array.from(row.cells)) {
+          this.addStackRole(cell, cell.tagName === 'TH' ? 'columnheader' : 'cell');
+        }
+      } else if (!stacked && row.hasAttribute('data-med-stack-hidden')) {
+        row.classList.remove('sr-only');
+        row.removeAttribute('data-med-stack-hidden');
+        for (const element of [row, ...Array.from(row.cells)]) {
+          if (element.hasAttribute('data-med-stack-role')) {
+            element.removeAttribute('role');
+            element.removeAttribute('data-med-stack-role');
+          }
+        }
+      }
+    }
+  }
+
+  /** Sets `role` on a consumer header-group element that has none, and marks it so the role can be removed when the table unstacks. */
+  private addStackRole(element: HTMLElement, role: 'row' | 'columnheader' | 'cell'): void {
+    if (element.hasAttribute('role')) {
+      return;
+    }
+    element.setAttribute('role', role);
+    element.setAttribute('data-med-stack-role', '');
+  }
+
   private observeHeaderHeight(): void {
     const head = this.tableHead()?.nativeElement;
     if (!head || typeof ResizeObserver === 'undefined') {
@@ -1299,6 +1407,17 @@ export class DataTableComponent<T> {
   }
 
   constructor() {
+    afterEveryRender(() => this.syncHeaderGroupVisibility(), { injector: this.injector });
+    // Listens to the breakpoint query only; the layout itself is read from `stacked`, so no state is written in the effect.
+    effect((onCleanup) => {
+      const query = this.breakpointQuery();
+      if (!query) {
+        return;
+      }
+      const onChange = () => this.mediaChanges.update((count) => count + 1);
+      query.addEventListener('change', onChange);
+      onCleanup(() => query.removeEventListener('change', onChange));
+    });
     this.filterModeControl.valueChanges.pipe(takeUntilDestroyed()).subscribe((mode) => this.setFilterDraftMode(mode));
     this.filterDateControl.valueChanges.pipe(takeUntilDestroyed()).subscribe((date) => this.setFilterDraftValue(date));
     // Restoring only after the first render keeps the first client render identical to the server-rendered markup. Restoring
@@ -1502,12 +1621,12 @@ export class DataTableComponent<T> {
   /** `rowGroupMode`, except that `virtualScroll` ignores grouping: group boundaries and spans need neighbouring rows that may not be rendered. */
   private readonly effectiveRowGroupMode = computed(() => (this.virtualScroll() ? null : this.rowGroupMode()));
   /** `reorderable`, except that `virtualScroll` ignores row reorder: a drag needs its drop target rendered, and the window moves while dragging. */
-  protected readonly rowReorderActive = computed(() => this.reorderable() && !this.virtualScroll());
+  protected readonly rowReorderActive = computed(() => this.reorderable() && !this.virtualScroll() && !this.stacked());
 
   /** The visible column row-span grouping merges: `rowGroupMode() === 'rowspan'` and `groupRowsBy()` naming a visible column's field, otherwise `null` and nothing merges. */
   protected readonly spanColumnField = computed(() => {
     const field = this.groupRowsBy();
-    if (this.effectiveRowGroupMode() !== 'rowspan' || !field) {
+    if (this.stacked() || this.effectiveRowGroupMode() !== 'rowspan' || !field) {
       return null;
     }
     return this.visibleColumns().some((col) => col.field() === field) ? field : null;
@@ -1622,7 +1741,7 @@ export class DataTableComponent<T> {
   protected readonly hasSelectionColumn = computed(() => !this.isCellSelectionActive() && (this.selectionMode() === 'multiple' || this.selectionMode() === 'radio'));
 
   /** `true` when the reorder, selection and radio columns freeze on the left: they follow a left-frozen data column. */
-  protected readonly utilityFrozen = computed(() => this.visibleColumns().some((col) => col.frozen() && col.alignFrozen() === 'left'));
+  protected readonly utilityFrozen = computed(() => !this.stacked() && this.visibleColumns().some((col) => col.frozen() && col.alignFrozen() === 'left'));
 
   private readonly utilityWidth = computed(() => (this.rowReorderActive() ? REORDER_COLUMN_PX : 0) + (this.hasSelectionColumn() ? SELECTION_COLUMN_PX : 0));
 
@@ -1630,6 +1749,10 @@ export class DataTableComponent<T> {
   private readonly frozenLayout = computed(() => {
     const cols = this.visibleColumns();
     const layout = new Map<TableColumnComponent, { readonly side: 'left' | 'right'; readonly offset: number }>();
+    // While stacked, frozen columns render as ordinary cells: no side, no offset, no sticky style.
+    if (this.stacked()) {
+      return layout;
+    }
     let left = this.utilityWidth();
     for (const col of cols) {
       if (col.frozen() && col.alignFrozen() === 'left') {
@@ -1755,22 +1878,49 @@ export class DataTableComponent<T> {
     return match ? parseFloat(match[1]) : MIN_FROZEN_COLUMN_PX;
   }
 
-  /** Sticky style of a frozen data column, or `null` for any other column. */
-  protected frozenStyle(col: TableColumnComponent): Record<string, string> | null {
-    const placed = this.frozenLayout().get(col);
-    return placed ? { position: 'sticky', [placed.side]: `${placed.offset}px`, 'z-index': '1' } : null;
+  /** Whether a data column is frozen, so it is sticky. Bound per class so hydration clears a server-rendered `sticky`. */
+  protected isFrozenColumn(col: TableColumnComponent): boolean {
+    return this.frozenLayout().has(col);
   }
 
-  /** Exact width of a utility column, plus its sticky offset when a left-frozen data column makes it freeze. */
+  /** Sticky position of a frozen data column, or `null`. Bound per property so hydration clears a server-rendered value. */
+  protected frozenPosition(col: TableColumnComponent): 'sticky' | null {
+    return this.frozenLayout().has(col) ? 'sticky' : null;
+  }
+
+  /** Offset of a frozen data column from `side`, or `null` when it is not frozen on that side. */
+  protected frozenEdge(col: TableColumnComponent, side: 'left' | 'right'): string | null {
+    const placed = this.frozenLayout().get(col);
+    return placed && placed.side === side ? `${placed.offset}px` : null;
+  }
+
+  /** Stacking level of a frozen data column, or `null`. */
+  protected frozenZIndex(col: TableColumnComponent): '1' | null {
+    return this.frozenLayout().has(col) ? '1' : null;
+  }
+
+  /** Exact width of a utility column. Its sticky position is bound per property by `utilityPosition` and `utilityLeft`. */
   protected utilityStyle(kind: 'reorder' | 'selection'): Record<string, string> {
     const px = kind === 'reorder' ? REORDER_COLUMN_PX : SELECTION_COLUMN_PX;
-    const style: Record<string, string> = { width: `${px}px`, 'min-width': `${px}px`, 'max-width': `${px}px` };
-    if (this.utilityFrozen()) {
-      style['position'] = 'sticky';
-      style['left'] = `${kind === 'selection' && this.rowReorderActive() ? REORDER_COLUMN_PX : 0}px`;
-      style['z-index'] = '1';
+    return { width: `${px}px`, 'min-width': `${px}px`, 'max-width': `${px}px` };
+  }
+
+  /** Sticky position of the utility columns, or `null` when they do not freeze. */
+  protected utilityPosition(): 'sticky' | null {
+    return this.utilityFrozen() ? 'sticky' : null;
+  }
+
+  /** Left offset of a sticky utility column, or `null` when it does not freeze. */
+  protected utilityLeft(kind: 'reorder' | 'selection'): string | null {
+    if (!this.utilityFrozen()) {
+      return null;
     }
-    return style;
+    return `${kind === 'selection' && this.rowReorderActive() ? REORDER_COLUMN_PX : 0}px`;
+  }
+
+  /** Stacking level of the utility columns while they are sticky, or `null`. */
+  protected utilityZIndex(): '1' | null {
+    return this.utilityFrozen() ? '1' : null;
   }
 
   /** Opaque background of a sticky utility cell (`row` is `null` in the header). */
@@ -1802,12 +1952,33 @@ export class DataTableComponent<T> {
     return placed ? mergeClasses(this.frozenBackground(row, index), this.frozenBorderClass(placed.side)) : '';
   }
 
+  /** Vertical padding of the current size. Horizontal padding is bound per class, because it moves to the row while stacked. */
+  private verticalPadding(): string {
+    return SIZE_PADDING_CLASS[this.size()].replace(/px-\S+\s?/, '').trim();
+  }
+
+  /** The horizontal padding class of the current size, such as `px-3`. */
+  private paddingX(): string {
+    return SIZE_PADDING_CLASS[this.size()].match(/px-\S+/)?.[0] ?? '';
+  }
+
+  /** Applies a body cell's horizontal padding when the table is not stacked, so a stacked cell has none and its label sits on the row's edge. */
+  protected cellPadX(name: string): boolean {
+    return !this.stacked() && this.paddingX() === name;
+  }
+
+  /** Applies a body row's horizontal padding while stacked, which replaces the padding its cells lose. */
+  protected rowPadX(name: string): boolean {
+    return this.stacked() && this.paddingX() === name;
+  }
+
+  /** The subheader group cell spans the row; while stacked it is a full-width block, as its row is. */
   protected groupCellClass(): string {
-    return SIZE_PADDING_CLASS[this.size()];
+    return mergeClasses(SIZE_PADDING_CLASS[this.size()], this.stacked() ? 'block' : '');
   }
 
   protected expansionCellClass(): string {
-    return SIZE_PADDING_CLASS[this.size()];
+    return mergeClasses(SIZE_PADDING_CLASS[this.size()], this.stacked() ? 'block' : '');
   }
 
   protected headerCellClass(col: TableColumnComponent): string {
@@ -1818,8 +1989,8 @@ export class DataTableComponent<T> {
       ALIGN_CLASS[col.align()],
       this.frozenCellClass(col, null, 0),
       this.dropTargetField() === col.field() ? 'bg-brand-50 dark:bg-brand-900/30' : '',
-      col.sortable() || this.isColumnDraggable(col)
-        ? (col.sortable() ? 'cursor-pointer ' : '') + 'focus-visible:outline-none focus-visible:ring-(--focus-ring-width) focus-visible:ring-offset-(--focus-ring-offset) focus-visible:ring-brand-500 dark:focus-visible:ring-brand-400'
+      (col.sortable() && !this.stacked()) || this.isColumnDraggable(col)
+        ? (col.sortable() && !this.stacked() ? 'cursor-pointer ' : '') + 'focus-visible:outline-none focus-visible:ring-(--focus-ring-width) focus-visible:ring-offset-(--focus-ring-offset) focus-visible:ring-brand-500 dark:focus-visible:ring-brand-400'
         : '',
     );
   }
@@ -1832,7 +2003,7 @@ export class DataTableComponent<T> {
     const cellSelectable = !frozen && this.isCellSelectionActive();
     const cellSelected = cellSelectable && this.isCellSelected(row, col.field());
     return mergeClasses(
-      SIZE_PADDING_CLASS[this.size()],
+      this.verticalPadding(),
       'text-surface-900 dark:text-surface-50',
       ALIGN_CLASS[col.align()],
       this.gridClass(),
@@ -1850,8 +2021,8 @@ export class DataTableComponent<T> {
 
   protected skeletonCellClass(col: TableColumnComponent): string {
     const placed = this.frozenLayout().get(col);
-    const frozen = placed ? mergeClasses('sticky z-[1] bg-surface-0 dark:bg-surface-800', this.frozenBorderClass(placed.side)) : '';
-    return mergeClasses(SIZE_PADDING_CLASS[this.size()], ALIGN_CLASS[col.align()], this.gridClass(), frozen);
+    const frozen = placed ? mergeClasses('bg-surface-0 dark:bg-surface-800', this.frozenBorderClass(placed.side)) : '';
+    return mergeClasses(this.verticalPadding(), ALIGN_CLASS[col.align()], this.gridClass(), frozen);
   }
 
   /** `interactive` is `false` for frozen rows, which are display-only: no pointer cursor, since they cannot be selected. */
@@ -1867,6 +2038,7 @@ export class DataTableComponent<T> {
     const rowFocusable = interactive && Boolean(this.selectionMode() || this.contextMenu()) && !cellSelectionActive;
     return mergeClasses(
       'group border-b border-surface-200 last:border-b-0 dark:border-surface-700',
+      this.stacked() ? 'block bg-surface-0 dark:bg-surface-800' : '',
       interactive && this.selectionMode() && !cellSelectionActive ? 'cursor-pointer' : '',
       rowFocusable ? INSET_FOCUS_RING_CLASS : '',
       this.isSelected(row) || (interactive && this.isContextMenuSelected(row))
@@ -2001,7 +2173,7 @@ export class DataTableComponent<T> {
   }
 
   protected onHeaderClick(col: TableColumnComponent, event: MouseEvent): void {
-    if (col.sortable()) {
+    if (col.sortable() && !this.stacked()) {
       this.toggleSort(col.field(), event.shiftKey);
     }
   }
@@ -2020,7 +2192,7 @@ export class DataTableComponent<T> {
       this.moveColumnByKey(col, event.key === 'ArrowLeft' ? -1 : 1);
       return;
     }
-    if (!col.sortable()) {
+    if (!col.sortable() || this.stacked()) {
       return;
     }
     if (event.key === 'Enter' || event.key === ' ') {
@@ -2057,7 +2229,7 @@ export class DataTableComponent<T> {
   protected readonly dropTargetField = signal<string | null>(null);
 
   protected isColumnDraggable(col: TableColumnComponent): boolean {
-    return this.reorderableColumns() && col.reorderable();
+    return !this.stacked() && this.reorderableColumns() && col.reorderable();
   }
 
   protected onColDragStart(event: DragEvent, col: TableColumnComponent): void {
@@ -2597,6 +2769,9 @@ export class DataTableComponent<T> {
 
   /** `fit` resizes against the next visible column, so the last visible column has no handle there; `expand` gives every column one. */
   protected hasResizeHandle(col: TableColumnComponent): boolean {
+    if (this.stacked()) {
+      return false;
+    }
     const visible = this.visibleColumns();
     return this.columnResizeMode() === 'expand' || visible[visible.length - 1] !== col;
   }
@@ -2681,6 +2856,22 @@ export class DataTableComponent<T> {
     }
     return String(this.rowTrackBy()(row, index));
   }
+
+  /**
+   * The text a stacked cell shows before its value: the column's `stackLabel` when set, else its `header`. An empty result, including
+   * a `stackLabel` set to `''` on a column that has a header, shows no label.
+   */
+  protected stackLabelFor(col: TableColumnComponent): string | null {
+    return (col.stackLabel() ?? col.header()) || null;
+  }
+  /**
+   * Classes of a stacked cell's label. Beside a value the label is a fixed-width inline box; while the cell shows its edit template the
+   * label takes its own line, so the editor sits under it with the cell's full width.
+   */
+  protected stackLabelClass(editing: boolean): string {
+    return mergeClasses(editing ? 'block pb-1' : 'inline-block w-28 pr-2 align-top', 'font-medium text-surface-500 dark:text-surface-400');
+  }
+
 
   protected isRowExpanded(row: T, index: number): boolean {
     return !!this.expandedRowKeys()[this.rowExpansionKey(row, index)];

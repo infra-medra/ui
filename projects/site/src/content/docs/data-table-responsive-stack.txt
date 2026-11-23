@@ -1,0 +1,11 @@
+## Responsive stack
+
+`responsiveLayout="stack"` changes how the table lays out on narrow viewports. Below `breakpoint` (a CSS length, `960px` by default) each body row renders as a block, and each cell shows its column's label beside its value. At or above `breakpoint` the table keeps its default horizontal scroll layout. The default `responsiveLayout` is `scroll`, which never stacks.
+
+The label of a cell is the column's `stackLabel` when set, otherwise its `header`. A column with neither shows no label, so use `stackLabel` for a column that has no visible header. While the table is stacked, sorting, frozen columns and rows, column resize and reorder, row reorder and row-span merging are inactive, while selection, row expansion, editing and `scrollable` keep working. `virtualScroll` always keeps the table unstacked.
+
+The demo below stacks under 960px, labels the first column "Full name" through `stackLabel` and includes a column with no header.
+
+The second table combines the stacked layout with other features: a frozen column and a frozen row, a `#headerGroup` row, subheader row groups, an expanded row, `scrollable` with a `300px` `scrollHeight`, and a `Badge` column hidden with `visible`. Below the breakpoint the frozen row and column render in their normal order, the header group is visually hidden, and the subheader and expansion rows span the full width; at or above it each feature works as usual.
+
+The third table uses `editMode="row"`. Below the breakpoint, the edit button stays in the row's actions cell, which has no label, and each editor renders on its own line under its cell's label.
