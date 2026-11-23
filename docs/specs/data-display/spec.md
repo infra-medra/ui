@@ -131,7 +131,7 @@ With `selectionMode="single"`, clicking a row, or pressing Enter or Space on a f
 
 ### REQ DAT-007: Data table loading and lazy mode
 
-With `loading` the table SHALL dim and overlay a spinner (label "Loading") while keeping existing rows. With `lazy`, the table SHALL NOT sort, filter (globally or by column) or slice `value` itself, SHALL treat it as the current page, SHALL use `totalRecords` for the paginator, and SHALL emit `lazyLoad` once on init and again on each page, sort, filter or column filter change, with the active `columnFilters` in the event. Without `lazy`, `lazyLoad` SHALL never emit.
+With `loading` in the default spinner mode, the table SHALL dim and overlay a spinner (label "Loading") while keeping existing rows; skeleton loading behavior is defined in DAT-042. With `lazy`, the table SHALL NOT sort, filter (globally or by column) or slice `value` itself, SHALL treat it as the current page, SHALL use `totalRecords` for the paginator, and SHALL emit `lazyLoad` once on init and again on each page, sort, filter or column filter change, with the active `columnFilters` in the event. Without `lazy`, `lazyLoad` SHALL never emit.
 
 #### Scenario DAT-007.S1: Lazy emission
 
@@ -352,7 +352,7 @@ In the organization chart ArrowDown SHALL move focus from a node to its first ch
 
 ### REQ DAT-024: Data table documentation page
 
-The DataTable documentation page SHALL declare an ordered `EXAMPLES` list that feeds its "On this page" index, and every entry SHALL resolve to a section whose `id` equals the entry id and which holds English prose, a live demo and a code block showing that demo's template. The page SHALL cover each DataTable feature the component already implements (basic table, single, multiple and radio selection, single and multiple sorting, global filter, column filter menu, pagination with page-size options, vertical scroll with a sticky header, row expansion, subheader row grouping, row-span grouping, expandable row groups, column resize with its fit and expand modes, column toggle, column groups, column reorder, cell editing, cell editing with selection, row editing, loading, lazy mode, empty state, column templates, conditional row style, persisted state, CSV export, row reorder with `dataKey` and events, size, grid lines, striped rows, row keyboard navigation, accessible row labels and row identity, frozen columns, frozen columns combined with the reorder and selection columns, frozen rows, horizontal scroll and flexible scroll). A demo SHALL NOT use an input, output or template the component does not implement.
+The DataTable documentation page SHALL declare an ordered `EXAMPLES` list that feeds its "On this page" index, and every entry SHALL resolve to a section whose `id` equals the entry id and which holds English prose, a live demo and a code block showing that demo's template. The page SHALL cover each DataTable feature the component already implements (basic table, single, multiple and radio selection, single and multiple sorting, global filter, column filter menu, pagination with page-size options, vertical scroll with a sticky header, row expansion, subheader row grouping, row-span grouping, expandable row groups, column resize with its fit and expand modes, column toggle, column groups, column reorder, cell editing, cell editing with selection, row editing, loading, lazy mode, empty state, column templates, conditional row style, persisted state, CSV export, row reorder with `dataKey` and events, size, grid lines, striped rows, row keyboard navigation, accessible row labels and row identity, frozen columns, frozen columns combined with the reorder and selection columns, frozen rows, horizontal scroll and flexible scroll, plus caption/summary slots, custom empty template, and skeleton loading). A demo SHALL NOT use an input, output or template the component does not implement.
 
 #### Scenario DAT-024.S1: Index matches sections
 
@@ -424,6 +424,12 @@ The DataTable documentation page SHALL declare an ordered `EXAMPLES` list that f
 - **When** the column filter section is inspected
 - **Then** it has prose, a working demo and a code block
 - **And** applying a rule in the demo's filter menu reduces the rows shown
+
+#### Scenario DAT-024.S12: Slots, custom empty template and skeleton loading documented
+
+- **Given** the page after this change
+- **When** its sections are listed
+- **Then** the caption/summary slots, custom empty template, and skeleton loading examples each have a section with prose, a working demo and a code block
 
 ### REQ DAT-025: Data table appearance
 
@@ -997,3 +1003,54 @@ A `columnFilter` column SHALL offer the match modes of its `filterType`: for `te
 - **Given** a numeric column with `filterMatchModes` listing gt, lt and a text-only mode, and `filterMatchMode` gt
 - **When** the user opens its filter menu
 - **Then** the match mode select offers only gt and lt, with gt selected
+
+### REQ DAT-040: Data table caption and summary slots
+
+`med-data-table` SHALL accept optional `caption` and `summary` projected templates. When provided, `caption` SHALL render above the table header inside the table container, and `summary` SHALL render below the table body/footer and above the paginator. When omitted, neither region SHALL render.
+
+#### Scenario DAT-040.S1: Caption and summary rendered
+
+- **Given** a data table with both `#caption` and `#summary` templates
+- **When** the table renders
+- **Then** the caption content appears above the table header
+- **And** the summary content appears below the table and before any paginator
+
+#### Scenario DAT-040.S2: Omitted slots render nothing
+
+- **Given** a data table without `#caption` or `#summary` templates
+- **When** the table renders
+- **Then** no extra caption or summary wrapper elements are rendered
+
+### REQ DAT-041: Data table custom empty template
+
+`med-data-table` SHALL accept an optional `#empty` template. When the table has zero visible rows and `loading` is false, the table SHALL render the `#empty` template inside the empty-state cell spanning all visible columns instead of `emptyLabel`. When `#empty` is omitted, `emptyLabel` SHALL continue to render.
+
+#### Scenario DAT-041.S1: Custom empty template shown
+
+- **Given** a data table with an empty `value` array, `loading` false, and a custom empty template
+- **When** the table renders
+- **Then** the custom empty template is rendered inside the empty-state row
+- **And** the default `emptyLabel` text is not shown
+
+#### Scenario DAT-041.S2: Fallback to emptyLabel
+
+- **Given** a data table with an empty `value` array, `loading` false, and no custom empty template
+- **When** the table renders
+- **Then** `emptyLabel` is rendered
+
+### REQ DAT-042: Data table skeleton loading
+
+`med-data-table` SHALL accept `loadingMode` (`'spinner' | 'skeleton'`, default `'spinner'`). When `loading` is true and `loadingMode` is `'skeleton'`, the table SHALL render placeholder skeleton cells across every visible column instead of the spinner overlay, preserving the table header, with the row count matching `rows` when `paginator` is enabled or 5 rows otherwise. When `loading` returns to false, normal data rows (or the empty state) SHALL render.
+
+#### Scenario DAT-042.S1: Skeleton rows rendered while loading
+
+- **Given** a data table configured for skeleton loading with `loading` true and three visible columns
+- **When** the table renders
+- **Then** skeleton placeholder cells are rendered for each visible column
+- **And** the spinner overlay is not shown
+
+#### Scenario DAT-042.S2: Data rows restored after loading
+
+- **Given** a data table in skeleton loading state with rows in `value`
+- **When** `loading` becomes false
+- **Then** the skeleton placeholders are removed and the data rows are rendered
