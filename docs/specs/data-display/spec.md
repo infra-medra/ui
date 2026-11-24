@@ -10,6 +10,8 @@ Lets applications present collections and hierarchies of data: tables, card list
 
 ## Requirements
 
+<!-- retired: DAT-039.S4 -->
+
 ### REQ DAT-001: Data table rendering
 
 `med-data-table` SHALL render one header cell per visible `med-table-column` and one row per item in `value`, showing `row[field]` by default or a custom cell template when provided. When there is nothing to show it SHALL render the empty label (default "No results found") in a single cell spanning all visible columns. The table SHALL carry `ariaLabel` when provided.
@@ -52,13 +54,19 @@ Clicking a sortable header SHALL cycle ascending, descending, then unsorted, unl
 
 ### REQ DAT-003: Data table multi-column sorting
 
-With `sortMode="multiple"`, a plain click SHALL replace the sort with just that column, Shift+click SHALL add the column keeping the others (or cycle its order in place and remove it once it returns to none), ties SHALL be broken by later keys, and a 1-based priority badge SHALL appear next to each active sorted column. `sort` SHALL emit the multi-sort metadata and data.
+With `sortMode="multiple"`, a plain click SHALL replace the sort with just that column, Shift+click SHALL add the column keeping the others (or cycle its order in place, removing it once it returns to none when `removableSort` is `true`, or cycling back to ascending when `removableSort` is `false`), ties SHALL be broken by later keys, and a 1-based priority badge SHALL appear next to each active sorted column. `sort` SHALL emit the multi-sort metadata and data.
 
 #### Scenario DAT-003.S1: Shift adds
 
 - **Given** a table sorted by column A in multiple mode
 - **When** the user Shift+clicks column B
 - **Then** the data is sorted by A then B and both show priority badges
+
+#### Scenario DAT-003.S2: Non-removable multi-column sort
+
+- **Given** a table with `sortMode="multiple"` and `removableSort` set to `false`, sorted ascending by column A and descending by column B
+- **When** the user Shift+clicks column B
+- **Then** column B cycles back to ascending instead of being removed from `multiSortMeta`
 
 ### REQ DAT-004: Data table global filter
 
@@ -184,7 +192,7 @@ With `editMode="cell"`, an editable column cell SHALL show its edit template bou
 
 ### REQ DAT-009: Data table CSV export
 
-`exportCSV()` SHALL download all rows that pass the global filter and every column rule as CSV with the header first, in the current sorted order, using `csvSeparator` and `exportFilename`, quoting values that contain the separator, a quote or a newline and doubling inner quotes. Only visible columns SHALL be exported. With `selectionOnly` it SHALL export only selected rows (only the header when none).
+`exportCSV(options?)` SHALL download all rows that pass the global filter and every column rule as CSV with the header first, in the current sorted order, using `csvSeparator` and `exportFilename`, quoting values that contain the separator, a quote or a newline and doubling inner quotes. Only visible columns SHALL be exported. With `selectionOnly` it SHALL export only selected rows (only the header when none). With `includeFooter` set to `true` and at least one visible column having `footer` text, it SHALL append the footer row after the data rows.
 
 #### Scenario DAT-009.S1: Quoting
 
@@ -198,9 +206,15 @@ With `editMode="cell"`, an editable column cell SHALL show its edit template bou
 - **When** the table is exported
 - **Then** the CSV holds the header and only the two rows that pass the rule
 
+#### Scenario DAT-009.S3: Footer included in CSV export
+
+- **Given** a table with visible columns whose `footer` texts are `"Total"` and `"100"`
+- **When** `exportCSV({ includeFooter: true })` is called
+- **Then** the exported CSV appends `"Total,100"` after the data rows
+
 ### REQ DAT-010: Data table grouping, reorder, resize, expansion and state
 
-The data table SHALL, with `rowGroupMode="subheader"`, insert a subheader row per consecutive distinct `groupRowsBy` value spanning all visible columns, with that field as primary sort key, and SHALL let the user collapse those groups with `expandableRowGroups` (DAT-037). With `rowGroupMode="rowspan"` it SHALL merge the `groupRowsBy` column's cells vertically instead (DAT-036). With `reorderable`, it SHALL show a drag handle per row and emit `rowReorder` with indices into `value`, not display positions; dropping on the origin row SHALL do nothing. With `resizableColumns` it SHALL render column resize handles that behave per `columnResizeMode`; with `scrollable` it SHALL keep a sticky header. It SHALL render the `#rowexpansion` template for rows whose key is in `expandedRowKeys`. With `stateKey`, it SHALL persist sort state and the active column filters (DAT-038) to session or local storage per `stateStorage`, and SHALL restore them on init, including state stored before column filters existed.
+The data table SHALL, with `rowGroupMode="subheader"`, insert a subheader row per consecutive distinct `groupRowsBy` value spanning all visible columns, with that field as primary sort key, and SHALL let the user collapse those groups with `expandableRowGroups` (DAT-037). With `rowGroupMode="rowspan"` it SHALL merge the `groupRowsBy` column's cells vertically instead (DAT-036). With `reorderable`, it SHALL show a drag handle per row and emit `rowReorder` with indices into `value`, not display positions; dropping on the origin row SHALL do nothing. With `resizableColumns` it SHALL render column resize handles that behave per `columnResizeMode`; with `scrollable` it SHALL keep a sticky header. It SHALL render the `#rowexpansion` template for rows whose key is in `expandedRowKeys`. With `stateKey`, it SHALL persist the page offset, sort state, expanded row keys and the active column filters (DAT-038) to session or local storage per `stateStorage`, together with the further fields DAT-056 lists, and SHALL restore them on init, including state stored before column filters existed.
 
 #### Scenario DAT-010.S1: Reorder indices
 
@@ -465,6 +479,14 @@ The DataTable documentation page SHALL declare an ordered `EXAMPLES` list that f
 - **Then** it has prose, a working demo and a code block
 - **And** its demo uses a `#header` template, a column footer and a column with `sortBy` or `sortCompare`
 
+#### Scenario DAT-024.S18: Extended persisted state documented
+
+- **Given** the page after this change
+- **When** the persisted state example section is inspected
+- **Then** it has prose, a working demo and a code block
+- **And** its demo uses a `stateKey` with column reorder, column resize, a column toggle bound with `[(visible)]`, the global filter and a paginator with `rowsPerPageOptions`
+- **And** its prose lists every field the table persists
+
 ### REQ DAT-025: Data table appearance
 
 `med-data-table` SHALL accept `size` (`sm`, `default` default, `lg`), which SHALL change the cell padding and text size, `showGridlines` (default false), which SHALL draw borders between cells, and `stripedRows` (default false), which SHALL give alternate body rows a different background. The three inputs SHALL be independent of each other and of the selection mode.
@@ -490,7 +512,7 @@ The DataTable documentation page SHALL declare an ordered `EXAMPLES` list that f
 
 ### REQ DAT-026: Data table row keyboard navigation
 
-When `selectionMode` is `single`, `radio` or `multiple`, body rows SHALL be focusable, and ArrowDown and ArrowUp on a focused row SHALL move focus to the next and previous row of the current page, Home SHALL move it to the first row and End to the last row. Moving focus SHALL NOT change the selection. Focus SHALL stay on the row at either end of the page, without wrapping. In `multiple` mode, Space and Enter on a focused row SHALL toggle that row in the selection. Without a selection mode these keys SHALL NOT be handled by the table.
+When `selectionMode` is `single`, `radio` or `multiple`, or when `keyboardNavigation` is `true`, body rows SHALL be focusable, and ArrowDown and ArrowUp on a focused row SHALL move focus to the next and previous row of the current page, Home SHALL move it to the first row and End to the last row. Plain Arrow, Home, and End navigation SHALL NOT change the selection, and focus SHALL stay on the row at either end of the page, without wrapping. In `multiple` mode, Space and Enter on a focused row SHALL toggle that row in the selection; `Shift+ArrowDown`, `Shift+ArrowUp`, `Shift+Home`, and `Shift+End` SHALL move focus and select the contiguous range of rows from the anchor row to the target row; and `Ctrl+A` (or `Meta+A`) on a focused body row outside interactive/editing elements SHALL select all loaded rows. Without a selection mode and with `keyboardNavigation` false (default), these keys SHALL NOT be handled by the table.
 
 #### Scenario DAT-026.S1: Arrow movement
 
@@ -510,7 +532,7 @@ When `selectionMode` is `single`, `radio` or `multiple`, body rows SHALL be focu
 - **Given** a focused first row in `single` mode
 - **When** the user presses ArrowUp
 - **Then** focus stays on the first row
-- **And** in a table without a selection mode the key presses are not handled by the table
+- **And** in a table without a selection mode and without `keyboardNavigation` the key presses are not handled by the table
 
 #### Scenario DAT-026.S4: Movement in multiple mode
 
@@ -525,6 +547,27 @@ When `selectionMode` is `single`, `radio` or `multiple`, body rows SHALL be focu
 - **When** the user presses Space
 - **Then** that row is added to the selection
 - **And** pressing Enter on it removes it from the selection again
+
+#### Scenario DAT-026.S6: Shift+Arrow range selection in multiple mode
+
+- **Given** a table in `multiple` mode with focus on the second row
+- **When** the user presses Shift+ArrowDown twice, then Shift+ArrowUp once
+- **Then** pressing Shift+ArrowDown twice selects rows 2 through 4 and moves focus to row 4
+- **And** pressing Shift+ArrowUp once shrinks the selected range to rows 2 through 3 and moves focus to row 3
+
+#### Scenario DAT-026.S7: Ctrl+A select all in multiple mode
+
+- **Given** a table in `multiple` mode with focus on a body row
+- **When** the user presses Ctrl+A
+- **Then** every loaded row is selected
+- **And** default text selection is prevented
+
+#### Scenario DAT-026.S8: Keyboard navigation without selection mode
+
+- **Given** a table without `selectionMode` and with `keyboardNavigation` set to `true`
+- **When** the user focuses the first row and presses ArrowDown, then End, then Home
+- **Then** focus moves to the second row, then the last row of the page, then the first row
+- **And** `selection` remains unchanged
 
 ### REQ DAT-027: Data table row identity and row labels
 
@@ -772,7 +815,7 @@ A `med-table-column` SHALL accept `visible` (default `true`). While `visible` is
 
 ### REQ DAT-034: Data table column reorder
 
-With `reorderableColumns`, `med-data-table` SHALL let the user move a column by dragging its header cell onto another column's header cell, which places the dragged column at the target column's position in the column order. The order SHALL include hidden columns (`visible` false), so a hidden column keeps its place and returns to it when shown. A frozen column SHALL move only to the position of another column frozen on the same edge, and a column that is not frozen SHALL NOT be dropped among frozen columns, so no drag changes a column's frozen state. A column whose `reorderable` is `false` SHALL NOT be draggable and SHALL NOT be a drop target. Dropping a column on itself SHALL change nothing. At the end of a drag that moves a column, `colReorder` SHALL emit `dragIndex`, `dropIndex` and `columns`, where the indices are positions in the full column order including hidden columns and `columns` lists the fields in the new order. A focused header cell of a reorderable column SHALL move the column one position toward the start with Alt+ArrowLeft and toward the end with Alt+ArrowRight, skipping hidden columns, with the same movement limits and the same `colReorder` event, keeping focus on that header and announcing the new position through a live region. Header, body and footer cells, the `#headerGroup` and `#footerGroup` rows and frozen offsets SHALL follow the new order, and the application owns the `colspan` of the group rows it writes. Without `reorderableColumns` the table SHALL NOT make headers draggable or react to Alt+Arrow.
+With `reorderableColumns`, `med-data-table` SHALL let the user move a column by dragging its header cell onto another column's header cell, which places the dragged column at the target column's position in the column order. The order SHALL include hidden columns (`visible` false), so a hidden column keeps its place and returns to it when shown. When `reorderAcrossFrozen` is `false` (default), a frozen column SHALL move only to the position of another column frozen on the same edge, and a column that is not frozen SHALL NOT be dropped among frozen columns, so no drag changes a column's frozen state. When `reorderAcrossFrozen` is `true`, moving a column onto a target column across a frozen boundary SHALL succeed and SHALL update the moved column's `frozen` and `alignFrozen` state to match the target column, recomputing frozen offsets. A column whose `reorderable` is `false` SHALL NOT be draggable and SHALL NOT be a drop target. Dropping a column on itself SHALL change nothing. At the end of a drag that moves a column, `colReorder` SHALL emit `dragIndex`, `dropIndex` and `columns`, where the indices are positions in the full column order including hidden columns and `columns` lists the fields in the new order. A focused header cell of a reorderable column SHALL move the column one position toward the start with Alt+ArrowLeft and toward the end with Alt+ArrowRight, skipping hidden columns, with the same movement limits and the same `colReorder` event, keeping focus on that header and announcing the new position through a live region. Header, body and footer cells, the `#headerGroup` and `#footerGroup` rows and frozen offsets SHALL follow the new order, and the application owns the `colspan` of the group rows it writes. Without `reorderableColumns` the table SHALL NOT make headers draggable or react to Alt+Arrow.
 
 #### Scenario DAT-034.S1: Dragging a header moves the column
 
@@ -795,7 +838,7 @@ With `reorderableColumns`, `med-data-table` SHALL let the user move a column by 
 
 #### Scenario DAT-034.S4: Frozen columns stay on their side
 
-- **Given** a table with `reorderableColumns`, a column F frozen on the left, and free columns A and B
+- **Given** a table with `reorderableColumns`, `reorderAcrossFrozen` false, a column F frozen on the left, and free columns A and B
 - **When** the user drags header A onto header F
 - **Then** the column order is unchanged
 - **And** `colReorder` does not emit
@@ -849,6 +892,12 @@ With `reorderableColumns`, `med-data-table` SHALL let the user move a column by 
 - **When** the user drags a header or presses Alt+ArrowRight on a focused header
 - **Then** the column order is unchanged
 - **And** no header is draggable
+
+#### Scenario DAT-034.S12: Moving a column across a frozen boundary when reorderAcrossFrozen is true
+
+- **Given** a table with `reorderableColumns` and `reorderAcrossFrozen` set to `true`, a left-frozen column F, and a free column A
+- **When** the user drags header A onto header F
+- **Then** column A moves to F's position, becomes left-frozen, and frozen offsets are recomputed
 
 ### REQ DAT-035: Data table row editing
 
@@ -956,7 +1005,7 @@ With `rowGroupMode="subheader"` and `expandableRowGroups`, `med-data-table` SHAL
 
 ### REQ DAT-038: Data table column filter menu
 
-A column with `columnFilter` SHALL show a funnel button in its header with the accessible name "Filter {header}" and an `aria-expanded` state, and activating the button SHALL open a menu holding a match mode select (only when the column offers more than one mode), a value control for the column's `filterType`, and Apply and Clear buttons. Pressing Apply, or Enter in the value control, SHALL commit the rule, close the menu and return the table to its first page; the table SHALL then show only the rows that pass every column rule and the global filter. Clear SHALL remove the column's rule. A rule with an empty value SHALL filter nothing. The funnel button SHALL show an active state while its column has a rule. Escape or a click outside the menu SHALL close it without committing and return the focus to the funnel button. Activating the funnel button SHALL NOT change the sort. A column without `columnFilter` SHALL show no funnel button. The model `columnFilters` SHALL hold each column's rule (match mode and value) keyed by field, SHALL be two-way, and SHALL filter the rows and set the funnel states when an application changes it. The `filter` output SHALL also emit when a column rule commits, with the current global text and the filtered rows.
+A column with `columnFilter` SHALL show a funnel button in its header with the accessible name "Filter {header}" and an `aria-expanded` state (when `filterDisplay` is `'menu'`), and activating the button SHALL open a menu holding a match mode select (only when the column offers more than one mode), a value control for the column's `filterType`, an Add Rule button (`addRuleLabel`) to add additional rules combined with an `AND`/`OR` operator (`'and'` default, `'or'` optional, with `matchAllLabel` / `matchAnyLabel`), and Apply and Clear buttons. Pressing Apply, or Enter in the value control, SHALL commit the rule(s), close the menu and return the table to its first page; the table SHALL then show only the rows that pass every column's rule group (matching all active rules when `'and'` or at least one active rule when `'or'`) and the global filter. Clear SHALL remove the column's rules. A rule with an empty value SHALL filter nothing. The funnel button SHALL show an active state while its column has any active rule. Escape or a click outside the menu SHALL close it without committing and return the focus to the funnel button. Activating the funnel button SHALL NOT change the sort. A column without `columnFilter` SHALL show no funnel button. The model `columnFilters` SHALL hold each column's rule (`{ matchMode, value }`) or rule group (`{ operator, rules }`) keyed by field, SHALL be two-way, and SHALL filter the rows, persist/restore boundedly when `stateKey` is set, and set the funnel states when an application changes it. The `filter` output SHALL also emit when a column rule commits, with the current global text and the filtered rows.
 
 #### Scenario DAT-038.S1: Apply a text rule
 
@@ -1010,9 +1059,16 @@ A column with `columnFilter` SHALL show a funnel button in its header with the a
 - **Then** the rows are filtered by that rule and the `name` funnel button shows its active state
 - **And** applying a new rule through the menu updates `columnFilters`
 
+#### Scenario DAT-038.S9: Multiple rules with AND and OR operators
+
+- **Given** a table with a `name` column with `columnFilter` and rows "Alpha", "Beta", "Alpha Beta", and "Gamma"
+- **When** the user adds two rules on `name` (`contains` "alpha" and `contains` "beta") with operator `'and'`, then switches the operator to `'or'`
+- **Then** under `'and'` only "Alpha Beta" is shown
+- **And** under `'or'` "Alpha", "Beta", and "Alpha Beta" are shown
+
 ### REQ DAT-039: Data table column filter match modes
 
-A `columnFilter` column SHALL offer the match modes of its `filterType`: for `text` (default) contains (default mode), notContains, startsWith, endsWith, equals and notEquals; for `numeric` equals (default mode), notEquals, lt, lte, gt and gte; for `date` dateIs (default mode), dateIsNot, dateBefore and dateAfter. `filterMatchModes` SHALL restrict the offered modes to those it lists that belong to the type, and `filterMatchMode` SHALL set the preselected mode when it is offered. Text modes SHALL compare case-insensitively against the cell's text, treating a missing value as the empty string. Numeric modes SHALL compare numbers, and a cell whose value is not a finite number SHALL match no numeric mode. Date modes SHALL compare calendar days in the local time zone of cells that are `Date` objects or ISO date strings, and a cell that is neither SHALL match no date mode.
+A `columnFilter` column SHALL offer the match modes of its `filterType`: for `text` (default) contains (default mode), notContains, startsWith, endsWith, equals, notEquals and in; for `numeric` equals (default mode), notEquals, lt, lte, gt, gte, between and in; for `date` dateIs (default mode), dateIsNot, dateBefore, dateAfter, between and in. `filterMatchModes` SHALL restrict the offered modes to those it lists that belong to the type, and `filterMatchMode` SHALL set the preselected mode when it is offered. Text modes SHALL compare case-insensitively against the cell's text, treating a missing value as the empty string. Numeric modes SHALL compare numbers, and a cell whose value is not a finite number SHALL match no numeric mode. Date modes SHALL compare calendar days in the local time zone of cells that are `Date` objects or ISO date strings, and a cell that is neither SHALL match no date mode. `between` SHALL take a two-element `[min, max]` array and match inclusive bounds (ignoring a `null` bound, and inactive when both bounds are empty/null). `in` SHALL take an array of allowed values (optionally populated from `filterOptions` or distinct column values in the UI) and match when the cell equals any element in the array (inactive when empty).
 
 #### Scenario DAT-039.S1: Text modes
 
@@ -1020,23 +1076,18 @@ A `columnFilter` column SHALL offer the match modes of its `filterType`: for `te
 - **When** the rule is startsWith "wid", then endsWith "GET", then notEquals "widget"
 - **Then** the rows shown are "Widget" and "widget pro", then "Widget" and "Gadget", then "Gadget" and "widget pro"
 
-#### Scenario DAT-039.S2: Numeric modes
+#### Scenario DAT-039.S2: Between mode for numeric and date columns
 
-- **Given** a numeric column with the values 5, 10 and 20 and one cell that is the text "n/a"
-- **When** the rule is gte 10
-- **Then** the rows with 10 and 20 are shown and the row with "n/a" is not
+- **Given** a numeric `price` column with values 10, 25, 50 and a date `created` column with values "2026-01-01", "2026-01-15", "2026-02-01"
+- **When** `price` uses `between` `[15, 50]` and `created` uses `between` `["2026-01-10", "2026-01-20"]`
+- **Then** `price` matches 25 and 50
+- **And** `created` matches "2026-01-15"
 
-#### Scenario DAT-039.S3: Date modes compare days
+#### Scenario DAT-039.S3: Multi-select `in` mode
 
-- **Given** a date column holding 2026-03-09 23:30, 2026-03-10 08:00 and 2026-03-11 00:00
-- **When** the rule is dateBefore 2026-03-11, then dateIs 2026-03-10
-- **Then** the first two rows are shown, then only the second
-
-#### Scenario DAT-039.S4: Offered modes
-
-- **Given** a numeric column with `filterMatchModes` listing gt, lt and a text-only mode, and `filterMatchMode` gt
-- **When** the user opens its filter menu
-- **Then** the match mode select offers only gt and lt, with gt selected
+- **Given** a text `category` column with values "A", "B", "C"
+- **When** the rule uses `in` with `["a", "C"]`
+- **Then** rows with category "A" and "C" are shown and "B" is excluded
 
 ### REQ DAT-040: Data table caption and summary slots
 
@@ -1091,7 +1142,7 @@ A `columnFilter` column SHALL offer the match modes of its `filterType`: for `te
 
 ### REQ DAT-043: Data table cell selection
 
-When `cellSelection` is `true` and `selectionMode` is `'single'` or `'multiple'`, `<med-data-table>` SHALL allow selecting individual data cells instead of whole rows. Clicking a data cell, or pressing Enter or Space on a focused data cell, SHALL select or toggle that cell (`{ row, field }`), set `aria-selected="true"` and `tabindex="0"` on data cells, and emit `cellSelect` or `cellUnselect`. In `'single'` mode, `selection` SHALL hold `{ row, field } | null` and selecting an already-selected cell SHALL be a no-op; in `'multiple'` mode, `selection` SHALL hold an array of `{ row, field }` entries. With `dataKey`, cell row matching SHALL compare by key across different object references; without it, by reference.
+When `cellSelection` is `true` and `selectionMode` is `'single'` or `'multiple'`, `<med-data-table>` SHALL allow selecting individual data cells instead of whole rows. Clicking a data cell, or pressing Enter or Space on a focused data cell, SHALL select or toggle that cell (`{ row, field }`), set `aria-selected="true"` and `tabindex="0"` on data cells, and emit `cellSelect` or `cellUnselect`. Pressing ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Home, or End on a focused data cell SHALL move focus to the target data cell within table bounds. In `'single'` mode, `selection` SHALL hold `{ row, field } | null` and selecting an already-selected cell SHALL be a no-op; in `'multiple'` mode, `selection` SHALL hold an array of `{ row, field }` entries, `Shift+Arrow*` / `Shift+Home` / `Shift+End` SHALL select the rectangular range of cells from the anchor cell to the target cell, `Ctrl+A` (or `Meta+A`) on a focused data cell SHALL select all data cells across loaded rows and visible columns, and dragging with the primary mouse button (`mousedown` on an anchor cell, hovering other cells, and releasing `mouseup`) SHALL select the rectangular range of cells between the anchor cell and the hovered cell. With `dataKey`, cell row matching SHALL compare by key across different object references; without it, by reference.
 
 #### Scenario DAT-043.S1: Single cell selection
 
@@ -1106,6 +1157,27 @@ When `cellSelection` is `true` and `selectionMode` is `'single'` or `'multiple'`
 - **When** the user clicks two different data cells
 - **Then** both cells have `aria-selected="true"` and `selection` contains both `{ row, field }` entries
 - **And** clicking an already-selected cell deselects it and emits `cellUnselect`
+
+#### Scenario DAT-043.S3: Cell arrow navigation and Shift+Arrow range selection
+
+- **Given** a table with `cellSelection` and `selectionMode="multiple"` with focus on cell `(row 1, col 0)`
+- **When** the user presses ArrowRight, then Shift+ArrowDown and Shift+ArrowRight
+- **Then** ArrowRight moves focus to `(row 1, col 1)` without selecting
+- **And** Shift+ArrowDown followed by Shift+ArrowRight selects the rectangular range from `(row 1, col 1)` to `(row 2, col 2)`
+
+#### Scenario DAT-043.S4: Ctrl+A selects all cells in multiple mode
+
+- **Given** a table with `cellSelection` and `selectionMode="multiple"` with focus on a data cell
+- **When** the user presses Ctrl+A
+- **Then** `selection` contains every `{ row, field }` pair for loaded rows and visible columns
+- **And** default text selection is prevented
+
+#### Scenario DAT-043.S5: Mouse drag selects a rectangular cell range
+
+- **Given** a table with `cellSelection` and `selectionMode="multiple"`
+- **When** the user presses `mousedown` on cell `(row 0, col 0)`, moves `mouseenter` onto cell `(row 1, col 1)`, and releases `mouseup`
+- **Then** `selection` contains all 4 cells in the 2×2 rectangle from `(row 0, col 0)` to `(row 1, col 1)`
+- **And** subsequent mouse movement after `mouseup` does not alter `selection`
 
 ### REQ DAT-044: Data table conditional cell styling
 
@@ -1323,7 +1395,7 @@ With `paginator`, `med-data-table` SHALL place its paginator according to `pagin
 
 ### REQ DAT-050: Data table responsive stack layout
 
-`med-data-table` SHALL accept `responsiveLayout` (`scroll` default, or `stack`) and `breakpoint` (a CSS length, default `960px`). With `responsiveLayout="stack"` and a viewport narrower than `breakpoint`, the table SHALL be stacked: each body row renders as a block and each data cell shows its column's label next to its value. With the default `scroll`, or at a viewport at least as wide as `breakpoint`, the table SHALL render and scroll horizontally exactly as before. Switching the viewport across `breakpoint` SHALL update the layout without a reload. A cell's label SHALL be the column's `stackLabel` when set, else its `header`, and a column with neither SHALL show no label. A `breakpoint` that is not a valid CSS length SHALL leave the table unstacked. `virtualScroll` SHALL keep the table unstacked, because its row positions assume a fixed row height. Labels SHALL NOT add any internal string.
+`med-data-table` SHALL accept `responsiveLayout` (`scroll` default, or `stack`), `breakpoint` (a CSS length, default `960px`), and `breakpointMode` (`'viewport'` default, or `'container'`). With `responsiveLayout="stack"` and the measured width (viewport width when `breakpointMode` is `'viewport'`, or the table host element's `ResizeObserver` width when `breakpointMode` is `'container'`) narrower than `breakpoint`, the table SHALL be stacked: each body row renders as a block and each data cell shows its column's label next to its value. With the default `scroll`, or at a width at least as wide as `breakpoint`, the table SHALL render and scroll horizontally exactly as before. Switching the viewport or container width across `breakpoint` SHALL update the layout without a reload. A cell's label SHALL be the column's `stackLabel` when set, else its `header`, and a column with neither SHALL show no label. A `breakpoint` that is not a valid CSS length SHALL leave the table unstacked. `virtualScroll` SHALL keep the table unstacked, because its row positions assume a fixed row height.
 
 #### Scenario DAT-050.S1: Defaults keep the scroll layout
 
@@ -1362,6 +1434,12 @@ With `paginator`, `med-data-table` SHALL place its paginator according to `pagin
 - **Given** a table with `responsiveLayout="stack"` and `breakpoint="wide"`, and another with `responsiveLayout="stack"` and `virtualScroll`, at a viewport of 400px
 - **When** they render
 - **Then** neither table is stacked
+
+#### Scenario DAT-050.S7: Container-width breakpoint via ResizeObserver
+
+- **Given** a table with `responsiveLayout="stack"`, `breakpointMode="container"`, and `breakpoint="500px"` inside a wide viewport
+- **When** the host container's observed width changes from 600px to 420px and back to 500px
+- **Then** the table is unstacked at 600px, stacked at 420px, and unstacked again at 500px
 
 ### REQ DAT-051: Data table stacked semantics and appearance
 
@@ -1538,7 +1616,7 @@ While stacked, `med-data-table` SHALL behave as follows with each other feature.
 
 ### REQ DAT-055: Data table custom column sorting
 
-`med-table-column` SHALL accept `sortBy`, the name of the row property a sort by that column compares (default the column's `field`), and `sortCompare`, a function that compares two rows for ascending order and returns a negative number, zero or a positive number. Whenever the table sorts by a column, from a header click or key, from the initial or two-way `sortField` and `sortOrder`, or as a key of `multiSortMeta`, it SHALL order rows with that column's `sortCompare` when set, otherwise by the column's `sortBy` value with the default comparison, and a descending order SHALL reverse the result. `sortCompare` SHALL take precedence over `sortBy`. `sortField`, `multiSortMeta`, `aria-sort`, the `sort` event, `lazyLoad` and the persisted state SHALL keep naming the column by its `field`. With `lazy` the table SHALL NOT sort, as DAT-007 defines. Rows that compare equal SHALL keep their relative order, and the subheader grouping key SHALL keep the default comparison.
+`med-table-column` SHALL accept `sortBy`, the name of the row property a sort by that column compares (default the column's `field`), and `sortCompare`, a function that compares two rows for ascending order and returns a negative number, zero or a positive number. Whenever the table sorts by a column, from a header click or key, from the initial or two-way `sortField` and `sortOrder`, or as a key of `multiSortMeta`, it SHALL order rows with that column's `sortCompare` when set, otherwise by the column's `sortBy` value with the default comparison, and a descending order SHALL reverse the result. `sortCompare` SHALL take precedence over `sortBy`. `sortField`, `multiSortMeta`, `aria-sort`, the `sort` event, `lazyLoad` and the persisted state SHALL keep naming the column by its `field`, while `lazyLoad` SHALL additionally emit `sortBy` (resolved `col.sortBy() ?? sortField`) and `multiSortByMeta` (each entry's field resolved to `col.sortBy() ?? m.field`). With `lazy` the table SHALL NOT sort, as DAT-007 defines. Rows that compare equal SHALL keep their relative order, and the subheader grouping key SHALL keep the default comparison.
 
 #### Scenario DAT-055.S1: Sort by another property
 
@@ -1573,3 +1651,205 @@ While stacked, `med-data-table` SHALL behave as follows with each other feature.
 - **When** the user clicks the column header
 - **Then** the rows keep the order of `value`
 - **And** `lazyLoad` emits with `sortField` `status` and `sortOrder` `asc`
+
+#### Scenario DAT-055.S6: Lazy load emits resolved sortBy and multiSortByMeta
+
+- **Given** a `lazy` table with column `status` having `sortBy="statusRank"`
+- **When** the user sorts by `status` ascending (and in `sortMode="multiple"`)
+- **Then** `lazyLoad` emits `sortField: 'status'`, `sortBy: 'statusRank'`, and `multiSortByMeta` with `field: 'statusRank'`
+
+### REQ DAT-056: Data table persisted state
+
+With `stateKey`, `med-data-table` SHALL save to the storage chosen by `stateStorage`, whenever one of them changes, the page offset, `sortField` and `sortOrder`, the expanded row keys and the column filter rules (DAT-010), and also the column order (DAT-034), the resized width of each column (DAT-031), whether each declared column is visible (DAT-032), the collapsed row groups (`expandedRowGroups`, DAT-037), the committed global filter text (`globalFilterValue`, DAT-004), `multiSortMeta` (DAT-003) and the page size chosen in the paginator (DAT-049). When the table restores the state on init it SHALL apply each saved field on its own: a field that is missing, or whose value has the wrong shape, SHALL keep the table's current value for that field and SHALL NOT stop the other fields from restoring, and stored text that is not valid JSON SHALL restore nothing and raise no error. Restoring SHALL skip every saved entry that names a field no declared column has: such a column in the saved order, width or visibility, a `multiSortMeta` entry, and a `sortField`. In the restored order, declared columns the saved order does not list SHALL follow the listed ones in declaration order. A width SHALL be restored only when it is a positive finite number of pixels, a page size only when it is a positive integer and, when `rowsPerPageOptions` is set, one of those options, and a `multiSortMeta` entry only when its order is `asc` or `desc`. A restored visibility SHALL set the column's `visible`, which SHALL be two-way on `med-table-column` so an application bound with `[(visible)]` receives it; an application that later writes `visible` SHALL override the restored value. The restored global filter text SHALL appear in the search box and filter the rows at once, without waiting for `filterDelay`. Restoring SHALL NOT emit `colReorder`, `colResize`, `sort`, `filter`, `pageChange`, `rowGroupExpand` or `rowGroupCollapse`; the two-way models it sets SHALL emit their change events.
+
+#### Scenario DAT-056.S1: Extended state round trip
+
+- **Given** a table with a `stateKey`, `resizableColumns`, `reorderableColumns`, `sortMode="multiple"`, `filterable`, a paginator with `rowsPerPageOptions` `[5, 10]`, `rowGroupMode="subheader"` with `expandableRowGroups`, and columns `name`, `team` and `price`
+- **And** the user moved `price` to the first position, resized `name` to 180 pixels, hid `team`, collapsed the group `A`, committed the global filter text `ab`, sorted by `name` ascending and then `price` descending, and chose 5 rows per page
+- **When** a new table with the same `stateKey` and the same columns is created
+- **Then** its column order is `price`, `name`, `team`
+- **And** the `name` header cell is 180 pixels wide
+- **And** `team` is not rendered and its `visible` is `false`
+- **And** `expandedRowGroups` holds `A`
+- **And** the search box shows `ab` and only rows matching `ab` are shown
+- **And** `multiSortMeta` is `name` ascending then `price` descending
+- **And** each page shows 5 rows
+
+#### Scenario DAT-056.S2: State saved by an older version
+
+- **Given** stored state under a `stateKey` that holds only a page offset, `sortField` `name` with `sortOrder` `asc`, and no other field
+- **When** a table with that `stateKey` is created
+- **Then** the sort by `name` ascending and the page offset are restored
+- **And** the columns keep their declaration order, declared widths and declared `visible` values
+- **And** `expandedRowGroups`, `globalFilterValue` and `multiSortMeta` keep their initial values and the page size equals `rows`
+- **And** no error is thrown
+
+#### Scenario DAT-056.S3: Saved entries for removed columns are skipped
+
+- **Given** stored state whose column order is `legacy`, `price`, `name`, whose widths and visibility include `legacy`, whose `multiSortMeta` is `legacy` ascending then `name` descending, and whose `sortField` is `legacy`
+- **When** a table declaring only `name`, `team` and `price` is created with that `stateKey`
+- **Then** its column order is `price`, `name`, `team`
+- **And** `multiSortMeta` is `name` descending
+- **And** `sortField` keeps its initial value
+- **And** no error is thrown
+
+#### Scenario DAT-056.S4: A malformed field does not block the others
+
+- **Given** stored state whose `columnWidths` value is a string, whose page size is `-3`, and whose global filter text is `ab`
+- **When** a table with that `stateKey` is created
+- **Then** every column keeps its declared width
+- **And** the page size equals `rows`
+- **And** the search box shows `ab` and the rows are filtered by it
+
+#### Scenario DAT-056.S5: Page size outside the options
+
+- **Given** stored state with page size 50 under a `stateKey`
+- **When** a table with that `stateKey` and `rowsPerPageOptions` `[5, 10]` is created
+- **Then** the page size equals `rows`
+
+#### Scenario DAT-056.S6: Restored visibility reaches the application
+
+- **Given** stored state where the `team` column is hidden
+- **When** a table with that `stateKey` is created whose `team` column binds `[(visible)]` to an application signal that starts `true`
+- **Then** the application signal becomes `false` and `team` is not rendered
+- **And** when the application sets the signal to `true`, `team` is rendered again and the stored state records it as visible
+
+#### Scenario DAT-056.S7: A shown column declared hidden stays shown
+
+- **Given** a table with a `stateKey` whose `notes` column is declared with `visible` `false`
+- **And** the user made `notes` visible
+- **When** a new table with the same `stateKey` and the same declaration is created
+- **Then** `notes` is rendered
+
+#### Scenario DAT-056.S8: Restoring emits no user events
+
+- **Given** stored state holding a column order, a width, a `multiSortMeta`, a global filter text and a page size
+- **When** a table with that `stateKey` is created
+- **Then** `colReorder`, `colResize`, `sort`, `filter` and `pageChange` do not emit
+
+#### Scenario DAT-056.S9: Unreadable stored text
+
+- **Given** the text `{not json` stored under a `stateKey`
+- **When** a table with that `stateKey` is created
+- **Then** the table renders with its declared state and no error is thrown
+
+### REQ DAT-057: Data table filter row and custom filter template
+
+`<med-data-table>` SHALL accept `filterDisplay` (`'menu' | 'row'`, default `'menu'`). When `filterDisplay` is `'row'` and the table is not stacked, it SHALL render a filter row inside `<thead>` directly below the column header row, with a filter control in each `columnFilter` column's cell (and empty cells for utility and non-filterable columns). `<med-table-column>` SHALL accept a `#filter` template (`filterTemplate`), which when present SHALL render in place of the default filter control in both `filterDisplay="row"` and `filterDisplay="menu"` with context `{ $implicit: value, filter, clear, matchMode }`.
+
+#### Scenario DAT-057.S1: Inline filter row below headers
+
+- **Given** a table with `filterDisplay="row"` and a `name` column with `columnFilter`
+- **When** the user types "wid" into the `name` filter row input
+- **Then** the table filters rows immediately to those matching "wid" without opening a popover menu
+- **And** `columnFilters` is updated and `filter` emits
+
+#### Scenario DAT-057.S2: Custom `#filter` template in row and menu modes
+
+- **Given** a column with `columnFilter` and a `#filter` template calling `filter(value)` and `clear()`
+- **When** rendered in `filterDisplay="row"` or in `filterDisplay="menu"`
+- **Then** the custom `#filter` template is rendered instead of the default control
+- **And** invoking `filter(value)` filters the rows and invoking `clear()` removes the column filter
+
+### REQ DAT-058: Data table column cell merging
+
+`<med-table-column>` SHALL accept a `merge` boolean input (default `false`). When `merge` is `true` on a visible non-frozen column and the table is neither stacked nor in `virtualScroll`, `<med-data-table>` SHALL merge consecutive rows on the displayed page that share the same raw cell value in that column by setting `rowspan` on the first cell of the run (plus any expanded `#rowexpansion` rows within the run) and omitting covered cells in subsequent rows, without requiring `groupRowsBy`.
+
+#### Scenario DAT-058.S1: Merging consecutive equal cells on non-grouped columns
+
+- **Given** a table with columns `region` (`merge` true) and `status` (`merge` true), where `groupRowsBy` is unset, and rows with consecutive equal values in `region` and `status`
+- **When** the table renders
+- **Then** consecutive equal cells in both `region` and `status` are merged with `rowspan` > 1 and covered cells are omitted
+- **And** rows stay rectangular across page boundaries without altering row sort order
+
+### REQ DAT-059: Data table utility column templates
+
+`<med-data-table>` SHALL accept optional `<ng-template #reorderHeader>`, `<ng-template #reorderFooter>`, `<ng-template #selectionHeader>`, `<ng-template #selectionFooter>`, `<ng-template #rowActionsHeader>`, and `<ng-template #rowActionsFooter>` templates. When provided, each template SHALL render inside its corresponding utility column header `<th>` or footer `<td>`, and any utility footer template SHALL trigger rendering of `<tfoot>` even when no data column defines a footer.
+
+#### Scenario DAT-059.S1: Custom utility header and footer templates
+
+- **Given** a table with `reorderable`, `selectionMode="multiple"`, `editMode="row"`, and custom `#reorderHeader`, `#reorderFooter`, `#selectionHeader`, `#selectionFooter`, `#rowActionsHeader`, and `#rowActionsFooter` templates
+- **When** the table renders
+- **Then** each utility header and footer cell renders its custom template content
+
+### REQ DAT-060: Data table stacked sort control
+
+When `stacked()` is `true` and at least one visible column has `sortable` enabled, `<med-data-table>` SHALL render a visible sort control bar (`data-med-stack-sort`) allowing the user to pick a sortable column (labelled by `stackSortLabel`, default `"Sort by"`) and toggle or clear its sort order (`stackSortAscLabel`, `stackSortDescLabel`, `stackSortClearLabel`), updating `sortField`/`sortOrder` (or `multiSortMeta` in `sortMode="multiple"`), emitting `sort`, and triggering `lazyLoad` in `lazy` mode, while keeping the hidden `<thead>` header cells non-interactive per DAT-052.
+
+#### Scenario DAT-060.S1: Sorting while stacked via the stacked sort control
+
+- **Given** a stacked table with sortable columns `name` ("Name") and `price` ("Price")
+- **When** the user selects `price` in the stacked sort control and toggles the sort direction to descending
+- **Then** the stacked rows are ordered by `price` ascending, then descending
+- **And** `sort` emits and `aria-sort` on the `price` header updates accordingly
+
+### REQ DAT-061: Data table variable row height in virtual scroll
+
+`<med-data-table>` SHALL accept `virtualScrollRowHeight` (`((row: T, index: number) => number) | 'auto' | null`, default `null`). When `virtualScroll` is `true` and `virtualScrollRowHeight` is `null`, every row SHALL keep the fixed `virtualScrollItemSize` height (DAT-046). When `virtualScrollRowHeight` is a function, the table SHALL size each row's `<tr>` height, total scrollable area, top/bottom spacers, rendered window, and keyboard `ArrowUp`/`ArrowDown`/`Home`/`End` scroll targets from the cumulative heights returned by the function (clamped to at least 1px, and falling back to `virtualScrollItemSize` for unloaded `lazy` placeholders or non-finite values). When `virtualScrollRowHeight` is `'auto'`, body rows SHALL NOT force fixed `virtualScrollItemSize` height or clip cell text, and the table SHALL measure rendered row heights after render using `virtualScrollItemSize` as the initial estimate for unmeasured rows, updating cumulative offsets and spacers accordingly.
+
+#### Scenario DAT-061.S1: Callback-driven variable row heights
+
+- **Given** a `virtualScroll` table with `scrollHeight="200px"`, `virtualScrollItemSize` `40`, 50 rows where even rows are `80px` tall and odd rows are `40px` tall via `virtualScrollRowHeight`
+- **When** the table renders and scrolls to offset `1,200px`
+- **Then** the total scrollable height is `3,000px` (`25 * 80 + 25 * 40`)
+- **And** the rendered rows match the cumulative-offset window around `1,200px` with each `<tr>` styled to its row height
+- **And** pressing `End` scrolls to and focuses the last row (`index 49`)
+
+#### Scenario DAT-061.S2: Auto-measured variable row heights in a real browser
+
+- **Given** a `virtualScroll` table with `virtualScrollRowHeight="auto"`, `scrollHeight="200px"`, `virtualScrollItemSize` `40`, and rows whose text wraps to varying heights
+- **When** the table renders in a browser and scrolls down
+- **Then** body rows render at their natural content heights without truncation
+- **And** the measured heights update the scrollable height beyond the `40px`-per-row initial estimate
+
+### REQ DAT-062: Data table expansion, grouping, and row reorder in virtual scroll
+
+When `virtualScroll` is `true` (and `lazy` is `false`), `<med-data-table>` SHALL support `#rowexpansion`, `rowGroupMode` (`'subheader'` and `'rowspan'`), `expandableRowGroups`, and `reorderable`:
+1. `#rowexpansion`: Expanding a row SHALL render its expansion row directly beneath its data row in the virtual body, counting toward total scrollable height and `aria-rowcount` while keeping virtualization active.
+2. `rowGroupMode="subheader"` and `expandableRowGroups`: Subheader rows SHALL be interleaved in the virtual item stream (using `groupRowsBy` as primary sort key), and collapsing a group via `expandableRowGroups` SHALL omit its rows from the virtual stream and emit `rowGroupCollapse`/`rowGroupExpand`.
+3. `rowGroupMode="rowspan"`: Each rendered group run inside the virtual window SHALL render the merged `groupRowsBy` cell on the first rendered row of that run in the window with `rowspan` equal to the number of rendered rows (plus rendered expansion rows) of that run inside the window, omitting covered cells so the table remains rectangular even when the top of a group is scrolled out of view.
+4. `reorderable`: Dragging a row in `virtualScroll` SHALL pin the dragged row in the rendered DOM until `drop` or `dragend`, and dropping on another row SHALL emit `rowReorder` with `dragIndex` and `dropIndex` relative to `value()`.
+
+#### Scenario DAT-062.S1: Row expansion in virtual scroll
+
+- **Given** a `virtualScroll` table with `scrollHeight="200px"`, `virtualScrollItemSize` `40`, 50 rows, `dataKey="id"`, and a `#rowexpansion` template
+- **When** the user expands row 0 and scrolls down and back up
+- **Then** the expansion row renders beneath row 0 inside the virtual body and increases the scrollable height
+- **And** row 0 remains expanded after scrolling away and back
+
+#### Scenario DAT-062.S2: Subheader grouping and expandable row groups in virtual scroll
+
+- **Given** a `virtualScroll` table with `rowGroupMode="subheader"`, `groupRowsBy="team"`, `expandableRowGroups`, and rows in teams `"Alpha"` and `"Beta"`
+- **When** the table renders and the user collapses `"Alpha"`
+- **Then** subheader rows render in the virtual body and collapsing `"Alpha"` hides `"Alpha"`'s rows from the virtual stream while keeping `"Beta"`'s rows and emitting `rowGroupCollapse`
+
+#### Scenario DAT-062.S3: Row-span grouping in virtual scroll across scroll offsets
+
+- **Given** a `virtualScroll` table with `rowGroupMode="rowspan"`, `groupRowsBy="team"`, `scrollHeight="160px"`, `virtualScrollItemSize` `40`, and 20 rows in team `"Alpha"` followed by 10 in `"Beta"`
+- **When** the table scrolls to offset `200px` (midway through `"Alpha"`)
+- **Then** the first rendered row of `"Alpha"` in the window renders the `"Alpha"` cell with `rowspan` matching the rendered `"Alpha"` rows in the window
+- **And** every rendered `<tr>` has a rectangular cell count matching the table columns
+
+#### Scenario DAT-062.S4: Row reorder in virtual scroll
+
+- **Given** a `virtualScroll` table with `reorderable` and 50 rows
+- **When** the user starts dragging row 0, scrolls so row 0 would leave the window, and drops onto row 15
+- **Then** row 0 remains pinned in the DOM during the drag
+- **And** `rowReorder` emits `{ dragIndex: 0, dropIndex: 15 }` relative to `value()`
+
+### REQ DAT-063: Data table horizontal column virtualization
+
+`<med-data-table>` SHALL accept `virtualScrollColumns` (`boolean`, default `false`) and `virtualScrollColumnWidth` (`number`, default `120`, clamped to at least 1px). When `virtualScrollColumns` is `true` and the table is not stacked, `<med-data-table>` SHALL always render left-frozen and right-frozen columns and SHALL render only the non-frozen visible columns whose cumulative widths (using resized/declared `px` width or `virtualScrollColumnWidth`) intersect the horizontal scroll viewport plus a column buffer, inserting left and right horizontal spacer `<th>`/`<td>` cells in header, filter, body, frozen, skeleton, and footer rows so the total table width equals the sum of all visible column widths (plus utility columns). `totalColumnCount` SHALL reflect the rendered column count (including active horizontal spacers) so `colspan` rows stay aligned, and `<table>` SHALL expose `aria-colcount` with rendered data cells carrying `aria-colindex`.
+
+#### Scenario DAT-063.S1: Only horizontal window and frozen columns render, and scrolling shifts the window
+
+- **Given** a table with `virtualScrollColumns` set to `true`, `virtualScrollColumnWidth` `100`, 1 left-frozen column (`100px`), and 50 scrollable columns (`5,000px` scrollable width) in a `400px`-wide viewport
+- **When** the table renders and then scrolls horizontally to `scrollLeft = 2,500`
+- **Then** fewer than 20 columns are rendered in the DOM per row, the left-frozen column stays rendered, and the total table width is `5,100px`
+- **And** scrolling to `2,500px` unmounts early scrollable columns, renders columns around index `25` with a left spacer, and keeps `aria-colcount="51"`
+
+#### Scenario DAT-063.S2: Real-browser horizontal column virtualization with frozen column and vertical virtual scroll
+
+- **Given** a `virtualScroll` + `virtualScrollColumns` table with `scrollHeight="200px"`, a left-frozen column, and 40 scrollable columns in a real browser
+- **When** the user scrolls horizontally to the middle of the table
+- **Then** the left-frozen column remains pinned on the left edge while middle columns appear in view and off-screen columns are omitted from the DOM

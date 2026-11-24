@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, TemplateRef, booleanAttribute, computed, contentChild, contentChildren, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, TemplateRef, booleanAttribute, computed, contentChild, contentChildren, input, linkedSignal, model, output } from '@angular/core';
 import { TableColumnAlign, TableFilterMatchMode, TableFilterType, TableSortCompare } from './data-table.types';
 
 /**
@@ -72,7 +72,25 @@ export class TableColumnComponent {
   readonly width = input<string | null>(null);
   readonly editable = input(false, { transform: booleanAttribute });
   readonly frozen = input(false, { transform: booleanAttribute });
-  readonly alignFrozen = input<'left' | 'right'>('left');
+  /** Emits when the table updates the column's frozen state during cross-boundary column reorder, enabling `[(frozen)]`. */
+  readonly frozenChange = output<boolean>();
+  /** Effective frozen state used by `DataTableComponent`; resets whenever the `frozen` input changes. */
+  readonly isFrozen = linkedSignal(() => this.frozen());
+  /** Frozen edge alignment (`'left'` or `'right'`), two-way bindable via `[(alignFrozen)]`. */
+  readonly alignFrozen = model<'left' | 'right'>('left');
+  /** Merges consecutive rows on the displayed page that share the same raw cell value in this column via `rowspan`. */
+  readonly merge = input(false, { transform: booleanAttribute });
+
+  /** Updates the effective frozen state and edge alignment, emitting change outputs only when they differ. */
+  applyFrozenState(frozen: boolean, alignFrozen: 'left' | 'right'): void {
+    if (this.isFrozen() !== frozen) {
+      this.isFrozen.set(frozen);
+      this.frozenChange.emit(frozen);
+    }
+    if (this.alignFrozen() !== alignFrozen) {
+      this.alignFrozen.set(alignFrozen);
+    }
+  }
   /**
    * Text shown before each of this column's cells while the table is stacked. Unset, the column's `header` is used; with neither,
    * the cells show no label. The table adds no text of its own.
@@ -82,8 +100,24 @@ export class TableColumnComponent {
    * Shows or hides the column. While `false` the table renders no header, body or footer cell for it and leaves it out of
    * column spans, frozen offsets and CSV export; its sort state, filter matching and resized width are kept, so setting it
    * back to `true` restores the column as it was.
+   *
+   * This input (and any value restored from persisted state) is presentation only, not access control. A column a user must
+   * not see has to be omitted from the template and its data omitted from `value`, rather than declared `visible="false"`.
    */
   readonly visible = input(true, { transform: booleanAttribute });
+  /** Emits when the table changes the column's visibility from stored state, enabling `[(visible)]`. */
+  readonly visibleChange = output<boolean>();
+  /** Effective column visibility used by the table; resets whenever the `visible` input changes, and can be overridden on restore. */
+  readonly isVisible = linkedSignal(() => this.visible());
+
+  /** Applies a visibility value restored from persisted state, emitting `visibleChange` only when it differs. */
+  applyRestoredVisibility(next: boolean): void {
+    if (this.isVisible() === next) {
+      return;
+    }
+    this.isVisible.set(next);
+    this.visibleChange.emit(next);
+  }
   /**
    * Whether the user can move this column by dragging its header or with Alt+ArrowLeft/Right on the focused header.
    * Set it to `false` to pin the column's position; other columns cannot be dropped onto it either.
@@ -97,6 +131,10 @@ export class TableColumnComponent {
   readonly filterMatchMode = input<TableFilterMatchMode | null>(null);
   /** Restricts the offered match modes to those listed here that belong to `filterType`. */
   readonly filterMatchModes = input<readonly TableFilterMatchMode[] | null>(null);
+  /** Explicit options offered by the UI when using the `in` match mode (each a value or `{ label, value }` option). */
+  readonly filterOptions = input<readonly unknown[] | null>(null);
+  /** Custom `#filter` template rendered in place of the default filter control in both `'row'` and `'menu'` filter modes. */
+  readonly filterTemplate = contentChild('filter', { read: TemplateRef });
 
   /**
    * The projected `<ng-template #header>` that replaces the `header` text inside the column's header cell. The `header` text stays
@@ -114,12 +152,12 @@ export class TableColumnComponent {
   /** Every `<ng-template>` projected directly into the column, in document order. */
   private readonly projectedTemplates = contentChildren(TemplateRef);
   /**
-   * The projected `<ng-template>` that renders the body cells: the first one that is not the header or edit template, so an
+   * The projected `<ng-template>` that renders the body cells: the first one that is not a reserved named template, so an
    * unnamed template written after `#header` still renders the cells.
    */
   readonly cellTemplate = computed(() => {
     // Angular may hand out a new `TemplateRef` object per read, so templates are told apart by their anchor node.
-    const reserved = new Set([this.headerTemplate(), this.footerTemplate(), this.editTemplate()].map((template) => template?.elementRef.nativeElement));
+    const reserved = new Set([this.headerTemplate(), this.footerTemplate(), this.editTemplate(), this.filterTemplate()].map((template) => template?.elementRef.nativeElement));
     return this.projectedTemplates().find((template) => !reserved.has(template.elementRef.nativeElement));
   });
   readonly editTemplate = contentChild('editTemplate', { read: TemplateRef });

@@ -7,7 +7,7 @@ import { MenuItem } from '../menu/menu.types';
 import { SelectComponent } from '../select/select.component';
 import { DataTableComponent } from './data-table.component';
 import { TableColumnComponent } from './table-column.component';
-import { TableColumnFilters, TableContextMenuSelectEvent, TableFilterMatchMode, TableLazyLoadEvent } from './data-table.types';
+import { TableColumnFilter, TableColumnFilters, TableContextMenuSelectEvent, TableFilterMatchMode, TableLazyLoadEvent } from './data-table.types';
 
 interface Product {
   name: string;
@@ -858,7 +858,9 @@ describe('DataTableComponent', () => {
         rows: 10,
         sortField: null,
         sortOrder: null,
+        sortBy: null,
         multiSortMeta: [],
+        multiSortByMeta: [],
         filter: '',
         columnFilters: {},
       });
@@ -3486,7 +3488,7 @@ describe('DataTableComponent column filters', () => {
         price: { matchMode: 'gte', value: 25 },
         released: { matchMode: 'dateBefore', value: new Date(2026, 2, 10) },
       });
-      expect(restored['released'].value).toBeInstanceOf(Date);
+      expect((restored['released'] as TableColumnFilter).value).toBeInstanceOf(Date);
       expect(rowNames(second)).toEqual(['Widget']);
       expect(funnelIcon(second, 'Name').variant()).toBe('solid');
       expect(funnelIcon(second, 'Price').variant()).toBe('solid');
@@ -4432,6 +4434,8 @@ const makeVirtualRows = (count: number): VirtualRow[] => Array.from({ length: co
       [(selection)]="selection"
       [editMode]="editMode()"
       [reorderable]="reorderable()"
+      [lazy]="lazy()"
+      [totalRecords]="totalRecords()"
       (editComplete)="completed.push($event)"
       (editCancel)="cancelled.push($event)"
     >
@@ -4455,6 +4459,8 @@ class VirtualScrollHostComponent {
   selection = signal<unknown>(null);
   editMode = signal<'cell' | null>(null);
   reorderable = signal(false);
+  lazy = signal(false);
+  totalRecords = signal<number | null>(null);
   completed: unknown[] = [];
   cancelled: unknown[] = [];
 }
@@ -4564,8 +4570,12 @@ describe('DataTableComponent virtual scroll', () => {
     expect(host.cancelled.length).toBe(0);
   });
 
-  it('ignores reorderable: no drag handle column and no draggable rows', () => {
-    const fixture = create((h) => h.reorderable.set(true));
+  it('ignores reorderable in lazy virtualScroll: no drag handle column and no draggable rows', () => {
+    const fixture = create((h) => {
+      h.lazy.set(true);
+      h.totalRecords.set(VIRTUAL_ROW_COUNT);
+      h.reorderable.set(true);
+    });
 
     expect(bodyRows(fixture).some((tr) => tr.getAttribute('draggable') === 'true')).toBe(false);
     expect(el(fixture).querySelector('med-icon[name="bars-3"]')).toBeNull();
@@ -4815,6 +4825,8 @@ describe('DataTableComponent lazy virtual scroll', () => {
       [expandedRowKeys]="expandedRowKeys"
       [frozenValue]="frozen"
       frozenRowsPosition="bottom"
+      [lazy]="lazy"
+      [totalRecords]="totalRecords"
     >
       <med-table-column field="name" header="Name">
         <ng-template let-row>{{ row.name }}</ng-template>
@@ -4836,6 +4848,8 @@ class VirtualGuardHostComponent {
   expandedRowKeys: Record<string, boolean> = {};
   withFooter = false;
   frozen: VirtualRow[] | null = null;
+  lazy = false;
+  totalRecords: number | null = null;
 }
 
 describe('DataTableComponent virtual scroll guards and edges', () => {
@@ -4848,8 +4862,10 @@ describe('DataTableComponent virtual scroll guards and edges', () => {
     document.body.innerHTML = '';
   });
 
-  it('ignores rowGroupMode: no subheader rows between the body rows', () => {
+  it('ignores rowGroupMode in lazy virtualScroll: no subheader rows between the body rows', () => {
     const fixture = TestBed.createComponent(VirtualGuardHostComponent);
+    fixture.componentInstance.lazy = true;
+    fixture.componentInstance.totalRecords = VIRTUAL_ROW_COUNT;
     fixture.componentInstance.rowGroupMode = 'subheader';
     fixture.detectChanges();
 
@@ -4858,8 +4874,10 @@ describe('DataTableComponent virtual scroll guards and edges', () => {
     expect(rowAt(fixture, 0)).not.toBeNull();
   });
 
-  it('ignores #rowexpansion: an expanded row renders no expansion row', () => {
+  it('ignores #rowexpansion in lazy virtualScroll: an expanded row renders no expansion row', () => {
     const fixture = TestBed.createComponent(VirtualGuardHostComponent);
+    fixture.componentInstance.lazy = true;
+    fixture.componentInstance.totalRecords = VIRTUAL_ROW_COUNT;
     fixture.componentInstance.expandedRowKeys = { '0': true };
     fixture.detectChanges();
 

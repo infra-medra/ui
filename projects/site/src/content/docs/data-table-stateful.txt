@@ -1,3 +1,5 @@
 ## Persisted state
 
-Set `stateKey` to save the table state (the sort, the current page and the expanded rows) in the browser storage under that key and restore it on the next visit. `stateStorage` chooses `'session'` (the default, cleared when the tab closes) or `'local'` (kept across sessions). Use a different key for each table.
+Set `stateKey` to save the table state in browser storage under that key and restore it on the next visit. The stored object tracks `first`, `sortField`, `sortOrder`, `expandedRowKeys`, `columnFilters`, `columnOrder`, `columnWidths`, `columnVisibility`, `collapsedRowGroups`, `globalFilter`, `multiSortMeta`, and `rows`. Use a different key for each table, and bind `[(visible)]` on `med-table-column` so restored column visibility flows back to your component state.
+
+`stateStorage` chooses `'session'` (the default, cleared when the tab closes) or `'local'` (kept across browser sessions with no expiry). Because stored state keeps search text, filter values, and collapsed group values from row data, prefer `'session'` for sensitive data, include the signed-in user's identity in `stateKey`, and remove the key from storage on sign-out. `visible` and any restored `columnVisibility` are presentation only, not access control: omit restricted columns from the template and their data from `value` rather than relying on `visible="false"`.

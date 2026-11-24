@@ -1,8 +1,12 @@
-import { matchesColumnFilter } from './data-table-column-filter';
+import { FILTER_MODES_BY_TYPE, isRuleActive, matchesColumnFilter } from './data-table-column-filter';
 import { TableColumnFilter, TableFilterMatchMode } from './data-table.types';
 
 function shown<T>(cells: readonly T[], rule: TableColumnFilter, type: 'text' | 'numeric' | 'date'): T[] {
   return cells.filter((cell) => matchesColumnFilter(cell, rule, type));
+}
+
+function makeRule(matchMode: string, value: unknown): TableColumnFilter {
+  return { matchMode: matchMode as TableFilterMatchMode, value: value as TableColumnFilter['value'] };
 }
 
 describe('matchesColumnFilter', () => {
@@ -93,6 +97,75 @@ describe('matchesColumnFilter', () => {
       expect(matchesColumnFilter('soon', rule('dateIsNot', new Date(2026, 2, 10)), 'date')).toBe(false);
       expect(matchesColumnFilter(42, rule('dateAfter', new Date(2026, 2, 10)), 'date')).toBe(false);
       expect(matchesColumnFilter(new Date('nope'), rule('dateIsNot', new Date(2026, 2, 10)), 'date')).toBe(false);
+    });
+  });
+
+  describe('DAT-039.S2 & DAT-039.S3 FILTER_MODES_BY_TYPE includes between and in', () => {
+    it('DAT-039 offers in for text, and between + in for numeric and date', () => {
+      expect(FILTER_MODES_BY_TYPE.text).toContain('in');
+      expect(FILTER_MODES_BY_TYPE.text).not.toContain('between');
+      expect(FILTER_MODES_BY_TYPE.numeric).toEqual(expect.arrayContaining(['between', 'in']));
+      expect(FILTER_MODES_BY_TYPE.date).toEqual(expect.arrayContaining(['between', 'in']));
+    });
+  });
+
+  describe('DAT-039.S2 between mode', () => {
+    it('DAT-039.S2 numeric between [15, 50] matches 25 and 50 inclusively and ignores non-finite cells', () => {
+      const prices: unknown[] = [10, 25, 50, 15, 'n/a', NaN, Infinity];
+      expect(shown(prices, makeRule('between', [15, 50]), 'numeric')).toEqual([25, 50, 15]);
+    });
+
+    it('DAT-039.S2 date between ["2026-01-10", "2026-01-20"] matches "2026-01-15" and inclusive bounds', () => {
+      const dates = ['2026-01-01', '2026-01-10', '2026-01-15', '2026-01-20', '2026-02-01'];
+      expect(shown(dates, makeRule('between', ['2026-01-10', '2026-01-20']), 'date')).toEqual(['2026-01-10', '2026-01-15', '2026-01-20']);
+
+      const dateObjs = [new Date(2026, 0, 1), new Date(2026, 0, 15, 14, 0), new Date(2026, 1, 1)];
+      expect(shown(dateObjs, makeRule('between', [new Date(2026, 0, 10), new Date(2026, 0, 20)]), 'date')).toEqual([dateObjs[1]]);
+    });
+
+    it('DAT-039.S2 partial bounds ignore null bound for numeric and date (including 0 lower bound)', () => {
+      expect(shown([0, 10, 25, 50], makeRule('between', [25, null]), 'numeric')).toEqual([25, 50]);
+      expect(shown([0, 10, 25, 50], makeRule('between', [null, 25]), 'numeric')).toEqual([0, 10, 25]);
+      expect(shown([0, 10, 25], makeRule('between', [0, null]), 'numeric')).toEqual([0, 10, 25]);
+
+      const dates = ['2026-01-01', '2026-01-15', '2026-02-01'];
+      expect(shown(dates, makeRule('between', ['2026-01-15', null]), 'date')).toEqual(['2026-01-15', '2026-02-01']);
+      expect(shown(dates, makeRule('between', [null, '2026-01-15']), 'date')).toEqual(['2026-01-01', '2026-01-15']);
+    });
+
+    it('DAT-039.S2 empty/null between bounds are inactive and match every row', () => {
+      expect(isRuleActive(makeRule('between', [null, null]))).toBe(false);
+      expect(isRuleActive(makeRule('between', ['', '']))).toBe(false);
+      expect(shown([10, 'n/a'], makeRule('between', [null, null]), 'numeric')).toEqual([10, 'n/a']);
+      expect(shown(['2026-01-01', 'bad'], makeRule('between', [null, null]), 'date')).toEqual(['2026-01-01', 'bad']);
+    });
+
+    it('DAT-039.S2 non-date cells do not match active date between', () => {
+      expect(matchesColumnFilter('not-a-date', makeRule('between', ['2026-01-10', '2026-01-20']), 'date')).toBe(false);
+      expect(matchesColumnFilter(42, makeRule('between', ['2026-01-10', '2026-01-20']), 'date')).toBe(false);
+    });
+  });
+
+  describe('DAT-039.S3 in mode', () => {
+    it('DAT-039.S3 text in ["a", "C"] matches "A" and "C" case-insensitively and excludes "B"', () => {
+      expect(shown(['A', 'B', 'C'], makeRule('in', ['a', 'C']), 'text')).toEqual(['A', 'C']);
+      expect(shown([null, 'A'], makeRule('in', ['a']), 'text')).toEqual(['A']);
+      expect(shown([null, 'A'], makeRule('in', ['']), 'text')).toEqual([null]);
+    });
+
+    it('DAT-039.S3 numeric in matches finite numbers and rejects non-finite cells', () => {
+      expect(shown([10, 25, 50, 'n/a', NaN], makeRule('in', [10, 50]), 'numeric')).toEqual([10, 50]);
+    });
+
+    it('DAT-039.S3 date in matches calendar days for Date and ISO strings', () => {
+      const dates = ['2026-01-01', '2026-01-15', '2026-02-01', 'invalid'];
+      expect(shown(dates, makeRule('in', ['2026-01-01', new Date(2026, 1, 1)]), 'date')).toEqual(['2026-01-01', '2026-02-01']);
+    });
+
+    it('DAT-039.S3 empty in array is inactive and matches every row', () => {
+      expect(isRuleActive(makeRule('in', []))).toBe(false);
+      expect(shown(['A', 'B', 'C'], makeRule('in', []), 'text')).toEqual(['A', 'B', 'C']);
+      expect(shown([10, 'n/a'], makeRule('in', []), 'numeric')).toEqual([10, 'n/a']);
     });
   });
 });

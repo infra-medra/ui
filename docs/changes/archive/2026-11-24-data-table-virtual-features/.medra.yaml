@@ -1,0 +1,137 @@
+change: data-table-virtual-features
+created: 2026-11-24
+track: full
+phase: archived
+diff_base: 8661bd0
+gates:
+  proposal:
+    status: approved
+    by: Tiago Cavalli
+    at: 2026-11-24T18:17:01Z
+    hash: 66e0b1b7094daf8922f3d603e508580852613668d1349060ef286a7498078726
+    note: null
+  plan:
+    status: approved
+    by: Tiago Cavalli
+    at: 2026-11-24T18:43:15Z
+    hash: dbd951038f93388817dc318be706f687e2e8180caa758bc06523f0e3df6b7b37
+    note: null
+  tasks:
+    status: approved
+    by: Tiago Cavalli
+    at: 2026-11-24T18:45:28Z
+    hash: 387b7489e3a0310c8b4314d99d9a438536404972a7249262b774af1979978ba9
+    note: null
+  verify:
+    status: approved
+    by: Tiago Cavalli
+    at: 2026-11-24T19:20:05Z
+    hash: 89267cc66add6a5bf141641b1291d581dea4618294586bd4d52bedba528a78fa
+    note: null
+gate_notes: []
+reviews:
+  - stage: verify
+    by: reviewer
+    at: 2026-11-24T19:04:22Z
+    recorded_at: 2026-11-24T19:04:22.312Z
+    hash: 702083e4e425c9135eb902a73c8449475ad1e82ae1d6620654043fe1c68b2a6a
+    verdict: fail
+    report: reviews/2026-11-24-verify-reviewer-r1.md
+  - stage: verify
+    by: reviewer
+    at: 2026-11-24T19:12:48Z
+    recorded_at: 2026-11-24T19:12:48.595Z
+    hash: 8ce20e1b63ea17a638a83dd7b646e44f2b6d83ffa0c52ad6cf5acccea7e90bc4
+    verdict: pass
+    report: reviews/2026-11-24-verify-reviewer-r2.md
+track_history: []
+blockers: []
+verify_fix_rounds: 1
+last_fix_round_at: 2026-11-24T19:04:57.490Z
+test_hashes:
+  T001:
+    projects/medra/ui/src/lib/data-table/data-table-virtual-expansions-groups.spec.ts: 45fc0fd7f0742211a819e0a2b3196a8e061d2a40898271cbd6a417bc064a5d52
+  T003:
+    projects/medra/ui/src/lib/data-table/data-table-virtual-expansions-groups.spec.ts: 45fc0fd7f0742211a819e0a2b3196a8e061d2a40898271cbd6a417bc064a5d52
+    projects/medra/ui/src/lib/data-table/data-table-virtual-features.spec.ts: 8c9291df573375dd12bafd85be32d74bbba2de64fbba015d419ce6f0650da2ab
+test_snapshots:
+  45fc0fd7f0742211a819e0a2b3196a8e061d2a40898271cbd6a417bc064a5d52: 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
+  8c9291df573375dd12bafd85be32d74bbba2de64fbba015d419ce6f0650da2ab: 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
+last_task_done_at: 2026-11-24T18:55:52.470Z
+suite:
+  at: 2026-11-24T19:09:40Z
+  exit: 0
+  commands:
+    - npm test
+  fingerprint: 48d944f91f48f2adb4076c02eedab090d0b75e0c9a05eeae9e965982cc7420ca
+handoff_snapshots:
+  check:
+    "1":
+      .changeset/data-table-extended-state.md: ced0cadf55d3cf17f32d773b527e54dff47d55676c24ba39106dadfa63484377
+      e2e/site/data-table-responsive-stack.spec.ts: f2f2d38683e9fb041e33ab2e1921ff67ed7bf787ac93ee6f2c4ca41aeaa7e6c0
+      e2e/site/data-table-state.spec.ts: f578181aa3f1aa9167a0d46c19205a60f29d52e8621dc752cbc1d2389e086234
+      e2e/site/data-table-virtual-scroll.spec.ts: 46767d75d23ff3c572c382773e71042b2395b44eacc5749d9edad1fabd992a6f
+      e2e/site/data-table-virtual-variable-height.spec.ts: 467bd8b1ca2b7db92a3ccc3461894c83d48c240cb24870c62bb5a269d3fc8043
+      projects/medra/ui/src/lib/data-table/data-table-advanced-filters.spec.ts: 20e00156ed164b41716b1b576f8df6a62f42169739e614a271c555960ed4b6eb
+      projects/medra/ui/src/lib/data-table/data-table-column-filter.spec.ts: 87fbf22c3b3e38964014594f2ed7c7dc92fc652d0dd3cf76f0e1ee9d6ac468c8
+      projects/medra/ui/src/lib/data-table/data-table-column-filter.ts: 817fed58bc68791e6d0afb0adc2d306c43c36dafb255245bda7a60a6ecda1cc7
+      projects/medra/ui/src/lib/data-table/data-table-columns-merge.spec.ts: 90723253ef67e137856cd39dbaebf89cf9f98d361a16664487ea007c769ecb08
+      projects/medra/ui/src/lib/data-table/data-table-filter-row.spec.ts: 475a17b637d91522d762fbdcada325b89debedd30bbe70063529504f6588e062
+      projects/medra/ui/src/lib/data-table/data-table-keyboard-selection.spec.ts: ea3d8efb7cc06443cc357f682b55eb25d262dc8827b29b3f9b42c07003a2684e
+      projects/medra/ui/src/lib/data-table/data-table-persisted-state.spec.ts: 012669aa6b79206e5bc31bcd89f00fcdb35198247b02e73098daa8054ea02cf5
+      projects/medra/ui/src/lib/data-table/data-table-responsive-stack-enhancements.spec.ts: 3792d0f120ef18c8bc1aa88799f3a4bc7ab13c3caa013f2daf1c2ace1903f274
+      projects/medra/ui/src/lib/data-table/data-table-sorting-csv.spec.ts: c672af265557c9229ca26d6ed33a8395b919a9661e8c93beb4d469f12815f85f
+      projects/medra/ui/src/lib/data-table/data-table-state.spec.ts: ff50660e3ffbfa31c6fa474ee13efea06f3fce01a55ac7c4ab13e19dc05b8f2b
+      projects/medra/ui/src/lib/data-table/data-table-state.ts: 43ad568ca7aa46c7f11e4da26069471c70014b7b61d793829ec566f69ebd87cc
+      projects/medra/ui/src/lib/data-table/data-table-virtual-expansions-groups.spec.ts: 45fc0fd7f0742211a819e0a2b3196a8e061d2a40898271cbd6a417bc064a5d52
+      projects/medra/ui/src/lib/data-table/data-table-virtual-features.spec.ts: 8c9291df573375dd12bafd85be32d74bbba2de64fbba015d419ce6f0650da2ab
+      projects/medra/ui/src/lib/data-table/data-table-virtual-heights.spec.ts: 9215feddfd9c8bdb76dfb1039fe97bda920532068134b0f6de4caee427de3a68
+      projects/medra/ui/src/lib/data-table/data-table-virtual-heights.ts: d9f1a872b9b514f3aac4e91ef7b3ecfa781db5c7fd44ea2540e10e1d70cab572
+      projects/medra/ui/src/lib/data-table/data-table-virtual-variable-height.spec.ts: 0167781999516cca3dbd986ff04178796cd762c66be62275bb1fb98537ce8e57
+      projects/medra/ui/src/lib/data-table/data-table.component.spec.ts: 68cdf678d85f17b5af68e8d233f4f6fbad0df985f5def91a9af34b7820ff46f4
+      projects/medra/ui/src/lib/data-table/data-table.component.ts: 56a343a0120e36182be00ee9269bb456a341a1070aa4e3b6d86ea6722841fd9c
+      projects/medra/ui/src/lib/data-table/data-table.types.ts: 699c39129a752af7ceef6f57dac33e7c9c099413b02ee9b13cec2c1b5305516b
+      projects/medra/ui/src/lib/data-table/table-column.component.ts: dd68f8349e0ced8ab74292dc63328e94c03a31cb05091c812f68efa4012f308b
+      projects/site/src/app/pages/docs/components/demos/data-table-responsive-stack.demo.html: d2ee1ebaf18825d2713f7eb0e5890ef4069987ef1e7f6709e60cb83957e565b6
+      projects/site/src/app/pages/docs/components/demos/data-table-stateful.demo.html: 0edd961ac6c1bae2f877e56ebc6bdf04adbe3163d7f2dbef1856dfe5d8be0c29
+      projects/site/src/app/pages/docs/components/demos/data-table-stateful.demo.ts: 9d2b6505f19dc8dea66d0b643f83dd64870fa339347d25e422c834b521c8049b
+      projects/site/src/app/pages/docs/components/demos/data-table-virtual-scroll.demo.html: 9d4a4ac2a37c07b6b7802205c538c8cb68ccf81bda120a1c4c636b84c1a4b496
+      projects/site/src/app/pages/docs/components/demos/data-table-virtual-scroll.demo.ts: 2443f8ff11113cbce0df3ae879f0ea685be4422cae030b0233bb47ddf8d42131
+      projects/site/src/content/docs/data-table-column-toggle.txt: 6d56474012fd65101cd7efdab9eb8162887d748ddcedef5a78e5851d882ee459
+      projects/site/src/content/docs/data-table-stateful.txt: 398971d754c63eb3ec2efdd0b8b859e3fb453be86ab4ae0c81fd095f288cf2d9
+    "2":
+      .changeset/data-table-extended-state.md: ced0cadf55d3cf17f32d773b527e54dff47d55676c24ba39106dadfa63484377
+      e2e/site/data-table-responsive-stack.spec.ts: f2f2d38683e9fb041e33ab2e1921ff67ed7bf787ac93ee6f2c4ca41aeaa7e6c0
+      e2e/site/data-table-state.spec.ts: f578181aa3f1aa9167a0d46c19205a60f29d52e8621dc752cbc1d2389e086234
+      e2e/site/data-table-virtual-scroll.spec.ts: 46767d75d23ff3c572c382773e71042b2395b44eacc5749d9edad1fabd992a6f
+      e2e/site/data-table-virtual-variable-height.spec.ts: 467bd8b1ca2b7db92a3ccc3461894c83d48c240cb24870c62bb5a269d3fc8043
+      projects/medra/ui/src/lib/data-table/data-table-advanced-filters.spec.ts: 20e00156ed164b41716b1b576f8df6a62f42169739e614a271c555960ed4b6eb
+      projects/medra/ui/src/lib/data-table/data-table-column-filter.spec.ts: 87fbf22c3b3e38964014594f2ed7c7dc92fc652d0dd3cf76f0e1ee9d6ac468c8
+      projects/medra/ui/src/lib/data-table/data-table-column-filter.ts: 817fed58bc68791e6d0afb0adc2d306c43c36dafb255245bda7a60a6ecda1cc7
+      projects/medra/ui/src/lib/data-table/data-table-columns-merge.spec.ts: 90723253ef67e137856cd39dbaebf89cf9f98d361a16664487ea007c769ecb08
+      projects/medra/ui/src/lib/data-table/data-table-filter-row.spec.ts: 475a17b637d91522d762fbdcada325b89debedd30bbe70063529504f6588e062
+      projects/medra/ui/src/lib/data-table/data-table-keyboard-selection.spec.ts: ea3d8efb7cc06443cc357f682b55eb25d262dc8827b29b3f9b42c07003a2684e
+      projects/medra/ui/src/lib/data-table/data-table-persisted-state.spec.ts: 012669aa6b79206e5bc31bcd89f00fcdb35198247b02e73098daa8054ea02cf5
+      projects/medra/ui/src/lib/data-table/data-table-responsive-stack-enhancements.spec.ts: 3792d0f120ef18c8bc1aa88799f3a4bc7ab13c3caa013f2daf1c2ace1903f274
+      projects/medra/ui/src/lib/data-table/data-table-sorting-csv.spec.ts: c672af265557c9229ca26d6ed33a8395b919a9661e8c93beb4d469f12815f85f
+      projects/medra/ui/src/lib/data-table/data-table-state.spec.ts: ff50660e3ffbfa31c6fa474ee13efea06f3fce01a55ac7c4ab13e19dc05b8f2b
+      projects/medra/ui/src/lib/data-table/data-table-state.ts: 43ad568ca7aa46c7f11e4da26069471c70014b7b61d793829ec566f69ebd87cc
+      projects/medra/ui/src/lib/data-table/data-table-virtual-expansions-groups.spec.ts: 45fc0fd7f0742211a819e0a2b3196a8e061d2a40898271cbd6a417bc064a5d52
+      projects/medra/ui/src/lib/data-table/data-table-virtual-features.spec.ts: c9cac0cd6eb9128457d38eb173f38e356e75741e03d191a4a04e148f7faec40c
+      projects/medra/ui/src/lib/data-table/data-table-virtual-heights.spec.ts: 9215feddfd9c8bdb76dfb1039fe97bda920532068134b0f6de4caee427de3a68
+      projects/medra/ui/src/lib/data-table/data-table-virtual-heights.ts: d9f1a872b9b514f3aac4e91ef7b3ecfa781db5c7fd44ea2540e10e1d70cab572
+      projects/medra/ui/src/lib/data-table/data-table-virtual-variable-height.spec.ts: 0167781999516cca3dbd986ff04178796cd762c66be62275bb1fb98537ce8e57
+      projects/medra/ui/src/lib/data-table/data-table.component.spec.ts: 68cdf678d85f17b5af68e8d233f4f6fbad0df985f5def91a9af34b7820ff46f4
+      projects/medra/ui/src/lib/data-table/data-table.component.ts: 6c9484ca00f4b8dfd254de3d417aec5f1927682f484088536f75e232bac415ef
+      projects/medra/ui/src/lib/data-table/data-table.types.ts: 699c39129a752af7ceef6f57dac33e7c9c099413b02ee9b13cec2c1b5305516b
+      projects/medra/ui/src/lib/data-table/table-column.component.ts: dd68f8349e0ced8ab74292dc63328e94c03a31cb05091c812f68efa4012f308b
+      projects/site/src/app/pages/docs/components/demos/data-table-responsive-stack.demo.html: d2ee1ebaf18825d2713f7eb0e5890ef4069987ef1e7f6709e60cb83957e565b6
+      projects/site/src/app/pages/docs/components/demos/data-table-stateful.demo.html: 0edd961ac6c1bae2f877e56ebc6bdf04adbe3163d7f2dbef1856dfe5d8be0c29
+      projects/site/src/app/pages/docs/components/demos/data-table-stateful.demo.ts: 9d2b6505f19dc8dea66d0b643f83dd64870fa339347d25e422c834b521c8049b
+      projects/site/src/app/pages/docs/components/demos/data-table-virtual-scroll.demo.html: 9d4a4ac2a37c07b6b7802205c538c8cb68ccf81bda120a1c4c636b84c1a4b496
+      projects/site/src/app/pages/docs/components/demos/data-table-virtual-scroll.demo.ts: 2443f8ff11113cbce0df3ae879f0ea685be4422cae030b0233bb47ddf8d42131
+      projects/site/src/content/docs/data-table-column-toggle.txt: 6d56474012fd65101cd7efdab9eb8162887d748ddcedef5a78e5851d882ee459
+      projects/site/src/content/docs/data-table-stateful.txt: 398971d754c63eb3ec2efdd0b8b859e3fb453be86ab4ae0c81fd095f288cf2d9
+archived:
+  at: 2026-11-24
+  sequence: 24

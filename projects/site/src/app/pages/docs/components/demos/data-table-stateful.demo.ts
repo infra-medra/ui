@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
-import { DataTableComponent, TableColumnComponent } from '@medra.dev/ui';
+import { Component, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { CheckboxComponent, DataTableComponent, TableColumnComponent } from '@medra.dev/ui';
 
 interface EquipmentItem {
   readonly id: number;
@@ -11,10 +12,14 @@ interface EquipmentItem {
 
 @Component({
   selector: 'app-data-table-stateful-demo',
-  imports: [DataTableComponent, TableColumnComponent],
+  imports: [FormsModule, CheckboxComponent, DataTableComponent, TableColumnComponent],
   templateUrl: './data-table-stateful.demo.html',
 })
 export class DataTableStatefulDemo {
+  protected readonly showName = signal(true);
+  protected readonly showCategory = signal(true);
+  protected readonly showQuantity = signal(true);
+
   protected readonly equipment: EquipmentItem[] = [
     { id: 1, name: 'Oscilloscope', category: 'Test equipment', quantity: 4, status: 'In stock' },
     { id: 2, name: 'Soldering station', category: 'Workbench tools', quantity: 12, status: 'In stock' },

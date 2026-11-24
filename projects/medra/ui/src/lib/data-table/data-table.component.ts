@@ -2,22 +2,28 @@ import { ChangeDetectionStrategy, Component, DestroyRef, Injector, PLATFORM_ID, 
 import { NgTemplateOutlet, isPlatformBrowser } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Subject, takeUntil } from 'rxjs';
 import { ButtonDirective } from '../button/button.directive';
 import { ContextMenuDirective } from '../context-menu/context-menu.directive';
 import { DatePickerComponent } from '../date-picker/date-picker.component';
 import { IconComponent } from '../icon/icon.component';
 import { InputTextDirective } from '../input-text/input-text.directive';
+import { MultiSelectComponent } from '../multi-select/multi-select.component';
 import { PaginatorComponent, PaginatorPageEvent } from '../paginator/paginator.component';
 import { PopoverComponent } from '../popover/popover.component';
+import { SelectButtonComponent } from '../select-button/select-button.component';
 import { SelectComponent } from '../select/select.component';
+import { SelectOption } from '../select/select.types';
 import { ProgressSpinnerComponent } from '../progress-spinner/progress-spinner.component';
 import { SkeletonComponent } from '../skeleton/skeleton.component';
 import { checkboxBoxVariants } from '../checkbox/checkbox.styles';
 import { DOT_SIZE_CLASS, radioRingVariants } from '../radio-button/radio-button.styles';
 import { mergeClasses } from '../utils/merge-classes';
 import { TableColumnComponent } from './table-column.component';
-import { FILTER_MODES_BY_TYPE, isRuleActive, matchesColumnFilter, offeredMatchModes, preselectedMatchMode } from './data-table-column-filter';
-import { TableCellSelection, TableColumnAlign, TableColumnFilter, TableColumnFilters, TableContextMenuSelectEvent, TableFilterMatchMode, TableColumnReorderEvent, TableLazyLoadEvent, TableLoadingMode, TableRowEditEvent, TableRowReorderEvent, TableSelectionMode, TableSize, TableSortMeta, TableSortMode, TableSortOrder } from './data-table.types';
+import { isColumnFilterEntryActive, isFilterGroup, isRuleActive, matchesColumnFilterEntry, offeredMatchModes, preselectedMatchMode } from './data-table-column-filter';
+import { MAX_COLUMN_FILTER_RULES, parseStoredTableState } from './data-table-state';
+import { buildVirtualHeightIndex, findRowAtOffset, rangeAtVariableOffset, rangeHeight } from './data-table-virtual-heights';
+import { TableCellSelection, TableColumnAlign, TableColumnFilter, TableColumnFilterGroup, TableColumnFilterOperator, TableColumnFilterTemplateContext, TableColumnFilters, TableContextMenuSelectEvent, TableFilterDisplay, TableFilterMatchMode, TableFilterValue, TableColumnReorderEvent, TableLazyLoadEvent, TableLoadingMode, TableRowEditEvent, TableRowReorderEvent, TableSelectionMode, TableSize, TableSortMeta, TableSortMode, TableSortOrder } from './data-table.types';
 
 /** A number followed by a unit, the only `breakpoint` form a media query takes here (`960px`, `40em`). */
 const CSS_LENGTH_PATTERN = /^\d*\.?\d+(px|em|rem|vw|vh|ch|ex|cm|mm|in|pt|pc)$/;
@@ -40,6 +46,8 @@ const DEFAULT_MATCH_MODE_LABELS: Readonly<Record<TableFilterMatchMode, string>> 
   dateIsNot: 'Date is not',
   dateBefore: 'Date is before',
   dateAfter: 'Date is after',
+  between: 'Between',
+  in: 'In',
 };
 
 const SIZE_PADDING_CLASS: Record<TableSize, string> = {
@@ -52,11 +60,29 @@ const SIZE_PADDING_CLASS: Record<TableSize, string> = {
 const DEFAULT_VIRTUAL_VIEWPORT_PX = 400;
 /** Rows rendered above and below the visible rows in `virtualScroll` mode. */
 const VIRTUAL_BUFFER_ROWS = 5;
+/** Viewport width of a `virtualScrollColumns` table before measurement. */
+const DEFAULT_VIRTUAL_VIEWPORT_WIDTH_PX = 400;
+/** Columns rendered before and after the visible scrollable columns in `virtualScrollColumns` mode. */
+const VIRTUAL_COLUMN_BUFFER = 3;
 
-/** One item of the virtual body: a spacer standing for rows outside the window, or a row with its absolute index in the processed row set. */
+/** One flattened stream item when non-lazy `virtualScroll` uses `#rowexpansion` or `rowGroupMode="subheader"`. */
+type VirtualItem<T> =
+  | { readonly kind: 'subheader'; readonly row: T; readonly rowIndex: number }
+  | { readonly kind: 'row'; readonly row: T; readonly rowIndex: number }
+  | { readonly kind: 'expansion'; readonly row: T; readonly rowIndex: number };
+
+/** One item of the virtual body: a spacer standing for rows outside the window, or a row/subheader/expansion item with its virtual stream `index` and `pagedValue()` `rowIndex`. */
 type VirtualEntry<T> =
   | { readonly kind: 'spacer'; readonly slot: number; readonly height: number }
-  | { readonly kind: 'row'; readonly row: T | null | undefined; readonly index: number };
+  | { readonly kind: 'subheader'; readonly row: T; readonly index: number; readonly rowIndex: number }
+  | { readonly kind: 'row'; readonly row: T | null | undefined; readonly index: number; readonly rowIndex: number }
+  | { readonly kind: 'expansion'; readonly row: T; readonly index: number; readonly rowIndex: number };
+
+/** One column slot rendered across table rows: a visible data column or a horizontal virtualization spacer. */
+type VirtualColumnSlot =
+  | { readonly kind: 'col'; readonly col: TableColumnComponent; readonly ariaColIndex: number | null }
+  | { readonly kind: 'spacer-left'; readonly widthPx: number }
+  | { readonly kind: 'spacer-right'; readonly widthPx: number };
 
 const SIZE_TEXT_CLASS: Record<TableSize, string> = {
   sm: 'text-xs',
@@ -332,8 +358,9 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
  * - The `<table>` gets `aria-rowcount` and each rendered row gets its
  *   `aria-rowindex`. ArrowUp, ArrowDown, Home and End scroll the target row
  *   into view and then focus it.
- * - `rowGroupMode`, `#rowexpansion` and `reorderable` are ignored in this
- *   mode, and so is the paginator.
+ * - In non-lazy `virtualScroll`, `rowGroupMode`, `#rowexpansion` and `reorderable`
+ *   remain active (with `lazy`, they are ignored). `paginator` is always ignored
+ *   in `virtualScroll`.
  *
  * **`lazy` with `virtualScroll`** loads rows by block instead of by page.
  * `value` is a sparse array of `totalRecords` entries, in which `null` or
@@ -352,7 +379,7 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
 @Component({
   selector: 'med-data-table',
   standalone: true,
-  imports: [NgTemplateOutlet, ReactiveFormsModule, ButtonDirective, DatePickerComponent, IconComponent, InputTextDirective, PaginatorComponent, PopoverComponent, ProgressSpinnerComponent, SelectComponent, SkeletonComponent],
+  imports: [NgTemplateOutlet, ReactiveFormsModule, ButtonDirective, DatePickerComponent, IconComponent, InputTextDirective, MultiSelectComponent, PaginatorComponent, PopoverComponent, ProgressSpinnerComponent, SelectButtonComponent, SelectComponent, SkeletonComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'block min-w-0', '[class.flex]': 'flexHeight()', '[class.flex-col]': 'flexHeight()', '[class.h-full]': 'flexHeight()' },
   template: `
@@ -375,86 +402,109 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
         />
       </div>
     }
-    <ng-template #dataCells let-row let-i="index" let-frozen="frozen" let-span="span">
-      @for (col of visibleColumns(); track col.field()) {
-        @if (frozen || span !== 0 || col.field() !== spanColumnField()) {
-        <td
-          [attr.role]="stacked() ? 'cell' : null"
-          [class.block]="stacked()"
-          [class]="bodyCellClass(col, row, i, !!frozen)"
-          [class.sticky]="isFrozenColumn(col)"
-          [class.px-2]="cellPadX('px-2')"
-          [class.px-3]="cellPadX('px-3')"
-          [class.px-4]="cellPadX('px-4')"
-          [style.position]="frozenPosition(col)"
-          [style.left]="frozenEdge(col, 'left')"
-          [style.right]="frozenEdge(col, 'right')"
-          [style.z-index]="frozenZIndex(col)"
-          [attr.rowspan]="!frozen && span >= 1 && col.field() === spanColumnField() ? span : null"
-          [attr.data-med-editing]="!frozen && isEditingCell(row, col) ? '' : null"
-          [attr.data-med-field]="!frozen ? col.field() : null"
-          [attr.aria-selected]="!frozen && isCellSelectionActive() ? isCellSelected(row, col.field()) : null"
-          [attr.tabindex]="!frozen && isCellSelectionActive() ? 0 : null"
-          (click)="frozen ? null : onCellClick($event, row, col)"
-          (dblclick)="frozen ? null : onCellDblClick($event, row, col)"
-          (keydown)="frozen ? null : onCellKeydown($event, row, col)"
-        >
-          @if (stacked() && stackLabelFor(col); as label) {
-            <span aria-hidden="true" [class]="stackLabelClass(!frozen && isEditingCell(row, col))">{{ label }}</span>
+    <ng-template #dataCells let-row let-i="index" let-frozen="frozen">
+      @for (slot of columnSlots(); track trackColumnSlot(slot)) {
+        @if (slot.kind === 'spacer-left') {
+          <td data-med-col-spacer-left aria-hidden="true" class="border-0 p-0" [style.width.px]="slot.widthPx"></td>
+        } @else if (slot.kind === 'spacer-right') {
+          <td data-med-col-spacer-right aria-hidden="true" class="border-0 p-0" [style.width.px]="slot.widthPx"></td>
+        } @else {
+          @let col = slot.col;
+          @if (frozen || cellSpan(col, i) !== 0) {
+          <td
+            [attr.role]="stacked() ? 'cell' : null"
+            [class.block]="stacked()"
+            [class]="bodyCellClass(col, row, i, !!frozen)"
+            [class.sticky]="isFrozenColumn(col)"
+            [class.px-2]="cellPadX('px-2')"
+            [class.px-3]="cellPadX('px-3')"
+            [class.px-4]="cellPadX('px-4')"
+            [style.position]="frozenPosition(col)"
+            [style.left]="frozenEdge(col, 'left')"
+            [style.right]="frozenEdge(col, 'right')"
+            [style.z-index]="frozenZIndex(col)"
+            [attr.aria-colindex]="slot.ariaColIndex"
+            [attr.rowspan]="!frozen ? cellRowSpanAttr(col, i) : null"
+            [attr.data-med-editing]="!frozen && isEditingCell(row, col) ? '' : null"
+            [attr.data-med-field]="!frozen ? col.field() : null"
+            [attr.aria-selected]="!frozen && isCellSelectionActive() ? isCellSelected(row, col.field()) : null"
+            [attr.tabindex]="!frozen && isCellSelectionActive() ? 0 : null"
+            (click)="frozen ? null : onCellClick($event, row, col)"
+            (dblclick)="frozen ? null : onCellDblClick($event, row, col)"
+            (mousedown)="frozen ? null : onCellMouseDown($event, row, col)"
+            (mouseenter)="frozen ? null : onCellMouseEnter(row, col)"
+            (mouseup)="frozen ? null : onCellMouseUp()"
+            (keydown)="frozen ? null : onCellKeydown($event, row, col)"
+          >
+            @if (stacked() && stackLabelFor(col); as label) {
+              <span aria-hidden="true" [class]="stackLabelClass(!frozen && isEditingCell(row, col))">{{ label }}</span>
+            }
+            @if (!frozen && isEditingCell(row, col); as editing) {
+              <ng-container
+                [ngTemplateOutlet]="col.editTemplate()!"
+                [ngTemplateOutletContext]="editContext(row, col)"
+              />
+            } @else if (col.cellTemplate(); as t) {
+              <ng-container [ngTemplateOutlet]="t" [ngTemplateOutletContext]="{ $implicit: row, rowIndex: i }" />
+            } @else {
+              {{ cellValue(row, col) }}
+            }
+          </td>
           }
-          @if (!frozen && isEditingCell(row, col); as editing) {
-            <ng-container
-              [ngTemplateOutlet]="col.editTemplate()!"
-              [ngTemplateOutletContext]="editContext(row, col)"
-            />
-          } @else if (col.cellTemplate(); as t) {
-            <ng-container [ngTemplateOutlet]="t" [ngTemplateOutletContext]="{ $implicit: row, rowIndex: i }" />
-          } @else {
-            {{ cellValue(row, col) }}
-          }
-        </td>
         }
       }
     </ng-template>
     <ng-template #frozenRow let-row let-i="index">
       <tr [class]="rowClassFor(row, i, false)" [class.block]="stacked()" [class.px-2]="rowPadX('px-2')" [class.px-3]="rowPadX('px-3')" [class.px-4]="rowPadX('px-4')" [attr.role]="stacked() ? 'row' : null" [attr.aria-rowindex]="frozenRowPosition(i)">
         @if (rowReorderActive()) {
-          <td [attr.role]="stacked() ? 'cell' : null" [class]="utilityCellClass('', true) + ' ' + frozenUtilityClass(row, i)" [style]="utilityStyle('reorder')" [style.position]="utilityPosition()" [style.left]="utilityLeft('reorder')" [style.z-index]="utilityZIndex()"></td>
+          <td [attr.role]="stacked() ? 'cell' : null" [attr.aria-colindex]="utilityColIndex('reorder')" [class]="utilityCellClass('', true) + ' ' + frozenUtilityClass(row, i)" [style]="utilityStyle('reorder')" [style.position]="utilityPosition()" [style.left]="utilityLeft('reorder')" [style.z-index]="utilityZIndex()"></td>
         }
         @if (hasSelectionColumn()) {
-          <td [attr.role]="stacked() ? 'cell' : null" [class]="utilityCellClass('') + ' ' + frozenUtilityClass(row, i)" [style]="utilityStyle('selection')" [style.position]="utilityPosition()" [style.left]="utilityLeft('selection')" [style.z-index]="utilityZIndex()"></td>
+          <td [attr.role]="stacked() ? 'cell' : null" [attr.aria-colindex]="utilityColIndex('selection')" [class]="utilityCellClass('') + ' ' + frozenUtilityClass(row, i)" [style]="utilityStyle('selection')" [style.position]="utilityPosition()" [style.left]="utilityLeft('selection')" [style.z-index]="utilityZIndex()"></td>
         }
         <ng-container [ngTemplateOutlet]="dataCells" [ngTemplateOutletContext]="{ $implicit: row, index: i, frozen: true }" />
         @if (editMode() === 'row') {
-          <td [attr.role]="stacked() ? 'cell' : null" [class]="utilityCellClass('')"></td>
+          <td [attr.role]="stacked() ? 'cell' : null" [attr.aria-colindex]="utilityColIndex('rowActions')" [class]="utilityCellClass('')"></td>
         }
       </tr>
     </ng-template>
-    <ng-template #bodyRow let-row let-i="index">
-            @if (isGroupStart(row, i)) {
-              <tr class="border-b border-surface-200 bg-surface-50 font-semibold dark:border-surface-700 dark:bg-surface-800/50" [class.block]="stacked()" [attr.role]="stacked() ? 'row' : null">
-                <td [attr.role]="stacked() ? 'cell' : null" [attr.colspan]="totalColumnCount()" [class]="groupCellClass()">
-                  @if (isRowGroupToggleable()) {
-                    <button
-                      type="button"
-                      class="mr-2 inline-flex size-6 items-center justify-center rounded align-middle text-surface-600 hover:bg-surface-200 focus-visible:outline-2 focus-visible:outline-brand-500 dark:text-surface-300 dark:hover:bg-surface-700"
-                      [attr.aria-expanded]="!isGroupCollapsed(row)"
-                      [attr.aria-label]="rowGroupToggleLabel()(groupValue(row), !isGroupCollapsed(row))"
-                      (click)="toggleRowGroup(row)"
-                      (keydown.enter)="$event.preventDefault(); toggleRowGroup(row)"
-                    >
-                      <med-icon [name]="isGroupCollapsed(row) ? 'chevron-right' : 'chevron-down'" variant="mini" class="size-4" />
-                    </button>
-                  }
-                  @if (groupHeaderTemplate(); as t) {
-                    <ng-container [ngTemplateOutlet]="t" [ngTemplateOutletContext]="{ $implicit: row }" />
-                  } @else {
-                    {{ groupValue(row) }}
-                  }
-                </td>
-              </tr>
-            }
-            @if (!isRowHiddenByGroup(row)) {
+    <ng-template #groupSubheaderRow let-row let-ariaIndex="ariaIndex" let-height="height">
+      <tr class="border-b border-surface-200 bg-surface-50 font-semibold dark:border-surface-700 dark:bg-surface-800/50" [class.block]="stacked()" [attr.role]="stacked() ? 'row' : null" [style.height.px]="height ?? null" [attr.aria-rowindex]="ariaIndex ?? null">
+        <td [attr.role]="stacked() ? 'cell' : null" [attr.colspan]="totalColumnCount()" [class]="groupCellClass()">
+          @if (isRowGroupToggleable()) {
+            <button
+              type="button"
+              class="mr-2 inline-flex size-6 items-center justify-center rounded align-middle text-surface-600 hover:bg-surface-200 focus-visible:outline-2 focus-visible:outline-brand-500 dark:text-surface-300 dark:hover:bg-surface-700"
+              [attr.aria-expanded]="!isGroupCollapsed(row)"
+              [attr.aria-label]="rowGroupToggleLabel()(groupValue(row), !isGroupCollapsed(row))"
+              (click)="toggleRowGroup(row)"
+              (keydown.enter)="$event.preventDefault(); toggleRowGroup(row)"
+            >
+              <med-icon [name]="isGroupCollapsed(row) ? 'chevron-right' : 'chevron-down'" variant="mini" class="size-4" />
+            </button>
+          }
+          @if (groupHeaderTemplate(); as t) {
+            <ng-container [ngTemplateOutlet]="t" [ngTemplateOutletContext]="{ $implicit: row }" />
+          } @else {
+            {{ groupValue(row) }}
+          }
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template #expansionRow let-row let-i="rowIndex" let-ariaIndex="ariaIndex" let-height="height">
+      @if (rowExpansionTemplate(); as expTpl) {
+        <tr class="border-b border-surface-200 bg-surface-50/40 dark:border-surface-700 dark:bg-surface-800/30" [class.block]="stacked()" [attr.role]="stacked() ? 'row' : null" [style.height.px]="height ?? null" [attr.aria-rowindex]="ariaIndex ?? null">
+          @for (seg of expansionSegments(); track $index) {
+            <td [attr.colspan]="seg.span" [class]="expansionCellClass()" [attr.role]="stacked() ? 'cell' : null">
+              @if (seg.primary) {
+                <ng-container [ngTemplateOutlet]="expTpl" [ngTemplateOutletContext]="{ $implicit: row, rowIndex: i }" />
+              }
+            </td>
+          }
+        </tr>
+      }
+    </ng-template>
+    <ng-template #dataRow let-row let-i="index" let-ariaIndex="ariaIndex" let-height="height">
             <tr
               [class]="rowClassFor(row, i)"
               [class.block]="stacked()"
@@ -462,10 +512,10 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
               [class.px-3]="rowPadX('px-3')"
               [class.px-4]="rowPadX('px-4')"
               [attr.role]="stacked() ? 'row' : null"
-              [style.height.px]="virtualScroll() ? virtualScrollItemSize() : null"
-              [attr.aria-rowindex]="bodyRowPosition(i)"
+              [style.height.px]="height ?? null"
+              [attr.aria-rowindex]="ariaIndex ?? null"
               [attr.aria-selected]="selectionMode() && !isCellSelectionActive() ? isSelected(row) : null"
-              [attr.tabindex]="(selectionMode() || contextMenu()) && !isCellSelectionActive() ? 0 : null"
+              [attr.tabindex]="(selectionMode() || contextMenu() || keyboardNavigation()) && !isCellSelectionActive() ? 0 : null"
               [draggable]="rowReorderActive()"
               (click)="onRowClick(row)"
               (contextmenu)="onRowContextMenu($event, row)"
@@ -473,14 +523,15 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
               (dragstart)="onRowDragStart(i)"
               (dragover)="onRowDragOver($event)"
               (drop)="onRowDrop(i)"
+              (dragend)="onRowDragEnd()"
             >
               @if (rowReorderActive()) {
-                <td [attr.role]="stacked() ? 'cell' : null" [class]="utilityCellClass('cursor-move text-surface-400 dark:text-surface-500', true) + ' ' + frozenUtilityClass(row, i)" [style]="utilityStyle('reorder')" [style.position]="utilityPosition()" [style.left]="utilityLeft('reorder')" [style.z-index]="utilityZIndex()" (click)="$event.stopPropagation()">
+                <td [attr.role]="stacked() ? 'cell' : null" [attr.aria-colindex]="utilityColIndex('reorder')" [class]="utilityCellClass('cursor-move text-surface-400 dark:text-surface-500', true) + ' ' + frozenUtilityClass(row, i)" [style]="utilityStyle('reorder')" [style.position]="utilityPosition()" [style.left]="utilityLeft('reorder')" [style.z-index]="utilityZIndex()" (click)="$event.stopPropagation()">
                   <med-icon name="bars-3" variant="mini" class="size-4" />
                 </td>
               }
               @if (!isCellSelectionActive() && selectionMode() === 'multiple') {
-                <td [attr.role]="stacked() ? 'cell' : null" [class]="utilityCellClass('') + ' ' + frozenUtilityClass(row, i)" [style]="utilityStyle('selection')" [style.position]="utilityPosition()" [style.left]="utilityLeft('selection')" [style.z-index]="utilityZIndex()">
+                <td [attr.role]="stacked() ? 'cell' : null" [attr.aria-colindex]="utilityColIndex('selection')" [class]="utilityCellClass('') + ' ' + frozenUtilityClass(row, i)" [style]="utilityStyle('selection')" [style.position]="utilityPosition()" [style.left]="utilityLeft('selection')" [style.z-index]="utilityZIndex()">
                   <span class="relative inline-flex">
                     <input
                       type="checkbox"
@@ -499,7 +550,7 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
                 </td>
               }
               @if (!isCellSelectionActive() && selectionMode() === 'radio') {
-                <td [attr.role]="stacked() ? 'cell' : null" [class]="utilityCellClass('') + ' ' + frozenUtilityClass(row, i)" [style]="utilityStyle('selection')" [style.position]="utilityPosition()" [style.left]="utilityLeft('selection')" [style.z-index]="utilityZIndex()">
+                <td [attr.role]="stacked() ? 'cell' : null" [attr.aria-colindex]="utilityColIndex('selection')" [class]="utilityCellClass('') + ' ' + frozenUtilityClass(row, i)" [style]="utilityStyle('selection')" [style.position]="utilityPosition()" [style.left]="utilityLeft('selection')" [style.z-index]="utilityZIndex()">
                   <span class="relative inline-flex">
                     <input
                       type="radio"
@@ -518,9 +569,9 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
                   </span>
                 </td>
               }
-              <ng-container [ngTemplateOutlet]="dataCells" [ngTemplateOutletContext]="{ $implicit: row, index: i, span: groupSpans()[i] ?? 1 }" />
+              <ng-container [ngTemplateOutlet]="dataCells" [ngTemplateOutletContext]="{ $implicit: row, index: i }" />
               @if (editMode() === 'row') {
-                <td [attr.role]="stacked() ? 'cell' : null" [class]="utilityCellClass('whitespace-nowrap')" (click)="$event.stopPropagation()">
+                <td [attr.role]="stacked() ? 'cell' : null" [attr.aria-colindex]="utilityColIndex('rowActions')" [class]="utilityCellClass('whitespace-nowrap')" (click)="$event.stopPropagation()">
                   @if (editingRow() === row) {
                     <button type="button" [class]="rowActionButtonClass" [attr.aria-label]="saveRowLabel()" (click)="saveRowEdit()">
                       <med-icon name="check" variant="mini" class="size-4" />
@@ -536,31 +587,17 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
                 </td>
               }
             </tr>
-            @if (expansionRowsRender() && isRowExpanded(row, i) && rowExpansionTemplate(); as expTpl) {
-              <tr class="border-b border-surface-200 bg-surface-50/40 dark:border-surface-700 dark:bg-surface-800/30" [class.block]="stacked()" [attr.role]="stacked() ? 'row' : null">
-                @if (expansionLayout(); as layout) {
-                  @if (layout.lead > 0) {
-                    <td [attr.colspan]="layout.lead" [class]="expansionCellClass()" [attr.role]="stacked() ? 'cell' : null">
-                      @if (layout.lead >= layout.trail) {
-                        <ng-container [ngTemplateOutlet]="expTpl" [ngTemplateOutletContext]="{ $implicit: row, rowIndex: i }" />
-                      }
-                    </td>
-                  }
-                  @if (layout.trail > 0) {
-                    <td [attr.colspan]="layout.trail" [class]="expansionCellClass()" [attr.role]="stacked() ? 'cell' : null">
-                      @if (layout.lead < layout.trail) {
-                        <ng-container [ngTemplateOutlet]="expTpl" [ngTemplateOutletContext]="{ $implicit: row, rowIndex: i }" />
-                      }
-                    </td>
-                  }
-                } @else {
-                  <td [attr.colspan]="totalColumnCount()" [class]="expansionCellClass()" [attr.role]="stacked() ? 'cell' : null">
-                    <ng-container [ngTemplateOutlet]="expTpl" [ngTemplateOutletContext]="{ $implicit: row, rowIndex: i }" />
-                  </td>
-                }
-              </tr>
-            }
-            }
+    </ng-template>
+    <ng-template #bodyRow let-row let-i="index">
+      @if (isGroupStart(row, i)) {
+        <ng-container [ngTemplateOutlet]="groupSubheaderRow" [ngTemplateOutletContext]="{ $implicit: row }" />
+      }
+      @if (!isRowHiddenByGroup(row)) {
+        <ng-container [ngTemplateOutlet]="dataRow" [ngTemplateOutletContext]="{ $implicit: row, index: i }" />
+        @if (expansionRowsRender() && isRowExpanded(row, i)) {
+          <ng-container [ngTemplateOutlet]="expansionRow" [ngTemplateOutletContext]="{ $implicit: row, rowIndex: i }" />
+        }
+      }
     </ng-template>
     <ng-template #emptyRow>
             <tr [class.block]="stacked()" [attr.role]="stacked() ? 'row' : null">
@@ -584,49 +621,105 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
           <ng-container [ngTemplateOutlet]="paginatorTpl" [ngTemplateOutletContext]="{ placement: 'top', label: paginatorLabelFor('top') }" />
         </div>
       }
+      @if (stacked() && sortableVisibleColumns().length > 0) {
+        <div data-med-stack-sort class="flex flex-wrap items-center gap-2 border-b border-surface-200 bg-surface-50 px-4 py-2 dark:border-surface-700 dark:bg-surface-800/50">
+          <select
+            [attr.aria-label]="stackSortLabel()"
+            [value]="activeStackSortField()"
+            (change)="onStackSortFieldChange($event)"
+            class="h-8 rounded-md border border-surface-300 bg-surface-0 px-2.5 text-sm text-surface-900 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-brand-500 dark:border-surface-600 dark:bg-surface-900 dark:text-surface-100"
+          >
+            <option value="" [selected]="activeStackSortField() === ''" [disabled]="!removableSort() && activeStackSortField() !== ''">{{ stackSortLabel() }}</option>
+            @for (col of sortableVisibleColumns(); track col.field()) {
+              <option [value]="col.field()" [selected]="col.field() === activeStackSortField()">{{ col.header() || col.field() }}</option>
+            }
+          </select>
+          @if (activeStackSortField()) {
+            <button
+              type="button"
+              data-med-stack-sort-dir
+              [attr.aria-label]="activeStackSortOrder() === 'desc' ? stackSortDescLabel() : stackSortAscLabel()"
+              (click)="toggleStackSortDirection()"
+              class="inline-flex h-8 items-center gap-1 rounded-md border border-surface-300 bg-surface-0 px-2.5 text-sm text-surface-700 hover:bg-surface-100 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-brand-500 dark:border-surface-600 dark:bg-surface-900 dark:text-surface-200 dark:hover:bg-surface-800"
+            >
+              <span>{{ activeStackSortOrder() === 'desc' ? stackSortDescLabel() : stackSortAscLabel() }}</span>
+            </button>
+            @if (removableSort()) {
+              <button
+                type="button"
+                data-med-stack-sort-clear
+                [attr.aria-label]="stackSortClearLabel()"
+                (click)="clearStackSort()"
+                class="inline-flex h-8 items-center rounded-md border border-surface-300 bg-surface-0 px-2.5 text-sm text-surface-700 hover:bg-surface-100 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-brand-500 dark:border-surface-600 dark:bg-surface-900 dark:text-surface-200 dark:hover:bg-surface-800"
+              >
+                <span>{{ stackSortClearLabel() }}</span>
+              </button>
+            }
+          }
+        </div>
+      }
       <div #viewport data-med-scroll-viewport class="relative w-full overflow-x-auto" [class.min-h-0]="flexHeight()" [class.flex-1]="flexHeight()" [class.overflow-y-auto]="scrollActive()" [style.maxHeight]="scrollActive() && !flexHeight() ? viewportMaxHeight() : null" (scroll)="onViewportScroll($event)">
         @if (isSpinnerLoading()) {
           <div class="absolute inset-0 z-10 flex items-center justify-center bg-surface-0/60 dark:bg-surface-800/60">
             <med-progress-spinner [ariaLabel]="loadingLabel()" />
           </div>
         }
-        <table [class]="tableClass()" [class.block]="stacked()" [attr.role]="stacked() ? 'table' : null" [style.width.px]="tableWidthPx()" [class.table-fixed]="resizableColumns() || hasFrozenColumn()" [class.opacity-50]="isSpinnerLoading()" [attr.aria-busy]="isSkeletonLoading() ? 'true' : null" [attr.aria-label]="ariaLabel()" [attr.aria-rowcount]="ariaRowCount()">
+        <table [class]="tableClass()" [class.block]="stacked()" [attr.role]="stacked() ? 'table' : null" [style.width.px]="tableWidthPx()" [class.table-fixed]="resizableColumns() || hasFrozenColumn() || virtualColumnsActive()" [class.opacity-50]="isSpinnerLoading()" [attr.aria-busy]="isSkeletonLoading() ? 'true' : null" [attr.aria-label]="ariaLabel()" [attr.aria-rowcount]="ariaRowCount()" [attr.aria-colcount]="ariaColCount()">
         <thead #tableHead [class.block]="stacked()" [attr.role]="stacked() ? 'rowgroup' : null" [class.sticky]="stickyActive()" [class.top-0]="stickyActive()" [class.z-10]="stickyActive()" [class.bg-surface-50]="stickyActive()" [class.dark:bg-surface-800]="stickyActive()">
           @if (headerGroupTemplate(); as hg) {
             <ng-container [ngTemplateOutlet]="hg" />
           }
           <tr data-med-header-row class="border-b border-surface-200 bg-surface-50 dark:border-surface-700 dark:bg-surface-800/50" [class.sr-only]="stacked()" [attr.role]="stacked() ? 'row' : null">
             @if (rowReorderActive()) {
-              <th [attr.role]="stacked() ? 'columnheader' : null" [class]="utilityCellClass('', true) + ' ' + frozenUtilityClass(null)" [style]="utilityStyle('reorder')" [style.position]="utilityPosition()" [style.left]="utilityLeft('reorder')" [style.z-index]="utilityZIndex()"></th>
+              <th [attr.role]="stacked() ? 'columnheader' : null" [attr.aria-colindex]="utilityColIndex('reorder')" [class]="utilityCellClass('', true) + ' ' + frozenUtilityClass(null)" [style]="utilityStyle('reorder')" [style.position]="utilityPosition()" [style.left]="utilityLeft('reorder')" [style.z-index]="utilityZIndex()">
+                @if (reorderHeaderTemplate(); as tpl) {
+                  <ng-container [ngTemplateOutlet]="tpl" />
+                }
+              </th>
             }
             @if (!isCellSelectionActive() && selectionMode() === 'multiple') {
-              <th [attr.role]="stacked() ? 'columnheader' : null" [class]="utilityCellClass('') + ' ' + frozenUtilityClass(null)" [style]="utilityStyle('selection')" [style.position]="utilityPosition()" [style.left]="utilityLeft('selection')" [style.z-index]="utilityZIndex()">
-                <span class="relative inline-flex">
-                  <input
-                    type="checkbox"
-                    class="peer absolute inset-0 size-full cursor-pointer opacity-0"
-                    [checked]="allSelected()"
-                    [indeterminate]="someSelected()"
-                    [attr.aria-label]="selectAllLabel()"
-                    (change)="toggleSelectAll()"
-                  />
-                  <span [class]="checkboxBoxClass" aria-hidden="true">
-                    @if (someSelected()) {
-                      <med-icon name="minus" variant="solid" class="size-3" />
-                    } @else if (allSelected()) {
-                      <med-icon name="check" variant="solid" class="size-3" />
-                    }
+              <th [attr.role]="stacked() ? 'columnheader' : null" [attr.aria-colindex]="utilityColIndex('selection')" [class]="utilityCellClass('') + ' ' + frozenUtilityClass(null)" [style]="utilityStyle('selection')" [style.position]="utilityPosition()" [style.left]="utilityLeft('selection')" [style.z-index]="utilityZIndex()">
+                @if (selectionHeaderTemplate(); as tpl) {
+                  <ng-container [ngTemplateOutlet]="tpl" />
+                } @else {
+                  <span class="relative inline-flex">
+                    <input
+                      type="checkbox"
+                      class="peer absolute inset-0 size-full cursor-pointer opacity-0"
+                      [checked]="allSelected()"
+                      [indeterminate]="someSelected()"
+                      [attr.aria-label]="selectAllLabel()"
+                      (change)="toggleSelectAll()"
+                    />
+                    <span [class]="checkboxBoxClass" aria-hidden="true">
+                      @if (someSelected()) {
+                        <med-icon name="minus" variant="solid" class="size-3" />
+                      } @else if (allSelected()) {
+                        <med-icon name="check" variant="solid" class="size-3" />
+                      }
+                    </span>
                   </span>
-                </span>
+                }
               </th>
             }
             @if (!isCellSelectionActive() && selectionMode() === 'radio') {
-              <th [attr.role]="stacked() ? 'columnheader' : null" [class]="utilityCellClass('') + ' ' + frozenUtilityClass(null)" [style]="utilityStyle('selection')" [style.position]="utilityPosition()" [style.left]="utilityLeft('selection')" [style.z-index]="utilityZIndex()"></th>
+              <th [attr.role]="stacked() ? 'columnheader' : null" [attr.aria-colindex]="utilityColIndex('selection')" [class]="utilityCellClass('') + ' ' + frozenUtilityClass(null)" [style]="utilityStyle('selection')" [style.position]="utilityPosition()" [style.left]="utilityLeft('selection')" [style.z-index]="utilityZIndex()">
+                @if (selectionHeaderTemplate(); as tpl) {
+                  <ng-container [ngTemplateOutlet]="tpl" />
+                }
+              </th>
             }
-            @for (col of visibleColumns(); track col.field()) {
+            @for (slot of columnSlots(); track trackColumnSlot(slot)) {
+              @if (slot.kind === 'spacer-left') {
+                <th data-med-col-spacer-left aria-hidden="true" class="border-0 p-0" [style.width.px]="slot.widthPx"></th>
+              } @else if (slot.kind === 'spacer-right') {
+                <th data-med-col-spacer-right aria-hidden="true" class="border-0 p-0" [style.width.px]="slot.widthPx"></th>
+              } @else {
+              @let col = slot.col;
               <th
                 scope="col"
                 [attr.role]="stacked() ? 'columnheader' : null"
+                [attr.aria-colindex]="slot.ariaColIndex"
                 [style.width]="columnWidth(col)"
                 [class]="headerCellClass(col)"
                 [class.sticky]="isFrozenColumn(col)"
@@ -658,7 +751,7 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
                       <sup class="text-[0.6rem] font-semibold text-surface-500 dark:text-surface-400">{{ priority }}</sup>
                     }
                   }
-                  @if (col.columnFilter()) {
+                  @if (col.columnFilter() && filterDisplay() === 'menu') {
                     <button
                       #funnelButton
                       type="button"
@@ -672,25 +765,64 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
                       <med-icon name="funnel" [variant]="isColumnFilterActive(col) ? 'solid' : 'mini'" class="size-3.5" />
                     </button>
                     <med-popover #filterPopover [ariaLabel]="columnFilterLabel()(col.header())" (shown)="onFilterMenuShown(col)" (hidden)="onFilterMenuHidden(funnelButton)">
-                      @if (filterDraft(); as draft) {
+                      @if (col.filterTemplate(); as filterTpl) {
+                        <div class="text-left font-normal normal-case">
+                          <ng-container [ngTemplateOutlet]="filterTpl" [ngTemplateOutletContext]="filterTemplateContext(col)" />
+                        </div>
+                      } @else if (filterDraft(); as draft) {
                         @if (draft.field === col.field()) {
-                          <div class="flex w-64 flex-col gap-3 text-left font-normal normal-case">
-                            @if (filterModeOptions(col); as modeOptions) {
-                              @if (modeOptions.length > 1) {
-                                <med-select fluid [options]="modeOptions" [ariaLabel]="filterMatchModeLabel()" [formControl]="filterModeControl" />
-                              }
+                          <div class="flex w-72 flex-col gap-3 text-left font-normal normal-case">
+                            @if (draft.rules.length > 1) {
+                              <med-select-button size="sm" [allowEmpty]="false" [options]="filterOperatorOptions()" [ariaLabel]="filterOperatorLabel()" [formControl]="draft.operatorControl" />
                             }
-                            @switch (col.filterType()) {
-                              @case ('numeric') {
-                                <input type="number" medInputText [attr.aria-label]="columnFilterLabel()(col.header())" [value]="draft.value ?? ''" (input)="onFilterNumberInput($event)" (keydown.enter)="$event.preventDefault(); applyColumnFilter(col, filterPopover)" />
-                              }
-                              @case ('date') {
-                                <med-date-picker [formControl]="filterDateControl" />
-                              }
-                              @default {
-                                <input type="text" medInputText [attr.aria-label]="columnFilterLabel()(col.header())" [value]="draft.value ?? ''" (input)="onFilterTextInput($event)" (keydown.enter)="$event.preventDefault(); applyColumnFilter(col, filterPopover)" />
-                              }
+                            @for (rule of draft.rules; track rule.id) {
+                              <div class="flex flex-col gap-2 rounded-md border border-surface-200 p-2 dark:border-surface-700">
+                                @if (filterModeOptions(col); as modeOptions) {
+                                  @if (modeOptions.length > 1 || draft.rules.length > 1) {
+                                    <div class="flex items-center gap-1.5">
+                                      @if (modeOptions.length > 1) {
+                                        <med-select fluid [options]="modeOptions" [ariaLabel]="filterMatchModeLabel()" [formControl]="rule.modeControl" />
+                                      }
+                                      @if (draft.rules.length > 1) {
+                                        <button medButton type="button" variant="text" severity="secondary" size="sm" [attr.aria-label]="removeRuleLabel()" (click)="removeFilterRule(rule.id)">
+                                          <med-icon name="trash" variant="mini" class="size-3.5" />
+                                        </button>
+                                      }
+                                    </div>
+                                  }
+                                }
+                                @if (rule.matchMode === 'between') {
+                                  @if (col.filterType() === 'date') {
+                                    <div class="flex flex-col gap-2">
+                                      <med-date-picker [placeholder]="filterMinLabel()" [formControl]="rule.dateStartControl" />
+                                      <med-date-picker [placeholder]="filterMaxLabel()" [formControl]="rule.dateEndControl" />
+                                    </div>
+                                  } @else {
+                                    <div class="flex items-center gap-2">
+                                      <input type="number" medInputText class="min-w-0 flex-1" [attr.aria-label]="filterMinLabel()" [placeholder]="filterMinLabel()" [value]="betweenBound(rule.value, 0)" (input)="onFilterBetweenNumberInput(rule.id, 0, $event)" (keydown.enter)="$event.preventDefault(); applyColumnFilter(col, filterPopover)" />
+                                      <input type="number" medInputText class="min-w-0 flex-1" [attr.aria-label]="filterMaxLabel()" [placeholder]="filterMaxLabel()" [value]="betweenBound(rule.value, 1)" (input)="onFilterBetweenNumberInput(rule.id, 1, $event)" (keydown.enter)="$event.preventDefault(); applyColumnFilter(col, filterPopover)" />
+                                    </div>
+                                  }
+                                } @else if (rule.matchMode === 'in') {
+                                  <med-multi-select fluid [options]="filterInOptions(col)" [ariaLabel]="columnFilterLabel()(col.header())" [placeholder]="filterInPlaceholder()" appendTo="self" [formControl]="rule.multiSelectControl" />
+                                } @else {
+                                  @switch (col.filterType()) {
+                                    @case ('numeric') {
+                                      <input type="number" medInputText [attr.aria-label]="columnFilterLabel()(col.header())" [value]="singleInputValue(rule.value)" (input)="onFilterNumberInput(rule.id, $event)" (keydown.enter)="$event.preventDefault(); applyColumnFilter(col, filterPopover)" />
+                                    }
+                                    @case ('date') {
+                                      <med-date-picker [formControl]="rule.dateControl" />
+                                    }
+                                    @default {
+                                      <input type="text" medInputText [attr.aria-label]="columnFilterLabel()(col.header())" [value]="singleInputValue(rule.value)" (input)="onFilterTextInput(rule.id, $event)" (keydown.enter)="$event.preventDefault(); applyColumnFilter(col, filterPopover)" />
+                                    }
+                                  }
+                                }
+                              </div>
                             }
+                            <button medButton type="button" variant="text" severity="secondary" size="sm" class="self-start" [disabled]="draft.rules.length >= maxFilterRules" (click)="addFilterRule(col)">
+                              {{ addRuleLabel() }}
+                            </button>
                             <div class="flex justify-end gap-2">
                               <button medButton type="button" variant="outlined" severity="secondary" size="sm" (click)="clearColumnFilter(col, filterPopover)">{{ clearFilterLabel() }}</button>
                               <button medButton type="button" size="sm" (click)="applyColumnFilter(col, filterPopover)">{{ applyFilterLabel() }}</button>
@@ -714,11 +846,85 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
                   ></span>
                 }
               </th>
+              }
             }
             @if (editMode() === 'row') {
-              <th scope="col" [attr.role]="stacked() ? 'columnheader' : null" [class]="utilityCellClass('')"><span class="sr-only">{{ rowActionsHeaderLabel() }}</span></th>
+              <th scope="col" [attr.role]="stacked() ? 'columnheader' : null" [attr.aria-colindex]="utilityColIndex('rowActions')" [class]="utilityCellClass('')">
+                @if (rowActionsHeaderTemplate(); as tpl) {
+                  <ng-container [ngTemplateOutlet]="tpl" />
+                } @else {
+                  <span class="sr-only">{{ rowActionsHeaderLabel() }}</span>
+                }
+              </th>
             }
           </tr>
+          @if (filterDisplay() === 'row' && !stacked()) {
+            <tr data-med-filter-row class="border-b border-surface-200 bg-surface-50 dark:border-surface-700 dark:bg-surface-800/50">
+              @if (rowReorderActive()) {
+                <th [attr.aria-colindex]="utilityColIndex('reorder')" [class]="utilityCellClass('', true) + ' ' + frozenUtilityClass(null)" [style]="utilityStyle('reorder')" [style.position]="utilityPosition()" [style.left]="utilityLeft('reorder')" [style.z-index]="utilityZIndex()"></th>
+              }
+              @if (!isCellSelectionActive() && selectionMode() === 'multiple') {
+                <th [attr.aria-colindex]="utilityColIndex('selection')" [class]="utilityCellClass('') + ' ' + frozenUtilityClass(null)" [style]="utilityStyle('selection')" [style.position]="utilityPosition()" [style.left]="utilityLeft('selection')" [style.z-index]="utilityZIndex()"></th>
+              }
+              @if (!isCellSelectionActive() && selectionMode() === 'radio') {
+                <th [attr.aria-colindex]="utilityColIndex('selection')" [class]="utilityCellClass('') + ' ' + frozenUtilityClass(null)" [style]="utilityStyle('selection')" [style.position]="utilityPosition()" [style.left]="utilityLeft('selection')" [style.z-index]="utilityZIndex()"></th>
+              }
+              @for (slot of columnSlots(); track trackColumnSlot(slot)) {
+                @if (slot.kind === 'spacer-left') {
+                  <th data-med-col-spacer-left aria-hidden="true" class="border-0 p-0" [style.width.px]="slot.widthPx"></th>
+                } @else if (slot.kind === 'spacer-right') {
+                  <th data-med-col-spacer-right aria-hidden="true" class="border-0 p-0" [style.width.px]="slot.widthPx"></th>
+                } @else {
+                @let col = slot.col;
+                <th
+                  [attr.aria-colindex]="slot.ariaColIndex"
+                  [style.width]="columnWidth(col)"
+                  [class]="filterRowCellClass(col)"
+                  [class.sticky]="isFrozenColumn(col)"
+                  [style.position]="frozenPosition(col)"
+                  [style.left]="frozenEdge(col, 'left')"
+                  [style.right]="frozenEdge(col, 'right')"
+                  [style.z-index]="frozenZIndex(col)"
+                >
+                  @if (col.columnFilter()) {
+                    @if (col.filterTemplate(); as filterTpl) {
+                      <ng-container [ngTemplateOutlet]="filterTpl" [ngTemplateOutletContext]="filterTemplateContext(col)" />
+                    } @else if (rowFilterMode(col) === 'between') {
+                      @if (col.filterType() === 'date') {
+                        <div class="flex flex-col gap-1">
+                          <med-date-picker [placeholder]="filterMinLabel()" [formControl]="rowDateStartControl(col)" />
+                          <med-date-picker [placeholder]="filterMaxLabel()" [formControl]="rowDateEndControl(col)" />
+                        </div>
+                      } @else {
+                        <div class="flex items-center gap-1">
+                          <input type="number" medInputText class="min-w-0 flex-1" [attr.aria-label]="filterMinLabel()" [placeholder]="filterMinLabel()" [value]="betweenBound(rowFilterValue(col), 0)" (input)="onRowFilterBetweenNumberInput(col, 0, $event)" />
+                          <input type="number" medInputText class="min-w-0 flex-1" [attr.aria-label]="filterMaxLabel()" [placeholder]="filterMaxLabel()" [value]="betweenBound(rowFilterValue(col), 1)" (input)="onRowFilterBetweenNumberInput(col, 1, $event)" />
+                        </div>
+                      }
+                    } @else if (rowFilterMode(col) === 'in') {
+                      <med-multi-select fluid [options]="filterInOptions(col)" [ariaLabel]="columnFilterLabel()(col.header())" [placeholder]="filterInPlaceholder()" [formControl]="rowMultiSelectControl(col)" />
+                    } @else {
+                      @switch (col.filterType()) {
+                        @case ('numeric') {
+                          <input type="number" medInputText class="w-full" [attr.aria-label]="columnFilterLabel()(col.header())" [value]="singleInputValue(rowFilterValue(col))" (input)="onRowFilterNumberInput(col, $event)" />
+                        }
+                        @case ('date') {
+                          <med-date-picker [formControl]="rowDateControl(col)" />
+                        }
+                        @default {
+                          <input type="text" medInputText class="w-full" [attr.aria-label]="columnFilterLabel()(col.header())" [value]="singleInputValue(rowFilterValue(col))" (input)="onRowFilterTextInput(col, $event)" />
+                        }
+                      }
+                    }
+                  }
+                </th>
+                }
+              }
+              @if (editMode() === 'row') {
+                <th [attr.aria-colindex]="utilityColIndex('rowActions')" [class]="utilityCellClass('')"></th>
+              }
+            </tr>
+          }
         </thead>
         @if (frozenRowsPosition() === 'top' && frozenRows().length) {
           <tbody #frozenTopBody [class.block]="stacked()" [attr.role]="stacked() ? 'rowgroup' : null" [class.sticky]="stickyActive()" [class.bg-surface-0]="stickyActive()" [class.dark:bg-surface-800]="stickyActive()" [style.z-index]="stickyActive() ? '5' : null" [style.top.px]="stickyActive() ? headerHeight() : null">
@@ -727,21 +933,28 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
             }
           </tbody>
         }
-        <tbody [class.block]="stacked()" [attr.role]="stacked() ? 'rowgroup' : null">
+        <tbody #virtualBody [class.block]="stacked()" [attr.role]="stacked() ? 'rowgroup' : null">
           @if (isSkeletonLoading()) {
             @for (_ of skeletonRows(); track $index) {
               <tr class="border-b border-surface-200 last:border-b-0 dark:border-surface-700" [attr.role]="stacked() ? 'row' : null">
                 @if (rowReorderActive()) {
-                  <td [attr.role]="stacked() ? 'cell' : null" [class]="skeletonUtilityCellClass(true)" [style]="utilityStyle('reorder')" [style.position]="utilityPosition()" [style.left]="utilityLeft('reorder')" [style.z-index]="utilityZIndex()"><med-skeleton height="1rem" /></td>
+                  <td [attr.role]="stacked() ? 'cell' : null" [attr.aria-colindex]="utilityColIndex('reorder')" [class]="skeletonUtilityCellClass(true)" [style]="utilityStyle('reorder')" [style.position]="utilityPosition()" [style.left]="utilityLeft('reorder')" [style.z-index]="utilityZIndex()"><med-skeleton height="1rem" /></td>
                 }
                 @if (hasSelectionColumn()) {
-                  <td [attr.role]="stacked() ? 'cell' : null" [class]="skeletonUtilityCellClass()" [style]="utilityStyle('selection')" [style.position]="utilityPosition()" [style.left]="utilityLeft('selection')" [style.z-index]="utilityZIndex()"><med-skeleton height="1rem" /></td>
+                  <td [attr.role]="stacked() ? 'cell' : null" [attr.aria-colindex]="utilityColIndex('selection')" [class]="skeletonUtilityCellClass()" [style]="utilityStyle('selection')" [style.position]="utilityPosition()" [style.left]="utilityLeft('selection')" [style.z-index]="utilityZIndex()"><med-skeleton height="1rem" /></td>
                 }
-                @for (col of visibleColumns(); track col.field()) {
-                  <td [attr.role]="stacked() ? 'cell' : null" [class]="skeletonCellClass(col)" [class.sticky]="isFrozenColumn(col)" [style.position]="frozenPosition(col)" [style.left]="frozenEdge(col, 'left')" [style.right]="frozenEdge(col, 'right')" [style.z-index]="frozenZIndex(col)"><med-skeleton height="1rem" /></td>
+                @for (slot of columnSlots(); track trackColumnSlot(slot)) {
+                  @if (slot.kind === 'spacer-left') {
+                    <td data-med-col-spacer-left aria-hidden="true" class="border-0 p-0" [style.width.px]="slot.widthPx"></td>
+                  } @else if (slot.kind === 'spacer-right') {
+                    <td data-med-col-spacer-right aria-hidden="true" class="border-0 p-0" [style.width.px]="slot.widthPx"></td>
+                  } @else {
+                    @let col = slot.col;
+                    <td [attr.role]="stacked() ? 'cell' : null" [attr.aria-colindex]="slot.ariaColIndex" [class]="skeletonCellClass(col)" [class.sticky]="isFrozenColumn(col)" [style.position]="frozenPosition(col)" [style.left]="frozenEdge(col, 'left')" [style.right]="frozenEdge(col, 'right')" [style.z-index]="frozenZIndex(col)"><med-skeleton height="1rem" /></td>
+                  }
                 }
                 @if (editMode() === 'row') {
-                  <td [attr.role]="stacked() ? 'cell' : null" [class]="utilityCellClass('')"><med-skeleton height="1rem" /></td>
+                  <td [attr.role]="stacked() ? 'cell' : null" [attr.aria-colindex]="utilityColIndex('rowActions')" [class]="utilityCellClass('')"><med-skeleton height="1rem" /></td>
                 }
               </tr>
             }
@@ -751,21 +964,32 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
                 <tr aria-hidden="true">
                   <td [attr.colspan]="totalColumnCount()" class="border-0 p-0" [style.height.px]="entry.height"></td>
                 </tr>
+              } @else if (entry.kind === 'subheader') {
+                <ng-container [ngTemplateOutlet]="groupSubheaderRow" [ngTemplateOutletContext]="{ $implicit: entry.row, ariaIndex: bodyRowPosition(entry.index), height: virtualItemHeight('subheader', entry.row, entry.rowIndex) }" />
+              } @else if (entry.kind === 'expansion') {
+                <ng-container [ngTemplateOutlet]="expansionRow" [ngTemplateOutletContext]="{ $implicit: entry.row, rowIndex: entry.rowIndex, ariaIndex: bodyRowPosition(entry.index), height: virtualItemHeight('expansion', entry.row, entry.rowIndex) }" />
               } @else if (entry.row !== null && entry.row !== undefined) {
-                <ng-container [ngTemplateOutlet]="bodyRow" [ngTemplateOutletContext]="{ $implicit: entry.row, index: entry.index }" />
+                <ng-container [ngTemplateOutlet]="dataRow" [ngTemplateOutletContext]="{ $implicit: entry.row, index: entry.rowIndex, ariaIndex: bodyRowPosition(entry.index), height: virtualItemHeight('row', entry.row, entry.rowIndex) }" />
               } @else {
-                <tr data-med-placeholder aria-busy="true" class="border-b border-surface-200 dark:border-surface-700" [style.height.px]="virtualScrollItemSize()" [attr.aria-rowindex]="bodyRowPosition(entry.index)">
+                <tr data-med-placeholder aria-busy="true" class="border-b border-surface-200 dark:border-surface-700" [style.height.px]="virtualRowHeight(entry.row, entry.index)" [attr.aria-rowindex]="bodyRowPosition(entry.index)">
                   @if (rowReorderActive()) {
-                    <td [attr.role]="stacked() ? 'cell' : null" [class]="skeletonUtilityCellClass(true)" [style]="utilityStyle('reorder')" [style.position]="utilityPosition()" [style.left]="utilityLeft('reorder')" [style.z-index]="utilityZIndex()"><med-skeleton height="1rem" /></td>
+                    <td [attr.role]="stacked() ? 'cell' : null" [attr.aria-colindex]="utilityColIndex('reorder')" [class]="skeletonUtilityCellClass(true)" [style]="utilityStyle('reorder')" [style.position]="utilityPosition()" [style.left]="utilityLeft('reorder')" [style.z-index]="utilityZIndex()"><med-skeleton height="1rem" /></td>
                   }
                   @if (hasSelectionColumn()) {
-                    <td [attr.role]="stacked() ? 'cell' : null" [class]="skeletonUtilityCellClass()" [style]="utilityStyle('selection')" [style.position]="utilityPosition()" [style.left]="utilityLeft('selection')" [style.z-index]="utilityZIndex()"><med-skeleton height="1rem" /></td>
+                    <td [attr.role]="stacked() ? 'cell' : null" [attr.aria-colindex]="utilityColIndex('selection')" [class]="skeletonUtilityCellClass()" [style]="utilityStyle('selection')" [style.position]="utilityPosition()" [style.left]="utilityLeft('selection')" [style.z-index]="utilityZIndex()"><med-skeleton height="1rem" /></td>
                   }
-                  @for (col of visibleColumns(); track col.field()) {
-                    <td [attr.role]="stacked() ? 'cell' : null" [class]="skeletonCellClass(col)" [class.sticky]="isFrozenColumn(col)" [style.position]="frozenPosition(col)" [style.left]="frozenEdge(col, 'left')" [style.right]="frozenEdge(col, 'right')" [style.z-index]="frozenZIndex(col)"><med-skeleton height="1rem" /></td>
+                  @for (slot of columnSlots(); track trackColumnSlot(slot)) {
+                    @if (slot.kind === 'spacer-left') {
+                      <td data-med-col-spacer-left aria-hidden="true" class="border-0 p-0" [style.width.px]="slot.widthPx"></td>
+                    } @else if (slot.kind === 'spacer-right') {
+                      <td data-med-col-spacer-right aria-hidden="true" class="border-0 p-0" [style.width.px]="slot.widthPx"></td>
+                    } @else {
+                      @let col = slot.col;
+                      <td [attr.role]="stacked() ? 'cell' : null" [attr.aria-colindex]="slot.ariaColIndex" [class]="skeletonCellClass(col)" [class.sticky]="isFrozenColumn(col)" [style.position]="frozenPosition(col)" [style.left]="frozenEdge(col, 'left')" [style.right]="frozenEdge(col, 'right')" [style.z-index]="frozenZIndex(col)"><med-skeleton height="1rem" /></td>
+                    }
                   }
                   @if (editMode() === 'row') {
-                    <td [attr.role]="stacked() ? 'cell' : null" [class]="utilityCellClass('')"><med-skeleton height="1rem" /></td>
+                    <td [attr.role]="stacked() ? 'cell' : null" [attr.aria-colindex]="utilityColIndex('rowActions')" [class]="utilityCellClass('')"><med-skeleton height="1rem" /></td>
                   }
                 </tr>
               }
@@ -795,14 +1019,29 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
             @if (hasColumnFooter()) {
               <tr data-med-column-footer [class.block]="stacked()" [attr.role]="stacked() ? 'row' : null">
                 @if (rowReorderActive()) {
-                  <td [attr.role]="stacked() ? 'cell' : null" [class]="utilityCellClass('', true) + ' ' + frozenUtilityClass(null)" [style]="utilityStyle('reorder')" [style.position]="utilityPosition()" [style.left]="utilityLeft('reorder')" [style.z-index]="utilityZIndex()"></td>
+                  <td [attr.role]="stacked() ? 'cell' : null" [attr.aria-colindex]="utilityColIndex('reorder')" [class]="utilityCellClass('', true) + ' ' + frozenUtilityClass(null)" [class.hidden]="stacked() && !reorderFooterTemplate()" [style]="utilityStyle('reorder')" [style.position]="utilityPosition()" [style.left]="utilityLeft('reorder')" [style.z-index]="utilityZIndex()">
+                    @if (reorderFooterTemplate(); as tpl) {
+                      <ng-container [ngTemplateOutlet]="tpl" />
+                    }
+                  </td>
                 }
                 @if (hasSelectionColumn()) {
-                  <td [attr.role]="stacked() ? 'cell' : null" [class]="utilityCellClass('') + ' ' + frozenUtilityClass(null)" [class.hidden]="stacked()" [style]="utilityStyle('selection')" [style.position]="utilityPosition()" [style.left]="utilityLeft('selection')" [style.z-index]="utilityZIndex()"></td>
+                  <td [attr.role]="stacked() ? 'cell' : null" [attr.aria-colindex]="utilityColIndex('selection')" [class]="utilityCellClass('') + ' ' + frozenUtilityClass(null)" [class.hidden]="stacked() && !selectionFooterTemplate()" [style]="utilityStyle('selection')" [style.position]="utilityPosition()" [style.left]="utilityLeft('selection')" [style.z-index]="utilityZIndex()">
+                    @if (selectionFooterTemplate(); as tpl) {
+                      <ng-container [ngTemplateOutlet]="tpl" />
+                    }
+                  </td>
                 }
-                @for (col of visibleColumns(); track col.field()) {
+                @for (slot of columnSlots(); track trackColumnSlot(slot)) {
+                  @if (slot.kind === 'spacer-left') {
+                    <td data-med-col-spacer-left aria-hidden="true" class="border-0 p-0" [style.width.px]="slot.widthPx"></td>
+                  } @else if (slot.kind === 'spacer-right') {
+                    <td data-med-col-spacer-right aria-hidden="true" class="border-0 p-0" [style.width.px]="slot.widthPx"></td>
+                  } @else {
+                  @let col = slot.col;
                   <td
                     [attr.role]="stacked() ? 'cell' : null"
+                    [attr.aria-colindex]="slot.ariaColIndex"
                     [class.block]="stacked()"
                     [class.hidden]="stacked() && !hasFooterContent(col)"
                     [class]="footerCellClass(col)"
@@ -824,9 +1063,14 @@ function isRowArray<T>(value: T | readonly T[]): value is readonly T[] {
                       {{ col.footer() }}
                     }
                   </td>
+                  }
                 }
                 @if (editMode() === 'row') {
-                  <td [attr.role]="stacked() ? 'cell' : null" [class]="utilityCellClass('')" [class.hidden]="stacked()"></td>
+                  <td [attr.role]="stacked() ? 'cell' : null" [attr.aria-colindex]="utilityColIndex('rowActions')" [class]="utilityCellClass('')" [class.hidden]="stacked() && !rowActionsFooterTemplate()">
+                    @if (rowActionsFooterTemplate(); as tpl) {
+                      <ng-container [ngTemplateOutlet]="tpl" />
+                    }
+                  </td>
                 }
               </tr>
             }
@@ -867,6 +1111,8 @@ export class DataTableComponent<T> {
   readonly selectionMode = input<TableSelectionMode>(null);
   /** Enables selecting individual data cells instead of whole rows when `selectionMode` is `'single'` or `'multiple'`. */
   readonly cellSelection = input(false, { transform: booleanAttribute });
+  /** Allows keyboard arrow/Home/End navigation across body rows even when `selectionMode` is unset. */
+  readonly keyboardNavigation = input(false, { transform: booleanAttribute });
   /** Cell padding and text size: `sm`, `default` or `lg`. */
   readonly size = input<TableSize>('default');
   /** Draws borders between cells. */
@@ -910,7 +1156,7 @@ export class DataTableComponent<T> {
   readonly dataKey = input<string | null>(null);
   readonly sortField = model<string | null>(null);
   readonly sortOrder = model<TableSortOrder>(null);
-  /** When `false`, a sorted column only alternates between ascending and descending instead of returning to unsorted on the third click. Ignored in `sortMode="multiple"`. */
+  /** When `false`, a sorted column only alternates between ascending and descending instead of returning to unsorted on the third click. */
   readonly removableSort = input(true, { transform: booleanAttribute });
   /** `'multiple'` layers `multiSortMeta` on top — `sortField`/`sortOrder` stay exactly as-is for `'single'` consumers. */
   readonly sortMode = input<TableSortMode>('single');
@@ -918,6 +1164,8 @@ export class DataTableComponent<T> {
   /** Shows the global search box above the table. Its text combines with the per-column rules in `columnFilters`: a row is shown only when it passes both. */
   readonly filterable = input(false, { transform: booleanAttribute });
   readonly globalFilterValue = model('');
+  /** Where column filter controls appear: `'menu'` (funnel button popover in header, default) or `'row'` (inline filter row below headers). */
+  readonly filterDisplay = input<TableFilterDisplay>('menu');
   /**
    * Active column filter rules keyed by column `field` (two-way). A rule filters its column's rows after the global text
    * filter; a rule for a field no column declares is kept and ignored. With `lazy` it is not applied client-side.
@@ -933,6 +1181,22 @@ export class DataTableComponent<T> {
   readonly filterMatchModeLabel = input('Match mode');
   /** Overrides the English names of the match modes shown in the filter menu; modes left out keep their default name. */
   readonly matchModeLabels = input<Partial<Record<TableFilterMatchMode, string>>>({});
+  /** Text of the filter menu's button that appends an additional rule for the column. Default: `Add Rule`. */
+  readonly addRuleLabel = input('Add Rule');
+  /** Accessible name of each rule's remove button when a column filter has multiple rules. Default: `Remove Rule`. */
+  readonly removeRuleLabel = input('Remove Rule');
+  /** Label for the `'and'` operator option when multiple rules are active on a column. Default: `Match All`. */
+  readonly matchAllLabel = input('Match All');
+  /** Label for the `'or'` operator option when multiple rules are active on a column. Default: `Match Any`. */
+  readonly matchAnyLabel = input('Match Any');
+  /** Accessible name of the `'and'`/`'or'` operator selector in multi-rule filter menus. Default: `Filter operator`. */
+  readonly filterOperatorLabel = input('Filter operator');
+  /** Label and placeholder for the lower bound input of `between` rules. Default: `Min`. */
+  readonly filterMinLabel = input('Min');
+  /** Label and placeholder for the upper bound input of `between` rules. Default: `Max`. */
+  readonly filterMaxLabel = input('Max');
+  /** Placeholder for the multi-select control of `in` rules. Default: `Select values`. */
+  readonly filterInPlaceholder = input('Select values');
   /** Narrows which columns `filterable`'s global search scans — unset (default): every declared column, same as before this input existed. Per-column rules (`columnFilter`) are not affected by it. */
   readonly globalFilterFields = input<readonly string[] | null>(null);
   /** Debounces committing a keystroke to `globalFilterValue` (and therefore to `filteredValue()`) — the `<input>` itself still reflects every keystroke immediately, see class doc. */
@@ -943,7 +1207,9 @@ export class DataTableComponent<T> {
   readonly loadingMode = input<TableLoadingMode>('spinner');
   protected readonly isSpinnerLoading = computed(() => this.loading() && this.loadingMode() === 'spinner');
   protected readonly isSkeletonLoading = computed(() => this.loading() && this.loadingMode() === 'skeleton');
-  protected readonly skeletonRows = computed(() => Array.from({ length: this.paginator() ? Math.max(1, this.pageSize()) : 5 }, (_, i) => i));
+  protected readonly skeletonRows = computed(() =>
+    Array.from({ length: Math.min(100, this.paginator() ? Math.max(1, this.pageSize()) : 5) }, (_, i) => i),
+  );
   /** Reinterprets `value()` as "current page only, already filtered/sorted server-side", or with `virtualScroll` as a sparse array loaded by block — see class doc's "lazy" sections. */
   readonly lazy = input(false, { transform: booleanAttribute });
   readonly totalRecords = input<number | null>(null);
@@ -957,6 +1223,7 @@ export class DataTableComponent<T> {
   readonly expandableRowGroups = input(false, { transform: booleanAttribute });
   /** Group values that are currently collapsed; the default empty list means every group is expanded. */
   readonly expandedRowGroups = model<readonly string[]>([]);
+  private readonly collapsedRowGroupSet = computed(() => new Set(this.expandedRowGroups()));
   /** Accessible name of the edit button in the actions column of `editMode="row"`. */
   readonly editRowLabel = input('Edit row');
   /** Accessible name of the save button in the actions column of `editMode="row"`. */
@@ -973,6 +1240,8 @@ export class DataTableComponent<T> {
   readonly resizableColumns = input(false, { transform: booleanAttribute });
   /** Lets the user move columns by dragging a header onto another or with Alt+ArrowLeft/Right on a focused header; each column opts out with `reorderable` false. */
   readonly reorderableColumns = input(false, { transform: booleanAttribute });
+  /** When `true`, columns can be moved across frozen boundaries and adopt the target column's `frozen` and `alignFrozen` state. */
+  readonly reorderAcrossFrozen = input(false, { transform: booleanAttribute });
   /** Builds the live-region text announced after a keyboard move; `position` counts visible columns. Override it to translate the message. */
   readonly columnMoveAnnouncement = input<(header: string, position: number, total: number) => string>((header, position, total) => `${header} moved to position ${position} of ${total}`);
   /**
@@ -991,6 +1260,7 @@ export class DataTableComponent<T> {
   private readonly frozenTopBody = viewChild<ElementRef<HTMLTableSectionElement>>('frozenTopBody');
   private readonly frozenBottomBody = viewChild<ElementRef<HTMLTableSectionElement>>('frozenBottomBody');
   private readonly tableFoot = viewChild<ElementRef<HTMLTableSectionElement>>('tableFoot');
+  private readonly virtualBody = viewChild<ElementRef<HTMLTableSectionElement>>('virtualBody');
   private readonly viewport = viewChild<ElementRef<HTMLElement>>('viewport');
   /** Height of the sticky `<thead>`, which is where top frozen rows stick; measured in the browser only, so server rendering never touches `ResizeObserver`. */
   protected readonly headerHeight = signal(0);
@@ -999,11 +1269,17 @@ export class DataTableComponent<T> {
    * Renders only the rows that intersect the scroll viewport, plus a small buffer, while the scrollbar still represents every row.
    * The viewport is `scrollHeight` (400px when unset). Replaces the paginator: `paginator`, `first` and `rows` no longer slice the rows.
    * Browsers cap the height of one element (about 17.9 million pixels in Firefox), which limits a table to roughly 440,000 rows at 40px.
-   * `rowGroupMode`, `#rowexpansion` and `reorderable` are ignored in this mode, and variable row heights are not supported.
+   * In non-lazy `virtualScroll`, `rowGroupMode`, `#rowexpansion` and `reorderable` remain active; when `lazy` is `true`, they are ignored.
    */
   readonly virtualScroll = input(false, { transform: booleanAttribute });
-  /** Height in pixels of every body row in `virtualScroll` mode. Cell content must fit it: the cells clip their overflow, because a taller row would shift every scroll offset. */
+  /** Height in pixels of every body row in `virtualScroll` mode (and initial estimate / `lazy` placeholder fallback when `virtualScrollRowHeight` is set). */
   readonly virtualScrollItemSize = input(40, { transform: numberAttribute });
+  /** Optional variable row height strategy in `virtualScroll` mode: a per-row callback, `'auto'` (`ResizeObserver` measurement), or `null` for fixed `virtualScrollItemSize`. */
+  readonly virtualScrollRowHeight = input<((row: T, index: number) => number) | 'auto' | null>(null);
+  /** Renders only the non-frozen visible columns intersecting the horizontal scroll viewport plus a column buffer, flanked by horizontal spacer cells. */
+  readonly virtualScrollColumns = input(false, { transform: booleanAttribute });
+  /** Default width in pixels for columns without a declared `px` or resized width in `virtualScrollColumns` mode (clamped to at least 1px). */
+  readonly virtualScrollColumnWidth = input(120, { transform: numberAttribute });
   /**
    * `scroll` (default) keeps the horizontal scroll layout. `stack` renders each body row as a block below `breakpoint`, with every
    * data cell labelled by its column (`stackLabel`, else `header`). At or above `breakpoint` the table renders as `scroll` does.
@@ -1011,9 +1287,33 @@ export class DataTableComponent<T> {
    * selection, expansion, editing and `scrollable` keep working.
    */
   readonly responsiveLayout = input<'scroll' | 'stack'>('scroll');
-  /** The viewport width below which a `stack` table stacks, as a CSS length such as `960px`. A value that is not a length keeps the table unstacked. */
+  /** The viewport or container width below which a `stack` table stacks, as a CSS length such as `960px`. A value that is not a length keeps the table unstacked. */
   readonly breakpoint = input('960px');
+  /** Whether `breakpoint` measures the viewport (`'viewport'`, default) or the table host element (`'container'`) via `ResizeObserver`. */
+  readonly breakpointMode = input<'viewport' | 'container'>('viewport');
+  /** Accessible label and placeholder option for the sort column select shown while stacked. */
+  readonly stackSortLabel = input('Sort by');
+  /** Label for ascending sort order in the stacked sort control. */
+  readonly stackSortAscLabel = input('Ascending');
+  /** Label for descending sort order in the stacked sort control. */
+  readonly stackSortDescLabel = input('Descending');
+  /** Label for the clear sort button in the stacked sort control. */
+  readonly stackSortClearLabel = input('Clear sort');
+  /**
+   * Storage key under which the table persists and restores its state (`first`, `sortField`, `sortOrder`, `expandedRowKeys`,
+   * `columnFilters`, `columnOrder`, `columnWidths`, `columnVisibility`, `collapsedRowGroups`, `globalFilter`, `multiSortMeta`,
+   * and `rows`).
+   *
+   * Because stored state includes search text, column filter values, and collapsed group values from row data, applications
+   * showing sensitive data should include the signed-in user's identity in `stateKey` and remove the key from storage on
+   * sign-out.
+   */
   readonly stateKey = input<string | null>(null);
+  /**
+   * Web Storage target for `stateKey` (`'session'` by default, or `'local'`). `'local'` keeps persisted fields — including
+   * search text, filter values, and group values — across browser sessions with no expiry; prefer `'session'` when handling
+   * sensitive data, scope `stateKey` to the signed-in user, and clear the key on sign-out.
+   */
   readonly stateStorage = input<'session' | 'local'>('session');
   readonly expandedRowKeys = model<Record<string, boolean>>({});
   readonly csvSeparator = input(',');
@@ -1101,8 +1401,8 @@ export class DataTableComponent<T> {
     const rank = new Map(order.map((field, index) => [field, index]));
     return [...cols].sort((a, b) => (rank.get(a.field()) ?? order.length) - (rank.get(b.field()) ?? order.length));
   });
-  /** The columns with `visible` on, in declaration order: what renders, spans, freezes and exports. Sorting and the default global-filter fields keep reading `columns()`, so a hidden column keeps its state. */
-  protected readonly visibleColumns = computed(() => this.orderedColumns().filter((col) => col.visible()));
+  /** The columns with effective visibility on, in the user's order: what renders, spans, freezes and exports. Sorting and the default global-filter fields keep reading `columns()`, so a hidden column keeps its state. */
+  protected readonly visibleColumns = computed(() => this.orderedColumns().filter((col) => col.isVisible()));
   /** Application-written `<tr>` rows rendered in `<thead>` above the column header row. */
   protected readonly headerGroupTemplate = contentChild('headerGroup', { read: TemplateRef });
   /** Application-written `<tr>` rows rendered in a `<tfoot>` after the body; no footer renders without it. */
@@ -1115,11 +1415,47 @@ export class DataTableComponent<T> {
   protected readonly summaryTemplate = contentChild('summary', { read: TemplateRef });
   /** Optional `#empty` template rendered inside the empty-state cell instead of `emptyLabel`. */
   protected readonly emptyTemplate = contentChild('empty', { read: TemplateRef });
+  /** Optional `#reorderHeader` template rendered inside the row-reorder utility header cell. */
+  protected readonly reorderHeaderTemplate = contentChild('reorderHeader', { read: TemplateRef });
+  /** Optional `#reorderFooter` template rendered inside the row-reorder utility footer cell. */
+  protected readonly reorderFooterTemplate = contentChild('reorderFooter', { read: TemplateRef });
+  /** Optional `#selectionHeader` template rendered inside the selection utility header cell. */
+  protected readonly selectionHeaderTemplate = contentChild('selectionHeader', { read: TemplateRef });
+  /** Optional `#selectionFooter` template rendered inside the selection utility footer cell. */
+  protected readonly selectionFooterTemplate = contentChild('selectionFooter', { read: TemplateRef });
+  /** Optional `#rowActionsHeader` template rendered inside the row-actions utility header cell. */
+  protected readonly rowActionsHeaderTemplate = contentChild('rowActionsHeader', { read: TemplateRef });
+  /** Optional `#rowActionsFooter` template rendered inside the row-actions utility footer cell. */
+  protected readonly rowActionsFooterTemplate = contentChild('rowActionsFooter', { read: TemplateRef });
   private readonly platformId = inject(PLATFORM_ID);
   /** Bumped by the breakpoint query's `change` event, so `stacked` re-reads the query when the viewport crosses `breakpoint`. */
   private readonly mediaChanges = signal(0);
+  /** Observed host width in pixels when `breakpointMode()` is `'container'`. */
+  private readonly containerWidthPx = signal<number | null>(null);
+  /** Parsed pixel threshold of `breakpoint` for `'container'` mode; `null` if invalid or on the server. */
+  private readonly breakpointPx = computed<number | null>(() => {
+    const length = this.breakpoint().trim();
+    const match = /^(\d*\.?\d+)(px|em|rem)$/i.exec(length);
+    if (!match || !isPlatformBrowser(this.platformId)) {
+      return null;
+    }
+    const num = Number(match[1]);
+    const unit = match[2].toLowerCase();
+    if (unit === 'px') {
+      return num;
+    }
+    const baseEl = unit === 'em' ? this.host.nativeElement : document.documentElement;
+    const baseSize =
+      Number.parseFloat(getComputedStyle(baseEl).fontSize || '') ||
+      Number.parseFloat(getComputedStyle(document.documentElement).fontSize || '16') ||
+      16;
+    return num * baseSize;
+  });
   /** The breakpoint query; `null` on the server, without `matchMedia`, or when `breakpoint` is not a CSS length. */
   private readonly breakpointQuery = computed<MediaQueryList | null>(() => {
+    if (this.breakpointMode() !== 'viewport') {
+      return null;
+    }
     const length = this.breakpoint().trim();
     if (!isPlatformBrowser(this.platformId) || typeof window.matchMedia !== 'function' || !CSS_LENGTH_PATTERN.test(length)) {
       return null;
@@ -1127,15 +1463,23 @@ export class DataTableComponent<T> {
     return window.matchMedia(`(width < ${length})`);
   });
   /**
-   * True while the table is stacked: `responsiveLayout` is `stack`, the viewport is narrower than `breakpoint` and `virtualScroll` is off.
-   * Every feature the stacked layout switches off reads this at the point of use, so it returns when the viewport widens.
+   * True while the table is stacked: `responsiveLayout` is `stack`, the measured width is narrower than `breakpoint` and `virtualScroll` is off.
+   * Every feature the stacked layout switches off reads this at the point of use, so it returns when the width widens.
    * It stays false until the first render has completed (`browserReady`), so server rendering and the first client render are both
    * unstacked and hydration reconciles identical markup; the table stacks in the render that follows.
    */
   protected readonly stacked = computed(() => {
+    if (!this.browserReady() || this.responsiveLayout() !== 'stack' || this.virtualScroll()) {
+      return false;
+    }
+    if (this.breakpointMode() === 'container') {
+      const threshold = this.breakpointPx();
+      const width = this.containerWidthPx();
+      return threshold !== null && width !== null && width < threshold;
+    }
     this.mediaChanges();
     const query = this.breakpointQuery();
-    return this.browserReady() && this.responsiveLayout() === 'stack' && !this.virtualScroll() && query !== null && query.matches;
+    return query !== null && query.matches;
   });
   private readonly destroyRef = inject(DestroyRef);
   private readonly injector = inject(Injector);
@@ -1164,7 +1508,9 @@ export class DataTableComponent<T> {
   private rowDraft: Record<string, unknown> = {};
   private readonly resizedColumnWidths = signal<ReadonlyMap<string, number>>(new Map());
   /** Inline width of the table in `expand` mode (start width plus the applied delta); `null` keeps the table at its natural `w-full`. */
-  protected readonly tableWidthPx = signal<number | null>(null);
+  private readonly resizedTableWidthPx = signal<number | null>(null);
+  /** Total inline width of the `<table>` in pixels: derived from all visible columns in `virtualScrollColumns` mode, or from `expand` column resizing. */
+  protected readonly tableWidthPx = computed(() => (this.virtualColumnsActive() ? this.virtualColumnLayout().totalWidthPx : this.resizedTableWidthPx()));
   private colResizeState: {
     field: string;
     startX: number;
@@ -1179,12 +1525,16 @@ export class DataTableComponent<T> {
   /** Undebounced — bound directly to the `<input>` so every keystroke is visible immediately; `filterDelay` only delays writing into `globalFilterValue`, see class doc. */
   protected readonly filterInputText = signal('');
   private filterDebounceHandle: ReturnType<typeof setTimeout> | null = null;
-  private draggedRowIndex: number | null = null;
+  private readonly draggedRowIndex = signal<number | null>(null);
 
   /** Scroll offset of the viewport in `virtualScroll` mode; written by the scroll listener. */
   private readonly viewportScrollTop = signal(0);
+  /** Horizontal scroll offset of the viewport in `virtualScrollColumns` mode; written by the scroll listener. */
+  private readonly viewportScrollLeft = signal(0);
   /** Measured height of the viewport; `0` until measured, and wherever the environment reports no layout. */
   private readonly measuredViewportHeight = signal(0);
+  /** Measured width of the viewport; `0` until measured, and wherever the environment reports no layout. */
+  private readonly measuredViewportWidth = signal(0);
   /** Measured height of the top frozen rows, which sit between the header and the first body row and stay stuck under the header. */
   private readonly frozenTopHeight = signal(0);
   /** Measured height of the bottom frozen rows, which stay stuck over the bottom of the viewport. */
@@ -1195,6 +1545,109 @@ export class DataTableComponent<T> {
   private readonly pendingFocusIndex = signal<number | null>(null);
   /** Absolute index of the row that keeps focus while `pendingFocusIndex` waits; it stays rendered so focus never falls to the page. */
   private readonly focusAnchorIndex = signal<number | null>(null);
+  /** Measured row heights keyed by body index in `virtualScrollRowHeight === 'auto'` mode. */
+  private readonly measuredRowHeights = signal<ReadonlyMap<number, number>>(new Map());
+  private rowHeightObserver: ResizeObserver | null = null;
+  private readonly observedAutoRows = new Set<HTMLElement>();
+
+  /** Whether non-lazy `virtualScroll` builds a flattened `virtualItems` stream (`#rowexpansion` or `rowGroupMode="subheader"`). */
+  private readonly useVirtualItems = computed(
+    () => this.virtualScroll() && !this.lazy() && (!!this.rowExpansionTemplate() || this.effectiveRowGroupMode() === 'subheader'),
+  );
+
+  /** Flattened virtual stream of subheaders, data rows, and expansion rows when `#rowexpansion` or `rowGroupMode="subheader"` is active in non-lazy `virtualScroll`; `null` keeps the 1:1 row fast path. */
+  private readonly virtualItems = computed<readonly VirtualItem<T>[] | null>(() => {
+    if (!this.useVirtualItems()) {
+      return null;
+    }
+    const rows = this.pagedValue();
+    const isSubheader = this.effectiveRowGroupMode() === 'subheader';
+    const hasExpansion = !!this.rowExpansionTemplate() && this.expansionRowsRender();
+    const items: VirtualItem<T>[] = [];
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i];
+      if (row === null || row === undefined) {
+        continue;
+      }
+      if (isSubheader && this.isGroupStart(row, i)) {
+        items.push({ kind: 'subheader', row, rowIndex: i });
+      }
+      if (isSubheader && this.isGroupCollapsed(row)) {
+        continue;
+      }
+      items.push({ kind: 'row', row, rowIndex: i });
+      if (hasExpansion && this.isRowExpanded(row, i)) {
+        items.push({ kind: 'expansion', row, rowIndex: i });
+      }
+    }
+    return items;
+  });
+
+  /** Total items in the virtual stream (`virtualItems.length` when flattened, else `effectiveTotalRecords()`). */
+  private readonly virtualItemCount = computed(() => {
+    const items = this.virtualItems();
+    return items ? items.length : this.effectiveTotalRecords();
+  });
+
+  /** Prefix-sum row height offsets when `virtualScrollRowHeight` is active; `null` keeps the O(1) fixed-height path. */
+  private readonly virtualHeightIndex = computed<Float64Array | null>(() => {
+    if (!this.virtualScroll()) {
+      return null;
+    }
+    const mode = this.virtualScrollRowHeight();
+    if (mode === null) {
+      return null;
+    }
+    const items = this.virtualItems();
+    const total = items ? items.length : this.effectiveTotalRecords();
+    const defaultSize = Math.max(1, this.virtualScrollItemSize());
+    if (mode === 'auto') {
+      const measured = this.measuredRowHeights();
+      return buildVirtualHeightIndex(total, defaultSize, (index) => measured.get(index) ?? defaultSize);
+    }
+    if (items) {
+      return buildVirtualHeightIndex(total, defaultSize, (index) => {
+        const item = items[index];
+        return item?.kind === 'row' ? mode(item.row, item.rowIndex) : defaultSize;
+      });
+    }
+    const rows = this.pagedValue();
+    return buildVirtualHeightIndex(total, defaultSize, (index) => {
+      const row = rows[index];
+      return row === null || row === undefined ? defaultSize : mode(row, index);
+    });
+  });
+
+  /** Height applied to a rendered body `<tr>`, or `null` when rows size naturally (`!virtualScroll` or `virtualScrollRowHeight === 'auto'`). */
+  protected virtualRowHeight(row: T | null | undefined, index: number): number | null {
+    if (!this.virtualScroll()) {
+      return null;
+    }
+    const mode = this.virtualScrollRowHeight();
+    if (mode === 'auto') {
+      return null;
+    }
+    if (typeof mode === 'function') {
+      const defaultSize = Math.max(1, this.virtualScrollItemSize());
+      if (row === null || row === undefined) {
+        return defaultSize;
+      }
+      const raw = mode(row, index);
+      return Number.isFinite(raw) ? Math.max(1, raw) : defaultSize;
+    }
+    return this.virtualScrollItemSize();
+  }
+
+  /** Height applied to a flattened `virtualItems` `<tr>`, keeping `virtualScrollItemSize()` for subheaders and expansion rows unless `virtualScrollRowHeight === 'auto'`. */
+  protected virtualItemHeight(kind: 'subheader' | 'row' | 'expansion', row: T | null | undefined, rowIndex: number): number | null {
+    if (!this.virtualScroll() || this.virtualScrollRowHeight() === 'auto') {
+      return null;
+    }
+    if (kind !== 'row') {
+      return this.virtualScrollItemSize();
+    }
+    return this.virtualRowHeight(row, rowIndex);
+  }
 
   /** The viewport height the window is computed from: measured, else the pixel `scrollHeight`, else the 400px default. */
   private readonly effectiveViewportHeight = computed(() => {
@@ -1211,9 +1664,13 @@ export class DataTableComponent<T> {
 
   /** The window `[start, end)` for a viewport scrolled to `scrollTop`. */
   private rangeAt(scrollTop: number): { readonly start: number; readonly end: number } {
-    const size = Math.max(1, this.virtualScrollItemSize());
-    const total = this.effectiveTotalRecords();
     const offset = Math.max(0, scrollTop - this.headerHeight() - this.frozenTopHeight());
+    const offsets = this.virtualHeightIndex();
+    if (offsets) {
+      return rangeAtVariableOffset(offsets, offset, this.effectiveViewportHeight(), VIRTUAL_BUFFER_ROWS);
+    }
+    const size = Math.max(1, this.virtualScrollItemSize());
+    const total = this.virtualItemCount();
     const firstVisible = Math.floor(offset / size);
     const lastVisible = Math.ceil((offset + this.effectiveViewportHeight()) / size);
     const start = Math.min(total, Math.max(0, firstVisible - VIRTUAL_BUFFER_ROWS));
@@ -1221,27 +1678,52 @@ export class DataTableComponent<T> {
     return { start, end };
   }
 
-  /** Absolute index of the row in edit, which stays rendered outside the window so its editor keeps the value typed so far. */
+  /** Absolute index of the row in edit (in `virtualItems` when active, else in `pagedValue()`), which stays rendered outside the window so its editor keeps the value typed so far. */
   private readonly pinnedEditIndex = computed(() => {
     const editing = this.editMode() === 'row' ? this.editingRow() : this.editingCell()?.row;
     if (editing === null || editing === undefined) {
       return null;
     }
+    const items = this.virtualItems();
+    if (items) {
+      const index = items.findIndex((item) => item.kind === 'row' && item.row === editing);
+      return index === -1 ? null : index;
+    }
     const index = this.pagedValue().indexOf(editing);
     return index === -1 ? null : index;
   });
 
-  /** What the virtual body renders in order: spacers for the rows outside the window and the rows inside it, so everything adds up to every row times `virtualScrollItemSize`. */
+  /** Virtual stream index of the row being dragged, which stays rendered outside the window until `drop` or `dragend`. */
+  private readonly pinnedDragIndex = computed(() => {
+    const rowIndex = this.draggedRowIndex();
+    if (rowIndex === null) {
+      return null;
+    }
+    const items = this.virtualItems();
+    if (items) {
+      const index = items.findIndex((item) => item.kind === 'row' && item.rowIndex === rowIndex);
+      return index === -1 ? null : index;
+    }
+    return rowIndex;
+  });
+
+  /** What the virtual body renders in order: spacers for the items outside the window and the items inside it, so everything adds up to every item's height. */
   protected readonly virtualEntries = computed<readonly VirtualEntry<T>[]>(() => {
     if (!this.virtualScroll()) {
       return [];
     }
     const rows = this.pagedValue();
+    const items = this.virtualItems();
     const size = Math.max(1, this.virtualScrollItemSize());
-    const total = this.effectiveTotalRecords();
-    const { start, end } = this.virtualRange();
-    // Rows kept rendered outside the window: the row in edit, and the row holding focus while a key waits for unloaded data.
-    const pinned = [...new Set([this.pinnedEditIndex(), this.focusAnchorIndex()])]
+    const offsets = this.virtualHeightIndex();
+    const spacerHeight = (from: number, to: number): number => (offsets ? rangeHeight(offsets, from, to) : (to - from) * size);
+    const total = this.virtualItemCount();
+    let { start, end } = this.virtualRange();
+    if (items && start > 0 && start < total && items[start]?.kind === 'expansion') {
+      start -= 1;
+    }
+    // Rows kept rendered outside the window: the row in edit, the row holding focus while a key waits for unloaded data, and the row being dragged.
+    const pinned = [...new Set([this.pinnedEditIndex(), this.focusAnchorIndex(), this.pinnedDragIndex()])]
       .filter((index): index is number => index !== null && index >= 0 && index < total && (index < start || index >= end))
       .sort((a, b) => a - b);
     const entries: VirtualEntry<T>[] = [];
@@ -1249,9 +1731,20 @@ export class DataTableComponent<T> {
     let cursor = 0;
     const emit = (index: number) => {
       if (index > cursor) {
-        entries.push({ kind: 'spacer', slot: slot++, height: (index - cursor) * size });
+        entries.push({ kind: 'spacer', slot: slot++, height: spacerHeight(cursor, index) });
       }
-      entries.push({ kind: 'row', row: rows[index], index });
+      if (items) {
+        const item = items[index];
+        if (item.kind === 'subheader') {
+          entries.push({ kind: 'subheader', row: item.row, index, rowIndex: item.rowIndex });
+        } else if (item.kind === 'expansion') {
+          entries.push({ kind: 'expansion', row: item.row, index, rowIndex: item.rowIndex });
+        } else {
+          entries.push({ kind: 'row', row: item.row, index, rowIndex: item.rowIndex });
+        }
+      } else {
+        entries.push({ kind: 'row', row: rows[index], index, rowIndex: index });
+      }
       cursor = index + 1;
     };
     pinned.filter((index) => index < start).forEach(emit);
@@ -1260,7 +1753,7 @@ export class DataTableComponent<T> {
     }
     pinned.filter((index) => index >= end).forEach(emit);
     if (total > cursor) {
-      entries.push({ kind: 'spacer', slot: slot++, height: (total - cursor) * size });
+      entries.push({ kind: 'spacer', slot: slot++, height: spacerHeight(cursor, total) });
     }
     return entries;
   });
@@ -1268,13 +1761,13 @@ export class DataTableComponent<T> {
   /** Rows in `<thead>`, measured with the header height: the column header row plus any `#headerGroup` rows. */
   private readonly headerRowCount = signal(1);
 
-  /** `aria-rowcount` in `virtualScroll` mode: header rows, frozen rows and every row of the set, rendered or not. */
-  protected readonly ariaRowCount = computed(() => (this.virtualScroll() ? this.headerRowCount() + this.frozenRows().length + this.effectiveTotalRecords() : null));
+  /** `aria-rowcount` in `virtualScroll` mode: header rows, frozen rows and every item of the virtual stream, rendered or not. */
+  protected readonly ariaRowCount = computed(() => (this.virtualScroll() ? this.headerRowCount() + this.frozenRows().length + this.virtualItemCount() : null));
 
   /** Rows that sit between the header and the first body row: the frozen rows when they are at the top. */
   private readonly rowsBeforeBody = computed(() => this.headerRowCount() + (this.frozenRowsPosition() === 'top' ? this.frozenRows().length : 0));
 
-  /** 1-based `aria-rowindex` of the body row at `index` of the processed set; `null` without `virtualScroll`. */
+  /** 1-based `aria-rowindex` of the body item at `index` of the virtual stream; `null` without `virtualScroll`. */
   protected bodyRowPosition(index: number): number | null {
     return this.virtualScroll() ? this.rowsBeforeBody() + index + 1 : null;
   }
@@ -1284,10 +1777,10 @@ export class DataTableComponent<T> {
     if (!this.virtualScroll()) {
       return null;
     }
-    return this.frozenRowsPosition() === 'top' ? this.headerRowCount() + index + 1 : this.headerRowCount() + this.effectiveTotalRecords() + index + 1;
+    return this.frozenRowsPosition() === 'top' ? this.headerRowCount() + index + 1 : this.headerRowCount() + this.virtualItemCount() + index + 1;
   }
 
-  /** Moves focus to the row at `index` of the processed set in `virtualScroll` mode: scrolls it into view, then focuses it once it is rendered. */
+  /** Moves focus to the item at `index` of the virtual stream in `virtualScroll` mode: scrolls it into view, then focuses it once it is rendered. */
   private focusVirtualRow(index: number, from: number): void {
     const element = this.viewport()?.nativeElement;
     if (!element) {
@@ -1295,12 +1788,14 @@ export class DataTableComponent<T> {
     }
     this.clearPendingFocus();
     const size = Math.max(1, this.virtualScrollItemSize());
+    const offsets = this.virtualHeightIndex();
     // The sticky header and frozen rows cover the edges of the viewport, so the row must fit between them.
     const coveredTop = this.headerHeight() + this.frozenTopHeight();
     // The bottom frozen rows and the footer both stick at `bottom: 0`, so they overlap: the taller one is what covers the viewport.
     const coveredBottom = Math.max(this.frozenBottomHeight(), this.footerHeight());
-    const rowTop = coveredTop + index * size;
-    const rowBottom = rowTop + size;
+    const rowTop = coveredTop + (offsets ? rangeHeight(offsets, 0, index) : index * size);
+    const rowHeight = offsets ? rangeHeight(offsets, index, index + 1) : size;
+    const rowBottom = rowTop + rowHeight;
     const viewHeight = this.effectiveViewportHeight();
     let top = element.scrollTop;
     if (rowTop < top + coveredTop) {
@@ -1318,7 +1813,8 @@ export class DataTableComponent<T> {
       rendered.focus({ preventScroll: true });
       return;
     }
-    const target = this.pagedValue()[index];
+    const items = this.virtualItems();
+    const target = items ? items[index]?.row : this.pagedValue()[index];
     if (target === null || target === undefined) {
       // A placeholder cannot take focus (DAT-048): the row that has it stays rendered and keeps it until the target's data arrives.
       this.focusAnchorIndex.set(from);
@@ -1347,37 +1843,61 @@ export class DataTableComponent<T> {
         continue;
       }
       requested.add(block);
-      this.lazyLoad.emit({
-        first: block * blockSize,
-        rows: blockSize,
-        sortField: this.sortField(),
-        sortOrder: this.sortOrder(),
-        multiSortMeta: this.multiSortMeta(),
-        filter: this.globalFilterValue(),
-        columnFilters: this.columnFilters(),
-      });
+      this.lazyLoad.emit(this.buildLazyLoadEvent(block * blockSize, blockSize));
     }
+  }
+
+  /** Builds a `TableLazyLoadEvent` for `(first, rows)`, resolving `sortBy` and `multiSortByMeta` from column definitions while keeping `sortField`/`multiSortMeta` keyed by `field`. */
+  private buildLazyLoadEvent(first: number, rows: number): TableLazyLoadEvent {
+    const cols = this.columns();
+    const sortByFor = (field: string): string => cols.find((c) => c.field() === field)?.sortBy() ?? field;
+    const sortField = this.sortField();
+    const multiSortMeta = this.multiSortMeta();
+    return {
+      first,
+      rows,
+      sortField,
+      sortOrder: this.sortOrder(),
+      sortBy: sortField === null ? null : sortByFor(sortField),
+      multiSortMeta,
+      multiSortByMeta: multiSortMeta.map((m) => ({ field: sortByFor(m.field), order: m.order })),
+      filter: this.globalFilterValue(),
+      columnFilters: this.columnFilters(),
+    };
   }
 
   protected trackVirtualEntry(entry: VirtualEntry<T>): unknown {
     if (entry.kind === 'spacer') {
       return `spacer-${entry.slot}`;
     }
-    return entry.row === null || entry.row === undefined ? `slot-${entry.index}` : this.rowTrackBy()(entry.row, entry.index);
+    if (entry.kind === 'subheader') {
+      return `subheader-${entry.rowIndex}-${this.groupValue(entry.row)}`;
+    }
+    if (entry.kind === 'expansion') {
+      return `expansion-${entry.rowIndex}-${this.rowExpansionKey(entry.row, entry.rowIndex)}`;
+    }
+    return entry.row === null || entry.row === undefined ? `slot-${entry.index}` : this.rowTrackBy()(entry.row, entry.rowIndex);
   }
 
   protected onViewportScroll(event: Event): void {
+    const target = event.target as HTMLElement;
     if (this.virtualScroll()) {
-      this.viewportScrollTop.set((event.target as HTMLElement).scrollTop);
+      this.viewportScrollTop.set(target.scrollTop);
+    }
+    if (this.virtualScrollColumns()) {
+      this.viewportScrollLeft.set(target.scrollLeft);
     }
   }
 
-  private observeViewportHeight(): void {
+  private observeViewportSize(): void {
     const element = this.viewport()?.nativeElement;
     if (!element || typeof ResizeObserver === 'undefined') {
       return;
     }
-    const observer = new ResizeObserver(() => this.measuredViewportHeight.set(element.clientHeight));
+    const observer = new ResizeObserver(() => {
+      this.measuredViewportHeight.set(element.clientHeight);
+      this.measuredViewportWidth.set(element.clientWidth);
+    });
     observer.observe(element);
     this.destroyRef.onDestroy(() => observer.disconnect());
   }
@@ -1458,10 +1978,161 @@ export class DataTableComponent<T> {
     this.destroyRef.onDestroy(() => observer.disconnect());
   }
 
+  private syncAutoRowHeightObserver(): void {
+    if (!isPlatformBrowser(this.platformId) || typeof ResizeObserver !== 'function' || !this.virtualScroll() || this.virtualScrollRowHeight() !== 'auto') {
+      this.disconnectRowHeightObserver();
+      return;
+    }
+    const tbody = this.virtualBody()?.nativeElement;
+    if (!tbody) {
+      this.disconnectRowHeightObserver();
+      return;
+    }
+    const observer = (this.rowHeightObserver ??= new ResizeObserver((entries) => this.handleAutoRowResizes(entries)));
+    const currentRows = new Set(Array.from(tbody.querySelectorAll<HTMLElement>(':scope > tr[aria-rowindex]:not([data-med-placeholder])')));
+    for (const row of this.observedAutoRows) {
+      if (!currentRows.has(row)) {
+        observer.unobserve(row);
+        this.observedAutoRows.delete(row);
+      }
+    }
+    for (const row of currentRows) {
+      if (!this.observedAutoRows.has(row)) {
+        observer.observe(row);
+        this.observedAutoRows.add(row);
+      }
+    }
+  }
+
+  private disconnectRowHeightObserver(): void {
+    this.rowHeightObserver?.disconnect();
+    this.rowHeightObserver = null;
+    this.observedAutoRows.clear();
+  }
+
+  private handleAutoRowResizes(entries: readonly ResizeObserverEntry[]): void {
+    if (!this.virtualScroll() || this.virtualScrollRowHeight() !== 'auto') {
+      return;
+    }
+    const rowsBefore = this.rowsBeforeBody();
+    const total = this.virtualItemCount();
+    const defaultSize = Math.max(1, this.virtualScrollItemSize());
+    const prevMap = this.measuredRowHeights();
+    const oldOffsets = this.virtualHeightIndex();
+    const vp = this.viewport()?.nativeElement;
+    const oldScrollTop = vp ? vp.scrollTop : this.viewportScrollTop();
+    const bodyOffset = Math.max(0, oldScrollTop - this.headerHeight() - this.frozenTopHeight());
+    const anchorIndex = oldOffsets ? findRowAtOffset(oldOffsets, bodyOffset) : 0;
+
+    let nextMap: Map<number, number> | null = null;
+    let scrollDelta = 0;
+
+    for (const entry of entries) {
+      const tr = entry.target as HTMLElement;
+      if (!this.observedAutoRows.has(tr)) {
+        continue;
+      }
+      const position = Number(tr.getAttribute('aria-rowindex'));
+      const index = position - rowsBefore - 1;
+      if (!Number.isInteger(index) || index < 0 || index >= total) {
+        continue;
+      }
+      const borderBlock = entry.borderBoxSize?.[0]?.blockSize;
+      const rawHeight =
+        typeof borderBlock === 'number' && borderBlock > 0
+          ? borderBlock
+          : entry.contentRect?.height > 0
+            ? entry.contentRect.height
+            : tr.getBoundingClientRect().height;
+      if (!Number.isFinite(rawHeight) || rawHeight <= 0) {
+        continue;
+      }
+      const measured = Math.max(1, rawHeight);
+      const prevHeight = prevMap.get(index);
+      if (prevHeight === measured) {
+        continue;
+      }
+      nextMap ??= new Map(prevMap);
+      nextMap.set(index, measured);
+      if (oldScrollTop > 0 && index < anchorIndex) {
+        scrollDelta += measured - (prevHeight ?? defaultSize);
+      }
+    }
+
+    if (!nextMap) {
+      return;
+    }
+    this.measuredRowHeights.set(nextMap);
+    if (vp && scrollDelta !== 0) {
+      const nextScrollTop = Math.max(0, oldScrollTop + scrollDelta);
+      vp.scrollTop = nextScrollTop;
+      this.viewportScrollTop.set(nextScrollTop);
+    }
+  }
+
   constructor() {
-    afterEveryRender(() => this.syncHeaderGroupVisibility(), { injector: this.injector });
-    // Listens to the breakpoint query only; the layout itself is read from `stacked`, so no state is written in the effect.
+    this.destroyRef.onDestroy(() => this.disconnectRowHeightObserver());
+    afterEveryRender(
+      () => {
+        this.syncHeaderGroupVisibility();
+        this.syncAutoRowHeightObserver();
+      },
+      { injector: this.injector },
+    );
+    let autoResetFirstRun = true;
+    effect(() => {
+      const active = this.virtualScroll() && this.virtualScrollRowHeight() === 'auto';
+      if (!active) {
+        autoResetFirstRun = true;
+        untracked(() => {
+          if (this.measuredRowHeights().size > 0) {
+            this.measuredRowHeights.set(new Map());
+          }
+          this.disconnectRowHeightObserver();
+        });
+        return;
+      }
+      this.totalRecords();
+      this.sortField();
+      this.sortOrder();
+      this.multiSortMeta();
+      this.globalFilterValue();
+      this.columnFilters();
+      if (!this.lazy()) {
+        this.value();
+        if (this.useVirtualItems()) {
+          this.expandedRowKeys();
+          this.expandedRowGroups();
+          this.rowGroupMode();
+          this.groupRowsBy();
+        }
+      }
+      if (autoResetFirstRun) {
+        autoResetFirstRun = false;
+        return;
+      }
+      untracked(() => {
+        this.disconnectRowHeightObserver();
+        if (this.measuredRowHeights().size > 0) {
+          this.measuredRowHeights.set(new Map());
+        }
+      });
+    });
+    // Listens to the breakpoint query or container ResizeObserver; the layout itself is read from `stacked`.
     effect((onCleanup) => {
+      if (this.breakpointMode() === 'container') {
+        if (!isPlatformBrowser(this.platformId) || typeof ResizeObserver !== 'function') {
+          return;
+        }
+        const el = this.host.nativeElement;
+        const observer = new ResizeObserver((entries) => {
+          const width = entries[0]?.contentRect?.width ?? el.getBoundingClientRect().width;
+          this.containerWidthPx.set(width);
+        });
+        observer.observe(el);
+        onCleanup(() => observer.disconnect());
+        return;
+      }
       const query = this.breakpointQuery();
       if (!query) {
         return;
@@ -1470,19 +2141,43 @@ export class DataTableComponent<T> {
       query.addEventListener('change', onChange);
       onCleanup(() => query.removeEventListener('change', onChange));
     });
-    this.filterModeControl.valueChanges.pipe(takeUntilDestroyed()).subscribe((mode) => this.setFilterDraftMode(mode));
-    this.filterDateControl.valueChanges.pipe(takeUntilDestroyed()).subscribe((date) => this.setFilterDraftValue(date));
     // Restoring only after the first render keeps the first client render identical to the server-rendered markup. Restoring
     // earlier changes the state before hydration reconciles the DOM, and the class bindings then leave stale server classes behind
     // (for example two "current page" buttons in the paginator).
     afterNextRender(() => {
       this.browserReady.set(true);
       this.observeHeaderHeight();
-      this.observeViewportHeight();
+      this.observeViewportSize();
     });
     this.observeSectionHeight(this.frozenTopBody, this.frozenTopHeight);
     this.observeSectionHeight(this.frozenBottomBody, this.frozenBottomHeight);
     this.observeSectionHeight(this.tableFoot, this.footerHeight);
+
+    effect(() => {
+      const filters = this.columnFilters();
+      if (this.rowControls.size === 0) {
+        return;
+      }
+      for (const [field, bundle] of this.rowControls) {
+        const entry = this.readColumnFilter(filters, field);
+        const value = isFilterGroup(entry) ? (entry.rules[0]?.value ?? null) : (entry?.value ?? null);
+        const singleDate = this.toDateValue(value);
+        if (bundle.date.value?.getTime() !== singleDate?.getTime()) {
+          bundle.date.setValue(singleDate, { emitEvent: false });
+        }
+        const range = Array.isArray(value) ? value : [null, null];
+        const start = this.toDateValue(range[0]);
+        const end = this.toDateValue(range[1]);
+        if (bundle.dateStart.value?.getTime() !== start?.getTime()) {
+          bundle.dateStart.setValue(start, { emitEvent: false });
+        }
+        if (bundle.dateEnd.value?.getTime() !== end?.getTime()) {
+          bundle.dateEnd.setValue(end, { emitEvent: false });
+        }
+        const multiVal = Array.isArray(value) ? [...value] : [];
+        bundle.multi.setValue(multiVal, { emitEvent: false });
+      }
+    });
 
     // A row a key moved focus to before its data arrived takes focus once it renders, but only while the anchor row still holds focus:
     // a click or tab elsewhere in the meantime abandons the move.
@@ -1561,16 +2256,39 @@ export class DataTableComponent<T> {
 
     effect(() => {
       const key = this.stateKey();
+      // Never persist before the stored state was restored, or the initial defaults would overwrite it.
+      if (!key || this.restoredKey() !== key) {
+        return;
+      }
       const first = this.first();
       const sortField = this.sortField();
       const sortOrder = this.sortOrder();
       const expandedRowKeys = this.expandedRowKeys();
       const columnFilters = this.columnFilters();
-      // Never persist before the stored state was restored, or the initial defaults would overwrite it.
-      if (!key || this.restoredKey() !== key) {
-        return;
+      const columnOrder = this.columnOrder();
+      const columnWidths = Object.fromEntries(this.resizedColumnWidths());
+      const columnVisibility: Record<string, boolean> = Object.create(null);
+      for (const col of this.columns()) {
+        columnVisibility[col.field()] = col.isVisible();
       }
-      this.persistTableState(key, { first, sortField, sortOrder, expandedRowKeys, columnFilters });
+      const collapsedRowGroups = this.expandedRowGroups();
+      const globalFilter = this.globalFilterValue();
+      const multiSortMeta = this.multiSortMeta();
+      const rows = this.pageSize();
+      this.persistTableState(key, {
+        first,
+        sortField,
+        sortOrder,
+        expandedRowKeys,
+        columnFilters,
+        columnOrder,
+        columnWidths,
+        columnVisibility,
+        collapsedRowGroups,
+        globalFilter,
+        multiSortMeta,
+        rows,
+      });
     });
 
     effect(() => {
@@ -1579,15 +2297,7 @@ export class DataTableComponent<T> {
       }
       // Reads every signal a lazy data source needs to react to — this is
       // the whole point of the effect, not a stray dependency.
-      this.lazyLoad.emit({
-        first: this.first(),
-        rows: this.pageSize(),
-        sortField: this.sortField(),
-        sortOrder: this.sortOrder(),
-        multiSortMeta: this.multiSortMeta(),
-        filter: this.globalFilterValue(),
-        columnFilters: this.columnFilters(),
-      });
+      this.lazyLoad.emit(this.buildLazyLoadEvent(this.first(), this.pageSize()));
     });
 
     // `lazy` with `virtualScroll` requests rows by block as the window moves; see `requestVisibleBlocks`.
@@ -1630,6 +2340,7 @@ export class DataTableComponent<T> {
       if (this.filterDebounceHandle !== null) {
         clearTimeout(this.filterDebounceHandle);
       }
+      this.clearCellDragListeners();
     });
   }
 
@@ -1646,11 +2357,11 @@ export class DataTableComponent<T> {
     }
     const rules = this.columnFilters();
     for (const col of this.columns()) {
-      const rule = rules[col.field()];
-      if (!isRuleActive(rule)) continue;
+      const entry = this.readColumnFilter(rules, col.field());
+      if (!isColumnFilterEntryActive(entry)) continue;
       const field = col.field();
       const type = col.filterType();
-      rows = rows.filter((row) => matchesColumnFilter((row as Record<string, unknown>)[field], rule, type));
+      rows = rows.filter((row) => matchesColumnFilterEntry((row as Record<string, unknown>)[field], entry, type));
     }
     return rows;
   });
@@ -1685,10 +2396,10 @@ export class DataTableComponent<T> {
   /** `rowGroupMode() === 'subheader'`: `groupRowsBy()` becomes the primary sort key ahead of anything else — otherwise same-group rows could scatter and the subheader boundary would fire once per row, see class doc's "rowGroupMode" section. */
   private readonly effectiveGroupField = computed(() => (this.effectiveRowGroupMode() ? this.groupRowsBy() : null));
 
-  /** `rowGroupMode`, except that `virtualScroll` ignores grouping: group boundaries and spans need neighbouring rows that may not be rendered. */
-  private readonly effectiveRowGroupMode = computed(() => (this.virtualScroll() ? null : this.rowGroupMode()));
-  /** `reorderable`, except that `virtualScroll` ignores row reorder: a drag needs its drop target rendered, and the window moves while dragging. */
-  protected readonly rowReorderActive = computed(() => this.reorderable() && !this.virtualScroll() && !this.stacked());
+  /** `rowGroupMode`, except that `lazy` + `virtualScroll` ignores grouping. */
+  private readonly effectiveRowGroupMode = computed(() => (this.virtualScroll() && this.lazy() ? null : this.rowGroupMode()));
+  /** `reorderable`, except that `lazy` + `virtualScroll` or `stacked` ignores row reorder. */
+  protected readonly rowReorderActive = computed(() => this.reorderable() && !(this.virtualScroll() && this.lazy()) && !this.stacked());
 
   /** The visible column row-span grouping merges: `rowGroupMode() === 'rowspan'` and `groupRowsBy()` naming a visible column's field, otherwise `null` and nothing merges. */
   protected readonly spanColumnField = computed(() => {
@@ -1699,54 +2410,184 @@ export class DataTableComponent<T> {
     return this.visibleColumns().some((col) => col.field() === field) ? field : null;
   });
 
-  /**
-   * Row-span grouping: one entry per displayed row. The first row of a run of consecutive rows sharing the `groupRowsBy` value gets the run length plus the expanded `#rowexpansion` rows inside it; the other rows of the run get `0` (their grouped cell is omitted). Empty when nothing merges. Computed per displayed page, so a run never crosses a page boundary.
-   */
-  protected readonly groupSpans = computed<readonly number[]>(() => {
-    const field = this.spanColumnField();
-    if (!field) {
+  /** Fields of visible columns whose consecutive equal cells are merged vertically via `rowspan`. */
+  private readonly mergedColumnFields = computed<ReadonlySet<string>>(() => {
+    if (this.stacked() || (this.virtualScroll() && this.lazy())) {
+      return new Set();
+    }
+    const fields = new Set<string>();
+    const groupSpanField = this.spanColumnField();
+    if (groupSpanField) {
+      fields.add(groupSpanField);
+    }
+    if (!this.virtualScroll()) {
+      for (const col of this.visibleColumns()) {
+        if (col.merge() && !col.isFrozen()) {
+          fields.add(col.field());
+        }
+      }
+    }
+    return fields;
+  });
+
+  /** Contiguous unmerged column segments for a `#rowexpansion` row; empty when every visible column is merged and no utility column exists. */
+  protected readonly expansionSegments = computed<readonly { readonly span: number; readonly primary: boolean }[]>(() => {
+    const merged = this.mergedColumnFields();
+    if (merged.size === 0) {
+      const total = this.totalColumnCount();
+      return total > 0 ? [{ span: total, primary: true }] : [];
+    }
+    const raw: number[] = [];
+    let current = this.leadingUtilityCount();
+    for (const slot of this.columnSlots()) {
+      if (slot.kind === 'col' && merged.has(slot.col.field())) {
+        if (current > 0) {
+          raw.push(current);
+          current = 0;
+        }
+      } else {
+        current += 1;
+      }
+    }
+    if (this.editMode() === 'row') {
+      current += 1;
+    }
+    if (current > 0) {
+      raw.push(current);
+    }
+    if (raw.length === 0) {
       return [];
     }
-    const rows = this.pagedValue();
-    const hasExpansion = !!this.rowExpansionTemplate() && this.expansionRowsRender();
-    const spans: number[] = [];
-    let runStart = -1;
-    rows.forEach((row, i) => {
-      const startsRun = i === 0 || this.rowFieldValue(rows[i - 1], field) !== this.rowFieldValue(row, field);
-      if (startsRun) {
-        runStart = i;
-        spans.push(0);
-      } else {
-        spans.push(0);
+    const maxSpan = Math.max(...raw);
+    let assignedPrimary = false;
+    return raw.map((span) => {
+      const primary = !assignedPrimary && span === maxSpan;
+      if (primary) {
+        assignedPrimary = true;
       }
-      spans[runStart] += 1 + (hasExpansion && this.isRowExpanded(row, i) ? 1 : 0);
+      return { span, primary };
     });
+  });
+
+  /** `false` when merged columns leave the expansion row no column to render in: the row is skipped and does not count toward a rowspan. */
+  protected readonly expansionRowsRender = computed(() => {
+    if (this.virtualScroll() && this.lazy()) {
+      return false;
+    }
+    return this.expansionSegments().length > 0;
+  });
+
+  /**
+   * Row-span matrix keyed by column `field`: for each merged column, one entry per displayed row (`0` = covered/omitted, `>= 1` = `rowspan` of the first cell in the run, including any expanded `#rowexpansion` rows within the run). Computed per displayed page, so runs never cross page boundaries.
+   */
+  protected readonly mergeSpans = computed<ReadonlyMap<string, readonly number[]>>(() => {
+    const merged = this.mergedColumnFields();
+    const map = new Map<string, readonly number[]>();
+    if (this.virtualScroll() || merged.size === 0) {
+      return map;
+    }
+    const rows = this.pagedValue();
+    const groupSpanField = this.spanColumnField();
+    const isSubheader = this.effectiveRowGroupMode() === 'subheader';
+    const hasExpansion = !!this.rowExpansionTemplate() && this.expansionRowsRender();
+    for (const field of merged) {
+      const useStringEq = field === groupSpanField;
+      const spans: number[] = [];
+      let runStart = -1;
+      rows.forEach((row, i) => {
+        if (isSubheader && this.isGroupCollapsed(row)) {
+          runStart = -1;
+          spans.push(0);
+          return;
+        }
+        const groupBoundary = isSubheader && this.isGroupStart(row, i);
+        const sameAsPrev =
+          i > 0 &&
+          runStart !== -1 &&
+          !groupBoundary &&
+          (useStringEq
+            ? this.rowFieldValue(rows[i - 1], field) === this.rowFieldValue(row, field)
+            : (rows[i - 1] as Record<string, unknown>)[field] === (row as Record<string, unknown>)[field]);
+        if (!sameAsPrev) {
+          runStart = i;
+        }
+        spans.push(0);
+        spans[runStart] += 1 + (hasExpansion && this.isRowExpanded(row, i) ? 1 : 0);
+      });
+      map.set(field, spans);
+    }
+    return map;
+  });
+
+  /**
+   * Window-sliced `rowspan` counts keyed by `rowIndex` for `rowGroupMode="rowspan"` in non-lazy `virtualScroll`.
+   * Runs reset at spacers and group changes so the first rendered row of any partially scrolled group renders the merged cell and keeps the table rectangular.
+   */
+  protected readonly virtualRowSpans = computed<ReadonlyMap<number, number>>(() => {
+    const field = this.spanColumnField();
+    if (!this.virtualScroll() || this.lazy() || !field) {
+      return new Map();
+    }
+    const spans = new Map<number, number>();
+    let runStartRowIndex: number | null = null;
+    let prevGroupVal: string | null = null;
+    for (const entry of this.virtualEntries()) {
+      if (entry.kind === 'spacer' || entry.kind === 'subheader') {
+        runStartRowIndex = null;
+        prevGroupVal = null;
+        continue;
+      }
+      if (entry.kind === 'expansion') {
+        if (runStartRowIndex !== null) {
+          spans.set(runStartRowIndex, (spans.get(runStartRowIndex) ?? 0) + 1);
+        }
+        continue;
+      }
+      const row = entry.row;
+      if (row === null || row === undefined) {
+        runStartRowIndex = null;
+        prevGroupVal = null;
+        continue;
+      }
+      const val = this.rowFieldValue(row, field);
+      if (runStartRowIndex !== null && val === prevGroupVal) {
+        spans.set(entry.rowIndex, 0);
+        spans.set(runStartRowIndex, (spans.get(runStartRowIndex) ?? 0) + 1);
+      } else {
+        runStartRowIndex = entry.rowIndex;
+        prevGroupVal = val;
+        spans.set(entry.rowIndex, 1);
+      }
+    }
     return spans;
   });
 
-  /**
-   * Row-span grouping: the expansion row cannot cross the merged cell's slot, so it is split into a leading and a trailing
-   * cell around the merged column. `null` when no column is merged (one full-width cell). The wider side holds the expansion template.
-   */
-  protected readonly expansionLayout = computed<{ lead: number; trail: number } | null>(() => {
-    const field = this.spanColumnField();
-    if (!field) {
+  protected cellSpan(col: TableColumnComponent, rowIndex: number): number {
+    if (this.virtualScroll()) {
+      return col.field() === this.spanColumnField() ? (this.virtualRowSpans().get(rowIndex) ?? 1) : 1;
+    }
+    const spans = this.mergeSpans().get(col.field());
+    return spans ? (spans[rowIndex] ?? 1) : 1;
+  }
+
+  protected cellRowSpanAttr(col: TableColumnComponent, rowIndex: number): number | null {
+    if (this.virtualScroll()) {
+      if (col.field() !== this.spanColumnField()) {
+        return null;
+      }
+      const span = this.virtualRowSpans().get(rowIndex) ?? 1;
+      return span >= 1 ? span : null;
+    }
+    const spans = this.mergeSpans().get(col.field());
+    if (!spans) {
       return null;
     }
-    const cols = this.visibleColumns();
-    const idx = cols.findIndex((col) => col.field() === field);
-    const utilityBefore = (this.rowReorderActive() ? 1 : 0) + (this.hasSelectionColumn() ? 1 : 0);
-    return { lead: utilityBefore + idx, trail: cols.length - idx - 1 + (this.editMode() === 'row' ? 1 : 0) };
-  });
-
-  /** `false` when row-span grouping leaves the expansion row no column to render in (the merged column is the only one): the row is skipped and does not count toward a rowspan. */
-  protected readonly expansionRowsRender = computed(() => {
-    if (this.virtualScroll()) {
-      return false;
+    const span = spans[rowIndex] ?? 1;
+    if (col.field() === this.spanColumnField()) {
+      return span >= 1 ? span : null;
     }
-    const layout = this.expansionLayout();
-    return !layout || layout.lead + layout.trail > 0;
-  });
+    return span > 1 ? span : null;
+  }
 
   /** `lazy()`: `value()` is already sorted server-side, identity passthrough same as `filteredValue`. `sortMode() === 'multiple'`: each `multiSortMeta` entry breaks ties left by the ones before it, primary key first. */
   protected readonly sortedValue = computed(() => {
@@ -1808,14 +2649,14 @@ export class DataTableComponent<T> {
 
   protected readonly effectiveTotalRecords = computed(() => (this.lazy() ? (this.totalRecords() ?? this.value().length) : this.sortedValue().length));
 
-  protected readonly hasFrozenColumn = computed(() => this.visibleColumns().some((col) => col.frozen()));
+  protected readonly hasFrozenColumn = computed(() => this.visibleColumns().some((col) => col.isFrozen()));
 
   protected readonly isCellSelectionActive = computed(() => this.cellSelection() && (this.selectionMode() === 'single' || this.selectionMode() === 'multiple'));
 
   protected readonly hasSelectionColumn = computed(() => !this.isCellSelectionActive() && (this.selectionMode() === 'multiple' || this.selectionMode() === 'radio'));
 
   /** `true` when the reorder, selection and radio columns freeze on the left: they follow a left-frozen data column. */
-  protected readonly utilityFrozen = computed(() => !this.stacked() && this.visibleColumns().some((col) => col.frozen() && col.alignFrozen() === 'left'));
+  protected readonly utilityFrozen = computed(() => !this.stacked() && this.visibleColumns().some((col) => col.isFrozen() && col.alignFrozen() === 'left'));
 
   private readonly utilityWidth = computed(() => (this.rowReorderActive() ? REORDER_COLUMN_PX : 0) + (this.hasSelectionColumn() ? SELECTION_COLUMN_PX : 0));
 
@@ -1829,14 +2670,14 @@ export class DataTableComponent<T> {
     }
     let left = this.utilityWidth();
     for (const col of cols) {
-      if (col.frozen() && col.alignFrozen() === 'left') {
+      if (col.isFrozen() && col.alignFrozen() === 'left') {
         layout.set(col, { side: 'left', offset: left });
         left += this.frozenColumnPx(col);
       }
     }
     let right = 0;
     for (let i = cols.length - 1; i >= 0; i--) {
-      if (cols[i].frozen() && cols[i].alignFrozen() === 'right') {
+      if (cols[i].isFrozen() && cols[i].alignFrozen() === 'right') {
         layout.set(cols[i], { side: 'right', offset: right });
         right += this.frozenColumnPx(cols[i]);
       }
@@ -1844,7 +2685,150 @@ export class DataTableComponent<T> {
     return layout;
   });
 
-  protected readonly totalColumnCount = computed(() => this.visibleColumns().length + (this.hasSelectionColumn() ? 1 : 0) + (this.rowReorderActive() ? 1 : 0) + (this.editMode() === 'row' ? 1 : 0));
+  protected readonly virtualColumnsActive = computed(() => this.virtualScrollColumns() && !this.stacked());
+
+  private readonly effectiveVirtualColumnWidth = computed(() => {
+    const raw = this.virtualScrollColumnWidth();
+    return Number.isFinite(raw) ? Math.max(1, raw) : 120;
+  });
+
+  private resolveColPxWidth(col: TableColumnComponent, fallbackPx: number): number {
+    const resized = this.resizedColumnWidths().get(col.field());
+    if (resized !== undefined) {
+      return Math.max(1, resized);
+    }
+    const match = /^\s*(\d+(?:\.\d+)?)px\s*$/.exec(col.width() ?? '');
+    return match ? Math.max(1, parseFloat(match[1])) : fallbackPx;
+  }
+
+  /** Horizontal column window layout: partitions frozen edges and slices scrollable columns with pixel spacers. */
+  protected readonly virtualColumnLayout = computed(() => {
+    const cols = this.visibleColumns();
+    if (!this.virtualColumnsActive()) {
+      return {
+        active: false as const,
+        leftFrozen: [] as readonly TableColumnComponent[],
+        scrollable: cols,
+        rightFrozen: [] as readonly TableColumnComponent[],
+        renderedScrollable: cols,
+        start: 0,
+        end: cols.length,
+        leftSpacerPx: 0,
+        rightSpacerPx: 0,
+        totalWidthPx: null as number | null,
+      };
+    }
+    const defaultWidth = this.effectiveVirtualColumnWidth();
+    const leftFrozen: TableColumnComponent[] = [];
+    const scrollable: TableColumnComponent[] = [];
+    const rightFrozen: TableColumnComponent[] = [];
+    let leftFrozenWidth = 0;
+    let rightFrozenWidth = 0;
+
+    for (const col of cols) {
+      if (col.isFrozen()) {
+        if (col.alignFrozen() === 'right') {
+          rightFrozen.push(col);
+          rightFrozenWidth += this.resolveColPxWidth(col, defaultWidth);
+        } else {
+          leftFrozen.push(col);
+          leftFrozenWidth += this.resolveColPxWidth(col, defaultWidth);
+        }
+      } else {
+        scrollable.push(col);
+      }
+    }
+
+    const offsets = buildVirtualHeightIndex(scrollable.length, defaultWidth, (index) => this.resolveColPxWidth(scrollable[index], defaultWidth));
+    const totalScrollableWidth = offsets[scrollable.length] ?? 0;
+    const effectiveViewportWidth = Math.max(1, this.measuredViewportWidth() || DEFAULT_VIRTUAL_VIEWPORT_WIDTH_PX);
+    const { start, end } = rangeAtVariableOffset(offsets, this.viewportScrollLeft(), effectiveViewportWidth, VIRTUAL_COLUMN_BUFFER);
+    const leftSpacerPx = rangeHeight(offsets, 0, start);
+    const rightSpacerPx = rangeHeight(offsets, end, scrollable.length);
+    const renderedScrollable = scrollable.slice(start, end);
+    const totalWidthPx = this.utilityWidth() + leftFrozenWidth + totalScrollableWidth + rightFrozenWidth;
+
+    return {
+      active: true as const,
+      leftFrozen,
+      scrollable,
+      rightFrozen,
+      renderedScrollable,
+      start,
+      end,
+      leftSpacerPx,
+      rightSpacerPx,
+      totalWidthPx,
+    };
+  });
+
+  private readonly leadingUtilityCount = computed(() => (this.rowReorderActive() ? 1 : 0) + (this.hasSelectionColumn() ? 1 : 0));
+
+  /** Ordered column and horizontal spacer slots rendered across header, filter, body, frozen, skeleton, and footer rows. */
+  protected readonly columnSlots = computed<readonly VirtualColumnSlot[]>(() => {
+    const layout = this.virtualColumnLayout();
+    if (!layout.active) {
+      return this.visibleColumns().map((col) => ({ kind: 'col', col, ariaColIndex: null }));
+    }
+    const baseIndex = this.leadingUtilityCount() + 1;
+    const slots: VirtualColumnSlot[] = [];
+    let colOffset = 0;
+    for (const col of layout.leftFrozen) {
+      slots.push({ kind: 'col', col, ariaColIndex: baseIndex + colOffset++ });
+    }
+    if (layout.leftSpacerPx > 0) {
+      slots.push({ kind: 'spacer-left', widthPx: layout.leftSpacerPx });
+    }
+    layout.renderedScrollable.forEach((col, i) => {
+      slots.push({ kind: 'col', col, ariaColIndex: baseIndex + layout.leftFrozen.length + layout.start + i });
+    });
+    if (layout.rightSpacerPx > 0) {
+      slots.push({ kind: 'spacer-right', widthPx: layout.rightSpacerPx });
+    }
+    colOffset = layout.leftFrozen.length + layout.scrollable.length;
+    for (const col of layout.rightFrozen) {
+      slots.push({ kind: 'col', col, ariaColIndex: baseIndex + colOffset++ });
+    }
+    return slots;
+  });
+
+  protected trackColumnSlot(slot: VirtualColumnSlot): string {
+    if (slot.kind === 'spacer-left') {
+      return '__spacer_left__';
+    }
+    if (slot.kind === 'spacer-right') {
+      return '__spacer_right__';
+    }
+    return slot.col.field();
+  }
+
+  protected readonly ariaColCount = computed(() => {
+    if (!this.virtualColumnsActive()) {
+      return null;
+    }
+    return this.leadingUtilityCount() + this.visibleColumns().length + (this.editMode() === 'row' ? 1 : 0);
+  });
+
+  protected utilityColIndex(kind: 'reorder' | 'selection' | 'rowActions'): number | null {
+    if (!this.virtualColumnsActive()) {
+      return null;
+    }
+    if (kind === 'reorder') {
+      return 1;
+    }
+    if (kind === 'selection') {
+      return this.rowReorderActive() ? 2 : 1;
+    }
+    return this.leadingUtilityCount() + this.visibleColumns().length + 1;
+  }
+
+  protected readonly totalColumnCount = computed(() => {
+    const utility = this.leadingUtilityCount() + (this.editMode() === 'row' ? 1 : 0);
+    if (!this.virtualColumnsActive()) {
+      return this.visibleColumns().length + utility;
+    }
+    return this.columnSlots().length + utility;
+  });
 
   /** The processed rows that hold data: with `lazy` and `virtualScroll`, `value` is sparse and its `null` or `undefined` entries are rows not loaded yet. */
   private readonly loadedRows = computed(() => (this.lazy() && this.virtualScroll() ? this.sortedValue().filter((row) => row !== null && row !== undefined) : this.sortedValue()));
@@ -1892,7 +2876,7 @@ export class DataTableComponent<T> {
 
   /** `true` when `row` belongs to a group whose value is in the `expandedRowGroups` model (the collapsed ones). */
   protected isGroupCollapsed(row: T): boolean {
-    return this.isRowGroupToggleable() && this.expandedRowGroups().includes(this.groupValue(row));
+    return this.isRowGroupToggleable() && this.collapsedRowGroupSet().has(this.groupValue(row));
   }
 
   /** A collapsed group hides its body rows and their expansion rows; the subheader row stays. */
@@ -1904,7 +2888,7 @@ export class DataTableComponent<T> {
   protected toggleRowGroup(row: T): void {
     const value = this.groupValue(row);
     const collapsed = this.expandedRowGroups();
-    if (collapsed.includes(value)) {
+    if (this.collapsedRowGroupSet().has(value)) {
       this.expandedRowGroups.set(collapsed.filter((group) => group !== value));
       this.rowGroupExpand.emit(value);
     } else {
@@ -1949,7 +2933,7 @@ export class DataTableComponent<T> {
       return resized;
     }
     const match = /^\s*(\d+(?:\.\d+)?)px\s*$/.exec(col.width() ?? '');
-    return match ? parseFloat(match[1]) : MIN_FROZEN_COLUMN_PX;
+    return match ? Math.max(1, parseFloat(match[1])) : (this.virtualColumnsActive() ? this.effectiveVirtualColumnWidth() : MIN_FROZEN_COLUMN_PX);
   }
 
   /** Whether a data column is frozen, so it is sticky. Bound per class so hydration clears a server-rendered `sticky`. */
@@ -2055,8 +3039,14 @@ export class DataTableComponent<T> {
     return mergeClasses(SIZE_PADDING_CLASS[this.size()], this.stacked() ? 'block' : '');
   }
 
-  /** Whether a column footer row renders: at least one visible column has footer content. */
-  protected readonly hasColumnFooter = computed(() => this.visibleColumns().some((col) => this.hasFooterContent(col)));
+  /** Whether a column footer row renders: at least one visible column has footer content, or an active utility column provides a footer template. */
+  protected readonly hasColumnFooter = computed(
+    () =>
+      this.visibleColumns().some((col) => this.hasFooterContent(col)) ||
+      (this.rowReorderActive() && !!this.reorderFooterTemplate()) ||
+      (this.hasSelectionColumn() && !!this.selectionFooterTemplate()) ||
+      (this.editMode() === 'row' && !!this.rowActionsFooterTemplate()),
+  );
 
   /** Whether a column has a footer to show: a `#footer` template or footer text. A column without one gets an empty footer cell. */
   protected hasFooterContent(col: TableColumnComponent): boolean {
@@ -2070,6 +3060,16 @@ export class DataTableComponent<T> {
       'font-semibold text-surface-700 dark:text-surface-200',
       ALIGN_CLASS[col.align()],
       this.gridClass(),
+      this.frozenCellClass(col, null, 0),
+    );
+  }
+
+  protected filterRowCellClass(col: TableColumnComponent): string {
+    return mergeClasses(
+      SIZE_PADDING_CLASS[this.size()],
+      this.gridClass(),
+      'font-normal',
+      ALIGN_CLASS[col.align()],
       this.frozenCellClass(col, null, 0),
     );
   }
@@ -2100,7 +3100,7 @@ export class DataTableComponent<T> {
       'text-surface-900 dark:text-surface-50',
       ALIGN_CLASS[col.align()],
       this.gridClass(),
-      this.virtualScroll() ? 'truncate' : '',
+      this.virtualScroll() && this.virtualScrollRowHeight() !== 'auto' ? 'truncate' : '',
       this.frozenCellClass(col, row, index),
       cellSelectable ? `cursor-pointer ${INSET_FOCUS_RING_CLASS}` : '',
       cellSelected ? (this.frozenLayout().has(col) ? 'bg-brand-50 dark:bg-brand-950' : 'bg-brand-50 dark:bg-brand-500/10') : '',
@@ -2128,7 +3128,7 @@ export class DataTableComponent<T> {
     }
     const striped = this.stripedRows() && index % 2 === 1;
     const cellSelectionActive = this.isCellSelectionActive();
-    const rowFocusable = interactive && Boolean(this.selectionMode() || this.contextMenu()) && !cellSelectionActive;
+    const rowFocusable = interactive && Boolean(this.selectionMode() || this.contextMenu() || this.keyboardNavigation()) && !cellSelectionActive;
     return mergeClasses(
       'group border-b border-surface-200 last:border-b-0 dark:border-surface-700',
       this.stacked() ? 'block bg-surface-0 dark:bg-surface-800' : '',
@@ -2156,7 +3156,7 @@ export class DataTableComponent<T> {
 
   /** Whether `col` has an active rule in `columnFilters`, which switches its funnel to the active state. */
   protected isColumnFilterActive(col: TableColumnComponent): boolean {
-    return isRuleActive(this.columnFilters()[col.field()]);
+    return isColumnFilterEntryActive(this.readColumnFilter(this.columnFilters(), col.field()));
   }
 
   protected funnelButtonClass(col: TableColumnComponent): string {
@@ -2166,8 +3166,32 @@ export class DataTableComponent<T> {
     );
   }
 
-  /** Rule being edited in the one open filter menu; seeded when the menu opens and discarded when it closes. */
-  protected readonly filterDraft = signal<{ readonly field: string; readonly matchMode: TableFilterMatchMode; readonly value: TableColumnFilter['value'] } | null>(null);
+  protected readonly maxFilterRules = MAX_COLUMN_FILTER_RULES;
+  private nextDraftRuleId = 0;
+
+  /** Rule group being edited in the one open filter menu; seeded when the menu opens and discarded when it closes. */
+  protected readonly filterDraft = signal<{
+    readonly field: string;
+    readonly operator: TableColumnFilterOperator;
+    readonly operatorControl: FormControl<TableColumnFilterOperator>;
+    readonly rules: readonly {
+      readonly id: number;
+      readonly matchMode: TableFilterMatchMode;
+      readonly value: TableFilterValue;
+      readonly modeControl: FormControl<TableFilterMatchMode>;
+      readonly dateControl: FormControl<Date | null>;
+      readonly dateStartControl: FormControl<Date | null>;
+      readonly dateEndControl: FormControl<Date | null>;
+      readonly multiSelectControl: FormControl<readonly unknown[]>;
+    }[];
+  } | null>(null);
+
+  protected filterOperatorOptions(): SelectOption<TableColumnFilterOperator>[] {
+    return [
+      { label: this.matchAllLabel(), value: 'and' },
+      { label: this.matchAnyLabel(), value: 'or' },
+    ];
+  }
 
   /** Options of the match mode select: the modes `col` offers, named by `matchModeLabels` over the English defaults. */
   protected filterModeOptions(col: TableColumnComponent): { label: string; value: TableFilterMatchMode }[] {
@@ -2175,56 +3199,389 @@ export class DataTableComponent<T> {
     return offeredMatchModes(col.filterType(), col.filterMatchModes()).map((mode) => ({ label: labels[mode] ?? mode, value: mode }));
   }
 
+  /** Options offered in the multi-select control for `in` match mode: `col.filterOptions()` when provided, else distinct non-empty values from `value()`. */
+  protected filterInOptions(col: TableColumnComponent): SelectOption<unknown>[] {
+    const explicit = col.filterOptions();
+    if (explicit !== null) {
+      return explicit.map((item) => {
+        if (typeof item === 'object' && item !== null && 'label' in item && 'value' in item) {
+          return item as SelectOption<unknown>;
+        }
+        const label = item instanceof Date
+          ? `${item.getFullYear()}-${String(item.getMonth() + 1).padStart(2, '0')}-${String(item.getDate()).padStart(2, '0')}`
+          : String(item ?? '');
+        return { label, value: item };
+      });
+    }
+    const seen = new Set<string>();
+    const options: SelectOption<unknown>[] = [];
+    const field = col.field();
+    for (const row of this.value()) {
+      if (row === null || row === undefined || typeof row !== 'object') continue;
+      const raw = (row as Record<string, unknown>)[field];
+      if (raw === null || raw === undefined || raw === '') continue;
+      const key = raw instanceof Date
+        ? `d:${raw.getFullYear()}-${raw.getMonth()}-${raw.getDate()}`
+        : `${typeof raw}:${String(raw)}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      const label = raw instanceof Date
+        ? `${raw.getFullYear()}-${String(raw.getMonth() + 1).padStart(2, '0')}-${String(raw.getDate()).padStart(2, '0')}`
+        : String(raw);
+      options.push({ label, value: raw });
+    }
+    return options;
+  }
+
+  private readColumnFilter(
+    filters: TableColumnFilters,
+    field: string,
+  ): TableColumnFilter | TableColumnFilterGroup | undefined {
+    return Object.hasOwn(filters, field) ? filters[field] : undefined;
+  }
+
+  private toDateValue(value: unknown): Date | null {
+    if (value instanceof Date) {
+      return Number.isNaN(value.getTime()) ? null : value;
+    }
+    if (typeof value !== 'string') {
+      return null;
+    }
+    const dateOnly = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+    if (dateOnly) {
+      return new Date(Number(dateOnly[1]), Number(dateOnly[2]) - 1, Number(dateOnly[3]));
+    }
+    if (/^\d{4}-\d{2}-\d{2}T/.test(value)) {
+      const parsed = new Date(value);
+      return Number.isNaN(parsed.getTime()) ? null : parsed;
+    }
+    return null;
+  }
+
+  protected rowFilterMode(col: TableColumnComponent): TableFilterMatchMode {
+    const offered = offeredMatchModes(col.filterType(), col.filterMatchModes());
+    const entry = this.readColumnFilter(this.columnFilters(), col.field());
+    const activeMode = isFilterGroup(entry) ? entry.rules[0]?.matchMode : entry?.matchMode;
+    return activeMode && offered.includes(activeMode)
+      ? activeMode
+      : preselectedMatchMode(col.filterType(), offered, col.filterMatchMode());
+  }
+
+  protected rowFilterValue(col: TableColumnComponent): TableFilterValue {
+    const entry = this.readColumnFilter(this.columnFilters(), col.field());
+    if (isFilterGroup(entry)) {
+      return entry.rules[0]?.value ?? null;
+    }
+    return entry?.value ?? null;
+  }
+
+  protected filterTemplateContext(col: TableColumnComponent): TableColumnFilterTemplateContext {
+    const matchMode = this.rowFilterMode(col);
+    const value = this.rowFilterValue(col);
+    return {
+      $implicit: value,
+      matchMode,
+      filter: (nextValue: TableFilterValue, mode?: TableFilterMatchMode) => {
+        const rule: TableColumnFilter = { matchMode: mode ?? matchMode, value: nextValue };
+        this.commitColumnFilter(col.field(), isRuleActive(rule) ? rule : null);
+      },
+      clear: () => {
+        this.commitColumnFilter(col.field(), null);
+      },
+    };
+  }
+
+  private readonly rowControls = new Map<
+    string,
+    {
+      date: FormControl<Date | null>;
+      dateStart: FormControl<Date | null>;
+      dateEnd: FormControl<Date | null>;
+      multi: FormControl<readonly unknown[]>;
+    }
+  >();
+
+  private getOrCreateRowControls(col: TableColumnComponent) {
+    const field = col.field();
+    const existing = this.rowControls.get(field);
+    if (existing) {
+      return existing;
+    }
+    const initial = untracked(() => this.rowFilterValue(col));
+    const range = Array.isArray(initial) ? initial : [null, null];
+    const bundle = {
+      date: new FormControl<Date | null>(this.toDateValue(initial)),
+      dateStart: new FormControl<Date | null>(this.toDateValue(range[0])),
+      dateEnd: new FormControl<Date | null>(this.toDateValue(range[1])),
+      multi: new FormControl<readonly unknown[]>(Array.isArray(initial) ? [...initial] : [], { nonNullable: true }),
+    };
+    bundle.date.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((date) => {
+      const rule: TableColumnFilter = { matchMode: this.rowFilterMode(col), value: date };
+      this.commitColumnFilter(field, isRuleActive(rule) ? rule : null);
+    });
+    bundle.dateStart.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((start) => {
+      const prev = this.rowFilterValue(col);
+      const end = Array.isArray(prev) ? (prev[1] ?? null) : null;
+      const rule: TableColumnFilter = { matchMode: 'between', value: [start, end] };
+      this.commitColumnFilter(field, isRuleActive(rule) ? rule : null);
+    });
+    bundle.dateEnd.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((end) => {
+      const prev = this.rowFilterValue(col);
+      const start = Array.isArray(prev) ? (prev[0] ?? null) : null;
+      const rule: TableColumnFilter = { matchMode: 'between', value: [start, end] };
+      this.commitColumnFilter(field, isRuleActive(rule) ? rule : null);
+    });
+    bundle.multi.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((values) => {
+      const rule: TableColumnFilter = { matchMode: 'in', value: [...(values as readonly (string | number | Date | null)[])] };
+      this.commitColumnFilter(field, isRuleActive(rule) ? rule : null);
+    });
+    this.rowControls.set(field, bundle);
+    return bundle;
+  }
+
+  protected rowDateControl(col: TableColumnComponent): FormControl<Date | null> {
+    return this.getOrCreateRowControls(col).date;
+  }
+
+  protected rowDateStartControl(col: TableColumnComponent): FormControl<Date | null> {
+    return this.getOrCreateRowControls(col).dateStart;
+  }
+
+  protected rowDateEndControl(col: TableColumnComponent): FormControl<Date | null> {
+    return this.getOrCreateRowControls(col).dateEnd;
+  }
+
+  protected rowMultiSelectControl(col: TableColumnComponent): FormControl<readonly unknown[]> {
+    return this.getOrCreateRowControls(col).multi;
+  }
+
+  protected onRowFilterTextInput(col: TableColumnComponent, event: Event): void {
+    const value = (event.target as HTMLInputElement).value;
+    const rule: TableColumnFilter = { matchMode: this.rowFilterMode(col), value };
+    this.commitColumnFilter(col.field(), isRuleActive(rule) ? rule : null);
+  }
+
+  protected onRowFilterNumberInput(col: TableColumnComponent, event: Event): void {
+    const text = (event.target as HTMLInputElement).value;
+    const parsed = text.trim() === '' ? null : Number(text);
+    const value = parsed === null || Number.isNaN(parsed) ? null : parsed;
+    const rule: TableColumnFilter = { matchMode: this.rowFilterMode(col), value };
+    this.commitColumnFilter(col.field(), isRuleActive(rule) ? rule : null);
+  }
+
+  protected onRowFilterBetweenNumberInput(col: TableColumnComponent, index: 0 | 1, event: Event): void {
+    const text = (event.target as HTMLInputElement).value;
+    const parsed = text.trim() === '' ? null : Number(text);
+    const bound = parsed === null || Number.isNaN(parsed) ? null : parsed;
+    const prev = this.rowFilterValue(col);
+    const next: [string | number | Date | null, string | number | Date | null] = Array.isArray(prev)
+      ? [prev[0] ?? null, prev[1] ?? null]
+      : [null, null];
+    next[index] = bound;
+    const rule: TableColumnFilter = { matchMode: 'between', value: next };
+    this.commitColumnFilter(col.field(), isRuleActive(rule) ? rule : null);
+  }
+
+  private filterDraftDestroy$: Subject<void> | null = null;
+  private readonly filterDraftRuleDestroy = new Map<number, Subject<void>>();
+
+  private teardownFilterDraft(): void {
+    this.filterDraftDestroy$?.next();
+    this.filterDraftDestroy$?.complete();
+    this.filterDraftDestroy$ = null;
+    for (const sub of this.filterDraftRuleDestroy.values()) {
+      sub.next();
+      sub.complete();
+    }
+    this.filterDraftRuleDestroy.clear();
+  }
+
+  private createDraftRule(matchMode: TableFilterMatchMode, value: TableFilterValue) {
+    const id = this.nextDraftRuleId++;
+    const destroy$ = new Subject<void>();
+    this.filterDraftRuleDestroy.set(id, destroy$);
+    const modeControl = new FormControl<TableFilterMatchMode>(matchMode, { nonNullable: true });
+    const dateControl = new FormControl<Date | null>(this.toDateValue(value));
+    const range = matchMode === 'between' && Array.isArray(value) ? value : [null, null];
+    const dateStartControl = new FormControl<Date | null>(this.toDateValue(range[0]));
+    const dateEndControl = new FormControl<Date | null>(this.toDateValue(range[1]));
+    const multiSelectControl = new FormControl<readonly unknown[]>(
+      matchMode === 'in' && Array.isArray(value) ? [...value] : [],
+      { nonNullable: true },
+    );
+
+    modeControl.valueChanges.pipe(takeUntil(destroy$), takeUntilDestroyed(this.destroyRef)).subscribe((mode) => this.setFilterDraftRuleMode(id, mode));
+    dateControl.valueChanges.pipe(takeUntil(destroy$), takeUntilDestroyed(this.destroyRef)).subscribe((date) => this.setFilterDraftRuleValue(id, date));
+    dateStartControl.valueChanges.pipe(takeUntil(destroy$), takeUntilDestroyed(this.destroyRef)).subscribe((date) => this.setFilterDraftBetweenBound(id, 0, date));
+    dateEndControl.valueChanges.pipe(takeUntil(destroy$), takeUntilDestroyed(this.destroyRef)).subscribe((date) => this.setFilterDraftBetweenBound(id, 1, date));
+    multiSelectControl.valueChanges.pipe(takeUntil(destroy$), takeUntilDestroyed(this.destroyRef)).subscribe((values) => this.setFilterDraftRuleValue(id, [...(values as readonly (string | number | Date | null)[])]));
+
+    return { id, matchMode, value, modeControl, dateControl, dateStartControl, dateEndControl, multiSelectControl };
+  }
+
   protected onFilterMenuShown(col: TableColumnComponent): void {
     this.openFilterField.set(col.field());
-    const rule = this.columnFilters()[col.field()];
+    this.teardownFilterDraft();
+    if (col.filterTemplate()) {
+      this.filterDraft.set(null);
+      return;
+    }
+    const existing = this.readColumnFilter(this.columnFilters(), col.field());
     const offered = offeredMatchModes(col.filterType(), col.filterMatchModes());
-    const matchMode = rule && offered.includes(rule.matchMode) ? rule.matchMode : preselectedMatchMode(col.filterType(), offered, col.filterMatchMode());
-    const value = rule?.value ?? null;
-    this.filterDraft.set({ field: col.field(), matchMode, value });
-    this.filterModeControl.setValue(matchMode, { emitEvent: false });
-    this.filterDateControl.setValue(value instanceof Date ? value : null, { emitEvent: false });
+    const defaultMode = preselectedMatchMode(col.filterType(), offered, col.filterMatchMode());
+
+    let operator: TableColumnFilterOperator = 'and';
+    let sourceRules: readonly TableColumnFilter[];
+    if (isFilterGroup(existing)) {
+      operator = existing.operator;
+      sourceRules = existing.rules.length > 0 ? existing.rules : [{ matchMode: defaultMode, value: null }];
+    } else if (existing) {
+      sourceRules = [existing];
+    } else {
+      sourceRules = [{ matchMode: defaultMode, value: null }];
+    }
+
+    const rules = sourceRules.slice(0, MAX_COLUMN_FILTER_RULES).map((r) => {
+      const mode = offered.includes(r.matchMode) ? r.matchMode : defaultMode;
+      return this.createDraftRule(mode, r.value);
+    });
+    const draftDestroy$ = new Subject<void>();
+    this.filterDraftDestroy$ = draftDestroy$;
+    const operatorControl = new FormControl<TableColumnFilterOperator>(operator, { nonNullable: true });
+    operatorControl.valueChanges.pipe(takeUntil(draftDestroy$), takeUntilDestroyed(this.destroyRef)).subscribe((op) => this.setFilterDraftOperator(op));
+
+    this.filterDraft.set({ field: col.field(), operator, operatorControl, rules });
   }
 
   /** Closing the menu by any route discards the draft and returns focus to its funnel button, which a click does not always focus (D-03). */
   protected onFilterMenuHidden(button: HTMLButtonElement): void {
     this.openFilterField.set(null);
+    this.teardownFilterDraft();
     this.filterDraft.set(null);
     button.focus();
   }
 
-  /**
-   * Bind the match mode select and the date picker, which are value accessors with no signal model. A `FormControl`
-   * writes its value into the accessor as soon as the control renders, where `ngModel` would wait a microtask.
-   */
-  protected readonly filterModeControl = new FormControl<TableFilterMatchMode>('contains', { nonNullable: true });
-  protected readonly filterDateControl = new FormControl<Date | null>(null);
-
-  protected setFilterDraftMode(matchMode: TableFilterMatchMode): void {
-    this.filterDraft.update((draft) => (draft ? { ...draft, matchMode } : draft));
+  protected addFilterRule(col: TableColumnComponent): void {
+    const offered = offeredMatchModes(col.filterType(), col.filterMatchModes());
+    const defaultMode = preselectedMatchMode(col.filterType(), offered, col.filterMatchMode());
+    this.filterDraft.update((draft) => {
+      if (!draft || draft.rules.length >= MAX_COLUMN_FILTER_RULES) return draft;
+      return { ...draft, rules: [...draft.rules, this.createDraftRule(defaultMode, null)] };
+    });
   }
 
-  protected setFilterDraftValue(value: TableColumnFilter['value']): void {
-    this.filterDraft.update((draft) => (draft ? { ...draft, value } : draft));
+  protected removeFilterRule(ruleId: number): void {
+    this.filterDraft.update((draft) => {
+      if (!draft || draft.rules.length <= 1) return draft;
+      const sub = this.filterDraftRuleDestroy.get(ruleId);
+      if (sub) {
+        sub.next();
+        sub.complete();
+        this.filterDraftRuleDestroy.delete(ruleId);
+      }
+      return { ...draft, rules: draft.rules.filter((r) => r.id !== ruleId) };
+    });
   }
 
-  protected onFilterTextInput(event: Event): void {
-    this.setFilterDraftValue((event.target as HTMLInputElement).value);
+  private setFilterDraftOperator(operator: TableColumnFilterOperator): void {
+    this.filterDraft.update((draft) => (draft ? { ...draft, operator } : draft));
+  }
+
+  private setFilterDraftRuleMode(ruleId: number, matchMode: TableFilterMatchMode): void {
+    this.filterDraft.update((draft) => {
+      if (!draft) return draft;
+      return {
+        ...draft,
+        rules: draft.rules.map((r) => {
+          if (r.id !== ruleId) return r;
+          let nextValue = r.value;
+          if (matchMode === 'between' && (r.matchMode !== 'between' || !Array.isArray(r.value))) {
+            nextValue = [null, null];
+            r.dateStartControl.setValue(null, { emitEvent: false });
+            r.dateEndControl.setValue(null, { emitEvent: false });
+          } else if (matchMode === 'in' && (r.matchMode !== 'in' || !Array.isArray(r.value))) {
+            nextValue = [];
+            r.multiSelectControl.setValue([], { emitEvent: false });
+          } else if (matchMode !== 'between' && matchMode !== 'in' && Array.isArray(r.value)) {
+            nextValue = null;
+            r.dateControl.setValue(null, { emitEvent: false });
+          }
+          return { ...r, matchMode, value: nextValue };
+        }),
+      };
+    });
+  }
+
+  private setFilterDraftRuleValue(ruleId: number, value: TableFilterValue): void {
+    this.filterDraft.update((draft) => {
+      if (!draft) return draft;
+      return {
+        ...draft,
+        rules: draft.rules.map((r) => (r.id === ruleId ? { ...r, value } : r)),
+      };
+    });
+  }
+
+  private setFilterDraftBetweenBound(ruleId: number, index: 0 | 1, bound: string | number | Date | null): void {
+    this.filterDraft.update((draft) => {
+      if (!draft) return draft;
+      return {
+        ...draft,
+        rules: draft.rules.map((r) => {
+          if (r.id !== ruleId) return r;
+          const prev = Array.isArray(r.value) ? r.value : [null, null];
+          const next: [string | number | Date | null, string | number | Date | null] = [
+            prev[0] ?? null,
+            prev[1] ?? null,
+          ];
+          next[index] = bound;
+          return { ...r, value: next };
+        }),
+      };
+    });
+  }
+
+  protected singleInputValue(value: TableFilterValue): string | number {
+    return Array.isArray(value) || value === null || value === undefined ? '' : (value as string | number);
+  }
+
+  protected betweenBound(value: TableFilterValue, index: 0 | 1): string | number {
+    if (!Array.isArray(value)) return '';
+    const bound = value[index];
+    return bound === null || bound === undefined || bound instanceof Date ? '' : bound;
+  }
+
+  protected onFilterTextInput(ruleId: number, event: Event): void {
+    this.setFilterDraftRuleValue(ruleId, (event.target as HTMLInputElement).value);
   }
 
   /** An empty or invalid number field stores `null`, so `0` stays a real value. */
-  protected onFilterNumberInput(event: Event): void {
+  protected onFilterNumberInput(ruleId: number, event: Event): void {
     const text = (event.target as HTMLInputElement).value;
     const value = text.trim() === '' ? null : Number(text);
-    this.setFilterDraftValue(value === null || Number.isNaN(value) ? null : value);
+    this.setFilterDraftRuleValue(ruleId, value === null || Number.isNaN(value) ? null : value);
   }
 
-  /** Commits the draft as `col`'s rule (an inactive draft removes it) and closes the menu. */
+  protected onFilterBetweenNumberInput(ruleId: number, index: 0 | 1, event: Event): void {
+    const text = (event.target as HTMLInputElement).value;
+    const value = text.trim() === '' ? null : Number(text);
+    this.setFilterDraftBetweenBound(ruleId, index, value === null || Number.isNaN(value) ? null : value);
+  }
+
+  /** Commits the draft as `col`'s rule or rule group (an inactive draft removes it) and closes the menu. */
   protected applyColumnFilter(col: TableColumnComponent, popover: PopoverComponent): void {
     const draft = this.filterDraft();
     if (draft) {
-      const rule: TableColumnFilter = { matchMode: draft.matchMode, value: draft.value };
-      this.commitColumnFilter(col.field(), isRuleActive(rule) ? rule : null);
+      const activeRules: TableColumnFilter[] = draft.rules
+        .map((r): TableColumnFilter => ({ matchMode: r.matchMode, value: r.value }))
+        .filter(isRuleActive);
+      if (activeRules.length === 0) {
+        this.commitColumnFilter(col.field(), null);
+      } else if (activeRules.length === 1) {
+        this.commitColumnFilter(col.field(), activeRules[0]);
+      } else {
+        this.commitColumnFilter(col.field(), { operator: draft.operator, rules: activeRules });
+      }
     }
     popover.hide();
   }
@@ -2235,10 +3592,13 @@ export class DataTableComponent<T> {
   }
 
   /** A rule change from the menu returns to the first page; an application write to `columnFilters` does not (D-06). */
-  private commitColumnFilter(field: string, rule: TableColumnFilter | null): void {
-    const next: Record<string, TableColumnFilter> = { ...this.columnFilters() };
-    if (rule) {
-      next[field] = rule;
+  private commitColumnFilter(field: string, entry: TableColumnFilter | TableColumnFilterGroup | null): void {
+    const next: Record<string, TableColumnFilter | TableColumnFilterGroup> = Object.assign(
+      Object.create(null) as Record<string, TableColumnFilter | TableColumnFilterGroup>,
+      this.columnFilters(),
+    );
+    if (entry) {
+      Object.defineProperty(next, field, { value: entry, enumerable: true, configurable: true, writable: true });
     } else {
       delete next[field];
     }
@@ -2318,7 +3678,7 @@ export class DataTableComponent<T> {
   /** Moves `col` one visible position toward the start (`-1`) or end (`1`), skipping hidden columns, then restores focus to its header. */
   private moveColumnByKey(col: TableColumnComponent, direction: -1 | 1): void {
     const ordered = this.orderedColumns();
-    const neighbor = (direction === -1 ? ordered.slice(0, ordered.indexOf(col)).reverse() : ordered.slice(ordered.indexOf(col) + 1)).find((c) => c.visible());
+    const neighbor = (direction === -1 ? ordered.slice(0, ordered.indexOf(col)).reverse() : ordered.slice(ordered.indexOf(col) + 1)).find((c) => c.isVisible());
     if (!neighbor || !this.moveColumn(col.field(), neighbor.field())) {
       return;
     }
@@ -2327,7 +3687,7 @@ export class DataTableComponent<T> {
     const field = col.field();
     afterNextRender(
       () => {
-        const headers = Array.from(this.host.nativeElement.querySelectorAll<HTMLElement>('thead tr:last-child th[scope="col"]'));
+        const headers = Array.from(this.host.nativeElement.querySelectorAll<HTMLElement>('thead tr[data-med-header-row] th[scope="col"]'));
         headers[this.visibleColumns().findIndex((c) => c.field() === field)]?.focus();
       },
       { injector: this.injector },
@@ -2389,18 +3749,21 @@ export class DataTableComponent<T> {
     this.dropTargetField.set(null);
   }
 
-  /** Whether `from` may take the position of `to`: both reorderable and frozen on the same edge (or both free), so a move never changes a frozen state. */
+  /** Whether `from` may take the position of `to`: both reorderable, and either `reorderAcrossFrozen` is on or both are frozen on the same edge (or both free). */
   protected canMoveColumn(from: TableColumnComponent, to: TableColumnComponent): boolean {
     if (from === to || !from.reorderable() || !to.reorderable()) {
       return false;
     }
-    if (from.frozen() !== to.frozen()) {
+    if (this.reorderAcrossFrozen()) {
+      return true;
+    }
+    if (from.isFrozen() !== to.isFrozen()) {
       return false;
     }
-    return !from.frozen() || from.alignFrozen() === to.alignFrozen();
+    return !from.isFrozen() || from.alignFrozen() === to.alignFrozen();
   }
 
-  /** Places the column `fromField` at the position of `toField` in the full column order and emits `colReorder`; returns whether anything moved. */
+  /** Places the column `fromField` at the position of `toField` in the full column order, syncing frozen state when `reorderAcrossFrozen` is on, and emits `colReorder`; returns whether anything moved. */
   protected moveColumn(fromField: string, toField: string): boolean {
     if (!this.reorderableColumns()) {
       return false;
@@ -2410,6 +3773,11 @@ export class DataTableComponent<T> {
     const dropIndex = ordered.findIndex((col) => col.field() === toField);
     if (dragIndex < 0 || dropIndex < 0 || !this.canMoveColumn(ordered[dragIndex], ordered[dropIndex])) {
       return false;
+    }
+    const fromCol = ordered[dragIndex];
+    const toCol = ordered[dropIndex];
+    if (this.reorderAcrossFrozen()) {
+      fromCol.applyFrozenState(toCol.isFrozen(), toCol.alignFrozen());
     }
     const fields = ordered.map((col) => col.field());
     const [moved] = fields.splice(dragIndex, 1);
@@ -2438,6 +3806,64 @@ export class DataTableComponent<T> {
     this.emitSort();
   }
 
+  protected readonly sortableVisibleColumns = computed(() => this.visibleColumns().filter((col) => col.sortable()));
+
+  protected readonly activeStackSortField = computed(() =>
+    this.sortMode() === 'multiple' ? (this.multiSortMeta()[0]?.field ?? '') : (this.sortField() ?? ''),
+  );
+
+  protected readonly activeStackSortOrder = computed<TableSortOrder>(() =>
+    this.sortMode() === 'multiple' ? (this.multiSortMeta()[0]?.order ?? null) : this.sortOrder(),
+  );
+
+  protected onStackSortFieldChange(event: Event): void {
+    const select = event.target as HTMLSelectElement;
+    const field = select.value;
+    if (!field) {
+      if (!this.removableSort()) {
+        select.value = this.activeStackSortField();
+        return;
+      }
+      this.clearStackSort();
+      return;
+    }
+    if (this.sortMode() === 'multiple') {
+      this.multiSortMeta.set([{ field, order: 'asc' }]);
+    } else {
+      this.sortField.set(field);
+      this.sortOrder.set('asc');
+    }
+    this.emitSort();
+  }
+
+  protected toggleStackSortDirection(): void {
+    const field = this.activeStackSortField();
+    if (!field) {
+      return;
+    }
+    const nextOrder: TableSortOrder = this.activeStackSortOrder() === 'asc' ? 'desc' : 'asc';
+    if (this.sortMode() === 'multiple') {
+      this.multiSortMeta.set([{ field, order: nextOrder }]);
+    } else {
+      this.sortField.set(field);
+      this.sortOrder.set(nextOrder);
+    }
+    this.emitSort();
+  }
+
+  protected clearStackSort(): void {
+    if (!this.removableSort()) {
+      return;
+    }
+    if (this.sortMode() === 'multiple') {
+      this.multiSortMeta.set([]);
+    } else {
+      this.sortField.set(null);
+      this.sortOrder.set(null);
+    }
+    this.emitSort();
+  }
+
   private emitSort(): void {
     this.sort.emit({ field: this.sortField(), order: this.sortOrder(), multiSortMeta: this.multiSortMeta(), data: this.sortedValue() });
   }
@@ -2446,10 +3872,11 @@ export class DataTableComponent<T> {
   private toggleMultiSort(field: string, additive: boolean): void {
     const current = this.multiSortMeta();
     const existingIndex = current.findIndex((m) => m.field === field);
+    const nextOrder = (order: TableSortOrder): TableSortOrder => (order === 'asc' ? 'desc' : order === 'desc' && this.removableSort() ? null : 'asc');
 
     if (!additive) {
       if (existingIndex === 0 && current.length === 1) {
-        const next = current[0].order === 'asc' ? 'desc' : current[0].order === 'desc' ? null : 'asc';
+        const next = nextOrder(current[0].order);
         this.multiSortMeta.set(next === null ? [] : [{ field, order: next }]);
       } else {
         this.multiSortMeta.set([{ field, order: 'asc' }]);
@@ -2461,8 +3888,7 @@ export class DataTableComponent<T> {
       this.multiSortMeta.set([...current, { field, order: 'asc' }]);
       return;
     }
-    const existing = current[existingIndex];
-    const next: TableSortOrder = existing.order === 'asc' ? 'desc' : existing.order === 'desc' ? null : 'asc';
+    const next = nextOrder(current[existingIndex].order);
     const withoutField = current.filter((m) => m.field !== field);
     this.multiSortMeta.set(next === null ? withoutField : [...withoutField.slice(0, existingIndex), { field, order: next }, ...withoutField.slice(existingIndex)]);
   }
@@ -2535,6 +3961,9 @@ export class DataTableComponent<T> {
     cm?.show(anchor, () => event.preventDefault());
   }
 
+  private rowRangeAnchor: T | null = null;
+  private rowRangeFocus: T | null = null;
+
   protected onRowKeydown(event: KeyboardEvent, row: T): void {
     // Enter saves and Escape cancels an edited row, even from an edit template that does not handle them itself.
     if (this.editMode() === 'row' && this.editingRow() === row && (event.key === 'Enter' || event.key === 'Escape')) {
@@ -2562,15 +3991,27 @@ export class DataTableComponent<T> {
       return;
     }
     const mode = this.selectionMode();
-    if (!mode) {
+    if (!mode && !this.keyboardNavigation()) {
       return;
     }
     // In `multiple` mode the row holds a checkbox that handles Space natively, so only keys pressed on the row itself count.
     if (mode === 'multiple' && event.target !== event.currentTarget) {
       return;
     }
-    if (event.key === 'Enter' || event.key === ' ') {
+    if (event.target !== event.currentTarget && (event.target as HTMLElement | null)?.closest?.('button, input, select, textarea, a, [contenteditable]')) {
+      return;
+    }
+    if (mode === 'multiple' && (event.ctrlKey || event.metaKey) && !event.altKey && event.key.toLowerCase() === 'a') {
       event.preventDefault();
+      this.rowRangeAnchor = null;
+      this.rowRangeFocus = null;
+      this.selection.set([...this.loadedRows()]);
+      return;
+    }
+    if (mode && (event.key === 'Enter' || event.key === ' ')) {
+      event.preventDefault();
+      this.rowRangeAnchor = null;
+      this.rowRangeFocus = null;
       if (mode === 'multiple') {
         this.toggleRow(row);
       } else {
@@ -2580,8 +4021,152 @@ export class DataTableComponent<T> {
     }
     if (event.key === 'ArrowDown' || event.key === 'ArrowUp' || event.key === 'Home' || event.key === 'End') {
       event.preventDefault();
-      this.moveRowFocus(event);
+      if (mode === 'multiple' && event.shiftKey) {
+        this.extendRowSelection(event, row);
+      } else {
+        this.rowRangeAnchor = null;
+        this.rowRangeFocus = null;
+        this.moveRowFocus(event);
+      }
     }
+  }
+
+  /** Computes the target index for ArrowUp, ArrowDown, Home, or End within `[0, last]`, clamped without wrapping. */
+  private targetNavigationIndex(key: string, current: number, last: number): number {
+    if (key === 'Home') {
+      return 0;
+    }
+    if (key === 'End') {
+      return last;
+    }
+    if (key === 'ArrowDown') {
+      return Math.min(current + 1, last);
+    }
+    return Math.max(current - 1, 0);
+  }
+
+  /** Displayed body rows that are loaded and not collapsed under a group header. */
+  private visibleBodyRows(): readonly T[] {
+    return this.pagedValue().filter((r): r is T => r !== null && r !== undefined && !this.isRowHiddenByGroup(r));
+  }
+
+  /** Moves focus and selects the contiguous row range from the Shift-range anchor to the target row in `multiple` mode. */
+  private extendRowSelection(event: KeyboardEvent, currentRow: T): void {
+    const current = event.currentTarget as HTMLElement;
+    if (this.virtualScroll()) {
+      const index = Number(current.getAttribute('aria-rowindex')) - this.rowsBeforeBody() - 1;
+      const items = this.virtualItems();
+      if (items) {
+        if (!Number.isInteger(index) || index < 0 || index >= items.length) {
+          return;
+        }
+        const targetIndex = this.targetVirtualRowItemIndex(event.key, index, items);
+        const targetItem = items[targetIndex];
+        if (!targetItem || targetItem.kind !== 'row') {
+          return;
+        }
+        if (this.rowRangeAnchor === null || this.rowRangeFocus === null || !this.rowsEqual(this.rowRangeFocus, currentRow)) {
+          this.rowRangeAnchor = currentRow;
+        }
+        let anchorIndex = items.findIndex((item) => item.kind === 'row' && this.rowsEqual(item.row, this.rowRangeAnchor!));
+        if (anchorIndex === -1) {
+          anchorIndex = index;
+          this.rowRangeAnchor = currentRow;
+        }
+        this.rowRangeFocus = targetItem.row;
+        if (targetIndex !== index) {
+          this.focusVirtualRow(targetIndex, index);
+        }
+        const start = Math.min(anchorIndex, targetIndex);
+        const end = Math.max(anchorIndex, targetIndex);
+        this.selection.set(
+          items
+            .slice(start, end + 1)
+            .filter((item): item is Extract<VirtualItem<T>, { kind: 'row' }> => item.kind === 'row')
+            .map((item) => item.row),
+        );
+        return;
+      }
+      const last = this.effectiveTotalRecords() - 1;
+      if (!Number.isInteger(index) || index < 0 || last < 0) {
+        return;
+      }
+      const targetIndex = this.targetNavigationIndex(event.key, index, last);
+      const rows = this.pagedValue();
+      const targetRow = rows[targetIndex];
+      if (targetRow === null || targetRow === undefined) {
+        return;
+      }
+      if (this.rowRangeAnchor === null || this.rowRangeFocus === null || !this.rowsEqual(this.rowRangeFocus, currentRow)) {
+        this.rowRangeAnchor = currentRow;
+      }
+      let anchorIndex = rows.findIndex((r) => r !== null && r !== undefined && this.rowsEqual(r, this.rowRangeAnchor!));
+      if (anchorIndex === -1) {
+        anchorIndex = index;
+        this.rowRangeAnchor = currentRow;
+      }
+      this.rowRangeFocus = targetRow;
+      if (targetIndex !== index) {
+        this.focusVirtualRow(targetIndex, index);
+      }
+      const start = Math.min(anchorIndex, targetIndex);
+      const end = Math.max(anchorIndex, targetIndex);
+      this.selection.set(rows.slice(start, end + 1).filter((r): r is T => r !== null && r !== undefined));
+      return;
+    }
+    const rowElements = Array.from(current.parentElement?.querySelectorAll<HTMLElement>(':scope > tr[tabindex]') ?? []);
+    const index = rowElements.indexOf(current);
+    if (index === -1) {
+      return;
+    }
+    const visibleRows = this.visibleBodyRows();
+    if (visibleRows.length !== rowElements.length) {
+      return;
+    }
+    const targetIndex = this.targetNavigationIndex(event.key, index, rowElements.length - 1);
+    if (this.rowRangeAnchor === null || this.rowRangeFocus === null || !this.rowsEqual(this.rowRangeFocus, currentRow)) {
+      this.rowRangeAnchor = currentRow;
+    }
+    let anchorIndex = visibleRows.findIndex((r) => this.rowsEqual(r, this.rowRangeAnchor!));
+    if (anchorIndex === -1) {
+      anchorIndex = index;
+      this.rowRangeAnchor = currentRow;
+    }
+    const targetRow = visibleRows[targetIndex];
+    this.rowRangeFocus = targetRow;
+    rowElements[targetIndex].focus();
+    const start = Math.min(anchorIndex, targetIndex);
+    const end = Math.max(anchorIndex, targetIndex);
+    this.selection.set(visibleRows.slice(start, end + 1));
+  }
+
+  /** Finds the target virtual item index for ArrowUp, ArrowDown, Home, or End among `'row'` entries, skipping subheaders and expansion rows. */
+  private targetVirtualRowItemIndex(key: string, current: number, items: readonly VirtualItem<T>[]): number {
+    if (key === 'Home') {
+      return items.findIndex((item) => item.kind === 'row');
+    }
+    if (key === 'End') {
+      for (let i = items.length - 1; i >= 0; i--) {
+        if (items[i].kind === 'row') {
+          return i;
+        }
+      }
+      return -1;
+    }
+    if (key === 'ArrowDown') {
+      for (let i = current + 1; i < items.length; i++) {
+        if (items[i].kind === 'row') {
+          return i;
+        }
+      }
+      return current;
+    }
+    for (let i = current - 1; i >= 0; i--) {
+      if (items[i].kind === 'row') {
+        return i;
+      }
+    }
+    return current;
   }
 
   /** Moves focus between the focusable body rows of the current page (or of the whole row set with `virtualScroll`), without changing the selection and without wrapping. */
@@ -2590,8 +4175,19 @@ export class DataTableComponent<T> {
     if (this.virtualScroll()) {
       // The rows outside the window are not in the DOM, so the move runs over the whole row set and scrolls its target into view.
       const index = Number(current.getAttribute('aria-rowindex')) - this.rowsBeforeBody() - 1;
+      const items = this.virtualItems();
+      if (items) {
+        if (!Number.isInteger(index) || index < 0 || index >= items.length) {
+          return;
+        }
+        const target = this.targetVirtualRowItemIndex(event.key, index, items);
+        if (target !== -1 && target !== index) {
+          this.focusVirtualRow(target, index);
+        }
+        return;
+      }
       const last = this.effectiveTotalRecords() - 1;
-      const target = event.key === 'Home' ? 0 : event.key === 'End' ? last : event.key === 'ArrowDown' ? Math.min(index + 1, last) : Math.max(index - 1, 0);
+      const target = this.targetNavigationIndex(event.key, index, last);
       if (Number.isInteger(index) && index >= 0 && target >= 0 && target !== index) {
         this.focusVirtualRow(target, index);
       }
@@ -2602,7 +4198,7 @@ export class DataTableComponent<T> {
     if (index === -1) {
       return;
     }
-    const target = event.key === 'Home' ? 0 : event.key === 'End' ? rows.length - 1 : event.key === 'ArrowDown' ? Math.min(index + 1, rows.length - 1) : Math.max(index - 1, 0);
+    const target = this.targetNavigationIndex(event.key, index, rows.length - 1);
     rows[target].focus();
   }
 
@@ -2640,11 +4236,15 @@ export class DataTableComponent<T> {
   }
 
   protected onRowDragStart(index: number): void {
-    this.draggedRowIndex = index;
+    this.draggedRowIndex.set(index);
   }
 
   protected onRowDragOver(event: DragEvent): void {
     event.preventDefault();
+  }
+
+  protected onRowDragEnd(): void {
+    this.draggedRowIndex.set(null);
   }
 
   /**
@@ -2654,8 +4254,8 @@ export class DataTableComponent<T> {
    * established this session, see class doc's "reorderable" section.
    */
   protected onRowDrop(dropDisplayIndex: number): void {
-    const dragDisplayIndex = this.draggedRowIndex;
-    this.draggedRowIndex = null;
+    const dragDisplayIndex = this.draggedRowIndex();
+    this.draggedRowIndex.set(null);
     if (dragDisplayIndex === null || dragDisplayIndex === dropDisplayIndex) {
       return;
     }
@@ -2677,11 +4277,28 @@ export class DataTableComponent<T> {
     return editing !== null && editing.row === row && editing.field === col.field();
   }
 
+  private cellRangeAnchor: TableCellSelection<T> | null = null;
+  private cellRangeFocus: TableCellSelection<T> | null = null;
+  private cellDragAnchor: TableCellSelection<T> | null = null;
+  private cellDragMoved = false;
+  private cellDragEndedOnAnchor = false;
+  private suppressNextCellClick = false;
+  private removeCellDragMouseUp: (() => void) | null = null;
+
+  private clearCellDragListeners(): void {
+    this.removeCellDragMouseUp?.();
+    this.removeCellDragMouseUp = null;
+  }
+
   /** With `editTrigger="click"` a click on an editable cell starts editing it; the event stops here so the row click never selects the row. */
   protected onCellClick(event: MouseEvent, row: T, col: TableColumnComponent): void {
     // A click inside a cell that is already being edited belongs to the edit template, never to row or cell selection.
     if (this.isEditingCell(row, col)) {
       event.stopPropagation();
+      return;
+    }
+    if (this.suppressNextCellClick) {
+      this.suppressNextCellClick = false;
       return;
     }
     if (this.editTrigger() === 'click' && this.editMode() === 'cell' && col.editable() && col.editTemplate()) {
@@ -2690,7 +4307,62 @@ export class DataTableComponent<T> {
       return;
     }
     if (this.isCellSelectionActive()) {
+      this.cellRangeAnchor = null;
+      this.cellRangeFocus = null;
       this.activateCellSelection(row, col.field());
+    }
+  }
+
+  protected onCellMouseDown(event: MouseEvent, row: T, col: TableColumnComponent): void {
+    this.suppressNextCellClick = false;
+    if (!this.isCellSelectionActive() || this.selectionMode() !== 'multiple' || event.button !== 0) {
+      return;
+    }
+    if (this.isEditingCell(row, col) || (event.target as HTMLElement | null)?.closest?.('[data-med-editing], button, input, select, textarea, a, [contenteditable]')) {
+      return;
+    }
+    if (this.editTrigger() === 'click' && this.editMode() === 'cell' && col.editable() && col.editTemplate()) {
+      return;
+    }
+    event.preventDefault();
+    (event.currentTarget as HTMLElement).focus?.({ preventScroll: true });
+    this.clearCellDragListeners();
+    this.cellRangeAnchor = null;
+    this.cellRangeFocus = null;
+    this.cellDragAnchor = { row, field: col.field() };
+    this.cellDragMoved = false;
+    this.cellDragEndedOnAnchor = false;
+    if (isPlatformBrowser(this.platformId)) {
+      const onUp = () => this.onCellMouseUp();
+      document.addEventListener('mouseup', onUp);
+      this.removeCellDragMouseUp = () => document.removeEventListener('mouseup', onUp);
+    }
+  }
+
+  protected onCellMouseEnter(row: T, col: TableColumnComponent): void {
+    if (!this.cellDragAnchor || !this.isCellSelectionActive() || this.selectionMode() !== 'multiple') {
+      return;
+    }
+    const target: TableCellSelection<T> = { row, field: col.field() };
+    this.cellDragMoved = true;
+    this.cellDragEndedOnAnchor = this.cellsEqual(this.cellDragAnchor, target);
+    this.selectCellRange(this.cellDragAnchor, target);
+  }
+
+  protected onCellMouseUp(): void {
+    if (!this.cellDragAnchor) {
+      return;
+    }
+    this.clearCellDragListeners();
+    const suppress = this.cellDragMoved && this.cellDragEndedOnAnchor;
+    this.cellDragAnchor = null;
+    this.cellDragMoved = false;
+    this.cellDragEndedOnAnchor = false;
+    if (suppress) {
+      this.suppressNextCellClick = true;
+      setTimeout(() => {
+        this.suppressNextCellClick = false;
+      }, 0);
     }
   }
 
@@ -2701,13 +4373,132 @@ export class DataTableComponent<T> {
     if ((event.target as HTMLElement | null)?.closest?.('[data-med-editing]')) {
       return;
     }
-    if (event.target !== event.currentTarget && (event.target as HTMLElement | null)?.closest?.('button, input, select, textarea, a')) {
+    if (event.target !== event.currentTarget && (event.target as HTMLElement | null)?.closest?.('button, input, select, textarea, a, [contenteditable]')) {
+      return;
+    }
+    if (this.selectionMode() === 'multiple' && (event.ctrlKey || event.metaKey) && !event.altKey && event.key.toLowerCase() === 'a') {
+      event.preventDefault();
+      this.cellRangeAnchor = null;
+      this.cellRangeFocus = null;
+      const cols = this.visibleColumns();
+      const allCells: TableCellSelection<T>[] = [];
+      for (const r of this.loadedRows()) {
+        for (const c of cols) {
+          allCells.push({ row: r, field: c.field() });
+        }
+      }
+      this.selection.set(allCells);
       return;
     }
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
+      this.cellRangeAnchor = null;
+      this.cellRangeFocus = null;
       this.activateCellSelection(row, col.field());
+      return;
     }
+    if (
+      event.key === 'ArrowUp' ||
+      event.key === 'ArrowDown' ||
+      event.key === 'ArrowLeft' ||
+      event.key === 'ArrowRight' ||
+      event.key === 'Home' ||
+      event.key === 'End'
+    ) {
+      event.preventDefault();
+      this.navigateCell(event, row, col);
+    }
+  }
+
+  /** Moves focus between data cells within table bounds, and extends a rectangular range in `multiple` mode when Shift is held. */
+  private navigateCell(event: KeyboardEvent, row: T, col: TableColumnComponent): void {
+    const visibleCols = this.visibleColumns();
+    const colCount = visibleCols.length;
+    const td = event.currentTarget as HTMLElement;
+    const tr = td.parentElement as HTMLElement | null;
+    const tbody = tr?.parentElement as HTMLElement | null;
+    if (!tr || !tbody || colCount === 0) {
+      return;
+    }
+    const rowElements = Array.from(tbody.querySelectorAll<HTMLElement>(':scope > tr')).filter((r) => r.querySelector(':scope > td[data-med-field]') !== null);
+    const rowIndex = rowElements.indexOf(tr);
+    const colIndex = visibleCols.findIndex((c) => c.field() === col.field());
+    if (rowIndex === -1 || colIndex === -1) {
+      return;
+    }
+    let targetRowIndex = rowIndex;
+    let targetColIndex = colIndex;
+    if (event.key === 'ArrowUp') {
+      targetRowIndex = Math.max(rowIndex - 1, 0);
+    } else if (event.key === 'ArrowDown') {
+      targetRowIndex = Math.min(rowIndex + 1, rowElements.length - 1);
+    } else if (event.key === 'ArrowLeft') {
+      targetColIndex = Math.max(colIndex - 1, 0);
+    } else if (event.key === 'ArrowRight') {
+      targetColIndex = Math.min(colIndex + 1, colCount - 1);
+    } else if (event.key === 'Home') {
+      targetColIndex = 0;
+    } else if (event.key === 'End') {
+      targetColIndex = colCount - 1;
+    }
+    const targetField = visibleCols[targetColIndex].field();
+    const targetCell = Array.from(rowElements[targetRowIndex].querySelectorAll<HTMLElement>(':scope > td[data-med-field]')).find(
+      (cell) => cell.dataset['medField'] === targetField,
+    );
+    targetCell?.focus();
+    if (this.selectionMode() === 'multiple' && event.shiftKey) {
+      let targetRow: T | undefined;
+      if (this.virtualScroll()) {
+        const absIndex = Number(rowElements[targetRowIndex].getAttribute('aria-rowindex')) - this.rowsBeforeBody() - 1;
+        const items = this.virtualItems();
+        if (items) {
+          const item = Number.isInteger(absIndex) && absIndex >= 0 ? items[absIndex] : undefined;
+          targetRow = item?.kind === 'row' ? item.row : undefined;
+        } else {
+          const candidate = Number.isInteger(absIndex) && absIndex >= 0 ? this.pagedValue()[absIndex] : undefined;
+          targetRow = candidate === null ? undefined : candidate;
+        }
+      } else {
+        targetRow = this.visibleBodyRows()[targetRowIndex];
+      }
+      if (targetRow === undefined) {
+        return;
+      }
+      const currentCell: TableCellSelection<T> = { row, field: col.field() };
+      if (this.cellRangeAnchor === null || this.cellRangeFocus === null || !this.cellsEqual(this.cellRangeFocus, currentCell)) {
+        this.cellRangeAnchor = currentCell;
+      }
+      const targetCoord: TableCellSelection<T> = { row: targetRow, field: targetField };
+      this.cellRangeFocus = targetCoord;
+      this.selectCellRange(this.cellRangeAnchor, targetCoord);
+    } else {
+      this.cellRangeAnchor = null;
+      this.cellRangeFocus = null;
+    }
+  }
+
+  /** Replaces `selection` with every `{ row, field }` pair inside the rectangular bounds from `anchor` to `target`. */
+  private selectCellRange(anchor: TableCellSelection<T>, target: TableCellSelection<T>): void {
+    const rows = this.visibleBodyRows();
+    const cols = this.visibleColumns();
+    const anchorRowIdx = rows.findIndex((r) => this.rowsEqual(r, anchor.row));
+    const targetRowIdx = rows.findIndex((r) => this.rowsEqual(r, target.row));
+    const anchorColIdx = cols.findIndex((c) => c.field() === anchor.field);
+    const targetColIdx = cols.findIndex((c) => c.field() === target.field);
+    if (anchorRowIdx === -1 || targetRowIdx === -1 || anchorColIdx === -1 || targetColIdx === -1) {
+      return;
+    }
+    const rStart = Math.min(anchorRowIdx, targetRowIdx);
+    const rEnd = Math.max(anchorRowIdx, targetRowIdx);
+    const cStart = Math.min(anchorColIdx, targetColIdx);
+    const cEnd = Math.max(anchorColIdx, targetColIdx);
+    const next: TableCellSelection<T>[] = [];
+    for (let r = rStart; r <= rEnd; r++) {
+      for (let c = cStart; c <= cEnd; c++) {
+        next.push({ row: rows[r], field: cols[c].field() });
+      }
+    }
+    this.selection.set(next);
   }
 
   private activateCellSelection(row: T, field: string): void {
@@ -2832,10 +4623,10 @@ export class DataTableComponent<T> {
   /**
    * Exports `sortedValue()` (every row that passes the global filter and every
    * column filter, in the current sort order, not just the visible page) as CSV, or just `selection()` when `{ selectionOnly:
-   * true }` is passed. See class doc for the escaping rule and why this is
-   * a plain method rather than a rendered button.
+   * true }` is passed. When `{ includeFooter: true }` is passed and at least one visible column has `footer` text, appends the
+   * footer row after the data rows. See class doc for the escaping rule and why this is a plain method rather than a rendered button.
    */
-  exportCSV(options?: { readonly selectionOnly?: boolean }): void {
+  exportCSV(options?: { readonly selectionOnly?: boolean; readonly includeFooter?: boolean }): void {
     const rows = options?.selectionOnly ? this.selectionAsArray() : this.loadedRows();
     const cols = this.visibleColumns();
     const sep = this.csvSeparator();
@@ -2843,7 +4634,11 @@ export class DataTableComponent<T> {
 
     const header = cols.map((col) => escape(col.header())).join(sep);
     const lines = rows.map((row) => cols.map((col) => escape(this.cellValue(row, col))).join(sep));
-    const csv = [header, ...lines].join('\n');
+    const allLines = [header, ...lines];
+    if (options?.includeFooter && cols.some((col) => Boolean(col.footer()))) {
+      allLines.push(cols.map((col) => escape(col.footer() ?? '')).join(sep));
+    }
+    const csv = allLines.join('\n');
 
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
@@ -2874,8 +4669,14 @@ export class DataTableComponent<T> {
   }
 
   protected columnWidth(col: TableColumnComponent): string | null {
+    if (this.virtualColumnsActive()) {
+      return `${this.resolveColPxWidth(col, this.effectiveVirtualColumnWidth())}px`;
+    }
     const px = this.resizedColumnWidths().get(col.field());
-    return px !== undefined ? `${px}px` : col.width();
+    if (px !== undefined) {
+      return `${px}px`;
+    }
+    return col.width();
   }
 
   /** `fit` resizes against the next visible column, so the last visible column has no handle there; `expand` gives every column one. */
@@ -2894,8 +4695,18 @@ export class DataTableComponent<T> {
     }
     (event.currentTarget as HTMLElement).setPointerCapture?.(event.pointerId);
     const visible = this.visibleColumns();
-    const nextCol = this.columnResizeMode() === 'fit' ? visible[visible.indexOf(col) + 1] : undefined;
-    const nextTh = th.nextElementSibling as HTMLElement | null;
+    let nextCol: TableColumnComponent | undefined;
+    let nextTh: HTMLElement | null = null;
+    if (this.columnResizeMode() === 'fit') {
+      const candidateTh = th.nextElementSibling as HTMLElement | null;
+      const isSpacer =
+        candidateTh?.hasAttribute('data-med-col-spacer-left') ||
+        candidateTh?.hasAttribute('data-med-col-spacer-right');
+      if (!this.virtualColumnsActive() || !isSpacer) {
+        nextCol = visible[visible.indexOf(col) + 1];
+        nextTh = candidateTh;
+      }
+    }
     if (this.columnResizeMode() === 'expand') {
       this.pinMeasuredWidths(th, visible.indexOf(col), visible);
     }
@@ -2914,6 +4725,29 @@ export class DataTableComponent<T> {
    * the width it gains across all columns, so the neighbours would change too. Widths set by an earlier drag are kept.
    */
   private pinMeasuredWidths(th: HTMLElement, index: number, visible: readonly TableColumnComponent[]): void {
+    if (this.virtualColumnsActive()) {
+      const headerCells = Array.from(th.parentElement?.querySelectorAll<HTMLElement>('th[scope="col"]') ?? []);
+      const renderedCols = this.columnSlots()
+        .filter((slot): slot is Extract<typeof slot, { kind: 'col' }> => slot.kind === 'col')
+        .map((slot) => slot.col);
+      const measuredByField = new Map<string, number>();
+      renderedCols.forEach((column, i) => {
+        const width = headerCells[i]?.getBoundingClientRect().width;
+        if (width) {
+          measuredByField.set(column.field(), width);
+        }
+      });
+      this.resizedColumnWidths.update((map) => {
+        const next = new Map(map);
+        for (const column of visible) {
+          if (!next.has(column.field())) {
+            next.set(column.field(), measuredByField.get(column.field()) ?? this.resolveColPxWidth(column, this.effectiveVirtualColumnWidth()));
+          }
+        }
+        return next;
+      });
+      return;
+    }
     const cells = Array.from(th.parentElement?.children ?? []) as HTMLElement[];
     const offset = cells.indexOf(th) - index;
     this.resizedColumnWidths.update((map) => {
@@ -2943,7 +4777,7 @@ export class DataTableComponent<T> {
     const nextWidth = Math.max(MIN_RESIZE_COLUMN_PX, state.startWidth + requested);
     this.resizedColumnWidths.update((map) => new Map(map).set(state.field, nextWidth));
     if (this.columnResizeMode() === 'expand') {
-      this.tableWidthPx.set(state.tableStartWidth + (nextWidth - state.startWidth));
+      this.resizedTableWidthPx.set(state.tableStartWidth + (nextWidth - state.startWidth));
     }
   }
 
@@ -3024,68 +4858,63 @@ export class DataTableComponent<T> {
       if (!raw) {
         return;
       }
-      const parsed = JSON.parse(raw) as {
-        first?: number;
-        sortField?: string | null;
-        sortOrder?: TableSortOrder;
-        expandedRowKeys?: Record<string, boolean>;
-        columnFilters?: unknown;
-      };
-      if (typeof parsed.first === 'number') {
-        this.first.set(parsed.first);
+      const parsed: unknown = JSON.parse(raw);
+      const cols = this.columns();
+      const restored = parseStoredTableState(parsed, {
+        columns: cols.map((col) => ({ field: col.field(), filterType: col.filterType() })),
+        rowsPerPageOptions: this.rowsPerPageOptions(),
+      });
+      if (restored.first !== undefined) {
+        this.first.set(restored.first);
       }
-      if (parsed.sortField !== undefined) {
-        this.sortField.set(parsed.sortField);
+      if (restored.sortField !== undefined) {
+        this.sortField.set(restored.sortField);
       }
-      if (parsed.sortOrder !== undefined) {
-        this.sortOrder.set(parsed.sortOrder);
+      if (restored.sortOrder !== undefined) {
+        this.sortOrder.set(restored.sortOrder);
       }
-      if (parsed.expandedRowKeys && typeof parsed.expandedRowKeys === 'object') {
-        this.expandedRowKeys.set(parsed.expandedRowKeys);
+      if (restored.expandedRowKeys !== undefined) {
+        this.expandedRowKeys.set(restored.expandedRowKeys);
       }
       // State stored before column filters existed has no such key and restores as before.
-      if (parsed.columnFilters !== undefined) {
-        this.columnFilters.set(this.parseStoredColumnFilters(parsed.columnFilters));
+      if (restored.columnFilters !== undefined) {
+        this.columnFilters.set(restored.columnFilters);
+      }
+      if (restored.columnOrder !== undefined) {
+        this.columnOrder.set(restored.columnOrder);
+      }
+      if (restored.columnWidths !== undefined) {
+        this.resizedColumnWidths.set(new Map(restored.columnWidths));
+      }
+      if (restored.columnVisibility !== undefined) {
+        const visibility = restored.columnVisibility;
+        for (const col of cols) {
+          const field = col.field();
+          if (Object.hasOwn(visibility, field)) {
+            col.applyRestoredVisibility(visibility[field]);
+          }
+        }
+      }
+      if (restored.collapsedRowGroups !== undefined) {
+        this.expandedRowGroups.set(restored.collapsedRowGroups);
+      }
+      if (restored.globalFilter !== undefined) {
+        if (this.filterDebounceHandle !== null) {
+          clearTimeout(this.filterDebounceHandle);
+          this.filterDebounceHandle = null;
+        }
+        this.filterInputText.set(restored.globalFilter);
+        this.globalFilterValue.set(restored.globalFilter);
+      }
+      if (restored.multiSortMeta !== undefined) {
+        this.multiSortMeta.set(restored.multiSortMeta);
+      }
+      if (restored.rows !== undefined) {
+        this.pageSize.set(restored.rows);
       }
     } catch {
       // Ignore malformed stored state.
     }
-  }
-
-  /**
-   * Keeps each stored rule whose field is a declared column and whose match mode and value fit that column's
-   * `filterType`: a string for text, a finite number for numeric, a valid ISO date string (turned back into a `Date`)
-   * for date. Anything else is dropped.
-   */
-  private parseStoredColumnFilters(stored: unknown): TableColumnFilters {
-    if (!stored || typeof stored !== 'object') {
-      return {};
-    }
-    const entries = stored as Record<string, unknown>;
-    const rules: Record<string, TableColumnFilter> = {};
-    for (const col of this.columns()) {
-      const entry = entries[col.field()] as { matchMode?: unknown; value?: unknown } | null | undefined;
-      if (!entry || typeof entry !== 'object') {
-        continue;
-      }
-      const type = col.filterType();
-      const matchMode = entry.matchMode as TableFilterMatchMode;
-      if (!FILTER_MODES_BY_TYPE[type].includes(matchMode)) {
-        continue;
-      }
-      const value = entry.value;
-      if (type === 'text' && typeof value === 'string') {
-        rules[col.field()] = { matchMode, value };
-      } else if (type === 'numeric' && typeof value === 'number' && Number.isFinite(value)) {
-        rules[col.field()] = { matchMode, value };
-      } else if (type === 'date' && typeof value === 'string') {
-        const date = new Date(value);
-        if (!Number.isNaN(date.getTime())) {
-          rules[col.field()] = { matchMode, value: date };
-        }
-      }
-    }
-    return rules;
   }
 
   private persistTableState(
@@ -3096,6 +4925,13 @@ export class DataTableComponent<T> {
       sortOrder: TableSortOrder;
       expandedRowKeys: Record<string, boolean>;
       columnFilters: TableColumnFilters;
+      columnOrder: readonly string[];
+      columnWidths: Record<string, number>;
+      columnVisibility: Record<string, boolean>;
+      collapsedRowGroups: readonly string[];
+      globalFilter: string;
+      multiSortMeta: readonly TableSortMeta[];
+      rows: number;
     },
   ): void {
     const storage = this.getStateStorage();

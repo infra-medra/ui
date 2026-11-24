@@ -3,6 +3,7 @@ import { expect, Locator, Page, test } from '@playwright/test';
 const PAGE = '/docs/components/data-table';
 
 const VIRTUAL_DEMO = 'app-data-table-virtual-scroll-demo';
+const VIRTUAL_TABLE = `${VIRTUAL_DEMO} > med-data-table`;
 const LAZY_DEMO = 'app-data-table-lazy-virtual-scroll-demo';
 const ROW_HEIGHT = 40;
 
@@ -35,25 +36,25 @@ test.describe('DataTable virtual scroll', () => {
 
   // DAT-046.S1
   test('DAT-046.S1: renders only the window and sizes the scrollable area to every row', async ({ page }) => {
-    await expect(page.locator(`${VIRTUAL_DEMO} tbody tr[aria-rowindex]`).first()).toBeVisible();
+    await expect(page.locator(`${VIRTUAL_TABLE} tbody tr[aria-rowindex]`).first()).toBeVisible();
 
-    const bodyRows = await page.locator(`${VIRTUAL_DEMO} tbody tr[aria-rowindex]`).count();
+    const bodyRows = await page.locator(`${VIRTUAL_TABLE} tbody tr[aria-rowindex]`).count();
     expect(bodyRows).toBeGreaterThan(0);
     expect(bodyRows).toBeLessThan(100);
 
     // 10,000 rows of 40 pixels, plus the sticky header and the one frozen row: a row that renders taller than its item size shows up here.
-    const scrollHeight = await viewport(page, VIRTUAL_DEMO).evaluate((element) => element.scrollHeight);
+    const scrollHeight = await viewport(page, VIRTUAL_TABLE).evaluate((element) => element.scrollHeight);
     expect(scrollHeight).toBeGreaterThanOrEqual(10000 * ROW_HEIGHT);
     expect(scrollHeight).toBeLessThanOrEqual(10000 * ROW_HEIGHT + 200);
   });
 
   // DAT-046.S2
   test('DAT-046.S2: scrolling renders the rows in view and drops the rows left behind', async ({ page }) => {
-    await expect(page.locator(`${VIRTUAL_DEMO} td:text-is("Row 0")`)).toHaveCount(1);
+    await expect(page.locator(`${VIRTUAL_TABLE} td:text-is("Row 0")`)).toHaveCount(1);
 
-    await scrollTo(page, VIRTUAL_DEMO, 200000);
+    await scrollTo(page, VIRTUAL_TABLE, 200000);
 
-    const row = page.locator(`${VIRTUAL_DEMO} td:text-is("Row 5000")`);
+    const row = page.locator(`${VIRTUAL_TABLE} td:text-is("Row 5000")`);
     await expect(row).toHaveCount(1);
     const inside = await page.evaluate(
       ({ demo }) => {
@@ -61,16 +62,16 @@ test.describe('DataTable virtual scroll', () => {
         const cell = Array.from(document.querySelectorAll(`${demo} td`)).find((td) => td.textContent?.trim() === 'Row 5000')!.getBoundingClientRect();
         return cell.top >= port.top && cell.bottom <= port.bottom;
       },
-      { demo: VIRTUAL_DEMO },
+      { demo: VIRTUAL_TABLE },
     );
     expect(inside).toBe(true);
-    await expect(page.locator(`${VIRTUAL_DEMO} td:text-is("Row 0")`)).toHaveCount(0);
+    await expect(page.locator(`${VIRTUAL_TABLE} td:text-is("Row 0")`)).toHaveCount(0);
   });
 
   // DAT-046.S6
   test('DAT-046.S6: the header and the frozen row stay in view while the body scrolls', async ({ page }) => {
-    await scrollTo(page, VIRTUAL_DEMO, 200000);
-    await expect(page.locator(`${VIRTUAL_DEMO} td:text-is("Row 5000")`)).toHaveCount(1);
+    await scrollTo(page, VIRTUAL_TABLE, 200000);
+    await expect(page.locator(`${VIRTUAL_TABLE} td:text-is("Row 5000")`)).toHaveCount(1);
 
     const positions = await page.evaluate(
       ({ demo }) => {
@@ -79,7 +80,7 @@ test.describe('DataTable virtual scroll', () => {
         const frozen = Array.from(document.querySelectorAll(`${demo} tbody tr`)).find((tr) => tr.textContent?.includes('Pinned'))!.getBoundingClientRect();
         return { portTop: port.top, headerTop: header.top, headerBottom: header.bottom, frozenTop: frozen.top, frozenBottom: frozen.bottom, portBottom: port.bottom };
       },
-      { demo: VIRTUAL_DEMO },
+      { demo: VIRTUAL_TABLE },
     );
     expect(Math.abs(positions.headerTop - positions.portTop)).toBeLessThanOrEqual(1);
     expect(positions.frozenTop).toBeGreaterThanOrEqual(positions.headerBottom - 1);
@@ -88,15 +89,15 @@ test.describe('DataTable virtual scroll', () => {
 
   // DAT-046.S7
   test('DAT-046.S7: without scrollHeight the viewport is 400 pixels tall and still renders only a window', async ({ page }) => {
-    const height = await viewport(page, VIRTUAL_DEMO).evaluate((element) => element.getBoundingClientRect().height);
+    const height = await viewport(page, VIRTUAL_TABLE).evaluate((element) => element.getBoundingClientRect().height);
     expect(Math.round(height)).toBe(400);
-    expect(await page.locator(`${VIRTUAL_DEMO} tbody tr[aria-rowindex]`).count()).toBeLessThan(100);
+    expect(await page.locator(`${VIRTUAL_TABLE} tbody tr[aria-rowindex]`).count()).toBeLessThan(100);
   });
 
   // DAT-047.S1
   test('DAT-047.S1: ArrowDown past the rendered window scrolls the next row into view and focuses it', async ({ page }) => {
-    await page.locator(`${VIRTUAL_DEMO} td:text-is("Row 0")`).click();
-    await expect(page.locator(`${VIRTUAL_DEMO} tr[aria-selected="true"]`)).toHaveCount(1);
+    await page.locator(`${VIRTUAL_TABLE} td:text-is("Row 0")`).click();
+    await expect(page.locator(`${VIRTUAL_TABLE} tr[aria-selected="true"]`)).toHaveCount(1);
 
     // More presses than the viewport has rows, so the focused row has to leave the first screen.
     for (let i = 0; i < 14; i++) {
@@ -105,17 +106,17 @@ test.describe('DataTable virtual scroll', () => {
 
     // Header row 1, frozen row 2, then body index 14 at position 17.
     await expect.poll(() => page.evaluate(() => document.activeElement?.getAttribute('aria-rowindex'))).toBe('17');
-    expect(await viewport(page, VIRTUAL_DEMO).evaluate((element) => element.scrollTop)).toBeGreaterThan(0);
-    await expect(page.locator(`${VIRTUAL_DEMO} tr:focus`)).toBeInViewport();
+    expect(await viewport(page, VIRTUAL_TABLE).evaluate((element) => element.scrollTop)).toBeGreaterThan(0);
+    await expect(page.locator(`${VIRTUAL_TABLE} tr:focus`)).toBeInViewport();
   });
 
   // DAT-047.S2
   test('DAT-047.S2: End reaches the last row of the whole set', async ({ page }) => {
-    await page.locator(`${VIRTUAL_DEMO} td:text-is("Row 0")`).click();
+    await page.locator(`${VIRTUAL_TABLE} td:text-is("Row 0")`).click();
     await page.keyboard.press('End');
 
     await expect.poll(() => page.evaluate(() => document.activeElement?.getAttribute('aria-rowindex'))).toBe('10002');
-    await expect(page.locator(`${VIRTUAL_DEMO} tr:focus`)).toContainText('Row 9999');
+    await expect(page.locator(`${VIRTUAL_TABLE} tr:focus`)).toContainText('Row 9999');
   });
 });
 
@@ -193,9 +194,9 @@ test.describe('DataTable virtual scroll docs', () => {
     }
 
     // The virtual scroll demo holds at least 10,000 rows while it renders fewer than 100 body rows.
-    const table = page.locator(`${VIRTUAL_DEMO} table`);
+    const table = page.locator(`${VIRTUAL_TABLE} table`);
     const rowCount = Number(await table.getAttribute('aria-rowcount'));
     expect(rowCount).toBeGreaterThanOrEqual(10000);
-    expect(await page.locator(`${VIRTUAL_DEMO} tbody tr[aria-rowindex]`).count()).toBeLessThan(100);
+    expect(await page.locator(`${VIRTUAL_TABLE} tbody tr[aria-rowindex]`).count()).toBeLessThan(100);
   });
 });

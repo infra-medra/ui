@@ -188,4 +188,70 @@ test.describe('DataTable responsive stack', () => {
     await demo.scrollIntoViewIfNeeded();
     await expect.poll(() => labelsOf(demo).count()).toBeGreaterThan(0);
   });
+
+  // DAT-050.S7
+  test('DAT-050.S7: breakpointMode="container" stacks and unstacks based on container width inside a wide viewport', async ({
+    page,
+  }) => {
+    const demo = await openDemo(page, WIDE);
+    const container = demo.locator('[data-med-container-stack-demo]');
+    const table = container.locator('med-data-table table');
+    await container.scrollIntoViewIfNeeded();
+
+    await expect.poll(() => displayOf(table)).toBe('table');
+
+    await container.evaluate((el) => {
+      (el as HTMLElement).style.width = '420px';
+    });
+    await expect.poll(() => displayOf(table)).toBe('block');
+
+    await container.evaluate((el) => {
+      (el as HTMLElement).style.width = '500px';
+    });
+    await expect.poll(() => displayOf(table)).toBe('table');
+  });
+
+  // DAT-060.S1
+  test('DAT-060.S1: visible stacked sort bar sorts rows, shows focus ring, and styles in dark mode', async ({ page }) => {
+    const demo = await openDemo(page, NARROW);
+    const sortBar = demo.locator('[data-med-stack-sort]').first();
+    await expect(sortBar).toBeVisible();
+
+    const lightBg = await sortBar.evaluate((el) => getComputedStyle(el).backgroundColor);
+    const select = sortBar.locator('select');
+    await select.selectOption('role');
+    await expect(demo.locator('thead th[scope="col"]').nth(1).first()).toHaveAttribute('aria-sort', 'ascending');
+
+    const roleValues = async () =>
+      demo
+        .locator('med-data-table')
+        .first()
+        .locator('tbody tr')
+        .evaluateAll((rows) =>
+          rows.map((tr) => tr.querySelectorAll('td')[1]?.textContent?.replace(/^Role/, '').trim() ?? ''),
+        );
+    const ascRoles = await roleValues();
+    expect(ascRoles.length).toBeGreaterThan(1);
+    expect(ascRoles).toEqual([...ascRoles].sort((a, b) => a.localeCompare(b)));
+
+    const dirBtn = sortBar.locator('button[data-med-stack-sort-dir]');
+    await select.focus();
+    await page.keyboard.press('Tab');
+    await expect(dirBtn).toBeFocused();
+    const outline = await dirBtn.evaluate((el) => ({
+      style: getComputedStyle(el).outlineStyle,
+      width: parseFloat(getComputedStyle(el).outlineWidth),
+    }));
+    expect(outline.style).not.toBe('none');
+    expect(outline.width).toBeGreaterThan(0);
+
+    await dirBtn.click();
+    await expect(demo.locator('thead th[scope="col"]').nth(1).first()).toHaveAttribute('aria-sort', 'descending');
+    const descRoles = await roleValues();
+    expect(descRoles).toEqual([...ascRoles].reverse());
+
+    await page.evaluate(() => document.documentElement.classList.add('dark'));
+    const darkBg = await sortBar.evaluate((el) => getComputedStyle(el).backgroundColor);
+    expect(darkBg).not.toBe(lightBg);
+  });
 });

@@ -14,3 +14,36 @@
 <p class="mt-2 text-sm text-surface-500 dark:text-surface-400">
   Selected: {{ selectedLabel() }}. Use the arrow keys, Home and End to move through all 10,000 rows.
 </p>
+
+<div data-med-virtual-variable-height-demo class="mt-6">
+  <med-data-table
+    [value]="variableRows"
+    [virtualScroll]="true"
+    virtualScrollRowHeight="auto"
+    scrollHeight="200px"
+    [virtualScrollItemSize]="40"
+    dataKey="id"
+    ariaLabel="Variable height rows (auto-measured virtual scroll)"
+  >
+    <med-table-column field="title" header="Item" />
+    <med-table-column field="notes" header="Notes" />
+  </med-data-table>
+</div>
+
+<div data-med-virtual-columns-demo class="mt-6">
+  <med-data-table
+    [value]="virtualColRows"
+    [virtualScroll]="true"
+    [virtualScrollColumns]="true"
+    [virtualScrollColumnWidth]="120"
+    scrollHeight="200px"
+    [virtualScrollItemSize]="40"
+    dataKey="id"
+    ariaLabel="Virtual horizontal columns with frozen column"
+  >
+    <med-table-column field="item" header="Item" frozen alignFrozen="left" width="120px" />
+    @for (field of virtualColFields; track field; let idx = $index) {
+      <med-table-column [field]="field" [header]="'Col ' + idx" />
+    }
+  </med-data-table>
+</div>
