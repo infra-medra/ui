@@ -1,3 +1,5 @@
 ## Column toggle
 
-`visible` on a `med-table-column` shows or hides the column. A hidden column renders no header cell and no body cell, and it drops out of the empty-state span, the frozen offsets and CSV export. Showing it again restores it in its original position, and a sort on it is kept. Bind `visible` to any state you like; the demo drives it from a `med-multi-select`.
+`visible` on a `med-table-column` shows or hides the column. A hidden column renders no header cell and no body cell, and it drops out of the empty-state span, the frozen offsets and CSV export. Showing it again restores it in its original position, and a sort on it is kept. Bind `visible` (or `[(visible)]` with `stateKey`) to any state you like; the demo drives it from a `med-multi-select`.
+
+`visible`, whether set directly or restored from persisted state, is presentation only, not access control. A column a user must not see has to be omitted from the template and its data omitted from `value`, rather than declared `visible="false"`.

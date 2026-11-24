@@ -1,0 +1,95 @@
+change: data-table-virtual-horizontal-columns
+created: 2026-11-24
+track: full
+phase: archived
+diff_base: 8661bd0
+gates:
+  proposal:
+    status: approved
+    by: Tiago Cavalli
+    at: 2026-11-24T19:26:45Z
+    hash: c6d3fcb009651e325472b04428a4c1db9ea25748463254def1203a8182e3ef03
+    note: null
+  plan:
+    status: approved
+    by: Tiago Cavalli
+    at: 2026-11-24T19:40:50Z
+    hash: eaca070e8162e94b2a7fe8f75f31886965aaf020217210b1e78ecfccd6634de6
+    note: null
+  tasks:
+    status: approved
+    by: Tiago Cavalli
+    at: 2026-11-24T19:45:29Z
+    hash: fc71994854d10806292f6f226a9f4a68b71a89f39d84cb351dca7ebbc1b6e492
+    note: null
+  verify:
+    status: approved
+    by: Tiago Cavalli
+    at: 2026-11-24T21:14:51Z
+    hash: 5d0810a2b0ca124405b2960d66f4b040633c6af47bc081e60d223640d5a117ad
+    note: null
+gate_notes: []
+reviews:
+  - stage: verify
+    by: reviewer
+    at: 2026-11-24T20:29:56Z
+    recorded_at: 2026-11-24T20:29:56.108Z
+    hash: f22a8d4a30000acdf2d95a76ab8e387debedd62e68af0b29f28d1cefca6d7cfa
+    verdict: pass-with-findings
+    report: reviews/2026-11-24-verify-reviewer-r1.md
+track_history: []
+blockers: []
+verify_fix_rounds: 0
+last_fix_round_at: null
+test_hashes:
+  T001:
+    projects/medra/ui/src/lib/data-table/data-table-virtual-columns.spec.ts: 6ebc48095d59a5e29f6bb0249850b4ffe24855b469d60e989533e07bb15cf80b
+test_snapshots:
+  6ebc48095d59a5e29f6bb0249850b4ffe24855b469d60e989533e07bb15cf80b: H4sIAAAAAAAAA80ba3Mbt/G7fsVa7fSO9ZEiKSmtKVGOrUeTqRW3sib5oOHU4B0oXg0CLACKohX+9w5ed8DxSFGO7MQzlgRgX1gsdhcLXD6ZMi7hAU7ZZMoopjIBkd9SRGAJI84mEH2P6O2MIL6XMo6jo518BeUiv5czjhO4xkK+xVk96p7EQub01idxhiS6RkOCC1oFbmsvQxI1pRptpW7YR7aIZDahdegas5nq8Q0E3jGU5fT2kmVqAqrnis3/wdls6nV9wASnMmdU9dWLKBdTLKKjnZ2cSsxHKMXwS55Z+c7wCB52ADhGGaNkAaMck6wHQvKc3h75I2OMMsxrh0acfcb0dQ+GjBGMaDCISH5LLxxERPBIRvArRDy/HatZe6DzPJPj144F/Ap0RkjIKScS8zWcRoyZwQr+cmdHKUFP+4rNoQ9XOGU8OzZwiQ8/GWJ+crSzM5pRrVeYoE/YIoqYs/kpm1HZs5AJpIwEPY2eY3MzsJqVM07hDedo0VLLEz8AwfRWjnvgyMEygfg/CfAG9E80FkDKqJAKoufJbYYA8qwHPLGNW2UTPeBwDJdIjlspzkkhKexBtwGvIXpDpmMUQQ+it1iiyCGbpevBx4vmnx/48qPr16tz4Qav/MHlkf41YhxigiWk0If2EaRwXGjjCNKXLxuFuJzNbz6mjPz5IV1+HEAfPl4peqe6bagt9U+rLM7mqnfZ0GsXLMWHlDNCyg0m4jRcEDZVsOJ1Dx7W2NOqEZWWY3tgadex2CVbrGbqL2WulzI2GrCbyqggd3p0G+rjKSPg9Wupe8VEWroNr19r6RNLUM3AgzEdCmiEiMAWSs/Kh9Id8Bo+XjAmDU/oFXSXDaPw7wuvpeUXEtEMEUZxDySfaeLGVYke3Kx6yqTWAQ4UmsSTKUES9+CjlvB4grNm6ausudzcITLDg/4uV3uuseu6ja3+bAdN6yoEucu5nCFirGTQ3w3a6+B+lHjyIf+siB60CxChx37AaiMM+rt+cx0ha5JVvs5SN2L9ola5HlMP+XrQi32WiylBC6UJv+3BERNBBv1d+9fqmAob5bhqeTDCDy5KBX7bg+OY8QxztYJq0cqWD+PFLrOyRdOD0q5MLelbNS+vFXATU0ZFfoffoQWbSc0y7PKghxyjT1OWUwVXNkoIZX3/xIv+bp4VSDG+nyKa4eyKzf+JF6Ix6O9WugzsicX4XjvDlBFgI+UERdw4AslR+km1Wnr/l+7Q2r2fBxQjenkxyQb93QJz1x81XsMOm0YwbrbFoL/74oUmoJsBhBeQLRmvR7kQE6MDnLm1TgUd+KMAyszlQptjKYFuhjJqP+SmaJ1Sld6eU+7SKTkfQTzP5fhcLYXIGY0bgVLpbdM5GPgTZ3Ps4IBg2eRsfuIJcZzld5ASJES5ts0MS5ST3ZMz/bsHDw86dkV5Fg1guTzey/K7ksjxnscxlPZ4L/RsavRjsrNs7GiW8LPZ5dYz/MCELDNFHWfYXEDfZrzHRUZxEgfpyGECh23ltF0cv1qHdjPQUMo0w3EvwJ3EN1r2BxevIkM0SopQFV24Hpc36IDg53guxUtcHIs67fb0PoKlCUqtVqs+jh+2GwrCCBp4wULiWAc3DeC743JGQaA/idXPVXKWYUlVzWEdmPa9JWin3Tbq9l1uyT+aYDoz2S2bRyexaWsM62Lr5uJ535JU9QxwEkdimlOKuaEXOOMKWnAq8NTgueY6OXynXKHoHz08gp6HfnwRql7aU5tZTa04IVH6SanO9mnU0nGXckevvlN2pccrzrmkXEn0bXp3chI/LDVi4E5WdfJ7JkMradDaZANTBZ/Fjd1ni0d1Uag+9lT99NM83xkeoRmRX+wB9xPoWg/4iG+rdzoO2aqw1gIyLFKeD3Ec1VQFaj1LfPbmutn+br8RJRAXZzpzomM8v80pIldY5J/x+6HA/A5z6MMtYUNErse5aIVjRyu4l0im40uc5Qj6MM9pxuatSdF3tLMDgEYS83OUjuPYO1Su5QH9NYId2SNJhYcHf+kx1gkVS2cTTGVryLJFS3usH64v30Efosid6pQHdae6nAqJCPk5x3O1jUL28Z3t/sUEE3fKc91FADhotxs9uGN55s7P2touWfqpMlNn9VOe36lMoSgfpMMehLCniJAhSj8dWRS9CnyWSsbj9dD+xpJK1ekQ+pAOjyr5DDN4sUT8FssenBOs9BZOQ/1TeY8Bao2ReCMlz4czieNI7zK13YyvbDqtREFeBPB++F+cylaGRznF/+JsirlcWJIJRCnJMTUajhJ4AO13ehCoXlU66Ci/nenoYXwfGB/6JC5mwerYmJEt+Fidxl4XwE3QgmD6Fs0IstKfMioxlVc4lUXNYGXyYy1cVVhYAhJw9v5SIV9hlL2nZFHloGFCSzmnklfgBmFTzVHhzegnyuZ0lYQP7mlnWbGxGXVWVpiVG8pykTJKcSqrY8tHfUXNtgqFVfU2NoJVX7IM9n7KMZL4+PokLuqgPaB4br3mdWkN+HUP4jETsgfXekwJ3Oit1HqPr8MC2sh0Q9/VgFuGZxnVC85WjSXHVmyxyyrtj8pZ0RQ36nwdmk4xzU7HOckKTIpkfofd1raVMzuWYYlTeTpG9BarCO2XwCxMoTJXDmTK2TnqNdO3a3CidVQrhFoe5ZBts4wuOlyfkyfQV+I42EbrfzPMFyb1ZPxYsbg2FDWfkzjSDKLGi5Kl207PyLNkd7POPQ4CGUwec4qJTh+2FEMvlVcF3CDVG0JKZSg2nkJ4KaMRQ51SB3ACchy5rMZYMRfyLcsWV2z++0iqDBwk72lJmqmycSVmpsX0t7Q9mDGef2ZUqkzqUTETi/QOj/w6uh/MjbVMoV+YTDEHs23upq2SiErjikYxnuViqnKV8zu17ZWXMX8VJ43Ht2fovXSNnYgpoh9mk1hyP4SbWVjxV6vGkm+t+p5I2RRrm0igbCjNtzjOZil2kTAWs0kCKSZE7xQxm8BLcyUwQfdxJ4GftFCxgmjdYullEqmZR9TQ9Z9O1Gi4ANM2f5TTz2Uc2fy29aHTA45phrkAc0lUrLvNGQHRzBYLILXpsTp0wWGi6wIm3iYgxvlIigJJegvY7yaH7XaiKeH7KRNYAOI5UkcVXXPfc62cZvg+yLnhkfTywJ7nV8OFCRPxhkJNYgKSxwtAdbTU0aUlsFxbrCkgldo1ZJm+fN3qC2xRgdHpSChn3SlHy12UTjaB6hxKg3cKddtTQBB7oO9iUGVz4/upSlPMfaaQC4JNEbLRkuwtjqNDM8k66NDMA7NRG8jhR06cvT34keYyR8Qadg9GeI45yDGi0G0XRjzFXDmABJS+m4GFW0ycJeYaDcQUpZjDlGOh7YYyjeX6F1i2fMm9iFR6anPLZCR+h4W4HiOqjq/BnFfixBPxNwSHIgZkZczSlupuYnYHSqGUSc3ip5m6b3kG4ikj7a9H+uCVof1FdNdE77I3ZaRp1rip1vvbcNImV6swZ+C2qlr6arIAyUC72em9McV1YTyB7qHexH8Mg/1GLuFd3R6foJyKYq+b8IQ4WVjdaY/mvAXiGGZ0onjgrOUHHE1UTR36T8htt9iLoZ4LNhv3UQn2eo2aTIgt1NSJnnePP/f+7nwdsoerZJ2pnBYrzmY0A60v6B5aOzG5jy5qdJpDJJTd+JrVVjRkcmxjg/BtJWWke/h8pqLJrVhKwWSjoRRQW9pJ929RGPCNy1D76oMJgk+a0hp/KMebfO/RCvsr5Sq/Pn/nkX0B1KJ86exXFnTdXAP3XHLbuLIrmtkIHU5jI+gUcYEvCEOrAr0IPLixmX/o/Jtrr99+hJIn7TakvGVw3vsnRg2+u++rC2k2zbU32nEsxzr3fyHH6+qylYWJGvCXv2wJb57HNQqm9qhnzniWsznheepQaXY5ffj1V4jaUSOBigJdBXzbFYGX6xT1cpXI2sWwB0njEQ7dUcAeBNSp8ur832BPlj0gGN1hUX+/wkYjGC4gM5dHCczUkbDTVcdJ2+eitD1dKq+aEjSZCtMjYIgJm0Nn+tuOi5abuNh8bKy95arbdsbeKlTDVKg+BTonq1hb5DnrYuIKrUpsXO96kseS0pWYWeG1Wmtt2cu56oGzilhbTn1MSTWpY/dgXer4hVqOo2671iVvsdxh5usnA8qccfaI5W1XsCjKEPV1gU61bPFc5QC/GFCj63CKtWvVsSvlrvw8+BpD2ihMs3Po9nZIZxu7eoKo611eTgXmUvhFNJsFAko5E8JGpcQ+P3F1oERnEwmIT5hgyajxd/Zdlb5HV21dJRJgK326/49aKvsugf2qzZUPnFbhOzXw36y0lhSvcQ2Ke3UbXTTVK9vtSm/77USLV0fIXoGuKc0FL5H0hPXbo29Wv1tfKOh0KxZj9gzOztjk1DzW2FA4qDktmDfwX1IpsRc+pekqnT2RnEGqJedM81Fy9hbFI6pRNVGV1WGUwUtwYBU2Q1Mm2YpJjyAhm2zU1B8+rJAyprUNMQUZSGwSq6Z9wqnpmlsT8+LIfrSg3h3dFKuWlBpPSm0lbkZJKc+gfLhQ5CPz7bOPdWXCJ1NbX0SrkvNugDibu4hfMXW3acoSnHXVxj1/wnhaunp9zYHSIofVuUQruJpaDW32DWF1Uz+KoB70Ga/hokdUQa0Nf2ahHcoTTL8wRKtBj8RvX+YvpLl5sWuX2mOxfsndYp9PpnKhd4ULvvohFRYgmXQB8/Spq1y+29yEUQTYm8H264qVwL9hUUNdOWqPK+rDbGh8BryE8vH2S7jDXOYpIpVnwfb6xClVx2pTYCuKsmfvL5+0jerzERWdywRjPXYlR1lR+SMZ6fab13/9bHZv5zvvzLJxfsU7Xrvtnc4fR/Ze+xpc3fE4XvDIdvtJVh71asQHVdCovApba9CeRSNC7C2DSju2fg7hm3joDjyCwXnNrzV1nYArodHDrgt4T4sp6w8U+sKRqzKKcpt75jIyvIxPIMMpQWqvuMt4Yc4PM5mTXC5KQNWZ5UKlrcEZxdpw/hnpVxHzMaagX3Hj7DcdMEguJKYqJPb1m7APWB7H+E6/EXtwLtT7iG+i3qAWH/sti1diJ6Fz02D/Vgv9LhfS+6iyoOh9QgeOahSbktox6GfnjeIDSpRl+hnJOyttD+L/qKTLCZIU8+jBl0iv/yhU0UJZFrtWcSTgeMLu8LcUI1PhD69KgrLMk+BbzfxrsVw3y+AlUc+auPsaoPhAtu7R9H+xOrJR+yg7NMVG/RvK+vfdRQpW3jX213wgu++2VQl701Zf4T6o82jQ6Z1tD82zkYDZVzzyH/w+R/i/1zyOKTWS1PD1Poz2mV/ZZ82beHML45i/CplXDvbBBz4m3k5mROZT9YYygPQ+69n+UP9c5/+9PThoQ1xIqy4L9rsQW6FU8+9t9aH4yIUe1fWqDbEfjlRf57Ctv1lpq0b31V877Tb0Yb/7qju9r6u5jTYU2wyW09PeHnSLeKbFU8eA4nK+D/sHGxlsVePdP4i2qIkctv/4T248E6/nUOTrJsoDMd9z1SUHNvkOcwSThYfer+XORH29d1YyJ+eEVfpUeOgyeXJdsefuzR60vr7KTTvkpZdEbUybK5+u2dRZf6q2VRa6zXo806XKduyC5DZ41btiEIOocgO13y3K2Or//wGUdpJqq0UAAA==
+last_task_done_at: 2026-11-24T20:14:39.029Z
+suite:
+  at: 2026-11-24T21:20:01Z
+  exit: 0
+  commands:
+    - npm test
+  fingerprint: 8dd8562dfd016474f17d2e0da8d226d2fac2c0e10a76024a1b4ff9cf4f2f8755
+handoff_snapshots:
+  check:
+    "1":
+      .changeset/data-table-extended-state.md: ced0cadf55d3cf17f32d773b527e54dff47d55676c24ba39106dadfa63484377
+      e2e/site/data-table-responsive-stack.spec.ts: f2f2d38683e9fb041e33ab2e1921ff67ed7bf787ac93ee6f2c4ca41aeaa7e6c0
+      e2e/site/data-table-state.spec.ts: f578181aa3f1aa9167a0d46c19205a60f29d52e8621dc752cbc1d2389e086234
+      e2e/site/data-table-virtual-columns.spec.ts: 4de7f4d1fec23a40fa21dfb6f7436d14687f3c90211c73b109cd17c6aaa7bb9c
+      e2e/site/data-table-virtual-scroll.spec.ts: 46767d75d23ff3c572c382773e71042b2395b44eacc5749d9edad1fabd992a6f
+      e2e/site/data-table-virtual-variable-height.spec.ts: 467bd8b1ca2b7db92a3ccc3461894c83d48c240cb24870c62bb5a269d3fc8043
+      projects/medra/ui/src/lib/data-table/data-table-advanced-filters.spec.ts: 20e00156ed164b41716b1b576f8df6a62f42169739e614a271c555960ed4b6eb
+      projects/medra/ui/src/lib/data-table/data-table-column-filter.spec.ts: 87fbf22c3b3e38964014594f2ed7c7dc92fc652d0dd3cf76f0e1ee9d6ac468c8
+      projects/medra/ui/src/lib/data-table/data-table-column-filter.ts: 817fed58bc68791e6d0afb0adc2d306c43c36dafb255245bda7a60a6ecda1cc7
+      projects/medra/ui/src/lib/data-table/data-table-columns-merge.spec.ts: 90723253ef67e137856cd39dbaebf89cf9f98d361a16664487ea007c769ecb08
+      projects/medra/ui/src/lib/data-table/data-table-filter-row.spec.ts: 475a17b637d91522d762fbdcada325b89debedd30bbe70063529504f6588e062
+      projects/medra/ui/src/lib/data-table/data-table-keyboard-selection.spec.ts: ea3d8efb7cc06443cc357f682b55eb25d262dc8827b29b3f9b42c07003a2684e
+      projects/medra/ui/src/lib/data-table/data-table-persisted-state.spec.ts: 012669aa6b79206e5bc31bcd89f00fcdb35198247b02e73098daa8054ea02cf5
+      projects/medra/ui/src/lib/data-table/data-table-responsive-stack-enhancements.spec.ts: 3792d0f120ef18c8bc1aa88799f3a4bc7ab13c3caa013f2daf1c2ace1903f274
+      projects/medra/ui/src/lib/data-table/data-table-sorting-csv.spec.ts: c672af265557c9229ca26d6ed33a8395b919a9661e8c93beb4d469f12815f85f
+      projects/medra/ui/src/lib/data-table/data-table-state.spec.ts: ff50660e3ffbfa31c6fa474ee13efea06f3fce01a55ac7c4ab13e19dc05b8f2b
+      projects/medra/ui/src/lib/data-table/data-table-state.ts: 43ad568ca7aa46c7f11e4da26069471c70014b7b61d793829ec566f69ebd87cc
+      projects/medra/ui/src/lib/data-table/data-table-virtual-columns.spec.ts: 6ebc48095d59a5e29f6bb0249850b4ffe24855b469d60e989533e07bb15cf80b
+      projects/medra/ui/src/lib/data-table/data-table-virtual-expansions-groups.spec.ts: 45fc0fd7f0742211a819e0a2b3196a8e061d2a40898271cbd6a417bc064a5d52
+      projects/medra/ui/src/lib/data-table/data-table-virtual-features.spec.ts: c9cac0cd6eb9128457d38eb173f38e356e75741e03d191a4a04e148f7faec40c
+      projects/medra/ui/src/lib/data-table/data-table-virtual-heights.spec.ts: 9215feddfd9c8bdb76dfb1039fe97bda920532068134b0f6de4caee427de3a68
+      projects/medra/ui/src/lib/data-table/data-table-virtual-heights.ts: d9f1a872b9b514f3aac4e91ef7b3ecfa781db5c7fd44ea2540e10e1d70cab572
+      projects/medra/ui/src/lib/data-table/data-table-virtual-variable-height.spec.ts: 0167781999516cca3dbd986ff04178796cd762c66be62275bb1fb98537ce8e57
+      projects/medra/ui/src/lib/data-table/data-table.component.spec.ts: 68cdf678d85f17b5af68e8d233f4f6fbad0df985f5def91a9af34b7820ff46f4
+      projects/medra/ui/src/lib/data-table/data-table.component.ts: 5a322dab1c4d6784fe25415403975372a051dfd4716d7b6eeeea39c266a58891
+      projects/medra/ui/src/lib/data-table/data-table.types.ts: 699c39129a752af7ceef6f57dac33e7c9c099413b02ee9b13cec2c1b5305516b
+      projects/medra/ui/src/lib/data-table/table-column.component.ts: dd68f8349e0ced8ab74292dc63328e94c03a31cb05091c812f68efa4012f308b
+      projects/site/src/app/pages/docs/components/demos/data-table-responsive-stack.demo.html: d2ee1ebaf18825d2713f7eb0e5890ef4069987ef1e7f6709e60cb83957e565b6
+      projects/site/src/app/pages/docs/components/demos/data-table-stateful.demo.html: 0edd961ac6c1bae2f877e56ebc6bdf04adbe3163d7f2dbef1856dfe5d8be0c29
+      projects/site/src/app/pages/docs/components/demos/data-table-stateful.demo.ts: 9d2b6505f19dc8dea66d0b643f83dd64870fa339347d25e422c834b521c8049b
+      projects/site/src/app/pages/docs/components/demos/data-table-virtual-scroll.demo.html: 2949e6fb685684513206c4543ecb4616cca8f5f3565c546f428ee0d919789a51
+      projects/site/src/app/pages/docs/components/demos/data-table-virtual-scroll.demo.ts: 0d4288800fa6dc1f92d7e1036f2e03b300fa38bec7627d945de0667f1e082725
+      projects/site/src/content/docs/data-table-column-toggle.txt: 6d56474012fd65101cd7efdab9eb8162887d748ddcedef5a78e5851d882ee459
+      projects/site/src/content/docs/data-table-stateful.txt: 398971d754c63eb3ec2efdd0b8b859e3fb453be86ab4ae0c81fd095f288cf2d9
+archived:
+  at: 2026-11-24
+  sequence: 25

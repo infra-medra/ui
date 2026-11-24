@@ -26,7 +26,11 @@ export interface TableLazyLoadEvent {
   readonly rows: number;
   readonly sortField: string | null;
   readonly sortOrder: TableSortOrder;
+  /** Resolved `sortBy` property (or `sortField`) for single-column sort. */
+  readonly sortBy: string | null;
   readonly multiSortMeta: readonly TableSortMeta[];
+  /** Multi-sort metadata with each entry's `field` resolved to its column's `sortBy` (or `field`). */
+  readonly multiSortByMeta: readonly TableSortMeta[];
   readonly filter: string;
   /** Active column filter rules keyed by field; the data source applies them, since a lazy table does not filter `value` itself. */
   readonly columnFilters: TableColumnFilters;
@@ -57,8 +61,9 @@ export interface TableRowEditEvent<T = unknown> {
 export type TableFilterType = 'text' | 'numeric' | 'date';
 
 /**
- * Match mode of a column filter rule. Text: `contains`, `notContains`, `startsWith`, `endsWith`, `equals`, `notEquals`.
- * Numeric: `equals`, `notEquals`, `lt`, `lte`, `gt`, `gte`. Date: `dateIs`, `dateIsNot`, `dateBefore`, `dateAfter`.
+ * Match mode of a column filter rule. Text: `contains`, `notContains`, `startsWith`, `endsWith`, `equals`, `notEquals`, `in`.
+ * Numeric: `equals`, `notEquals`, `lt`, `lte`, `gt`, `gte`, `between`, `in`.
+ * Date: `dateIs`, `dateIsNot`, `dateBefore`, `dateAfter`, `between`, `in`.
  */
 export type TableFilterMatchMode =
   | 'contains'
@@ -74,16 +79,44 @@ export type TableFilterMatchMode =
   | 'dateIs'
   | 'dateIsNot'
   | 'dateBefore'
-  | 'dateAfter';
+  | 'dateAfter'
+  | 'between'
+  | 'in';
+
+/** Scalar value used by a single-value column filter rule or as an element of `between` / `in`. */
+export type TableFilterScalar = string | number | Date | null;
+
+/** Value stored in a {@link TableColumnFilter}: a scalar for standard modes, `[min, max]` for `between`, or an allowed-values list for `in`. */
+export type TableFilterValue = TableFilterScalar | readonly TableFilterScalar[];
 
 /** A rule applied to one column: a match mode and the value to compare cells against. A `null`, empty or `NaN` value makes the rule inactive. */
 export interface TableColumnFilter {
   readonly matchMode: TableFilterMatchMode;
-  readonly value: string | number | Date | null;
+  readonly value: TableFilterValue;
 }
 
-/** Active column filter rules, keyed by column `field`. */
-export type TableColumnFilters = Readonly<Record<string, TableColumnFilter>>;
+/** How multiple rules on the same column combine: `'and'` requires every active rule to match; `'or'` requires at least one. */
+export type TableColumnFilterOperator = 'and' | 'or';
+
+/** Multi-rule filter group for a column: combines `rules` with `'and'` or `'or'`. */
+export interface TableColumnFilterGroup {
+  readonly operator: TableColumnFilterOperator;
+  readonly rules: readonly TableColumnFilter[];
+}
+
+/** How per-column filters are presented: `'menu'` (popover funnel in headers, default) or `'row'` (inline filter row below headers). */
+export type TableFilterDisplay = 'menu' | 'row';
+
+/** Template context passed to a column's `<ng-template #filter>` in both `'menu'` and `'row'` filter modes. */
+export interface TableColumnFilterTemplateContext {
+  readonly $implicit: TableFilterValue;
+  readonly filter: (value: TableFilterValue, matchMode?: TableFilterMatchMode) => void;
+  readonly clear: () => void;
+  readonly matchMode: TableFilterMatchMode;
+}
+
+/** Active column filter rules or rule groups, keyed by column `field`. */
+export type TableColumnFilters = Readonly<Record<string, TableColumnFilter | TableColumnFilterGroup>>;
 
 /** Cell selection coordinate stored in `selection` and emitted by `cellSelect`/`cellUnselect` when `cellSelection` is active. */
 export interface TableCellSelection<T = unknown> {

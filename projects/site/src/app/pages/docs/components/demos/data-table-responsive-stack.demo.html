@@ -66,3 +66,17 @@
   </med-table-column>
   <med-table-column field="capacity" header="Capacity" />
 </med-data-table>
+
+<div data-med-container-stack-demo class="mt-6 w-[600px]">
+  <med-data-table
+    [value]="people"
+    responsiveLayout="stack"
+    breakpoint="500px"
+    breakpointMode="container"
+    dataKey="id"
+    ariaLabel="Team members (container-width responsive stack)"
+  >
+    <med-table-column field="name" header="Name" />
+    <med-table-column field="role" header="Role" />
+  </med-data-table>
+</div>

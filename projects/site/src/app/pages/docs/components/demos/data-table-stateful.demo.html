@@ -1,13 +1,34 @@
+<div class="mb-3 flex flex-wrap items-center gap-4">
+  <span class="text-sm font-medium text-surface-700 dark:text-surface-200">Columns:</span>
+  <label class="inline-flex items-center gap-2 text-sm text-surface-700 dark:text-surface-200">
+    <med-checkbox [ngModel]="showName()" (ngModelChange)="showName.set($event)" />
+    Name
+  </label>
+  <label class="inline-flex items-center gap-2 text-sm text-surface-700 dark:text-surface-200">
+    <med-checkbox [ngModel]="showCategory()" (ngModelChange)="showCategory.set($event)" />
+    Category
+  </label>
+  <label class="inline-flex items-center gap-2 text-sm text-surface-700 dark:text-surface-200">
+    <med-checkbox [ngModel]="showQuantity()" (ngModelChange)="showQuantity.set($event)" />
+    Quantity
+  </label>
+</div>
 <med-data-table
   [value]="equipment"
   [paginator]="true"
   [rows]="4"
+  [rowsPerPageOptions]="[4, 8]"
+  [filterable]="true"
+  [reorderableColumns]="true"
+  [resizableColumns]="true"
   stateKey="docs-data-table-stateful"
   stateStorage="session"
   ariaLabel="Lab equipment inventory (persisted state)"
 >
-  <med-table-column field="name" header="Name" sortable />
-  <med-table-column field="category" header="Category" sortable />
-  <med-table-column field="quantity" header="Quantity" align="right" sortable />
+  <med-table-column field="name" header="Name" sortable [(visible)]="showName" />
+  <med-table-column field="category" header="Category" sortable [(visible)]="showCategory" />
+  <med-table-column field="quantity" header="Quantity" align="right" sortable [(visible)]="showQuantity" />
 </med-data-table>
-<p class="mt-2 text-sm text-surface-500 dark:text-surface-400">Sort or change page, then reload the page: the table comes back as you left it.</p>
+<p class="mt-2 text-sm text-surface-500 dark:text-surface-400">
+  Sort, filter, reorder, resize or toggle columns, or change page size, then reload the page: the table comes back as you left it.
+</p>

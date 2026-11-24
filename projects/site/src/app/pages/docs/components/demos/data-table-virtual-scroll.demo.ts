@@ -7,6 +7,18 @@ interface ScoreRow {
   readonly score: number;
 }
 
+interface VariableRow {
+  readonly id: number;
+  readonly title: string;
+  readonly notes: string;
+}
+
+const VARIABLE_NOTES = [
+  'Short note.',
+  'Medium wrapped row with enough detail to span multiple lines inside the table column when rendered in the docs layout.',
+  'Long wrapped row containing several sentences of natural prose so the cell expands across multiple lines in the browser. Variable row height mode lets the table measure each rendered row with ResizeObserver instead of truncating text with an ellipsis, keeping every word readable as you scroll.',
+] as const;
+
 @Component({
   selector: 'app-data-table-virtual-scroll-demo',
   imports: [DataTableComponent, TableColumnComponent],
@@ -18,4 +30,19 @@ export class DataTableVirtualScrollDemo {
   protected readonly pinned: ScoreRow[] = [{ id: -1, name: 'Pinned', score: 0 }];
   protected readonly selected = signal<ScoreRow | null>(null);
   protected readonly selectedLabel = computed(() => this.selected()?.name ?? 'none');
+
+  protected readonly variableRows: VariableRow[] = Array.from({ length: 60 }, (_, i) => ({
+    id: i,
+    title: `Item ${i}`,
+    notes: VARIABLE_NOTES[i % VARIABLE_NOTES.length],
+  }));
+
+  protected readonly virtualColFields: readonly string[] = Array.from({ length: 40 }, (_, i) => `c${i}`);
+  protected readonly virtualColRows: readonly Record<string, string | number>[] = Array.from({ length: 60 }, (_, r) => {
+    const row: Record<string, string | number> = { id: r, item: `Item ${r}` };
+    for (let c = 0; c < 40; c++) {
+      row[`c${c}`] = `R${r}C${c}`;
+    }
+    return row;
+  });
 }
