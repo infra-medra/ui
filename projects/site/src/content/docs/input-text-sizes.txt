@@ -1,0 +1,3 @@
+## Sizes
+
+Set `size` to `'sm'`, `'default'`, or `'lg'` to match the shared form-field padding and typography scale.

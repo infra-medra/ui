@@ -1,0 +1,3 @@
+## Clear Icon
+
+Compose `med-icon-field` with a `medIconFieldIcon` clear button (`position="right"` and `pointer-events-auto`) to reset non-empty text values inline.

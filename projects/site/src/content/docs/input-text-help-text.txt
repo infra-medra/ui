@@ -1,0 +1,3 @@
+## Help Text
+
+Pair `<input medInputText>` with a `<small>` description linked via `aria-describedby` to provide contextual guidance below the field.

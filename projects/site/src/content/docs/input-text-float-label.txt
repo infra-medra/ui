@@ -1,0 +1,3 @@
+## Float Label
+
+Wrap `<input medInputText class="peer" placeholder=" " />` and `<label medFloatLabelText>` inside `med-float-label` so the label floats above the field on focus or when populated.
