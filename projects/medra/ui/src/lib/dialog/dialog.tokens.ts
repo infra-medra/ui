@@ -36,6 +36,8 @@ export interface DialogShellOptions {
   restoreLabel?: string;
   /** Maps a `max-width` media-query breakpoint to a dialog width at that breakpoint (e.g. `{ '960px': '75vw', '640px': '90vw' }`) — see `DialogService`'s own doc. */
   breakpoints?: Record<string, string>;
+  /** Renders the dialog as modal with a backdrop and `aria-modal="true"`. Default: `true`. */
+  modal?: boolean;
 }
 
 export const DIALOG_SHELL_OPTIONS = new InjectionToken<DialogShellOptions>('DIALOG_SHELL_OPTIONS');

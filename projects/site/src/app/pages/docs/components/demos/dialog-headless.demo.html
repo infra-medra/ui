@@ -1,0 +1,14 @@
+<button medButton variant="outlined" (click)="visible.set(true)">Show</button>
+
+<med-dialog [(visible)]="visible">
+  <ng-template #headless>
+    <div class="flex flex-col items-center gap-3 p-6 text-center">
+      <med-icon name="check-circle" variant="solid" class="size-10 text-brand-600 dark:text-brand-400" />
+      <p class="text-lg font-semibold text-surface-900 dark:text-surface-0">Headless Dialog</p>
+      <p class="text-sm text-surface-600 dark:text-surface-300">
+        The #headless template replaces the default header, body wrapper, and footer with completely custom markup.
+      </p>
+      <button medButton type="button" variant="outlined" (click)="visible.set(false)">Close</button>
+    </div>
+  </ng-template>
+</med-dialog>

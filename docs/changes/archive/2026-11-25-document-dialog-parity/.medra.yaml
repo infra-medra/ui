@@ -1,0 +1,50 @@
+change: document-dialog-parity
+created: 2026-11-25
+track: fast
+phase: archived
+diff_base: 180c284
+gates:
+  proposal:
+    status: approved
+    by: Tiago Cavalli
+    at: 2026-11-25T14:38:13Z
+    hash: 56734385eb09697d23622eab221fc87ac8b4eb06098aaaec8d98f641ac56c90a
+    note: null
+  plan:
+    status: pending
+  tasks:
+    status: pending
+  verify:
+    status: approved
+    by: Tiago Cavalli
+    at: 2026-11-25T15:35:55Z
+    hash: 008eb32732f3d9870ca8cd239d0ab657eb16fc7aa3daa552d383e7722d6a3cc0
+    note: null
+gate_notes: []
+reviews:
+  - stage: verify
+    by: reviewer
+    at: 2026-11-25T15:06:46Z
+    recorded_at: 2026-11-25T15:06:46.751Z
+    hash: b2424fc2481cf1675b4c2c803d325d154075cc0f1286a387ff99ea01e7b922d1
+    verdict: pass-with-findings
+    report: reviews/2026-11-25-verify-reviewer-r1.md
+track_history: []
+blockers: []
+verify_fix_rounds: 0
+last_fix_round_at: null
+test_hashes:
+  T001:
+    e2e/site/dialog-docs.spec.ts: bc9fd3da18304f259fc423e3e75f17c0f764af258e834f1ba0818d99f67a9ce3
+test_snapshots:
+  bc9fd3da18304f259fc423e3e75f17c0f764af258e834f1ba0818d99f67a9ce3: H4sIAAAAAAAAA71XbW/bNhD+7l9xaINJWm3ZydZhtedtaWy0BdIuSIKugOEttHSWiVKkRtKJU9f/fSD1YklWnJcV+xDQoe65e3j38EjSOBFSwxpwlWCg26BRadjAXIoYnN8TRm5vJI0Wums+OINWKxBcaTg7fjOGITjdUASqG4g4ERy5Vt2QEiaireH409n45HI8+nv86fj92en4AoYwaQGsgYZ9cHBF4oRhZ0YUDZw2MDJD1gfntf0fNu1dU41xwojGkvVlPtUISISimgpeApzlU42AmKxoTL+QGSsHeV+abYSFkkRRDTQq5hohEtVOnPNirhHCBI86geAauS6hTgWP4CSbbgQukIQMlSqB3uZTd5FLBFf0GjshVTFVirAqz+wzfAejwsC4mgJRYOs/aLWMcPwQVSDpDF1nZAUCoQiWMXJNTBkgIRGCOzoddXq9Q//i0HPa4How/BXWLbCadJ3t1z5I5CFKBX9w0AuqUjyj/LNqQyKFwjYwQyzEWKg2BCJEmDERmO+Eh0C5RkkCbW0sIQVzIYEwBq8gS4DJFFG3PADXsAAbxeRpUzCDdJWAUgqp+qC0pDyaTI3Ip4MC5AvuOuaHtTNrQymtkxToJ0u1MHN+jEqRCD2vBjZhhJWJG6uoFD9noHGlYQixinzz080cANC5hfj6NkGT0uEQnJQGfP0K3cVtKG0Nvn5403vZ66XDYTocpcMP6fBjOrzsUt9WxMTxvIIHVBZzNTlYb8NupnCwNvabq4LYxo4bb9CyP8gNoTpdsEL9keKN6UwX9Au6a7ihoV704fDo514bFmgaUh9e9XoWXkNHQgvX9Kfcc5YgEZwagcAwM0P9+vZcMHQdTq5pRLIWsQZOYuyDU9aWAxvPZyIgWkjXIZOFxPn3w2fP863ybOpUiKTd1M1jer4Wb8k1nogl1+5OS/QZ8kgvqnwVBobRu9Aw3i4vS16JjNQ0YAgkSTpW+hMa/jV8VmaWY/CasCXReMyY6yJTqQKZ8mOSmInsf5+Guf6ydWy5mJWM/1kS1rCK1EvqJPNhnZiN5TLUQGEIvQFQ+GX3WMhyMAD64oVX07bpS1nfgQ0Md8ETOh1UEKYVwLCouc/1wqWF8io1MqZ5fY61lnS21Og6psJOGzjewDlG41XiXj0/WNNwc3Dl7XdkmjCh/NLsQss5z0OtsrkQ80pm/q+avWcgE+A1fqSKzhhuN3lmlCIy06LcRWldZLY5ZMcE/PYbOI7na0lj18tFmEZ4I5FolJcLwt1efQGmq/4pSZKghGERrlDkKiF6MZwLxsQN5VHHcKU86vdDej05LHZKbYElp1tXs6XWgjueP6dSadfbWX6Fl2nzl2kfbPRmtoix6dijABKJFrJ130gs9/qQ1Oe23zT3abO0Q7cL9maUHVogEuTdgAmF9lhTgUgwBIlqyTSIpU6WGoIFBp/BPe30jn7ySg3GXrlGGIu6EG2e0gDpvaxjslltcAXYV4EUjL3jWpie/W7+ATHE0G1qh1tQESpxvGpz7N0RptSu66LwA0aDz3nE8uLSJO02/OySejdH+72x4GVe1qqBWekQOSE8QGaPjwrLSsy76O3LzL0pLbch55QoncmiD4HlxDB08g3U7UJ+hd5VVvkMzYy2m78qnOc7d3Tv0W0hXV4t0oNUVsc8UjI5/CmqqWL3CKdquF87F+Qav5ly8jqXXjHlUrche/QgaBFFDNN7cl0ApZfRvRoov6KeKoPdeA9SQgPskWKIyeopOihgeyRQ2Oyvflao+xRQiVi7w4REk7wMGDptcLRc4n7i+0mdo9JCWk7/fYUnRlzfXOD5m3ZvI8vfwveKuHg0P1XBtUgPkm8d80jt5vCnCLiK3VPjRvttjhZH+4+vGu7/1kmGSh+s2zfNZGp9m0el+fsXFj3DLx0TAAA=
+last_task_done_at: 2026-11-25T14:54:29.806Z
+suite:
+  at: 2026-11-25T15:14:54Z
+  exit: 0
+  commands:
+    - npm test
+  fingerprint: 14280f2cfb71b043c24eb9679d3ced8ac700d85f6001a6c7193ab825c9b66512
+archived:
+  at: 2026-11-25
+  sequence: 34

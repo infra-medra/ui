@@ -34,6 +34,8 @@ export interface DialogOptions<TData = unknown> {
    * some other, more deliberate way (an unsaved-changes confirmation, say).
    */
   dismissableMask?: boolean;
+  /** Renders the dialog as modal with a backdrop, focus trap, and `aria-modal="true"`. Default: `true`. */
+  modal?: boolean;
   data?: TData;
 }
 
@@ -121,6 +123,7 @@ export class DialogService {
             maximizeLabel: options.maximizeLabel,
             restoreLabel: options.restoreLabel,
             breakpoints: options.breakpoints,
+            modal: options.modal ?? true,
           },
         },
       ],
@@ -129,8 +132,10 @@ export class DialogService {
     handle = this.overlayService.openGlobal<DialogShellComponent, TResult>(DialogShellComponent, {
       position: options.position,
       injector: shellInjector,
+      hasBackdrop: options.modal ?? true,
       closeOnEscape: options.closeOnEscape,
       closeOnBackdropClick: options.dismissableMask,
+      closeOnOutsideClick: options.dismissableMask,
       // Not the pane: see the comment on DialogShellComponent's host classes
       // for why the dialog box's own sizing/visuals live there instead of
       // in `panelClass` (which targets `.cdk-overlay-pane` — a selector the

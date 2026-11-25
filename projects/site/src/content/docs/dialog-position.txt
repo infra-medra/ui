@@ -1,0 +1,3 @@
+## Position
+
+Anchor the dialog anywhere in the viewport with `position`: `center` (default), `top`, `bottom`, `top-left`, `top-right`, `bottom-left`, or `bottom-right`.

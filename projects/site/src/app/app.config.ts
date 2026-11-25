@@ -57,6 +57,8 @@ export const appConfig: ApplicationConfig = {
         check: heroOutlineIcons.check,
         bell: heroOutlineIcons.bell,
         creditCard: heroOutlineIcons.creditCard,
+        arrowsPointingIn: heroOutlineIcons.arrowsPointingIn,
+        arrowsPointingOut: heroOutlineIcons.arrowsPointingOut,
       },
       solid: {
         check: heroSolidIcons.check,
@@ -118,6 +120,7 @@ export const appConfig: ApplicationConfig = {
         user: heroMiniIcons.user,
         envelope: heroMiniIcons.envelope,
         bell: heroMiniIcons.bell,
+        arrowsUpDown: heroMiniIcons.arrowsUpDown,
       },
     }),
   ],

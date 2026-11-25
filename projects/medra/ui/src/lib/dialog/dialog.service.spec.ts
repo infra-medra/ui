@@ -447,4 +447,45 @@ describe('DialogService', () => {
       expect(completed).toBe(true);
     });
   });
+
+  describe('modal (DLD-002.S1)', () => {
+    it('[DLD-002.S1] retains .cdk-overlay-backdrop and aria-modal="true" when modal defaults to true', () => {
+      open(TestContentComponent, { header: 'Title' });
+      const shell = getOverlayContainerElement().querySelector('med-dialog-shell') as HTMLElement;
+
+      expect(shell.getAttribute('role')).toBe('dialog');
+      expect(document.querySelectorAll('.cdk-overlay-backdrop')).toHaveLength(1);
+      expect(shell.getAttribute('aria-modal')).toBe('true');
+    });
+
+    it('[DLD-002.S1] modal: false opens role="dialog" with zero .cdk-overlay-backdrop, omits aria-modal, and closes on outside click by default', () => {
+      open(TestContentComponent, { header: 'Title', modal: false } as DialogOptions);
+      const shell = getOverlayContainerElement().querySelector('med-dialog-shell') as HTMLElement;
+
+      expect(shell.getAttribute('role')).toBe('dialog');
+      expect(document.querySelectorAll('.cdk-overlay-backdrop')).toHaveLength(0);
+      expect(shell.getAttribute('aria-modal')).toBeNull();
+
+      document.body.dispatchEvent(new MouseEvent('pointerdown', { bubbles: true }));
+      document.body.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      appRef.tick();
+
+      expect(getOverlayContainerElement().querySelector('med-dialog-shell')).toBeNull();
+    });
+
+    it('[DLD-002.S1] modal: false with dismissableMask: false stays open on outside click', () => {
+      open(TestContentComponent, { header: 'Title', modal: false, dismissableMask: false } as DialogOptions);
+      const shell = getOverlayContainerElement().querySelector('med-dialog-shell') as HTMLElement;
+
+      expect(shell.getAttribute('role')).toBe('dialog');
+      expect(document.querySelectorAll('.cdk-overlay-backdrop')).toHaveLength(0);
+      expect(shell.getAttribute('aria-modal')).toBeNull();
+
+      document.body.dispatchEvent(new MouseEvent('pointerdown', { bubbles: true }));
+      document.body.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      appRef.tick();
+
+      expect(getOverlayContainerElement().querySelector('med-dialog-shell')).not.toBeNull();
+    });
+  });
 });

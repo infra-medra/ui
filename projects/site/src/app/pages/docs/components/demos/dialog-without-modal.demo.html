@@ -1,0 +1,17 @@
+<div class="flex flex-wrap items-center gap-3">
+  <button medButton variant="outlined" (click)="visible.set(true)">Show</button>
+  <button medButton type="button" variant="outlined" severity="secondary" (click)="incrementOutside()">
+    Outside action ({{ outsideClicks() }})
+  </button>
+</div>
+
+<med-dialog [(visible)]="visible" [modal]="false" [dismissableMask]="false" header="Without Modal">
+  <p class="text-sm text-surface-600 dark:text-surface-300">
+    Background content remains interactive while this non-modal dialog is open.
+  </p>
+  <ng-template #footer>
+    <div class="flex justify-end">
+      <button medButton type="button" (click)="visible.set(false)">Done</button>
+    </div>
+  </ng-template>
+</med-dialog>

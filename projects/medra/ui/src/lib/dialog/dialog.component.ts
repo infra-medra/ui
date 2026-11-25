@@ -39,7 +39,7 @@ let nextDeclarativeDialogId = 0;
       <div
         [class]="panelClass()"
         role="dialog"
-        aria-modal="true"
+        [attr.aria-modal]="modal() ? 'true' : null"
         [attr.aria-labelledby]="header() ? headerId : null"
         [attr.data-maximized]="maximized() ? 'true' : null"
         [style.width]="maximized() ? 'calc(100vw - 2rem)' : null"
@@ -126,6 +126,8 @@ export class DialogComponent implements OnDestroy {
   readonly restoreLabel = input('Restore');
   readonly closeOnEscape = input(true, { transform: booleanAttribute });
   readonly dismissableMask = input(true, { transform: booleanAttribute });
+  /** Renders the dialog as modal with a backdrop, focus trap, and `aria-modal="true"`. Default: `true`. */
+  readonly modal = input(true, { transform: booleanAttribute });
   readonly breakpoints = input<Record<string, string> | undefined>(undefined);
   readonly class = input('', { alias: 'class' });
 
@@ -179,8 +181,10 @@ export class DialogComponent implements OnDestroy {
     const handle = this.overlayService.openGlobalTemplate<void>(this.panelTemplate(), this.viewContainerRef, {
       position: this.position(),
       panelClass: [],
+      hasBackdrop: this.modal(),
       closeOnEscape: this.closeOnEscape(),
       closeOnBackdropClick: this.dismissableMask(),
+      closeOnOutsideClick: this.dismissableMask(),
     });
     this.handle = handle;
     this.onShow.emit();

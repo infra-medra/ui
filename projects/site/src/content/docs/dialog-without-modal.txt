@@ -1,0 +1,3 @@
+## Without Modal
+
+Set `[modal]="false"` on `<med-dialog>` (or `modal: false` on `DialogService.open()`) to open a non-modal dialog without a backdrop, focus trap, or `aria-modal` attribute. Users can continue interacting with controls outside the dialog while it stays open, and `[dismissableMask]="false"` keeps outside clicks from closing it automatically.

@@ -1,0 +1,12 @@
+# Tasks: add-dialog-modal
+
+## Task List
+
+- [x] T001 [TEST] [DLD-002] Write failing Jest unit tests in `projects/medra/ui/src/lib/dialog/dialog.component.spec.ts` and `projects/medra/ui/src/lib/dialog/dialog.service.spec.ts` covering `DLD-002.S1` (`[modal]="false"` and `modal: false` omit `.cdk-overlay-backdrop`, omit `aria-modal`, and respect `dismissableMask`) — verify: red (`npx jest projects/medra/ui/src/lib/dialog/dialog.component.spec.ts projects/medra/ui/src/lib/dialog/dialog.service.spec.ts`)
+  - evidence red 2026-11-25: `npx jest projects/medra/ui/src/lib/dialog/dialog.component.spec.ts projects/medra/ui/src/lib/dialog/dialog.service.spec.ts` exit 1 — "241 |         if (name) { | > 242 |           console.warn( | |                   ^"
+- [x] T002 [DLD-002] after T001 Implement `modal` on `DialogComponent`, `DialogOptions` (`DialogService.open()`), and `DialogShellComponent` in `projects/medra/ui/src/lib/dialog/` and add `.changeset/dialog-modal.md` (`minor`) — verify: green (`npx jest projects/medra/ui/src/lib/dialog/dialog.component.spec.ts projects/medra/ui/src/lib/dialog/dialog.service.spec.ts && npm run build:ui`)
+  - evidence green 2026-11-25: `npx jest projects/medra/ui/src/lib/dialog/dialog.component.spec.ts projects/medra/ui/src/lib/dialog/dialog.service.spec.ts && npm run build:ui` exit 0
+- [x] T003 [TEST] [DLD-003] after T002 Extend `e2e/site/dialog-docs.spec.ts` with failing Playwright real-browser assertions for `Without Modal` (`#example-without-modal`, `DLD-003.S1`, and `DLD-002.S1` no `.cdk-overlay-backdrop`, no `aria-modal`, and clickable outside elements) — verify: red (`npx playwright test --reporter=list --project=site e2e/site/dialog-docs.spec.ts`)
+  - evidence red 2026-11-25: `npx playwright test --reporter=list --project=site e2e/site/dialog-docs.spec.ts` exit 1 — "Call log: | - Expect 'toHaveCount' getByRole('navigation', { name: 'On this page' }).locator('a[href*='#example-']') with timeout 5000ms | - waiting for getByRole('navigation', { name: 'On this page' }).locator('a[href*='#example-']')"
+- [x] T004 [DLD-003] after T003 Create `dialog-without-modal.demo.{ts,html}` and `dialog-without-modal.txt` and register `Without Modal` in `projects/site/src/app/pages/docs/components/dialog.page.ts` — verify: green (`npm test && npm run build:ui && npm run build:site && npx playwright test --reporter=list --project=site e2e/site/dialog-docs.spec.ts`)
+  - evidence green 2026-11-25: `npx playwright test --reporter=list --project=site e2e/site/dialog-docs.spec.ts` exit 0

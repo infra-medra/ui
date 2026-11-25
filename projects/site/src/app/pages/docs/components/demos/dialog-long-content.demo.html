@@ -1,0 +1,9 @@
+<button medButton variant="outlined" (click)="visible.set(true)">Show</button>
+
+<med-dialog [(visible)]="visible" header="Long Content">
+  <div class="space-y-4 text-sm text-surface-600 dark:text-surface-300">
+    @for (paragraph of paragraphs; track paragraph) {
+      <p>{{ paragraph }}</p>
+    }
+  </div>
+</med-dialog>
