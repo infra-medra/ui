@@ -1,0 +1,3 @@
+## Fluid
+
+Add the `fluid` attribute (or wrap the control in `<med-fluid>` or a container with `[medFluid]`) to stretch the select button to the full width of its container, giving every option an equal share of the row.

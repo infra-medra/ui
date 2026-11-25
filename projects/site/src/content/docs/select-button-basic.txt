@@ -1,0 +1,3 @@
+## Basic
+
+Pass `options` as an array of `SelectOption<T>` objects (or custom objects mapped with `optionLabel` and `optionValue`) to render a single-select segmented control bound to a `T | null` value.

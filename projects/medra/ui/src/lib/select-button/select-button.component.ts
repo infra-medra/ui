@@ -1,9 +1,18 @@
-import { ChangeDetectionStrategy, Component, ElementRef, booleanAttribute, computed, forwardRef, input, signal, viewChildren } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
+import { ChangeDetectionStrategy, Component, ElementRef, TemplateRef, booleanAttribute, computed, contentChild, forwardRef, inject, input, signal, viewChildren } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { ButtonSize, INVALID_RING_CLASS, buttonVariants } from '../button/button.styles';
+import { MED_FLUID_CONTEXT } from '../fluid/fluid.directive';
 import { RippleDirective } from '../ripple/ripple.directive';
 import { SelectOption } from '../select/select.types';
 import { mergeClasses } from '../utils/merge-classes';
+
+/** Context passed to the optional `#item` template for each option button. */
+export interface SelectButtonItemContext<T = unknown> {
+  $implicit: SelectOption<T>;
+  selected: boolean;
+  index: number;
+}
 
 /**
  * SelectButton primitive (Tier 2). A connected row of `ToggleButton`-style
@@ -31,8 +40,12 @@ import { mergeClasses } from '../utils/merge-classes';
   selector: 'med-select-button',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { class: 'inline-block' },
-  imports: [RippleDirective],
+  host: {
+    '[class.block]': 'isFluid()',
+    '[class.w-full]': 'isFluid()',
+    '[class.inline-block]': '!isFluid()',
+  },
+  imports: [NgTemplateOutlet, RippleDirective],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -57,13 +70,19 @@ import { mergeClasses } from '../utils/merge-classes';
           (click)="selectOption(option)"
           (keydown)="onKeydown($event, i)"
         >
-          {{ option.label }}
+          @if (itemTemplate(); as tpl) {
+            <ng-container *ngTemplateOutlet="tpl; context: { $implicit: option, selected: isSelected(option.value), index: i }" />
+          } @else {
+            {{ option.label }}
+          }
         </button>
       }
     </div>
   `,
 })
 export class SelectButtonComponent<T = unknown> implements ControlValueAccessor {
+  private readonly fluidContext = inject(MED_FLUID_CONTEXT, { optional: true });
+
   readonly options = input<readonly (SelectOption<T> | Record<string, unknown> | T)[]>([]);
   readonly optionLabel = input('label');
   readonly optionValue = input('value');
@@ -71,21 +90,28 @@ export class SelectButtonComponent<T = unknown> implements ControlValueAccessor 
   readonly multiple = input(false, { transform: booleanAttribute });
   readonly allowEmpty = input(true, { transform: booleanAttribute });
   readonly size = input<ButtonSize>('default');
+  readonly fluid = input(false, { transform: booleanAttribute });
   readonly invalid = input(false, { transform: booleanAttribute });
   readonly disabled = input(false, { transform: booleanAttribute });
   readonly ariaLabel = input<string | null>(null);
   readonly class = input('', { alias: 'class' });
 
+  /** Optional custom template for option button content, by named reference `#item`. */
+  readonly itemTemplate = contentChild<TemplateRef<SelectButtonItemContext<T>>>('item');
+
   private readonly value = signal<T | readonly T[] | null>(null);
   private readonly formsDisabled = signal(false);
   protected readonly isDisabled = computed(() => this.disabled() || this.formsDisabled());
+  protected readonly isFluid = computed(() => this.fluid() || (this.fluidContext?.() ?? false));
 
   private readonly optionButtons = viewChildren<ElementRef<HTMLButtonElement>>('optionButton');
 
   private onChange: (value: T | readonly T[] | null) => void = () => {};
   private onTouched: () => void = () => {};
 
-  protected readonly groupClass = computed(() => mergeClasses('inline-flex flex-wrap', this.class()));
+  protected readonly groupClass = computed(() =>
+    mergeClasses(this.isFluid() ? 'flex w-full' : 'inline-flex flex-wrap', this.class()),
+  );
 
   protected readonly resolvedOptions = computed<readonly SelectOption<T>[]>(() => {
     const labelKey = this.optionLabel();
@@ -118,7 +144,11 @@ export class SelectButtonComponent<T = unknown> implements ControlValueAccessor 
     const selected = this.isSelected(option.value);
     return mergeClasses(
       buttonVariants({ severity: selected ? 'primary' : 'secondary', variant: selected ? 'filled' : 'outlined', size: this.size() }),
+      // Filled buttons have no border while outlined buttons have a 1px border;
+      // matching the 1px border keeps selected and unselected buttons the same height and equal width in fluid flex layout.
+      selected ? 'border border-transparent' : '',
       'rounded-none focus-visible:z-10 first:rounded-l-md last:rounded-r-md',
+      this.isFluid() ? 'flex-1 justify-center' : '',
       index > 0 ? '-ml-px' : '',
       this.invalid() ? INVALID_RING_CLASS : '',
       // `buttonVariants`' own `disabled:*` classes key off the native

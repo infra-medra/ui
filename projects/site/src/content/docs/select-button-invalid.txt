@@ -1,0 +1,3 @@
+## Invalid
+
+Set `invalid` to apply a danger focus ring around the option buttons when validation fails.

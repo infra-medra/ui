@@ -1,0 +1,3 @@
+## Multiple
+
+Set `multiple` to switch from `role="radiogroup"` to a `role="group"` of independent `aria-pressed` toggle buttons bound to a `readonly T[]` array.

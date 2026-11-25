@@ -1,0 +1,3 @@
+## Template Driven
+
+Use `[(ngModel)]` with `FormsModule` and standard template-driven attributes such as `required` and `name`.

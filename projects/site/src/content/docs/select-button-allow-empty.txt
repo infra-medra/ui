@@ -1,6 +1,3 @@
-## Preventing an empty selection
+## Allow Empty
 
-By default (`allowEmpty` `true`), clicking the already-selected option clears it — back to `null` in
-single mode, shown in the basic example above. Set `allowEmpty="false"` when the control should
-always have a value, like a text-alignment toggle: clicking the current selection again is then a
-no-op, exactly like a native radio button.
+By default (`allowEmpty` `true`), clicking the already-selected option clears it — back to `null` in single mode, shown in the basic example above. Set `[allowEmpty]="false"` when the control should always keep a selection: clicking the current option again becomes a no-op, and in `multiple` mode the last remaining selection cannot be cleared.

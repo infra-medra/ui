@@ -1,0 +1,3 @@
+## Template
+
+Provide an `<ng-template #item>` child to customize the content rendered inside each option button. The template context exposes the resolved option as `$implicit`, its selection state as `selected`, and its zero-based position as `index`.

@@ -1,0 +1,9 @@
+<med-select-button [options]="options" [(ngModel)]="selectedView" ariaLabel="Content view">
+  <ng-template #item let-option let-selected="selected">
+    <span class="inline-flex items-center gap-1.5" [attr.data-selected]="selected">
+      <med-icon [name]="iconFor(option.value)" variant="mini" class="size-4" />
+      <span>{{ option.label }}</span>
+    </span>
+  </ng-template>
+</med-select-button>
+<p class="mt-2 text-sm text-surface-500 dark:text-surface-400">Value: {{ selectedView ?? 'none' }}</p>
