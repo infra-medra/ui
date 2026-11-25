@@ -1,0 +1,3 @@
+## Badge
+
+Pass a string to `badge` to render an inline count or status pill inside the button, and customize its color with `badgeSeverity`.

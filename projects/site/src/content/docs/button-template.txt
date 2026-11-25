@@ -1,0 +1,3 @@
+## Template
+
+Because `medButton` is an attribute directive on `<button>` or `<a>`, any custom markup, icons, or multi-line layout projected between the opening and closing tags renders directly inside the button.

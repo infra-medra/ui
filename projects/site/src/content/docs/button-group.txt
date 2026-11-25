@@ -1,0 +1,3 @@
+## Button Group
+
+Wrap adjacent `button[medButton]` or `a[medButton]` elements inside `<med-button-group>` to join them horizontally with collapsed inner borders, square inner corners, and elevated hover and focus stacking.

@@ -1,0 +1,3 @@
+## Fluid
+
+Add `fluid` to stretch the button to `100%` of its container width (`w-full`).

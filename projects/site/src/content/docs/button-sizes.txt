@@ -1,0 +1,3 @@
+## Sizes
+
+Control button density with `size`: `'sm'` for compact toolbars, `'default'` for standard actions, and `'lg'` for prominent calls to action.

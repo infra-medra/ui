@@ -1,0 +1,3 @@
+## Raised Text
+
+Combine `variant="text"` with `raised` to add subtle elevation (`shadow` / `hover:shadow-md`) to a borderless text button.

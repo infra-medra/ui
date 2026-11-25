@@ -1,0 +1,38 @@
+# Review: add-button-group — verify
+
+**Stage:** verify
+**Verdict:** fail
+**Counts:** critical 1 · major 0 · minor 2
+**Reviewer:** reviewer agent
+**Date:** 2026-11-25
+
+## Summary
+
+`ButtonGroupComponent` (`<med-button-group>`) and `buttonGroupVariants` (`projects/medra/ui/src/lib/button-group/`), their `@medra.dev/ui` exports, `.changeset/button-group.md` (`minor`), and the `/docs/components/button` `#example-button-group` documentation section (`BTD-003`) are implemented cleanly and comply with Constitution Articles I–IV, VII, VIII, and X, with `npm run release:check`, `npx tsc --noEmit -p projects/medra/ui/tsconfig.lib.json`, `npm run build:ui`, `npm run build:css`, `npm run build:site`, Jest `button-group.component.spec.ts` (3/3 passed), Playwright `e2e/site/button-docs.spec.ts` (1 passed), and CLI `Suite: green` all passing (and pre-check-flagged `date-picker-panel.component.spec.ts` / `input-number.component.spec.ts` diffs belonging to uncommitted archived changes with zero test weakening). However, verification fails on one critical Constitution Article V / VI / XI gap: the real-browser Playwright test tagged `BTD-002.S1` in `e2e/site/button-docs.spec.ts:82-112` omits assertions for collapsed inner borders (`marginLeft === '-1px'`), bottom outer corner radii (`radii[0].bottomLeft` and `radii[2].bottomRight`), and real-browser `:focus-visible` / `:hover` stacking (`z-10`). Two minor improvements are also noted for `<a medButton>` unit test coverage and the `/docs/components/button` `Import` snippet.
+
+## Findings
+
+### F-01 [critical] Real-browser `BTD-002.S1` verification omits collapsed inner borders, bottom outer corner radii, and `:focus-visible` / `:hover` stacking (Constitution Articles V, VI, XI)
+
+**Where:** `e2e/site/button-docs.spec.ts:82-112` · `BTD-002`, `BTD-002.S1`, `T003`, Constitution Articles V, VI, XI
+**Problem:** `Scenario BTD-002.S1` requires that when rendered in the DOM and a real browser, adjacent buttons share collapsed inner borders with square inner corners (only the first button retains left rounding and only the last button retains right rounding), and `REQ BTD-002` requires horizontal grouping (`inline-flex items-center`), `-ml-px` border collapse, and `:focus-visible` / `:hover` elevation (`z-10`) so focus rings remain visible. Under Constitution Article V, CSS/layout and real `:hover`/focus behavior must be verified in a real browser because jsdom does not cover computed CSS; under Article VI, focus visibility must have a check; and under Article XI, every test tagged with a scenario ID must assert every Given and Then clause. In `e2e/site/button-docs.spec.ts:82-112` (tagged `BTD-002.S1`), the Playwright test inspects only 10 of 12 `borderRadius` values and omits: (1) `radii[0].bottomLeft !== '0px'` and `radii[2].bottomRight !== '0px'`, (2) real-browser computed collapsed inner borders (`getComputedStyle(el).marginLeft` equal to `'0px'` on the first button and `'-1px'` on the second and third buttons) and horizontal alignment (`inline-flex`), and (3) real-browser keyboard `Tab` (`:focus-visible`) / `:hover` elevation (`getComputedStyle(el).zIndex === '10'` with visible focus ring). `docs/changes/add-button-group/plan.md:22-24` records `Complexity Tracking: None.`
+**Fix:** Extend the `BTD-002.S1` assertions in `e2e/site/button-docs.spec.ts:82-112` to assert `radii[0].bottomLeft !== '0px'` and `radii[2].bottomRight !== '0px'`, assert `getComputedStyle(el).marginLeft` is `'0px'` on index 0 and `'-1px'` on indices 1 and 2 (and single-row horizontal alignment), and move focus via keyboard `Tab` (and/or `.hover()`) onto a grouped button to assert `getComputedStyle(el).zIndex === '10'` and a visible focus ring.
+
+### F-02 [minor] Jest spec exercises `<button medButton>` children only and omits `<a medButton>` projection
+
+**Where:** `projects/medra/ui/src/lib/button-group/button-group.component.spec.ts:7-51` · `BTD-002`
+**Problem:** `REQ BTD-002` specifies that `ButtonGroupComponent` groups both `button[medButton]` and `a[medButton]` children horizontally, whereas `DefaultHostComponent` and `OverrideHostComponent` in `button-group.component.spec.ts:7-31` render only `<button medButton>` elements. While `buttonGroupVariants` (`button-group.styles.ts:10-17`) uses child combinators (`[&>*:...]`) that apply to anchors as well and `BTD-002.S1` specifies `<button medButton>`, `<a medButton>` projection has no direct unit test.
+**Fix:** Add a unit test in `projects/medra/ui/src/lib/button-group/button-group.component.spec.ts` mounting `<med-button-group>` with `<a medButton>` children and asserting `role="group"`, projected anchor count, and the group utility classes.
+
+### F-03 [minor] `/docs/components/button` `Import` code block omits `ButtonGroupComponent`
+
+**Where:** `projects/site/src/app/pages/docs/components/button.page.ts:80,120-121,213-217` · `BTD-003`
+**Problem:** `IMPORT_CODE` at `projects/site/src/app/pages/docs/components/button.page.ts:80` still reads `import { ButtonDirective } from '@medra.dev/ui';`, omitting `ButtonGroupComponent` even though `#example-button-group` (`button.page.ts:213-217`) renders `<med-button-group>` (`ButtonGroupDemo` imports `ButtonGroupComponent` in `button-group.demo.ts:2`) and `ButtonGroupComponent` has no separate component page.
+**Fix:** Update `IMPORT_CODE` in `projects/site/src/app/pages/docs/components/button.page.ts:80` to `import { ButtonDirective, ButtonGroupComponent } from '@medra.dev/ui';`.
+
+## Coverage
+
+| Requirement | Evidence | Status |
+|---|---|---|
+| `BTD-002` | `projects/medra/ui/src/lib/button-group/button-group.component.ts:11-26` (`selector: 'med-button-group'`, `standalone: true`, `OnPush`, `role="group"`, `class` input merged via `mergeClasses`), `projects/medra/ui/src/lib/button-group/button-group.styles.ts:10-17` (`buttonGroupVariants` with `inline-flex items-center`, `[&>*:not(:first-child)]:rounded-l-none`, `[&>*:not(:last-child)]:rounded-r-none`, `[&>*:not(:first-child)]:-ml-px`, `[&>*:hover]:z-10`, `[&>*:focus-visible]:z-10`), `projects/medra/ui/src/public-api.ts:21-22`, `.changeset/button-group.md:1-5` (`"@medra.dev/ui": minor`), `projects/medra/ui/src/lib/button-group/button-group.component.spec.ts:33-74` (3/3 Jest tests passed for `BTD-002.S1` DOM classes and `mergeClasses`), `npm run release:check` (exit 0), `npx tsc --noEmit -p projects/medra/ui/tsconfig.lib.json` (exit 0), `npm run build:ui` (exit 0), `npm run build:css` (exit 0; all utilities verified in `dist/medra/ui/styles.css`), `docs/changes/add-button-group/tasks.md:5-8` (`T001` `red`, `T002` `green`), and CLI `Suite: green`; marked `partial` because `e2e/site/button-docs.spec.ts:82-112` omits real-browser verification of collapsed inner borders (`marginLeft === '-1px'`), `radii[0].bottomLeft`/`radii[2].bottomRight`, and `:focus-visible` / `:hover` `z-10` (`F-01`, Constitution Articles V, VI, XI). | partial |
+| `BTD-003` | `projects/site/src/app/pages/docs/components/button.page.ts:23,40,59,61-78,114,213-217,242,259` (`Button Group` `#example-button-group` in `EXAMPLES`, template section, demo, and raw HTML code block), `projects/site/src/app/pages/docs/components/demos/button-group.demo.ts:1-9`, `projects/site/src/app/pages/docs/components/demos/button-group.demo.html:1-14`, `projects/site/src/content/docs/button-group.txt:1-3` (original English prose), `npm run build:site` (exit 0), `e2e/site/button-docs.spec.ts:24-114` (`1 passed` in Playwright verifying all 16 `#example-*` TOC links in order, visible `#example-button-group` prose/demo/code block, `role="group"`, 3 buttons, outer/inner radii, and zero console/hydration errors), and `docs/changes/add-button-group/tasks.md:9-12` (`T003` `red`, `T004` `green`). | met |

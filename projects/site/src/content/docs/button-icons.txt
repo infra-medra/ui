@@ -1,0 +1,3 @@
+## Icons
+
+Project `<med-icon>` directly inside `<button medButton>` in any position — before the label, after the label, or on its own with `iconOnly` and an `aria-label`.

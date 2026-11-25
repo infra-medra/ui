@@ -1,0 +1,3 @@
+## Text
+
+Use `variant="text"` for low-emphasis actions that sit directly on the surface without a background fill or border until hovered or focused.

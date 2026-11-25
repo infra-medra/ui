@@ -1,0 +1,3 @@
+## Disabled
+
+Use the native HTML `disabled` attribute directly on `<button medButton>`. `ButtonDirective` respects native `:disabled` styling and browser behavior without duplicating a custom `disabled` input.

@@ -1,0 +1,3 @@
+## Rounded
+
+Add the `pill` boolean input to give any button fully rounded pill corners (`rounded-full`), independent of `severity`, `variant`, or `size`.

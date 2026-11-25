@@ -1,0 +1,3 @@
+## Outlined
+
+Set `variant="outlined"` for bordered secondary actions that keep a transparent background while preserving each severity's color and focus ring.
