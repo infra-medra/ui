@@ -2,10 +2,11 @@
 
 **Capability:** `input-number`
 **ID prefix:** `INN`
+**Paths:** `projects/medra/ui/src/lib/input-number/**`
 
 ## Purpose
 
-Defines the documentation requirements for the InputNumber component page (`/docs/components/input-number`).
+Defines the behavior of `med-input-number`: a locale-aware numeric input with formatting, step buttons and bounds that works with Angular forms, and the requirements for its documentation page (`/docs/components/input-number`).
 
 ## Requirements
 
@@ -24,3 +25,45 @@ The `/docs/components/input-number` page SHALL expose an `EXAMPLES` list rendere
 - **Given** an `InputNumberComponent` with `min` and `max` set to `undefined` or bound via Signal Forms `[formField]`
 - **When** the user types or steps values
 - **Then** `aria-valuemin` and `aria-valuemax` are omitted when bounds are `undefined`, values are not clamped to `NaN`, and `[formField]` syncs the numeric value bidirectionally
+
+### REQ INN-003: Number input parsing and formatting
+
+`med-input-number` SHALL display its value formatted for `locale` (default `en-US`) in `decimal` or `currency` mode with `currency`, `currencyDisplay`, `minFractionDigits`, `maxFractionDigits`, `useGrouping`, `prefix` and `suffix`, SHALL show the raw text while the user is typing, SHALL reformat on blur or Enter, and SHALL only emit values that parse as numbers within `min` and `max`.
+
+#### Scenario INN-003.S1: Currency formatting
+
+- **Given** a `med-input-number` in currency mode with USD and value `1234.5`
+- **When** it renders
+- **Then** the input shows `$1,234.50`
+
+#### Scenario INN-003.S2: Out-of-range text
+
+- **Given** `max="10"`
+- **When** the user types `"15"`
+- **Then** no new value is emitted to the form
+
+### REQ INN-004: Number input keyboard and step buttons
+
+`med-input-number` SHALL expose a `spinbutton` with value, min, max and text ARIA attributes, SHALL step by `step` on ArrowUp and ArrowDown and by ten steps on PageUp and PageDown, SHALL jump to `min` on Home and `max` on End when those are set, and SHALL clamp stepped values. When `showButtons` is set it SHALL render increment and decrement buttons in a `stacked`, `horizontal` or `vertical` layout, disabled at their limit.
+
+#### Scenario INN-004.S1: Arrow step
+
+- **Given** a `med-input-number` with value 5 and `step="2"`
+- **When** the user presses ArrowUp
+- **Then** the value becomes 7
+
+#### Scenario INN-004.S2: Button at limit
+
+- **Given** `showButtons`, `max="10"` and value 10
+- **When** it renders
+- **Then** the increment button is disabled
+
+### REQ INN-005: Number input clear and states
+
+`med-input-number` SHALL, when `showClear` is set, show a clear button while a value exists and the control is enabled; activating it SHALL set the value to null. It SHALL support `size`, `variant`, `fluid`, `invalid` and `disabled`.
+
+#### Scenario INN-005.S1: Clear
+
+- **Given** a `med-input-number` with `showClear` and value 3
+- **When** the user activates the clear button
+- **Then** the form value is `null`

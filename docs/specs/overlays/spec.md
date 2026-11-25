@@ -2,13 +2,15 @@
 
 **Capability:** `overlays`
 **ID prefix:** `OVL`
-**Paths:** `projects/medra/ui/src/lib/overlay/**`, `projects/medra/ui/src/lib/dialog/**`, `projects/medra/ui/src/lib/confirm-dialog/**`, `projects/medra/ui/src/lib/confirm-popup/**`, `projects/medra/ui/src/lib/drawer/**`, `projects/medra/ui/src/lib/popover/**`, `projects/medra/ui/src/lib/tooltip/**`, `projects/medra/ui/src/lib/toast/**`, `projects/medra/ui/src/lib/focus-trap/**`, `projects/medra/ui/src/lib/block-ui/**`
+**Paths:** `projects/medra/ui/src/lib/overlay/**`, `projects/medra/ui/src/lib/confirm-dialog/**`, `projects/medra/ui/src/lib/confirm-popup/**`, `projects/medra/ui/src/lib/drawer/**`, `projects/medra/ui/src/lib/popover/**`, `projects/medra/ui/src/lib/tooltip/**`, `projects/medra/ui/src/lib/toast/**`, `projects/medra/ui/src/lib/focus-trap/**`, `projects/medra/ui/src/lib/block-ui/**`
 
 ## Purpose
 
 Lets applications show content above the page: modal dialogs, confirmations, side drawers, anchored popovers, tooltips, toasts and blocking masks. All of them share one overlay service that decides backdrop, dismissal, scrolling and focus behavior.
 
 ## Requirements
+
+<!-- retired: OVL-006, OVL-006.S1, OVL-006.S2, OVL-006.S3, OVL-007, OVL-007.S1, OVL-007.S2, OVL-008, OVL-008.S1, OVL-008.S2, OVL-009, OVL-009.S1 -->
 
 ### REQ OVL-001: Overlay backdrop, dismissal and result
 
@@ -86,71 +88,6 @@ When an overlay supplies a before-close hook returning a promise, the overlay se
 - **When** close is requested
 - **Then** the overlay remains attached until the promise resolves
 - **And** a second close request in the meantime has no effect
-
-### REQ OVL-006: Dialog structure and accessibility
-
-The dialog (`med-dialog` and the dialog service) SHALL render a header, the content, and a close button labelled "Close" by default (customizable via `closeLabel`). It SHALL expose `role="dialog"` and `aria-modal` with `aria-labelledby` pointing at the header. When there is no header and it is not closable, no header bar SHALL be rendered. When the dialog has no header but is closable, only a floating corner close button SHALL be shown; a header, maximizable or draggable dialog SHALL still render the full header bar. Content components SHALL receive `DIALOG_DATA` and a `DialogRef` whose `close(result)` closes the dialog and emits the result.
-
-#### Scenario OVL-006.S1: Accessible dialog
-
-- **Given** a dialog opened with a header
-- **When** it is rendered
-- **Then** the shell has `role="dialog"` and `aria-modal`
-- **And** `aria-labelledby` references the header
-
-#### Scenario OVL-006.S2: Close hidden
-
-- **Given** a dialog with `closable` set to false
-- **When** it is rendered
-- **Then** no close button is shown
-
-#### Scenario OVL-006.S3: Result from content
-
-- **Given** a dialog whose content component injects `DialogRef`
-- **When** the content calls `close(result)`
-- **Then** the dialog closes and the result is emitted to the opener
-
-### REQ OVL-007: Dialog dismissal and declarative use
-
-The dialog SHALL close on Escape and on backdrop click by default, and SHALL ignore each when `closeOnEscape` or `dismissableMask` is false. `med-dialog` SHALL open and close through the two-way `visible` binding, SHALL project `#header` and `#footer` templates, and SHALL emit `shown`/`hidden` (and `onShow`/`onHide`) events. The dialog service's `opened$` SHALL emit once after the caller can subscribe and then complete.
-
-#### Scenario OVL-007.S1: Mask dismissal disabled
-
-- **Given** a dialog with `dismissableMask` false
-- **When** the user clicks the backdrop
-- **Then** the dialog stays open
-
-#### Scenario OVL-007.S2: Declarative visible binding
-
-- **Given** `<med-dialog [(visible)]="open">` with open set to true
-- **When** the user closes the dialog
-- **Then** `open` becomes false
-
-### REQ OVL-008: Dialog position, drag, resize and maximize
-
-The dialog SHALL be centered by default and SHALL anchor to a corner when `position` says so. It SHALL move by dragging the header only when `draggable` is set (never when pressing the close button), accumulating offsets across drags. It SHALL show a resize handle only when `resizable` is set, resizing from the corner without shrinking below a minimum size. It SHALL show a maximize button only when `maximizable` is set, toggling between "Maximize" and "Restore" labels and filling the viewport while maximized; while maximized the resize handle SHALL be hidden and any drag offset SHALL be suppressed but restored on restore. A `maximize` event SHALL report the maximized state.
-
-#### Scenario OVL-008.S1: Not draggable by default
-
-- **Given** a dialog without `draggable`
-- **When** the user drags the header
-- **Then** the dialog does not move
-
-#### Scenario OVL-008.S2: Maximize and restore
-
-- **Given** a maximizable dialog
-- **When** the user activates the maximize button, then activates it again
-- **Then** the dialog first fills the viewport and then returns to its previous size and position
-
-### REQ OVL-009: Dialog responsive breakpoints
-
-When `breakpoints` is provided, the dialog SHALL apply a width rule per breakpoint scoped to that dialog instance only and not while maximized. Without `breakpoints` no such rule SHALL be injected.
-
-#### Scenario OVL-009.S1: Breakpoint rule
-
-- **Given** a dialog with a breakpoint map
-- **When** it is rendered
-- **Then** one media rule per breakpoint applies to that dialog only
 
 ### REQ OVL-010: Confirm dialog
 

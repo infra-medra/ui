@@ -2,10 +2,11 @@
 
 **Capability:** `tabs`
 **ID prefix:** `TBD`
+**Paths:** `projects/medra/ui/src/lib/tabs/**`
 
 ## Purpose
 
-Defines the documentation requirements for the Tabs component page (`/docs/components/tabs`).
+Defines the behavior of `med-tabs` and `med-tab`: tabbed content with keyboard navigation, lazy panels and custom headers, and the requirements for its documentation page (`/docs/components/tabs`).
 
 ## Requirements
 
@@ -32,3 +33,29 @@ The `/docs/components/tabs` page SHALL include a `Template` (`#example-template`
 - **Given** the `/docs/components/tabs` documentation page
 - **When** loaded in a real browser with zero console errors or hydration warnings
 - **Then** the `Template` (`#example-template`) link, prose, custom-header tab demo, and code blocks render visibly and switching custom-header tabs updates the visible `role="tabpanel"`
+
+### REQ TBD-004: Tabs
+
+`med-tabs` SHALL render one tab button per `med-tab` (labelled from its header) and show only the active panel, hiding others. Tab buttons SHALL be linked to panels through `aria-controls`/`aria-labelledby` and `aria-selected`. Clicking SHALL switch the active panel; disabled tabs SHALL carry `aria-disabled` and ignore clicks. `activeIndex` SHALL be two-way. Only the active tab SHALL be in the Tab order; ArrowLeft/ArrowRight SHALL move with wrap skipping disabled tabs, and Home/End jump to ends. `ariaLabel` defaults to "Tabs".
+
+#### Scenario TBD-004.S1: Arrow wrap
+
+- **Given** the last tab is active
+- **When** the user presses ArrowRight
+- **Then** the first enabled tab becomes active
+
+### REQ TBD-005: Lazy tab content and scroll navigators
+
+A tab whose content is wrapped in `<ng-template>` SHALL not create its content until first activated and SHALL never recreate it after switching away; a tab that starts active SHALL create it immediately; tabs without a template SHALL project eagerly. With `showNavigators`, previous/next scroll buttons (labels customizable, defaults "Scroll tabs left"/"Scroll tabs right") SHALL appear only for the direction where the tab strip can scroll, none when nothing overflows, and none by default.
+
+#### Scenario TBD-005.S1: Lazy first activation
+
+- **Given** a tab with lazy content that has never been active
+- **When** it becomes active
+- **Then** its content is created once and stays created afterward
+
+#### Scenario TBD-005.S2: Navigators at start
+
+- **Given** `showNavigators` and overflowing tabs scrolled to the start
+- **When** it renders
+- **Then** only the scroll-right button is shown

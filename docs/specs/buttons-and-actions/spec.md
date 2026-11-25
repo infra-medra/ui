@@ -2,7 +2,7 @@
 
 **Capability:** `buttons-and-actions`
 **ID prefix:** `BTN`
-**Paths:** `projects/medra/ui/src/lib/button/**`, `projects/medra/ui/src/lib/split-button/**`, `projects/medra/ui/src/lib/speed-dial/**`, `projects/medra/ui/src/lib/toolbar/**`
+**Paths:** `projects/medra/ui/src/lib/split-button/**`, `projects/medra/ui/src/lib/speed-dial/**`, `projects/medra/ui/src/lib/toolbar/**`
 
 ## Purpose
 
@@ -10,97 +10,7 @@ Gives users buttons and grouped action controls to trigger commands. Covers the 
 
 ## Requirements
 
-### REQ BTN-001: Button defaults and styling inputs
-
-The `medButton` directive on a `button` or `a` element SHALL render a filled, primary, default-size button when no inputs are set, and SHALL change appearance with `severity`, `variant` (`filled`, `outlined`, `text`, `link`), `size` (`sm`, `default`, `lg`), `pill`, `raised`, `plain`, `fluid` and `iconOnly`.
-
-#### Scenario BTN-001.S1: Defaults
-
-- **Given** a bare `medButton`
-- **When** it renders
-- **Then** it is filled, primary and default size
-
-#### Scenario BTN-001.S2: Reactive change
-
-- **Given** the variant input changes to `outlined`
-- **When** the view updates
-- **Then** the button has a border and no solid background
-
-#### Scenario BTN-001.S3: Icon only
-
-- **Given** `iconOnly` is on
-- **When** it renders
-- **Then** padding is square
-
-### REQ BTN-002: Button native semantics and class overrides
-
-The directive SHALL preserve native button semantics (disabled attribute, type), SHALL show disabled styling for the native disabled state, and a consumer `class` SHALL win over the internal classes on conflict.
-
-#### Scenario BTN-002.S1: Disabled
-
-- **Given** a disabled `button`
-- **When** it renders
-- **Then** the native disabled attribute is present and disabled styling applies
-
-#### Scenario BTN-002.S2: Override
-
-- **Given** a consumer class conflicts with an internal one
-- **When** it renders
-- **Then** the consumer class wins
-
-### REQ BTN-003: Button loading state
-
-With `loading` the button SHALL set `aria-busy` and dim interaction without rendering a spinner of its own, and SHALL cancel Enter and Space activation so no click is produced; when not loading it SHALL leave activation alone.
-
-#### Scenario BTN-003.S1: Busy
-
-- **Given** `loading` is on
-- **When** the button renders
-- **Then** `aria-busy` is true
-
-#### Scenario BTN-003.S2: Keyboard blocked
-
-- **Given** `loading` is on
-- **When** the user presses Enter or Space
-- **Then** the default action is prevented
-
-#### Scenario BTN-003.S3: Not loading
-
-- **Given** `loading` is off
-- **When** the user presses Enter
-- **Then** activation is untouched and bound click handlers run
-
-### REQ BTN-004: Button invalid and badge
-
-`invalid` SHALL set `aria-invalid` and a danger focus ring, and omit the attribute when false. `badge` SHALL render a badge with colour from `badgeSeverity` (default secondary) and remove it when cleared.
-
-#### Scenario BTN-004.S1: Invalid
-
-- **Given** `invalid` is on
-- **When** it renders
-- **Then** `aria-invalid` is true
-
-#### Scenario BTN-004.S2: Badge
-
-- **Given** `badge` is "3"
-- **When** it renders
-- **Then** a badge showing 3 appears
-
-### REQ BTN-005: Button ripple
-
-The button SHALL show a ripple effect on pointer press and SHALL honour `medRippleDisabled`.
-
-#### Scenario BTN-005.S1: Ripple
-
-- **Given** an enabled button
-- **When** the user presses the pointer on it
-- **Then** a ripple is shown
-
-#### Scenario BTN-005.S2: Ripple disabled
-
-- **Given** `medRippleDisabled` is set
-- **When** the user presses
-- **Then** no ripple is shown
+<!-- retired: BTN-001, BTN-001.S1, BTN-001.S2, BTN-001.S3, BTN-002, BTN-002.S1, BTN-002.S2, BTN-003, BTN-003.S1, BTN-003.S2, BTN-003.S3, BTN-004, BTN-004.S1, BTN-004.S2, BTN-005, BTN-005.S1, BTN-005.S2 -->
 
 ### REQ BTN-006: Split-button primary action
 

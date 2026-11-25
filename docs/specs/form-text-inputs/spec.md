@@ -2,7 +2,7 @@
 
 **Capability:** `form-text-inputs`
 **ID prefix:** `TXT`
-**Paths:** `projects/medra/ui/src/lib/input-text/**`, `projects/medra/ui/src/lib/textarea/**`, `projects/medra/ui/src/lib/password/**`, `projects/medra/ui/src/lib/input-number/**`, `projects/medra/ui/src/lib/input-otp/**`, `projects/medra/ui/src/lib/input-chips/**`, `projects/medra/ui/src/lib/input-group/**`, `projects/medra/ui/src/lib/icon-field/**`, `projects/medra/ui/src/lib/float-label/**`, `projects/medra/ui/src/lib/ifta-label/**`, `projects/medra/ui/src/lib/key-filter/**`
+**Paths:** `projects/medra/ui/src/lib/password/**`, `projects/medra/ui/src/lib/input-otp/**`, `projects/medra/ui/src/lib/input-chips/**`, `projects/medra/ui/src/lib/input-group/**`, `projects/medra/ui/src/lib/icon-field/**`, `projects/medra/ui/src/lib/float-label/**`, `projects/medra/ui/src/lib/ifta-label/**`, `projects/medra/ui/src/lib/key-filter/**`
 
 ## Purpose
 
@@ -10,41 +10,7 @@ Provides text-entry form controls (text, multi-line, password, number, one-time 
 
 ## Requirements
 
-### REQ TXT-001: Text input directive
-
-The `input[medInputText]` directive SHALL style a native input, SHALL support `size` (`sm`, `default`, `lg`), `variant` (`outlined`, `filled`), `fluid` and `invalid`, and SHALL work as a forms control (value read and written, touched on blur, disabled state).
-
-#### Scenario TXT-001.S1: Invalid state
-
-- **Given** an input with `medInputText` and `invalid`
-- **When** it renders
-- **Then** it has `aria-invalid="true"` and the danger styling
-
-#### Scenario TXT-001.S2: Forms value
-
-- **Given** an input with `medInputText` bound to a form control with value `"abc"`
-- **When** the user types `"abcd"`
-- **Then** the control value becomes `"abcd"`
-
-### REQ TXT-002: Text input fluid and class override
-
-The `medInputText` directive SHALL be full width when `fluid` is set or when it is inside a fluid context, and SHALL let a consumer `class` win over its default classes.
-
-#### Scenario TXT-002.S1: Fluid
-
-- **Given** an input with `medInputText` and `fluid`
-- **When** it renders
-- **Then** it is full width
-
-### REQ TXT-003: Textarea
-
-The `textarea[medTextarea]` directive SHALL share the text input's `size`, `variant`, `fluid` and `invalid` options and forms integration, SHALL be vertically resizable by default, and SHALL, when `autoResize` is set, disable manual resizing and grow and shrink its height to fit its content on input, on programmatic value writes and on first render.
-
-#### Scenario TXT-003.S1: Auto resize
-
-- **Given** a textarea with `autoResize`
-- **When** the user adds lines of text, then removes them
-- **Then** its height increases and then decreases to fit the content
+<!-- retired: TXT-001, TXT-001.S1, TXT-001.S2, TXT-002, TXT-002.S1, TXT-003, TXT-003.S1, TXT-007, TXT-007.S1, TXT-007.S2, TXT-008, TXT-008.S1, TXT-008.S2, TXT-009, TXT-009.S1 -->
 
 ### REQ TXT-004: Password masking and toggle
 
@@ -81,48 +47,6 @@ When `feedback` is set, `med-password` SHALL, while focused, show a non-modal st
 - **Given** the feedback panel is open
 - **When** the input loses focus
 - **Then** the panel is closed
-
-### REQ TXT-007: Number input parsing and formatting
-
-`med-input-number` SHALL display its value formatted for `locale` (default `en-US`) in `decimal` or `currency` mode with `currency`, `currencyDisplay`, `minFractionDigits`, `maxFractionDigits`, `useGrouping`, `prefix` and `suffix`, SHALL show the raw text while the user is typing, SHALL reformat on blur or Enter, and SHALL only emit values that parse as numbers within `min` and `max`.
-
-#### Scenario TXT-007.S1: Currency formatting
-
-- **Given** a `med-input-number` in currency mode with USD and value `1234.5`
-- **When** it renders
-- **Then** the input shows `$1,234.50`
-
-#### Scenario TXT-007.S2: Out-of-range text
-
-- **Given** `max="10"`
-- **When** the user types `"15"`
-- **Then** no new value is emitted to the form
-
-### REQ TXT-008: Number input keyboard and step buttons
-
-`med-input-number` SHALL expose a `spinbutton` with value, min, max and text ARIA attributes, SHALL step by `step` on ArrowUp and ArrowDown and by ten steps on PageUp and PageDown, SHALL jump to `min` on Home and `max` on End when those are set, and SHALL clamp stepped values. When `showButtons` is set it SHALL render increment and decrement buttons in a `stacked`, `horizontal` or `vertical` layout, disabled at their limit.
-
-#### Scenario TXT-008.S1: Arrow step
-
-- **Given** a `med-input-number` with value 5 and `step="2"`
-- **When** the user presses ArrowUp
-- **Then** the value becomes 7
-
-#### Scenario TXT-008.S2: Button at limit
-
-- **Given** `showButtons`, `max="10"` and value 10
-- **When** it renders
-- **Then** the increment button is disabled
-
-### REQ TXT-009: Number input clear and states
-
-`med-input-number` SHALL, when `showClear` is set, show a clear button while a value exists and the control is enabled; activating it SHALL set the value to null. It SHALL support `size`, `variant`, `fluid`, `invalid` and `disabled`.
-
-#### Scenario TXT-009.S1: Clear
-
-- **Given** a `med-input-number` with `showClear` and value 3
-- **When** the user activates the clear button
-- **Then** the form value is `null`
 
 ### REQ TXT-010: One-time-code input entry
 

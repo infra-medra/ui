@@ -2,7 +2,7 @@
 
 **Capability:** `form-choice-inputs`
 **ID prefix:** `CHO`
-**Paths:** `projects/medra/ui/src/lib/checkbox/**`, `projects/medra/ui/src/lib/radio-button/**`, `projects/medra/ui/src/lib/toggle-switch/**`, `projects/medra/ui/src/lib/toggle-button/**`, `projects/medra/ui/src/lib/select-button/**`, `projects/medra/ui/src/lib/rating/**`, `projects/medra/ui/src/lib/slider/**`, `projects/medra/ui/src/lib/knob/**`, `projects/medra/ui/src/lib/color-picker/**`
+**Paths:** `projects/medra/ui/src/lib/toggle-switch/**`, `projects/medra/ui/src/lib/toggle-button/**`, `projects/medra/ui/src/lib/rating/**`, `projects/medra/ui/src/lib/slider/**`, `projects/medra/ui/src/lib/knob/**`, `projects/medra/ui/src/lib/color-picker/**`
 
 ## Purpose
 
@@ -10,45 +10,7 @@ Provides form controls for picking a value without typing: boolean toggles, sing
 
 ## Requirements
 
-### REQ CHO-001: Checkbox binary mode
-
-`med-checkbox` SHALL, in binary mode (the default when no `value` is set, or when `binary` is true), write `trueValue` (default `true`) when checked and `falseValue` (default `false`) when unchecked, and SHALL show a check mark when checked.
-
-#### Scenario CHO-001.S1: Toggle
-
-- **Given** an unchecked `med-checkbox`
-- **When** the user clicks it
-- **Then** it is checked and the form value is `true`
-
-### REQ CHO-002: Checkbox group mode
-
-`med-checkbox` SHALL, when `value` is set (or `binary` is false), treat the form value as an array and add or remove its `value` from that array when checked or unchecked.
-
-#### Scenario CHO-002.S1: Array membership
-
-- **Given** two `med-checkbox` with values `"a"` and `"b"` sharing one form control holding `["a"]`
-- **When** the user checks the second
-- **Then** the form value is `["a", "b"]`
-
-### REQ CHO-003: Checkbox states
-
-`med-checkbox` SHALL show a minus mark when `indeterminate`, SHALL set `aria-invalid` when `invalid`, SHALL NOT change value when `readonly` (exposing `aria-readonly`), SHALL be non-interactive when disabled, and SHALL support `size` and `variant` (`outlined`, `filled`).
-
-#### Scenario CHO-003.S1: Readonly
-
-- **Given** a checked `med-checkbox` with `readonly`
-- **When** the user clicks it
-- **Then** it stays checked and the form value does not change
-
-### REQ CHO-004: Radio button
-
-`med-radio-button` SHALL require `name` and `value`, SHALL be checked when the form value equals its `value`, SHALL write its `value` to the form when selected, and SHALL support `size`, `variant`, `invalid` and `disabled`.
-
-#### Scenario CHO-004.S1: Selection
-
-- **Given** two `med-radio-button` with the same `name` and values `"a"` and `"b"` and the form value `"a"`
-- **When** the user selects the second
-- **Then** the form value is `"b"` and the first is no longer checked
+<!-- retired: CHO-001, CHO-001.S1, CHO-002, CHO-002.S1, CHO-003, CHO-003.S1, CHO-004, CHO-004.S1, CHO-007, CHO-007.S1, CHO-007.S2, CHO-008, CHO-008.S1, CHO-009, CHO-009.S1 -->
 
 ### REQ CHO-005: Toggle switch
 
@@ -69,42 +31,6 @@ Provides form controls for picking a value without typing: boolean toggles, sing
 - **Given** a `med-toggle-button` with `onLabel="On"` and `offLabel="Off"` that is off
 - **When** the user clicks it
 - **Then** it shows "On", `aria-pressed` is true and the form value is `true`
-
-### REQ CHO-007: Select button selection
-
-`med-select-button` SHALL render one button per option from `options` (primitives, objects with `optionLabel`, `optionValue` and `optionDisabled` keys, or `{label, value, disabled}`), SHALL in single mode select one option and expose `role="radiogroup"` with `role="radio"` buttons, and SHALL in `multiple` mode toggle options into an array and expose `role="group"` with `aria-pressed` buttons.
-
-#### Scenario CHO-007.S1: Single selection
-
-- **Given** a single-mode `med-select-button` with options "A" and "B"
-- **When** the user clicks "B"
-- **Then** the form value is `"B"` and only "B" is checked
-
-#### Scenario CHO-007.S2: Multiple selection
-
-- **Given** a `multiple` `med-select-button`
-- **When** the user clicks "A" then "B"
-- **Then** the form value is `["A", "B"]`
-
-### REQ CHO-008: Select button deselection and disabled options
-
-`med-select-button` SHALL deselect an option when it is clicked again, unless `allowEmpty` is false (in which case the last selected option stays), and SHALL NOT select disabled options.
-
-#### Scenario CHO-008.S1: Deselect
-
-- **Given** a single-mode `med-select-button` with "A" selected
-- **When** the user clicks "A"
-- **Then** the form value is `null`
-
-### REQ CHO-009: Select button keyboard
-
-In single mode, `med-select-button` SHALL use a roving tab stop and SHALL, on ArrowRight/ArrowDown and ArrowLeft/ArrowUp, wrap to the next or previous enabled option, and on Home and End go to the first or last enabled option, selecting and focusing it.
-
-#### Scenario CHO-009.S1: Arrow selects
-
-- **Given** a single-mode `med-select-button` with "A" selected and focused
-- **When** the user presses ArrowRight
-- **Then** "B" is selected and focused
 
 ### REQ CHO-010: Rating selection
 
