@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { FluidDirective } from '../fluid/fluid.directive';
 import { SelectOption } from '../select/select.types';
 import { SelectButtonComponent } from './select-button.component';
 
@@ -297,5 +298,117 @@ describe('SelectButtonComponent (multiple mode)', () => {
 
     btns[0].click();
     expect(onChange).toHaveBeenCalledWith(1);
+  });
+});
+
+describe('SelectButtonComponent (item template & fluid)', () => {
+  // @scenario SLB-002.S1
+  it('SLB-002.S1: renders <ng-template #item> with { $implicit, selected, index } and updates aria-checked and value on click and arrow keys', () => {
+    @Component({
+      standalone: true,
+      imports: [SelectButtonComponent, ReactiveFormsModule],
+      template: `
+        <med-select-button [options]="options" [formControl]="control" ariaLabel="View mode">
+          <ng-template #item let-option let-selected="selected" let-index="index">
+            <span class="custom-item" [attr.data-selected]="selected" [attr.data-index]="index">
+              {{ index }}: {{ option.label }}
+            </span>
+          </ng-template>
+        </med-select-button>
+      `,
+    })
+    class TemplateHostComponent {
+      readonly options: SelectOption<string>[] = [
+        { label: 'List', value: 'list' },
+        { label: 'Grid', value: 'grid' },
+        { label: 'Table', value: 'table' },
+      ];
+      readonly control = new FormControl<string | null>('list');
+    }
+
+    TestBed.configureTestingModule({ imports: [TemplateHostComponent] });
+    const fixture = TestBed.createComponent(TemplateHostComponent);
+    fixture.detectChanges();
+
+    const btns = buttons(fixture);
+    const items = btns
+      .map((b) => b.querySelector('.custom-item') as HTMLElement | null)
+      .filter((el): el is HTMLElement => el !== null);
+    expect(items).toHaveLength(3);
+    expect(items.map((el) => el.textContent?.trim())).toEqual(['0: List', '1: Grid', '2: Table']);
+    expect(items.map((el) => el.getAttribute('data-index'))).toEqual(['0', '1', '2']);
+    expect(items.map((el) => el.getAttribute('data-selected'))).toEqual(['true', 'false', 'false']);
+    expect(btns.map((b) => b.getAttribute('aria-checked'))).toEqual(['true', 'false', 'false']);
+
+    // Click second option
+    btns[1].click();
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.control.value).toBe('grid');
+    expect(btns.map((b) => b.getAttribute('aria-checked'))).toEqual(['false', 'true', 'false']);
+    const afterClickItems = Array.from(fixture.nativeElement.querySelectorAll('.custom-item')) as HTMLElement[];
+    expect(afterClickItems.map((el) => el.getAttribute('data-selected'))).toEqual(['false', 'true', 'false']);
+
+    // Navigate with ArrowRight to third option
+    keydown(btns[1], 'ArrowRight');
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.control.value).toBe('table');
+    expect(btns.map((b) => b.getAttribute('aria-checked'))).toEqual(['false', 'false', 'true']);
+    const afterKeyItems = Array.from(fixture.nativeElement.querySelectorAll('.custom-item')) as HTMLElement[];
+    expect(afterKeyItems.map((el) => el.getAttribute('data-selected'))).toEqual(['false', 'false', 'true']);
+  });
+
+  // @scenario SLB-003.S1
+  it('SLB-003: stays inline-block by default and applies block/w-full/flex-1 when fluid input is set', () => {
+    const fixture = TestBed.createComponent(SelectButtonComponent<string>);
+    fixture.componentRef.setInput('options', OPTIONS);
+    fixture.detectChanges();
+
+    const hostEl = fixture.nativeElement as HTMLElement;
+    const groupEl = hostEl.querySelector('[role="radiogroup"]') as HTMLElement;
+    expect(hostEl.classList.contains('inline-block')).toBe(true);
+    expect(hostEl.classList.contains('w-full')).toBe(false);
+    expect(groupEl.className).toContain('inline-flex');
+    expect(groupEl.className).not.toContain('w-full');
+    expect(buttons(fixture).every((b) => !b.className.includes('flex-1'))).toBe(true);
+
+    fixture.componentRef.setInput('fluid', true);
+    fixture.detectChanges();
+
+    expect(hostEl.classList.contains('block')).toBe(true);
+    expect(hostEl.classList.contains('w-full')).toBe(true);
+    expect(hostEl.classList.contains('inline-block')).toBe(false);
+    expect(groupEl.className).toContain('flex');
+    expect(groupEl.className).toContain('w-full');
+    expect(groupEl.className).not.toContain('inline-flex');
+    expect(buttons(fixture).every((b) => b.className.includes('flex-1') && b.className.includes('justify-center'))).toBe(true);
+  });
+
+  // @scenario SLB-003.S1
+  it('SLB-003: inherits fluid layout from ancestor MED_FLUID_CONTEXT (<med-fluid>)', () => {
+    @Component({
+      standalone: true,
+      imports: [FluidDirective, SelectButtonComponent],
+      template: `
+        <med-fluid>
+          <med-select-button [options]="options" />
+        </med-fluid>
+      `,
+    })
+    class FluidHostComponent {
+      readonly options = OPTIONS;
+    }
+
+    TestBed.configureTestingModule({ imports: [FluidHostComponent] });
+    const fixture = TestBed.createComponent(FluidHostComponent);
+    fixture.detectChanges();
+
+    const selectBtnHost = fixture.nativeElement.querySelector('med-select-button') as HTMLElement;
+    const groupEl = selectBtnHost.querySelector('[role="radiogroup"]') as HTMLElement;
+    expect(selectBtnHost.classList.contains('block')).toBe(true);
+    expect(selectBtnHost.classList.contains('w-full')).toBe(true);
+    expect(groupEl.className).toContain('w-full');
+    expect(buttons(fixture).every((b) => b.className.includes('flex-1') && b.className.includes('justify-center'))).toBe(true);
   });
 });

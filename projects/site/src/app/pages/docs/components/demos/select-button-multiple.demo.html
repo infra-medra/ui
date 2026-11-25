@@ -1,0 +1,2 @@
+<med-select-button [options]="formatOptions" [(ngModel)]="formats" multiple ariaLabel="Text formatting" />
+<p class="mt-2 text-sm text-surface-500 dark:text-surface-400">Value: {{ formats.join(', ') || 'none' }}</p>

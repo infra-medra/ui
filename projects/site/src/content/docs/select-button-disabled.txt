@@ -1,0 +1,3 @@
+## Disabled
+
+Set `disabled` on `<med-select-button>` to disable the entire group, or set `disabled: true` on individual option items (configurable via `optionDisabled`) to disable specific buttons.
