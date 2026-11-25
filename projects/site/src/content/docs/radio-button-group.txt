@@ -1,0 +1,3 @@
+## Group
+
+Group radio buttons by giving every `<med-radio-button>` the same `name` and binding them to a shared `[(ngModel)]` (or `FormControl`), each with a distinct `value`.

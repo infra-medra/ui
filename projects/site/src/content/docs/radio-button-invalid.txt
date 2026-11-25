@@ -1,0 +1,3 @@
+## Invalid
+
+Set `invalid` to apply `aria-invalid="true"` and danger border styling to the radio button ring.

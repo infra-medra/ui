@@ -1,0 +1,16 @@
+<div class="flex flex-col gap-3">
+  <div class="flex flex-wrap items-center gap-5">
+    @for (category of categories; track category.key) {
+      <label class="flex items-center gap-2 text-sm text-surface-900 dark:text-surface-50">
+        <med-radio-button
+          [inputId]="'category-' + category.key"
+          [value]="category.name"
+          [(ngModel)]="selectedCategory"
+          name="category"
+        />
+        {{ category.name }}
+      </label>
+    }
+  </div>
+  <p class="text-sm text-surface-500 dark:text-surface-400">Selected: {{ selectedCategory }}</p>
+</div>

@@ -1,0 +1,23 @@
+<div class="flex flex-col gap-2">
+  <label class="flex items-center gap-2 text-sm text-surface-900 dark:text-surface-50">
+    <med-radio-button
+      name="reactive-plan"
+      value="free"
+      [formControl]="planControl"
+      [invalid]="planControl.invalid && planControl.touched"
+    />
+    Free
+  </label>
+  <label class="flex items-center gap-2 text-sm text-surface-900 dark:text-surface-50">
+    <med-radio-button
+      name="reactive-plan"
+      value="pro"
+      [formControl]="planControl"
+      [invalid]="planControl.invalid && planControl.touched"
+    />
+    Pro
+  </label>
+</div>
+<p class="mt-2 text-sm text-surface-500 dark:text-surface-400">
+  Value: {{ planControl.value ?? 'none' }} · {{ planControl.valid ? 'valid' : 'required' }}
+</p>
