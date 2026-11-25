@@ -1,0 +1,3 @@
+## Template
+
+Place `<ng-template #header>` inside `<med-tab>` to render custom icons, badges, or other markup inside the tab button without needing a `header` string. You can combine `#header` with either eager panel content or an unnamed `<ng-template>` for lazy panel rendering.

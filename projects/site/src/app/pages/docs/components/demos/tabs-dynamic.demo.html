@@ -1,0 +1,10 @@
+<div class="mb-3">
+  <button type="button" medButton variant="outlined" (click)="addTab()">Add tab</button>
+</div>
+<med-tabs class="max-w-lg">
+  @for (tab of tabs(); track tab.id) {
+    <med-tab [header]="tab.header">
+      <p class="p-3 text-sm text-surface-600 dark:text-surface-300">{{ tab.content }}</p>
+    </med-tab>
+  }
+</med-tabs>

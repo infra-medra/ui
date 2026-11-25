@@ -1,0 +1,23 @@
+<div class="mb-3 flex flex-wrap gap-2">
+  <button type="button" medButton [variant]="activeIndex() === 0 ? 'filled' : 'outlined'" (click)="activeIndex.set(0)">
+    Open Tab 1
+  </button>
+  <button type="button" medButton [variant]="activeIndex() === 1 ? 'filled' : 'outlined'" (click)="activeIndex.set(1)">
+    Open Tab 2
+  </button>
+  <button type="button" medButton [variant]="activeIndex() === 2 ? 'filled' : 'outlined'" (click)="activeIndex.set(2)">
+    Open Tab 3
+  </button>
+</div>
+<med-tabs [(activeIndex)]="activeIndex" class="max-w-lg">
+  <med-tab header="General">
+    <p class="p-3 text-sm text-surface-600 dark:text-surface-300">Workspace settings and general preferences.</p>
+  </med-tab>
+  <med-tab header="Members">
+    <p class="p-3 text-sm text-surface-600 dark:text-surface-300">Manage team roles and pending invitations.</p>
+  </med-tab>
+  <med-tab header="Integrations">
+    <p class="p-3 text-sm text-surface-600 dark:text-surface-300">Configure webhooks and connected apps.</p>
+  </med-tab>
+</med-tabs>
+<p class="mt-2 text-sm text-surface-500 dark:text-surface-400">Active index: {{ activeIndex() }}</p>

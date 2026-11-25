@@ -352,4 +352,102 @@ describe('TabsComponent', () => {
       expect(fixture.nativeElement.querySelector('button[aria-label="Rolar à direita"]')).not.toBeNull();
     });
   });
+
+  describe('custom header template (#header) (TBD-002.S1)', () => {
+    const lazyBodyCtorSpy = jest.fn();
+
+    @Component({
+      standalone: true,
+      selector: 'app-custom-lazy-body',
+      template: `<p class="custom-lazy-body">Lazy body content</p>`,
+    })
+    class CustomLazyBody {
+      constructor() {
+        lazyBodyCtorSpy();
+      }
+    }
+
+    @Component({
+      standalone: true,
+      imports: [TabsComponent, TabComponent, CustomLazyBody],
+      template: `
+        <med-tabs>
+          <med-tab>
+            <ng-template #header>
+              <span class="custom-header-1">Overview <em>(3)</em></span>
+            </ng-template>
+            <p class="eager-body">Eager overview body</p>
+          </med-tab>
+          <med-tab>
+            <ng-template #header>
+              <span class="custom-header-2">Activity <span class="badge">New</span></span>
+            </ng-template>
+            <ng-template>
+              <app-custom-lazy-body />
+            </ng-template>
+          </med-tab>
+          <med-tab header="Plain">
+            <p class="plain-body">Plain header body</p>
+          </med-tab>
+        </med-tabs>
+      `,
+    })
+    class CustomHeaderHostComponent {}
+
+    beforeEach(() => {
+      lazyBodyCtorSpy.mockClear();
+    });
+
+    function createCustomHeader() {
+      const fixture = TestBed.createComponent(CustomHeaderHostComponent);
+      fixture.detectChanges();
+      return fixture;
+    }
+
+    it('TBD-002.S1: renders #header inside role="tab" with default activeIndex, eager/lazy bodies, and click/keyboard switching', () => {
+      const fixture = createCustomHeader();
+      const buttons = tabButtons(fixture);
+      const tabPanels = panels(fixture);
+
+      expect(buttons).toHaveLength(3);
+      expect(buttons[0].querySelector('.custom-header-1')?.textContent).toContain('Overview (3)');
+      expect(buttons[1].querySelector('.custom-header-2')?.textContent).toContain('Activity New');
+      expect(buttons[2].textContent?.trim()).toBe('Plain');
+
+      // Eager body is rendered only in panel 0, not in the tab button
+      expect(buttons[0].querySelector('.eager-body')).toBeNull();
+      expect(tabPanels[0].querySelector('.eager-body')?.textContent).toContain('Eager overview body');
+      expect(tabPanels[0].hidden).toBe(false);
+
+      // Lazy body is not instantiated until activated and never treated as header or rendered eagerly
+      expect(lazyBodyCtorSpy).not.toHaveBeenCalled();
+      expect(tabPanels[1].querySelector('.custom-lazy-body')).toBeNull();
+      expect(buttons[1].querySelector('.custom-lazy-body')).toBeNull();
+      expect(tabPanels[1].hidden).toBe(true);
+
+      // Click second custom-header tab (with lazy body)
+      buttons[1].click();
+      fixture.detectChanges();
+
+      expect(buttons[0].getAttribute('aria-selected')).toBe('false');
+      expect(buttons[1].getAttribute('aria-selected')).toBe('true');
+      expect(tabPanels[0].hidden).toBe(true);
+      expect(tabPanels[1].hidden).toBe(false);
+      expect(lazyBodyCtorSpy).toHaveBeenCalledTimes(1);
+      expect(tabPanels[1].querySelector('.custom-lazy-body')?.textContent).toContain('Lazy body content');
+
+      // Keyboard ArrowRight to Plain tab, then ArrowLeft back to custom-header tab 1
+      buttons[1].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true }));
+      fixture.detectChanges();
+      expect(buttons[2].getAttribute('aria-selected')).toBe('true');
+      expect(tabPanels[2].hidden).toBe(false);
+      expect(tabPanels[1].hidden).toBe(true);
+
+      buttons[2].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true, cancelable: true }));
+      fixture.detectChanges();
+      expect(buttons[1].getAttribute('aria-selected')).toBe('true');
+      expect(tabPanels[1].hidden).toBe(false);
+      expect(lazyBodyCtorSpy).toHaveBeenCalledTimes(1);
+    });
+  });
 });

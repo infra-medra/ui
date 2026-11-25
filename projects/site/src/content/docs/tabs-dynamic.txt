@@ -1,0 +1,3 @@
+## Dynamic
+
+Render tabs from an array or signal using `@for`. `TabsComponent` updates its `contentChildren` query automatically as tabs are added or updated.

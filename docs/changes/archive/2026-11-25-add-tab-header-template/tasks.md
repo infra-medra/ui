@@ -1,0 +1,12 @@
+# Tasks: add-tab-header-template
+
+## Task List
+
+- [x] T001 [TEST] [TBD-002] Write failing Jest unit tests in `projects/medra/ui/src/lib/tabs/tabs.component.spec.ts` covering `TBD-002.S1` (`<ng-template #header>` renders inside `button[role="tab"]` alongside both eager `<ng-content />` and lazy `<ng-template>` panels, and switching tabs updates `aria-selected` & visible `role="tabpanel"`) — verify: red (`npx jest projects/medra/ui/src/lib/tabs/tabs.component.spec.ts`)
+  - evidence red 2026-11-25: `npx jest projects/medra/ui/src/lib/tabs/tabs.component.spec.ts` exit 1 — "✓ clicking a tab switches the active panel and updates aria-selected (23 ms) | ✓ links each tab button to its panel via aria-controls/id and aria-labelledby (15 ms) | ✓ only the active tab is in the Tab order (roving tabindex) (26 ms)"
+- [x] T002 [TBD-002] after T001 Implement `headerTemplate` (`#header`), optional `header`, and `contentTemplate` exclusion in `projects/medra/ui/src/lib/tabs/tab.component.ts` + `NgTemplateOutlet` rendering in `tabs.component.ts`, and add `.changeset/tabs-header-template.md` (`minor`) — verify: green (`npx jest projects/medra/ui/src/lib/tabs/tabs.component.spec.ts && npm run build:ui`)
+  - evidence green 2026-11-25: `npx jest projects/medra/ui/src/lib/tabs/tabs.component.spec.ts && npm run build:ui` exit 0
+- [x] T003 [TEST] [TBD-003] after T002 Extend `e2e/site/tabs-docs.spec.ts` with failing Playwright real-browser assertions for `Template` (`#example-template`, `TBD-003.S1`, and custom `#header` tab rendering & panel switching for `TBD-002.S1`) — verify: red (`npx playwright test --reporter=list --project=site e2e/site/tabs-docs.spec.ts`)
+  - evidence red 2026-11-25: `npx playwright test --reporter=list --project=site e2e/site/tabs-docs.spec.ts` exit 1 — "Call log: | - Expect 'toHaveCount' getByRole('navigation', { name: 'On this page' }).locator('a[href*='#example-']') with timeout 5000ms | - waiting for getByRole('navigation', { name: 'On this page' }).locator('a[href*='#example-']')"
+- [x] T004 [TBD-003] after T003 Create `tabs-template.demo.{ts,html}` and `tabs-template.txt` and register `Template` in `projects/site/src/app/pages/docs/components/tabs.page.ts` — verify: green (`npm test && npm run build:ui && npm run build:site && npx playwright test --reporter=list --project=site e2e/site/tabs-docs.spec.ts`)
+  - evidence green 2026-11-25: `npx playwright test --reporter=list --project=site e2e/site/tabs-docs.spec.ts` exit 0

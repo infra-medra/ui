@@ -1,0 +1,32 @@
+<med-tabs class="max-w-lg">
+  <med-tab>
+    <ng-template #header>
+      <med-icon name="user" variant="mini" class="size-4" />
+      <span>Profile</span>
+    </ng-template>
+    <p class="p-3 text-sm text-surface-600 dark:text-surface-300">
+      Update your display name, avatar, and public bio.
+    </p>
+  </med-tab>
+  <med-tab>
+    <ng-template #header>
+      <med-icon name="envelope" variant="mini" class="size-4" />
+      <span>Messages</span>
+      <med-badge value="3" size="sm" />
+    </ng-template>
+    <p class="p-3 text-sm text-surface-600 dark:text-surface-300">
+      Review unread team conversations and direct messages.
+    </p>
+  </med-tab>
+  <med-tab>
+    <ng-template #header>
+      <med-icon name="bell" variant="mini" class="size-4" />
+      <span>Alerts</span>
+    </ng-template>
+    <ng-template>
+      <p class="p-3 text-sm text-surface-600 dark:text-surface-300">
+        Lazy alert feed — custom #header renders immediately while panel content loads on first activation.
+      </p>
+    </ng-template>
+  </med-tab>
+</med-tabs>

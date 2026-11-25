@@ -1,0 +1,3 @@
+## Disabled
+
+Set `[disabled]="true"` on a `<med-tab>` to prevent pointer and keyboard activation. Disabled tabs expose `aria-disabled="true"` and are skipped when navigating with arrow keys.

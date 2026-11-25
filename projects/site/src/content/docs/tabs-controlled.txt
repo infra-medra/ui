@@ -1,0 +1,3 @@
+## Controlled
+
+Bind `[(activeIndex)]` to a signal or property to read and update the active tab programmatically from outside `<med-tabs>`.

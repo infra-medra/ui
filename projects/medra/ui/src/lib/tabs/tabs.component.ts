@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, afterNextRender, booleanAttribute, computed, contentChildren, effect, inject, input, model, signal, viewChild, viewChildren } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { IconComponent } from '../icon/icon.component';
 import { mergeClasses } from '../utils/merge-classes';
 import { TabComponent } from './tab.component';
@@ -49,7 +50,7 @@ let nextTabsId = 0;
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'block' },
-  imports: [IconComponent],
+  imports: [IconComponent, NgTemplateOutlet],
   template: `
     <div class="flex items-center gap-1">
       @if (showNavigators() && canScrollPrev()) {
@@ -77,7 +78,11 @@ let nextTabsId = 0;
             (click)="selectIndex(i)"
             (keydown)="onKeydown($event, i)"
           >
-            {{ tab.header() }}
+            @if (tab.headerTemplate(); as headerTemplate) {
+              <ng-container [ngTemplateOutlet]="headerTemplate" />
+            } @else {
+              {{ tab.header() }}
+            }
           </button>
         }
       </div>
@@ -199,7 +204,7 @@ export class TabsComponent {
   protected tabButtonClass(tab: TabComponent, index: number): string {
     const isActive = index === this.activeIndex();
     return mergeClasses(
-      '-mb-px shrink-0 border-b-2 px-4 py-2 text-sm font-medium transition-colors duration-(--transition-duration-base)',
+      '-mb-px inline-flex shrink-0 items-center gap-2 border-b-2 px-4 py-2 text-sm font-medium transition-colors duration-(--transition-duration-base)',
       isActive
         ? 'border-brand-500 text-brand-600 dark:border-brand-400 dark:text-brand-400'
         : 'border-transparent text-surface-500 hover:text-surface-700 dark:text-surface-400 dark:hover:text-surface-200',
