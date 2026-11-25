@@ -79,7 +79,8 @@ describe('DialogService', () => {
     expect(container.querySelector('[aria-label="Close"]')).toBeNull();
   });
 
-  it('hides the close button when closable is false', () => {
+  // DLD-004.S2
+  it('[DLD-004.S2] hides the close button when closable is false', () => {
     open(TestContentComponent, { header: 'Title', closable: false });
     const container = getOverlayContainerElement();
 
@@ -137,7 +138,8 @@ describe('DialogService', () => {
     expect(container.querySelector('p')?.textContent).toContain('42');
   });
 
-  it('sets role=dialog and aria-modal on the shell, with aria-labelledby matching the header', () => {
+  // DLD-004.S1
+  it('[DLD-004.S1] sets role=dialog and aria-modal on the shell, with aria-labelledby matching the header', () => {
     open(TestContentComponent, { header: 'Title' });
     const container = getOverlayContainerElement();
     const shell = container.querySelector('med-dialog-shell') as HTMLElement;
@@ -148,7 +150,8 @@ describe('DialogService', () => {
     expect(shell.getAttribute('aria-labelledby')).toBe(header.id);
   });
 
-  it("the content component's DialogRef.close(result) closes the overlay and emits the result", (done) => {
+  // DLD-004.S3
+  it("[DLD-004.S3] the content component's DialogRef.close(result) closes the overlay and emits the result", (done) => {
     const dialogRef = open<TestContentComponent>(TestContentComponent, { header: 'Title' });
 
     dialogRef.closed$.subscribe((result) => {
@@ -203,7 +206,8 @@ describe('DialogService', () => {
       return shell().querySelector('h2')!.parentElement as HTMLElement;
     }
 
-    it('does not move on drag when draggable is not set (default)', () => {
+    // DLD-006.S1
+    it('[DLD-006.S1] does not move on drag when draggable is not set (default)', () => {
       open(TestContentComponent, { header: 'Title' });
       header().dispatchEvent(pointer('pointerdown', 100, 100));
       header().dispatchEvent(pointer('pointermove', 150, 130));
@@ -305,9 +309,11 @@ describe('DialogService', () => {
       expect(shell().querySelector('[aria-label="Maximize"]')).toBeNull();
     });
 
-    it('toggles between Maximize and Restore, filling the viewport while maximized', () => {
+    // DLD-006.S2
+    it('[DLD-006.S2] toggles between Maximize and Restore, filling the viewport while maximized', () => {
       open(TestContentComponent, { header: 'Title', maximizable: true });
       expect(maximizeButton().getAttribute('aria-label')).toBe('Maximize');
+      const before = { width: shell().style.width, height: shell().style.height, transform: shell().style.transform };
 
       maximizeButton().click();
       appRef.tick();
@@ -322,6 +328,7 @@ describe('DialogService', () => {
       appRef.tick();
       expect(maximizeButton().getAttribute('aria-label')).toBe('Maximize');
       expect(shell().style.maxWidth).toBe('');
+      expect({ width: shell().style.width, height: shell().style.height, transform: shell().style.transform }).toEqual(before);
     });
 
     it('suppresses the resize handle while maximized', () => {
@@ -367,7 +374,8 @@ describe('DialogService', () => {
       expect(getOverlayContainerElement().querySelector('med-dialog-shell')).toBeNull();
     });
 
-    it('dismissableMask: false keeps the dialog open on a backdrop click', () => {
+    // DLD-005.S1
+    it('[DLD-005.S1] dismissableMask: false keeps the dialog open on a backdrop click', () => {
       open(TestContentComponent, { header: 'Title', dismissableMask: false });
       backdrop().click();
       appRef.tick();
@@ -405,7 +413,8 @@ describe('DialogService', () => {
       expect(Array.from(document.querySelectorAll('style')).some((el) => el.textContent?.includes(dialogId!))).toBe(false);
     });
 
-    it('injects a scoped <style> with one @media rule per breakpoint, targeting this dialog\'s own data-dialog-id', () => {
+    // DLD-007.S1
+    it('[DLD-007.S1] injects a scoped <style> with one @media rule per breakpoint, targeting this dialog\'s own data-dialog-id', () => {
       open(TestContentComponent, { header: 'Title', breakpoints: { '960px': '75vw', '640px': '90vw' } });
       const shell = getOverlayContainerElement().querySelector('med-dialog-shell') as HTMLElement;
       const dialogId = shell.getAttribute('data-dialog-id');
@@ -416,6 +425,7 @@ describe('DialogService', () => {
       expect(styleEl!.textContent).toContain('75vw');
       expect(styleEl!.textContent).toContain('@media (max-width: 640px)');
       expect(styleEl!.textContent).toContain('90vw');
+      expect(styleEl!.textContent!.match(/@media/g)).toHaveLength(2);
     });
 
     it('guards the rule against the maximized state', () => {

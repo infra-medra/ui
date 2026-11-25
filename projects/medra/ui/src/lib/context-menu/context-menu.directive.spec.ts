@@ -380,4 +380,102 @@ describe('ContextMenuDirective', () => {
       expect(menuPanel()).not.toBeNull();
     });
   });
+
+  describe('programmatic show()', () => {
+    @Component({
+      standalone: true,
+      imports: [ContextMenuDirective],
+      template: `
+        <div class="target" #cm="medContextMenu" [medContextMenu]="items">Menu host</div>
+        <button type="button" class="opener" (click)="cm.show($event)">Open</button>
+      `,
+    })
+    class ExportAsHostComponent {
+      items: MenuItem[] = [{ label: 'Rename' }];
+    }
+
+    function clickEvent(): MouseEvent {
+      return new MouseEvent('click', { bubbles: true, cancelable: true, clientX: 20, clientY: 30 });
+    }
+
+    // NAV-025.S1
+    it('[NAV-025.S1] opens at a pointer event through the medContextMenu export and prevents its default action', () => {
+      const fixture = TestBed.createComponent(ExportAsHostComponent);
+      fixture.detectChanges();
+      const opener = fixture.nativeElement.querySelector('.opener') as HTMLElement;
+      const event = clickEvent();
+
+      opener.dispatchEvent(event);
+      fixture.detectChanges();
+
+      expect(fixture.componentInstance.items.length).toBeGreaterThan(0);
+      expect(menuPanel()).not.toBeNull();
+      expect(event.defaultPrevented).toBe(true);
+    });
+
+    // NAV-025.S2
+    it("[NAV-025.S2] calls a given preventDefault callback instead of the event's own preventDefault()", () => {
+      const fixture = create();
+      const event = clickEvent();
+      const eventPreventDefault = jest.spyOn(event, 'preventDefault');
+      const callback = jest.fn();
+
+      fixture.componentInstance.contextMenu.show(event, callback);
+      fixture.detectChanges();
+
+      expect(fixture.componentInstance.items.length).toBeGreaterThan(0);
+      expect(menuPanel()).not.toBeNull();
+      expect(callback).toHaveBeenCalledTimes(1);
+      expect(eventPreventDefault).not.toHaveBeenCalled();
+    });
+
+    // NAV-025.S3
+    it('[NAV-025.S3] opens anchored to an element', () => {
+      const fixture = create();
+      const anchor = fixture.nativeElement.querySelector('.other') as HTMLElement;
+
+      fixture.componentInstance.contextMenu.show(anchor);
+      fixture.detectChanges();
+
+      expect(fixture.componentInstance.items.length).toBeGreaterThan(0);
+      expect(menuPanel()).not.toBeNull();
+    });
+
+    // NAV-025.S4
+    it('[NAV-025.S4] opens nothing and leaves the event alone when contextMenuDisabled is true', () => {
+      const fixture = create((host) => (host.disabled = true));
+      const event = clickEvent();
+
+      fixture.componentInstance.contextMenu.show(event);
+      fixture.detectChanges();
+
+      expect(menuPanel()).toBeNull();
+      expect(event.defaultPrevented).toBe(false);
+    });
+
+    // NAV-025.S4
+    it('[NAV-025.S4] opens nothing and leaves the event alone when there are no items', () => {
+      const fixture = create((host) => (host.items = []));
+      const event = clickEvent();
+
+      fixture.componentInstance.contextMenu.show(event);
+      fixture.detectChanges();
+
+      expect(menuPanel()).toBeNull();
+      expect(event.defaultPrevented).toBe(false);
+    });
+
+    // NAV-025.S5
+    it('[NAV-025.S5] a repeated call closes the previous panel and keeps exactly one open', () => {
+      const fixture = create();
+      fixture.componentInstance.contextMenu.show({ x: 10, y: 10 });
+      fixture.detectChanges();
+      expect(menuPanel()).not.toBeNull();
+
+      fixture.componentInstance.contextMenu.show({ x: 50, y: 60 });
+      fixture.detectChanges();
+
+      expect(document.querySelectorAll('[role="menu"]').length).toBe(1);
+    });
+  });
 });

@@ -73,6 +73,19 @@ class NonModalStickyDialogHostComponent {
   readonly visible = signal(true);
 }
 
+@Component({
+  standalone: true,
+  imports: [DialogComponent],
+  template: `
+    <med-dialog [(visible)]="open" header="Closable">
+      <p>Closable body</p>
+    </med-dialog>
+  `,
+})
+class ClosableDialogHostComponent {
+  open = true;
+}
+
 function getOverlayContainer(): HTMLElement {
   return document.querySelector('.cdk-overlay-container') as HTMLElement;
 }
@@ -86,6 +99,7 @@ describe('DialogComponent (UI-009.S1)', () => {
         UnsafeTextDialogHostComponent,
         NonModalDialogHostComponent,
         NonModalStickyDialogHostComponent,
+        ClosableDialogHostComponent,
       ],
     });
   });
@@ -125,6 +139,21 @@ describe('DialogComponent (UI-009.S1)', () => {
     expect(fixture.componentInstance.visible()).toBe(false);
     expect(fixture.componentInstance.hideCount).toBe(1);
     expect(getOverlayContainer()?.querySelector('[role="dialog"]') ?? null).toBeNull();
+  });
+
+  // DLD-005.S2
+  it('[DLD-005.S2] closing the dialog from its close button sets the bound visible value to false', () => {
+    const fixture = TestBed.createComponent(ClosableDialogHostComponent);
+    fixture.detectChanges();
+    expect(fixture.componentInstance.open).toBe(true);
+    const dialog = getOverlayContainer().querySelector('[role="dialog"]') as HTMLElement;
+    expect(dialog).not.toBeNull();
+
+    (dialog.querySelector('button[aria-label="Close"]') as HTMLButtonElement).click();
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.open).toBe(false);
+    expect(getOverlayContainer().querySelector('[role="dialog"]')).toBeNull();
   });
 
   it('[UI-009.S1][M-03] escapes header and body text without injecting HTML DOM elements', () => {

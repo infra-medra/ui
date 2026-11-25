@@ -55,7 +55,8 @@ describe('RadioButtonComponent', () => {
       expect(proInput.checked).toBe(false);
     });
 
-    it('selecting one radio deselects the other through the shared control', () => {
+    // RDB-002.S1
+    it('[RDB-002.S1] selecting one radio deselects the other through the shared control', () => {
       const fixture = TestBed.createComponent(GroupHostComponent);
       fixture.detectChanges();
       const [freeInput, proInput] = nativeInputs(fixture);

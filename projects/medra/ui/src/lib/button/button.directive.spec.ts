@@ -78,7 +78,8 @@ describe('ButtonDirective', () => {
     return { fixture, button: fixture.componentInstance.host().nativeElement };
   }
 
-  it('applies the filled/primary/default-size classes by default', () => {
+  // BTD-004.S1
+  it('[BTD-004.S1] applies the filled/primary/default-size classes by default', () => {
     const { button } = createHost();
 
     expect(button.className).toContain('bg-brand-500');
@@ -93,7 +94,8 @@ describe('ButtonDirective', () => {
     expect(button.className).not.toContain('bg-brand-500');
   });
 
-  it('merges a consumer class override via mergeClasses, winning over the internal class', () => {
+  // BTD-005.S2
+  it('[BTD-005.S2] merges a consumer class override via mergeClasses, winning over the internal class', () => {
     const { button } = createHost({ extraClass: 'rounded-full' });
 
     expect(button.className).toContain('rounded-full');
@@ -113,7 +115,8 @@ describe('ButtonDirective', () => {
     expect(button.type).toBe('button');
   });
 
-  it('triggers the ripple effect (hostDirectives wiring) on pointerdown', () => {
+  // BTD-008.S1
+  it('[BTD-008.S1] triggers the ripple effect (hostDirectives wiring) on pointerdown', () => {
     const { button } = createHost();
 
     firePointerDown(button);
@@ -122,22 +125,70 @@ describe('ButtonDirective', () => {
     expect(button.querySelector('span')).not.toBeNull();
   });
 
-  it('forwards medRippleDisabled to the underlying RippleDirective', () => {
+  // BTD-008.S2
+  it('[BTD-008.S2] forwards medRippleDisabled to the underlying RippleDirective', () => {
     const { button } = createHost({ rippleDisabled: true });
 
     firePointerDown(button);
 
     expect(animateSpy).not.toHaveBeenCalled();
+    expect(button.querySelector('span')).toBeNull();
   });
 
-  it('sets square padding when iconOnly is true', () => {
+  // BTD-004.S2
+  it('[BTD-004.S2] switching the variant to outlined adds a border and drops the solid background', () => {
+    const { fixture, button } = createHost();
+    expect(button.className).toContain('bg-brand-500');
+
+    fixture.componentInstance.variant = 'outlined';
+    fixture.changeDetectorRef.markForCheck();
+    fixture.detectChanges();
+
+    expect(button.className.split(' ')).toContain('border');
+    expect(button.className).toContain('border-brand-500');
+    expect(button.className).not.toContain('bg-brand-500');
+  });
+
+  // BTD-005.S1
+  it('[BTD-005.S1] a disabled button has the native disabled attribute and the disabled styling', () => {
+    const { button } = createHost({ disabled: true });
+
+    expect(button.hasAttribute('disabled')).toBe(true);
+    expect(button.className).toContain('disabled:pointer-events-none');
+    expect(button.className).toContain('disabled:opacity-(--opacity-disabled)');
+  });
+
+  // BTD-006.S3
+  it('[BTD-006.S3] a non-loading button leaves Enter alone and runs its bound click handler', () => {
+    const { fixture, button } = createHost({ loading: false });
+
+    const enter = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true });
+    button.dispatchEvent(enter);
+    button.click();
+
+    expect(enter.defaultPrevented).toBe(false);
+    expect(fixture.componentInstance.clicks).toBe(1);
+  });
+
+  // BTD-007.S2
+  it('[BTD-007.S2] badge "3" renders a badge showing 3', () => {
+    const { fixture, button } = createHost();
+    fixture.componentInstance.badge.set('3');
+    fixture.detectChanges();
+
+    expect(button.querySelector('[data-med-button-badge]')?.textContent?.trim()).toBe('3');
+  });
+
+  // BTD-004.S3
+  it('[BTD-004.S3] sets square padding when iconOnly is true', () => {
     const { button } = createHost({ iconOnly: true });
 
     expect(button.className).toContain('aspect-square');
     expect(button.className).toContain('p-2.5');
   });
 
-  it('applies aria-invalid and the shared danger ring when invalid is true', () => {
+  // BTD-007.S1
+  it('[BTD-007.S1] applies aria-invalid and the shared danger ring when invalid is true', () => {
     const { button } = createHost({ invalid: true });
 
     expect(button.getAttribute('aria-invalid')).toBe('true');
@@ -175,7 +226,8 @@ describe('ButtonDirective', () => {
     expect(button.className).toContain('bg-danger-500');
   });
 
-  it('sets aria-busy and dims interaction when loading is true, without rendering a spinner', () => {
+  // BTD-006.S1
+  it('[BTD-006.S1] sets aria-busy and dims interaction when loading is true, without rendering a spinner', () => {
     const { button } = createHost({ loading: true });
 
     expect(button.getAttribute('aria-busy')).toBe('true');
@@ -190,7 +242,8 @@ describe('ButtonDirective', () => {
     expect(button.getAttribute('aria-busy')).toBeNull();
   });
 
-  it('cancels the Enter-key activation behavior when loading is true, so a real browser never synthesizes the resulting click (Wave 2 fix)', () => {
+  // BTD-006.S2
+  it('[BTD-006.S2] cancels the Enter-key activation behavior when loading is true, so a real browser never synthesizes the resulting click (Wave 2 fix)', () => {
     const { button } = createHost({ loading: true });
 
     const event = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true });
@@ -199,7 +252,8 @@ describe('ButtonDirective', () => {
     expect(event.defaultPrevented).toBe(true);
   });
 
-  it('cancels the Space-key activation behavior when loading is true', () => {
+  // BTD-006.S2
+  it('[BTD-006.S2] cancels the Space-key activation behavior when loading is true', () => {
     const { button } = createHost({ loading: true });
 
     const event = new KeyboardEvent('keydown', { key: ' ', bubbles: true, cancelable: true });

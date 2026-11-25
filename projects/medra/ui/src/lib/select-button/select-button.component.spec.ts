@@ -412,3 +412,102 @@ describe('SelectButtonComponent (item template & fluid)', () => {
     expect(buttons(fixture).every((b) => b.className.includes('flex-1') && b.className.includes('justify-center'))).toBe(true);
   });
 });
+
+describe('SelectButtonComponent scenarios', () => {
+  const AB: SelectOption<string>[] = [
+    { label: 'A', value: 'A' },
+    { label: 'B', value: 'B' },
+  ];
+
+  beforeEach(() => {
+    HTMLElement.prototype.animate = jest.fn().mockReturnValue({ finished: Promise.resolve() }) as unknown as HTMLElement['animate'];
+  });
+
+  afterEach(() => {
+    delete (HTMLElement.prototype as { animate?: unknown }).animate;
+  });
+
+  @Component({
+    standalone: true,
+    imports: [SelectButtonComponent, ReactiveFormsModule],
+    template: `<med-select-button [options]="options" [formControl]="choice" />`,
+  })
+  class SingleHostComponent {
+    readonly options = AB;
+    readonly choice = new FormControl<string | null>(null);
+  }
+
+  @Component({
+    standalone: true,
+    imports: [SelectButtonComponent, ReactiveFormsModule],
+    template: `<med-select-button multiple [options]="options" [formControl]="choice" />`,
+  })
+  class MultipleHostComponent {
+    readonly options = AB;
+    readonly choice = new FormControl<string[] | null>(null);
+  }
+
+  function checked(fixture: { nativeElement: HTMLElement }): string[] {
+    return buttons(fixture)
+      .filter((b) => b.getAttribute('aria-checked') === 'true')
+      .map((b) => b.textContent?.trim() ?? '');
+  }
+
+  // SLB-005.S1
+  it('[SLB-005.S1] clicking "B" in single mode sets the form value to "B" and checks only "B"', () => {
+    const fixture = TestBed.createComponent(SingleHostComponent);
+    fixture.detectChanges();
+    expect(buttons(fixture).map((b) => b.textContent?.trim())).toEqual(['A', 'B']);
+
+    buttons(fixture)[1].click();
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.choice.value).toBe('B');
+    expect(checked(fixture)).toEqual(['B']);
+  });
+
+  // SLB-005.S2
+  it('[SLB-005.S2] clicking "A" then "B" in multiple mode sets the form value to ["A", "B"]', () => {
+    const fixture = TestBed.createComponent(MultipleHostComponent);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[role="group"]')).not.toBeNull();
+
+    buttons(fixture)[0].click();
+    fixture.detectChanges();
+    buttons(fixture)[1].click();
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.choice.value).toEqual(['A', 'B']);
+  });
+
+  // SLB-006.S1
+  it('[SLB-006.S1] clicking the selected "A" in single mode sets the form value to null', () => {
+    const fixture = TestBed.createComponent(SingleHostComponent);
+    fixture.componentInstance.choice.setValue('A');
+    fixture.detectChanges();
+    expect(checked(fixture)).toEqual(['A']);
+
+    buttons(fixture)[0].click();
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.choice.value).toBeNull();
+  });
+
+  // SLB-007.S1
+  it('[SLB-007.S1] ArrowRight on the selected, focused "A" selects and focuses "B"', () => {
+    const fixture = TestBed.createComponent(SingleHostComponent);
+    fixture.componentInstance.choice.setValue('A');
+    fixture.detectChanges();
+    const [a] = buttons(fixture);
+    a.focus();
+    expect(document.activeElement).toBe(a);
+    expect(checked(fixture)).toEqual(['A']);
+
+    keydown(a, 'ArrowRight');
+    fixture.detectChanges();
+
+    expect(checked(fixture)).toEqual(['B']);
+    expect(fixture.componentInstance.choice.value).toBe('B');
+    expect(document.activeElement).toBe(buttons(fixture)[1]);
+  });
+});
