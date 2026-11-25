@@ -1,6 +1,3 @@
-## Severities
+## Severity
 
-Eight severities cover the usual range from a primary call to action to a destructive one.
-`secondary` and `contrast` are neutral — everything else maps to a semantic color shared across
-the whole library (the same `info`/`success`/`warn`/`help`/`danger` tokens show up on Message,
-Tag, and other components).
+Eight severities cover the usual range from a primary call to action to a destructive one. `secondary` and `contrast` are neutral — everything else maps to a semantic color shared across the whole library (the same `info`/`success`/`warn`/`help`/`danger` tokens show up on Message, Tag, and other components).

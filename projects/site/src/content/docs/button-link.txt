@@ -1,0 +1,3 @@
+## Link
+
+Set `variant="link"` on a `<button medButton>` to style an action like an inline hyperlink, or apply `medButton` directly to a native `<a>` element for real anchor navigation with `href`, `target`, and `rel`.

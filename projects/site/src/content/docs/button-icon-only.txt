@@ -1,0 +1,3 @@
+## Icon Only
+
+Add `iconOnly` for square icon buttons (with equal padding around the icon) and combine with `pill` or `variant="outlined"` as needed. Always provide a descriptive `aria-label` when there is no visible text.

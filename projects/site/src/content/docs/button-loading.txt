@@ -1,0 +1,3 @@
+## Loading
+
+Setting `loading` sets `aria-busy="true"`, dims the button, and blocks both pointer clicks and synthetic keyboard activation (`Enter` / `Space`). Because `medButton` is an attribute directive with no template of its own, project a `<med-progress-spinner>` inside the button while `loading` is active.

@@ -18,6 +18,8 @@ export * as medCustomIcons from './lib/icon/icons/custom';
 
 export * from './lib/button/button.directive';
 export * from './lib/button/button.styles';
+export * from './lib/button-group/button-group.component';
+export * from './lib/button-group/button-group.styles';
 
 export * from './lib/checkbox/checkbox.component';
 export * from './lib/checkbox/checkbox.styles';
