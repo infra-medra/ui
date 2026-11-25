@@ -1,8 +1,22 @@
 export type DatePickerSelectionMode = 'single' | 'multiple' | 'range';
 
+export type DatePickerView = 'date' | 'month' | 'year';
+
 export interface DateRange {
   readonly start: Date | null;
   readonly end: Date | null;
+}
+
+export interface DatePickerDateTemplateContext {
+  readonly $implicit: Date;
+  readonly date: number;
+  readonly month: number;
+  readonly year: number;
+  readonly today: boolean;
+  readonly selected: boolean;
+  readonly disabled: boolean;
+  readonly selectable: boolean;
+  readonly outsideMonth: boolean;
 }
 
 /**

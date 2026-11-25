@@ -1,0 +1,4 @@
+<med-date-picker [(ngModel)]="range" selectionMode="range" showClear class="max-w-sm" />
+<p class="mt-2 text-sm text-surface-500 dark:text-surface-400">
+  Range: {{ range.start ? range.start.toLocaleDateString('en-US') : 'none' }} – {{ range.end ? range.end.toLocaleDateString('en-US') : 'none' }}
+</p>

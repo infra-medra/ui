@@ -1,0 +1,3 @@
+## Range
+
+`selectionMode="range"` binds a `DateRange` object (`{ start: Date | null; end: Date | null }`) and renders two side-by-side months by default. Pick a start date and an end date to complete the range; the text input is read-only in this mode.

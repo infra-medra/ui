@@ -1,0 +1,3 @@
+## Invalid
+
+`invalid` applies the error border, focus ring, and `aria-invalid="true"` state to the input element.

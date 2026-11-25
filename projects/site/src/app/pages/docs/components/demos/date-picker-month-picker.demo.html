@@ -1,0 +1,4 @@
+<med-date-picker [(ngModel)]="month" view="month" showClear class="max-w-xs" />
+<p class="mt-2 text-sm text-surface-500 dark:text-surface-400">
+  Selected: {{ month ? month.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : 'none' }}
+</p>

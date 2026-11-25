@@ -1,14 +1,15 @@
-import { ChangeDetectionStrategy, Component, ElementRef, OnDestroy, booleanAttribute, computed, forwardRef, inject, input, numberAttribute, signal, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, OnDestroy, TemplateRef, booleanAttribute, computed, contentChild, forwardRef, inject, input, numberAttribute, signal, viewChild } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { MED_FLUID_CONTEXT } from '../fluid/fluid.directive';
 import { IconComponent } from '../icon/icon.component';
 import { OverlayHandle, OverlayService } from '../overlay/overlay.service';
 import { mergeClasses } from '../utils/merge-classes';
-import { InputTextSize, inputTextVariants } from '../input-text/input-text.styles';
+import { FieldVariant, InputTextSize, inputTextVariants } from '../input-text/input-text.styles';
 import { SELECT_PANEL_CLASS } from '../select/select.styles';
 import { DATE_PICKER_TRAILING_PADDING_REM } from './date-picker.styles';
 import { DatePickerPanelComponent } from './date-picker-panel.component';
 import { formatDate, formatRange, formatTime, parseDate, startOfDay } from './date-format';
-import { DatePickerSelectionMode, DatePickerValue, DateRange } from './date-picker.types';
+import { DatePickerDateTemplateContext, DatePickerSelectionMode, DatePickerValue, DatePickerView, DateRange } from './date-picker.types';
 
 let nextDatePickerId = 0;
 
@@ -71,9 +72,14 @@ let nextDatePickerId = 0;
 @Component({
   selector: 'med-date-picker',
   standalone: true,
-  imports: [IconComponent],
+  imports: [IconComponent, DatePickerPanelComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { class: 'relative inline-block w-full' },
+  host: {
+    class: 'relative inline-block w-full',
+    '[class.block]': 'isFluid()',
+    '[class.inline-block]': '!isFluid()',
+    '[class.med-date-picker-fluid]': 'isFluid()',
+  },
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -82,59 +88,113 @@ let nextDatePickerId = 0;
     },
   ],
   template: `
-    <input
-      #trigger
-      type="text"
-      role="combobox"
-      autocomplete="off"
-      [id]="inputId()"
-      aria-haspopup="grid"
-      [attr.aria-expanded]="isOpen()"
-      [attr.aria-controls]="isOpen() ? panelElementId : null"
-      [attr.aria-invalid]="invalid() ? 'true' : null"
-      [class]="inputClass()"
-      [style.paddingInlineEnd]="trailingPaddingRem()"
-      [readOnly]="selectionMode() !== 'single' || showTime() || view() === 'month'"
-      [disabled]="isDisabled()"
-      [value]="displayText()"
-      [placeholder]="placeholder()"
-      (input)="onInput($event)"
-      (keydown)="onKeydown($event)"
-      (blur)="onBlur()"
-      (click)="onInputClick()"
-    />
-    <span class="pointer-events-none absolute inset-y-0 right-0 flex items-center gap-0.5 pr-(--spacing-field-x)">
-      @if (showClear() && hasValue() && !isDisabled()) {
+    @if (inline()) {
+      <div [class]="inlineWrapperClass()">
+        <med-date-picker-panel
+          [panelId]="panelElementId"
+          [selectionMode]="selectionMode()"
+          [pickerView]="view()"
+          [navigation]="navigation()"
+          [numberOfMonths]="numberOfMonths()"
+          [initialViewDate]="inlineSeedDate()"
+          [todayDate]="todayDate"
+          [selectedValue]="selectionMode() === 'single' ? singleValue() : null"
+          [selectedRange]="selectionMode() === 'range' ? rangeValue() : { start: null, end: null }"
+          [selectedDates]="selectionMode() === 'multiple' ? multipleValue() : []"
+          [minDate]="minDate()"
+          [maxDate]="maxDate()"
+          [disabledDates]="disabledDates()"
+          [disabledDays]="disabledDays()"
+          [locale]="locale()"
+          [firstDayOfWeek]="firstDayOfWeek()"
+          [startDateLabel]="startDateLabel()"
+          [endDateLabel]="endDateLabel()"
+          [previousMonthLabel]="previousMonthLabel()"
+          [nextMonthLabel]="nextMonthLabel()"
+          [previousYearLabel]="previousYearLabel()"
+          [nextYearLabel]="nextYearLabel()"
+          [previousDecadeLabel]="previousDecadeLabel()"
+          [nextDecadeLabel]="nextDecadeLabel()"
+          [yearFilterPlaceholder]="yearFilterPlaceholder()"
+          [emptyLabel]="emptyLabel()"
+          [showTime]="showTime()"
+          [timeOnly]="timeOnly()"
+          [hourFormat]="hourFormat()"
+          [stepMinute]="stepMinute()"
+          [hourLabel]="hourLabel()"
+          [minuteLabel]="minuteLabel()"
+          [doneLabel]="doneLabel()"
+          [showButtonBar]="showButtonBar()"
+          [todayLabel]="todayLabel()"
+          [clearLabel]="clearLabel()"
+          [dateTemplate]="dateTemplate() ?? null"
+          [autoFocus]="false"
+          [inline]="true"
+          [disabled]="isDisabled()"
+          (dateSelect)="onPanelDateSelect($event)"
+          (rangeComplete)="onPanelRangeComplete($event)"
+          (multipleSelect)="onPanelMultipleSelect($event)"
+          (clearRequested)="onPanelClear()"
+        />
+      </div>
+    } @else {
+      <input
+        #trigger
+        type="text"
+        role="combobox"
+        autocomplete="off"
+        [id]="inputId()"
+        aria-haspopup="grid"
+        [attr.aria-expanded]="isOpen()"
+        [attr.aria-controls]="isOpen() ? panelElementId : null"
+        [attr.aria-invalid]="invalid() ? 'true' : null"
+        [class]="inputClass()"
+        [style.paddingInlineEnd]="trailingPaddingRem()"
+        [readOnly]="isReadOnly()"
+        [disabled]="isDisabled()"
+        [value]="displayText()"
+        [placeholder]="placeholder()"
+        (input)="onInput($event)"
+        (keydown)="onKeydown($event)"
+        (blur)="onBlur()"
+        (click)="onInputClick()"
+      />
+      <span class="pointer-events-none absolute inset-y-0 right-0 flex items-center gap-0.5 pr-(--spacing-field-x)">
+        @if (showClear() && hasValue() && !isDisabled()) {
+          <button
+            type="button"
+            class="pointer-events-auto inline-flex items-center justify-center rounded-sm p-0.5 text-surface-400 hover:text-surface-600 dark:hover:text-surface-300"
+            [attr.aria-label]="clearLabel()"
+            (click)="clear($event)"
+          >
+            <med-icon name="x-mark" variant="mini" class="size-3.5" />
+          </button>
+        }
         <button
           type="button"
           class="pointer-events-auto inline-flex items-center justify-center rounded-sm p-0.5 text-surface-400 hover:text-surface-600 dark:hover:text-surface-300"
-          [attr.aria-label]="clearLabel()"
-          (click)="clear($event)"
+          [disabled]="isDisabled()"
+          [attr.aria-label]="toggleLabel()"
+          (click)="toggle($event)"
         >
-          <med-icon name="x-mark" variant="mini" class="size-3.5" />
+          <med-icon name="calendar" variant="mini" class="size-4" />
         </button>
-      }
-      <button
-        type="button"
-        class="pointer-events-auto inline-flex items-center justify-center rounded-sm p-0.5 text-surface-400 hover:text-surface-600 dark:hover:text-surface-300"
-        [disabled]="isDisabled()"
-        [attr.aria-label]="toggleLabel()"
-        (click)="toggle($event)"
-      >
-        <med-icon name="calendar" variant="mini" class="size-4" />
-      </button>
-    </span>
+      </span>
+    }
   `,
 })
 export class DatePickerComponent implements ControlValueAccessor, OnDestroy {
   private readonly overlayService = inject(OverlayService);
+  private readonly fluidContext = inject(MED_FLUID_CONTEXT, { optional: true });
   private readonly instanceId = nextDatePickerId++;
   protected readonly panelElementId = `med-date-picker-panel-${this.instanceId}`;
+  protected readonly todayDate = startOfDay(new Date());
 
   readonly selectionMode = input<DatePickerSelectionMode>('single');
   /** Single mode only — see class doc's "view: 'month'" section. */
-  readonly view = input<'date' | 'month'>('date');
+  readonly view = input<DatePickerView>('date');
   readonly navigation = input<'calendar' | 'drilldown'>('calendar');
+  readonly inline = input(false, { transform: booleanAttribute });
   readonly dateFormat = input('mm/dd/yyyy');
   readonly locale = input('en-US');
   readonly firstDayOfWeek = input(0, { transform: numberAttribute });
@@ -147,19 +207,26 @@ export class DatePickerComponent implements ControlValueAccessor, OnDestroy {
   /** Weekday indices (`0`=Sunday..`6`=Saturday) that can't be selected — e.g. `[0, 6]` disables all weekends. */
   readonly disabledDays = input<readonly number[]>([]);
   readonly size = input<InputTextSize>('default');
+  readonly variant = input<FieldVariant>('outlined');
+  readonly fluid = input(false, { transform: booleanAttribute });
   readonly invalid = input(false, { transform: booleanAttribute });
   readonly disabled = input(false, { transform: booleanAttribute });
   readonly showClear = input(false, { transform: booleanAttribute });
+  readonly showButtonBar = input(false, { transform: booleanAttribute });
   /** `null` (the default) falls back to a format-derived placeholder — see `placeholder` computed below. */
   readonly placeholderOverride = input<string | null>(null, { alias: 'placeholder' });
   /** Defaults are English — see roadmap/decisoes-produto.md, Phase 2, "i18n support". */
   readonly clearLabel = input('Clear');
+  readonly todayLabel = input('Today');
   readonly toggleLabel = input('Toggle calendar');
   readonly previousMonthLabel = input('Previous month');
   readonly nextMonthLabel = input('Next month');
   /** Only used by `view="month"` in `navigation="calendar"` mode — pages by year instead of by month. */
   readonly previousYearLabel = input('Previous year');
   readonly nextYearLabel = input('Next year');
+  /** Only used by `view="year"` in `navigation="calendar"` mode — pages by decade. */
+  readonly previousDecadeLabel = input('Previous decade');
+  readonly nextDecadeLabel = input('Next decade');
   readonly startDateLabel = input('Start date');
   readonly endDateLabel = input('End date');
   readonly yearFilterPlaceholder = input('Search year');
@@ -168,6 +235,7 @@ export class DatePickerComponent implements ControlValueAccessor, OnDestroy {
   readonly numberOfMonthsOverride = input<number | null>(null, { alias: 'numberOfMonths' });
   /** Single mode only — see class doc's "showTime" section. */
   readonly showTime = input(false, { transform: booleanAttribute });
+  readonly timeOnly = input(false, { transform: booleanAttribute });
   readonly hourFormat = input<'12' | '24'>('24');
   readonly stepMinute = input(1, { transform: numberAttribute });
   readonly hourLabel = input('Hour');
@@ -176,21 +244,40 @@ export class DatePickerComponent implements ControlValueAccessor, OnDestroy {
   readonly inputId = input<string | null>(null);
   readonly class = input('', { alias: 'class' });
 
+  /** Optional custom template for day cells, by named reference `#date`. */
+  readonly dateTemplate = contentChild<TemplateRef<DatePickerDateTemplateContext>>('date');
+
   private readonly value = signal<DatePickerValue>(null);
   private readonly rawText = signal('');
   private readonly editingText = signal(false);
   private readonly formsDisabled = signal(false);
   protected readonly isDisabled = computed(() => this.disabled() || this.formsDisabled());
+  protected readonly isFluid = computed(() => this.fluid() || (this.fluidContext?.() ?? false));
   protected readonly isOpen = signal(false);
 
-  private readonly triggerRef = viewChild.required<ElementRef<HTMLInputElement>>('trigger');
+  private readonly triggerRef = viewChild<ElementRef<HTMLInputElement>>('trigger');
   private handle: OverlayHandle<DatePickerPanelComponent, void> | null = null;
 
   private onChange: (value: DatePickerValue) => void = () => {};
   protected onTouched: () => void = () => {};
 
-  protected readonly inputClass = computed(() => mergeClasses(inputTextVariants({ size: this.size(), invalid: this.invalid() }), this.class()));
+  protected readonly inputClass = computed(() =>
+    mergeClasses(
+      inputTextVariants({ size: this.size(), invalid: this.invalid(), variant: this.variant() }),
+      this.isFluid() ? 'w-full' : '',
+      this.class(),
+    ),
+  );
+  protected readonly inlineWrapperClass = computed(() =>
+    mergeClasses(
+      'rounded-lg border border-surface-200 bg-surface-0 dark:border-surface-700 dark:bg-surface-800',
+      this.isFluid() ? 'block w-full' : 'inline-block',
+      this.class(),
+    ),
+  );
   protected readonly trailingPaddingRem = computed(() => DATE_PICKER_TRAILING_PADDING_REM[this.size()]);
+
+  protected readonly singleValue = computed<Date | null>(() => (this.selectionMode() === 'single' ? (this.value() as Date | null) : null));
 
   protected readonly rangeValue = computed<DateRange>(() => {
     const current = this.value();
@@ -201,6 +288,12 @@ export class DatePickerComponent implements ControlValueAccessor, OnDestroy {
     const current = this.value();
     return Array.isArray(current) ? (current as readonly Date[]) : [];
   });
+
+  protected readonly inlineSeedDate = computed(() => this.seedDate());
+
+  protected readonly isReadOnly = computed(
+    () => this.selectionMode() !== 'single' || this.showTime() || this.timeOnly() || this.view() === 'month' || this.view() === 'year',
+  );
 
   protected readonly hasValue = computed(() => {
     if (this.selectionMode() === 'range') {
@@ -225,8 +318,14 @@ export class DatePickerComponent implements ControlValueAccessor, OnDestroy {
     if (override !== null) {
       return override;
     }
+    if (this.timeOnly()) {
+      return this.hourFormat() === '12' ? 'hh:mm AM' : 'HH:mm';
+    }
     if (this.selectionMode() === 'range') {
       return `${this.dateFormat()}${this.rangeSeparator()}${this.dateFormat()}`;
+    }
+    if (this.view() === 'year') {
+      return 'yyyy';
     }
     if (this.view() === 'month') {
       return 'mm/yyyy';
@@ -245,6 +344,14 @@ export class DatePickerComponent implements ControlValueAccessor, OnDestroy {
       return this.multipleValue()
         .map((date) => formatDate(date, this.dateFormat()))
         .join(this.multipleSeparator());
+    }
+    if (this.timeOnly()) {
+      const date = this.value() as Date | null;
+      return date ? formatTime(date, this.hourFormat()) : '';
+    }
+    if (this.view() === 'year') {
+      const date = this.value() as Date | null;
+      return date ? String(date.getFullYear()) : '';
     }
     if (this.view() === 'month') {
       const date = this.value() as Date | null;
@@ -282,7 +389,7 @@ export class DatePickerComponent implements ControlValueAccessor, OnDestroy {
         this.open();
         break;
       case 'Enter':
-        if (this.selectionMode() === 'single' && !this.showTime() && this.view() !== 'month') {
+        if (!this.isReadOnly()) {
           this.reformatFromCommittedValue();
         } else {
           this.open();
@@ -299,7 +406,7 @@ export class DatePickerComponent implements ControlValueAccessor, OnDestroy {
 
   protected onBlur(): void {
     this.onTouched();
-    if (this.selectionMode() === 'single' && this.view() !== 'month') {
+    if (!this.isReadOnly()) {
       this.reformatFromCommittedValue();
     }
     // Deliberately not closing the panel here: opening it moves real DOM
@@ -310,7 +417,7 @@ export class DatePickerComponent implements ControlValueAccessor, OnDestroy {
   }
 
   protected onInputClick(): void {
-    if (this.selectionMode() !== 'single' || this.showTime() || this.view() === 'month') {
+    if (this.isReadOnly()) {
       this.open();
     }
   }
@@ -330,6 +437,43 @@ export class DatePickerComponent implements ControlValueAccessor, OnDestroy {
   protected clear(event: Event): void {
     event.stopPropagation();
     event.preventDefault();
+    this.clearValue();
+    this.triggerRef()?.nativeElement.focus();
+  }
+
+  protected onPanelDateSelect(date: Date): void {
+    this.setSingleValue(date);
+    if (this.handle) {
+      this.handle.componentRef.setInput('selectedValue', date);
+      // With showTime/timeOnly on, picking a day or dialing time doesn't close
+      // the panel — the user uses the Done button, toggle, Escape, or outside-click.
+      if (!this.showTime() && !this.timeOnly()) {
+        this.handle.close();
+      }
+    }
+  }
+
+  protected onPanelRangeComplete(range: DateRange): void {
+    this.setRangeValue(range);
+    this.handle?.close();
+  }
+
+  protected onPanelMultipleSelect(dates: readonly Date[]): void {
+    this.setMultipleValue(dates);
+    // Stays open across picks — same reasoning as MultiSelect's own panel.
+    this.handle?.componentRef.setInput('selectedDates', dates);
+  }
+
+  protected onPanelClear(): void {
+    this.clearValue();
+    this.handle?.close();
+  }
+
+  ngOnDestroy(): void {
+    this.handle?.close();
+  }
+
+  private clearValue(): void {
     if (this.selectionMode() === 'range') {
       this.setRangeValue({ start: null, end: null });
     } else if (this.selectionMode() === 'multiple') {
@@ -337,11 +481,16 @@ export class DatePickerComponent implements ControlValueAccessor, OnDestroy {
     } else {
       this.setSingleValue(null);
     }
-    this.triggerRef().nativeElement.focus();
   }
 
-  ngOnDestroy(): void {
-    this.handle?.close();
+  private seedDate(): Date {
+    if (this.selectionMode() === 'range') {
+      return this.rangeValue().start ?? this.rangeValue().end ?? new Date();
+    }
+    if (this.selectionMode() === 'multiple') {
+      return this.multipleValue()[0] ?? new Date();
+    }
+    return (this.value() as Date | null) ?? new Date();
   }
 
   /** Mirrors `DatePickerPanelComponent.isDayDisabled()` — a typed date is only committed if it's neither out of bounds nor individually disabled. */
@@ -385,50 +534,28 @@ export class DatePickerComponent implements ControlValueAccessor, OnDestroy {
   }
 
   private open(): void {
-    if (this.isOpen() || this.isDisabled()) {
+    if (this.inline() || this.isOpen() || this.isDisabled()) {
+      return;
+    }
+    const triggerEl = this.triggerRef()?.nativeElement;
+    if (!triggerEl) {
       return;
     }
     this.isOpen.set(true);
 
-    const seed =
-      this.selectionMode() === 'range'
-        ? (this.rangeValue().start ?? this.rangeValue().end ?? new Date())
-        : this.selectionMode() === 'multiple'
-          ? (this.multipleValue()[0] ?? new Date())
-          : ((this.value() as Date | null) ?? new Date());
-
-    const handle = this.overlayService.openConnected<DatePickerPanelComponent, void>(this.triggerRef().nativeElement, DatePickerPanelComponent, {
+    const seed = this.seedDate();
+    const handle = this.overlayService.openConnected<DatePickerPanelComponent, void>(triggerEl, DatePickerPanelComponent, {
       panelClass: SELECT_PANEL_CLASS,
     });
     this.handle = handle;
-    // The panel never gets *narrower* than the space its visible month(s)
-    // need (a `min-width` on the pane always wins over a smaller `width`),
-    // but if the trigger itself is wider than that (e.g. a range field
-    // showing two dates), the pane grows to match it instead of looking
-    // oddly narrower than the field above it — same `width` line
-    // Select/Autocomplete use, plus the `min-width` floor. `navigation()`
-    // is checked here too: drilldown always renders a single month
-    // regardless of `numberOfMonths()`, so reserving extra width for it
-    // would just leave wasted empty space on the right. Below the `sm`
-    // breakpoint (640px), `DatePickerPanelComponent` only ever renders its
-    // first month (`hidden sm:block` on the rest, checked against the
-    // viewport, same threshold used here), so the floor must match that —
-    // otherwise the pane would reserve room for months that never render,
-    // overflowing a narrow viewport. This check is a one-time snapshot at
-    // open time, not reactive to a later resize — same tradeoff already
-    // accepted for the equivalent viewport check in the panel's template.
-    const belowSmBreakpoint = window.innerWidth < 640;
-    const visibleMonths = this.navigation() === 'drilldown' || belowSmBreakpoint ? 1 : this.numberOfMonths();
-    const desiredMinWidthPx = (19 * visibleMonths + 1.5 * (visibleMonths - 1)) * 16;
-    // Same reasoning as the panel template's `min(…, calc(100vw - 2rem))`:
-    // on a narrow phone, asking CDK for exactly (or almost) the full
-    // viewport width leaves no slack for `OverlayService`'s connected
-    // position strategy to actually center the pane with a margin on both
-    // sides — it ends up flush against one edge instead. Capping this JS-set
-    // floor the same way keeps the two in sync.
-    const maxAvailableWidthPx = window.innerWidth - 32;
-    handle.overlayRef.overlayElement.style.minWidth = `${Math.min(desiredMinWidthPx, maxAvailableWidthPx)}px`;
-    handle.overlayRef.overlayElement.style.width = `${this.triggerRef().nativeElement.offsetWidth}px`;
+    if (!this.timeOnly()) {
+      const belowSmBreakpoint = window.innerWidth < 640;
+      const visibleMonths = this.navigation() === 'drilldown' || belowSmBreakpoint ? 1 : this.numberOfMonths();
+      const desiredMinWidthPx = (19 * visibleMonths + 1.5 * (visibleMonths - 1)) * 16;
+      const maxAvailableWidthPx = window.innerWidth - 32;
+      handle.overlayRef.overlayElement.style.minWidth = `${Math.min(desiredMinWidthPx, maxAvailableWidthPx)}px`;
+    }
+    handle.overlayRef.overlayElement.style.width = `${triggerEl.offsetWidth}px`;
 
     handle.componentRef.setInput('panelId', this.panelElementId);
     handle.componentRef.setInput('selectionMode', this.selectionMode());
@@ -452,34 +579,30 @@ export class DatePickerComponent implements ControlValueAccessor, OnDestroy {
     handle.componentRef.setInput('nextMonthLabel', this.nextMonthLabel());
     handle.componentRef.setInput('previousYearLabel', this.previousYearLabel());
     handle.componentRef.setInput('nextYearLabel', this.nextYearLabel());
+    handle.componentRef.setInput('previousDecadeLabel', this.previousDecadeLabel());
+    handle.componentRef.setInput('nextDecadeLabel', this.nextDecadeLabel());
     handle.componentRef.setInput('yearFilterPlaceholder', this.yearFilterPlaceholder());
     handle.componentRef.setInput('emptyLabel', this.emptyLabel());
     handle.componentRef.setInput('showTime', this.showTime());
+    handle.componentRef.setInput('timeOnly', this.timeOnly());
     handle.componentRef.setInput('hourFormat', this.hourFormat());
     handle.componentRef.setInput('stepMinute', this.stepMinute());
     handle.componentRef.setInput('hourLabel', this.hourLabel());
     handle.componentRef.setInput('minuteLabel', this.minuteLabel());
     handle.componentRef.setInput('doneLabel', this.doneLabel());
+    handle.componentRef.setInput('showButtonBar', this.showButtonBar());
+    handle.componentRef.setInput('todayLabel', this.todayLabel());
+    handle.componentRef.setInput('clearLabel', this.clearLabel());
+    handle.componentRef.setInput('dateTemplate', this.dateTemplate() ?? null);
+    handle.componentRef.setInput('autoFocus', true);
+    handle.componentRef.setInput('inline', false);
+    handle.componentRef.setInput('disabled', this.isDisabled());
+    handle.componentRef.changeDetectorRef.detectChanges();
 
-    handle.componentRef.instance.dateSelect.subscribe((date: Date) => {
-      this.setSingleValue(date);
-      // With showTime on, picking a day doesn't close the panel — the user
-      // still needs to dial in a time via the panel's hour/minute row (its
-      // own "Done" button, or the existing toggle/Escape/outside-click
-      // paths, close it explicitly instead).
-      if (!this.showTime()) {
-        handle.close();
-      }
-    });
-    handle.componentRef.instance.rangeComplete.subscribe((range: DateRange) => {
-      this.setRangeValue(range);
-      handle.close();
-    });
-    handle.componentRef.instance.multipleSelect.subscribe((dates: readonly Date[]) => {
-      this.setMultipleValue(dates);
-      // Stays open across picks — same reasoning as MultiSelect's own panel.
-      handle.componentRef.setInput('selectedDates', dates);
-    });
+    handle.componentRef.instance.dateSelect.subscribe((date: Date) => this.onPanelDateSelect(date));
+    handle.componentRef.instance.rangeComplete.subscribe((range: DateRange) => this.onPanelRangeComplete(range));
+    handle.componentRef.instance.multipleSelect.subscribe((dates: readonly Date[]) => this.onPanelMultipleSelect(dates));
+    handle.componentRef.instance.clearRequested.subscribe(() => this.onPanelClear());
     handle.componentRef.instance.closeRequested.subscribe(() => handle.close());
 
     handle.closed$.subscribe(() => {

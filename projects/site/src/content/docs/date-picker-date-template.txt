@@ -1,0 +1,3 @@
+## Date Template
+
+Provide an `<ng-template #date>` child to customize how each day cell renders while preserving selection and keyboard behavior.

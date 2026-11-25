@@ -1,0 +1,3 @@
+## Reactive Forms
+
+Use `[formControl]` or `formControlName`. The field notifies `onTouched` on blur so validation feedback like `[invalid]` can wait until the user leaves the control.

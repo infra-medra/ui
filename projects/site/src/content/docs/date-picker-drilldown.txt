@@ -1,0 +1,3 @@
+## Drilldown Navigation
+
+`navigation="drilldown"` opens the overlay directly on a searchable year list and steps down from year to month to day without previous/next chevron buttons. On the month and day views, clicking the header button steps back up one level at a time.

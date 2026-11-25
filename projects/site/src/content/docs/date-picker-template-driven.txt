@@ -1,0 +1,3 @@
+## Template Driven
+
+Use `[(ngModel)]` and `name` for template-driven forms. The bound value is `Date | null` in single mode, `readonly Date[]` in multiple mode, or `DateRange` in range mode.

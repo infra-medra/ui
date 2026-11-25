@@ -1,0 +1,3 @@
+## Float Label
+
+Wrap `med-date-picker` in `med-float-label` with `variant="over"` and mark the `<label>` with `medFloatLabelText`, matching `inputId` to `for`.

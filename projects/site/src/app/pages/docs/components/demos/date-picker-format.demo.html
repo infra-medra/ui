@@ -1,0 +1,10 @@
+<div class="flex flex-wrap items-start gap-6">
+  <div class="w-full max-w-xs">
+    <med-date-picker [(ngModel)]="shortDate" dateFormat="dd/mm/yy" showClear />
+    <p class="mt-2 text-sm text-surface-500 dark:text-surface-400">dd/mm/yy</p>
+  </div>
+  <div class="w-full max-w-xs">
+    <med-date-picker [(ngModel)]="isoDate" dateFormat="yy-mm-dd" showClear />
+    <p class="mt-2 text-sm text-surface-500 dark:text-surface-400">yy-mm-dd</p>
+  </div>
+</div>

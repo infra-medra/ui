@@ -1,4 +1,4 @@
-## Time selection
+## Time
 
 `showTime` (single mode only) adds an hour/minute row to the panel, and the committed `Date`
 carries a real time-of-day instead of always midnight. `hourFormat` (`'12'`/`'24'`, default `'24'`)
