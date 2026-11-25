@@ -1,8 +1,3 @@
-## Group-by-array and custom true/false values
+## Group
 
-Setting `value` on a checkbox switches it into group mode: several instances share one
-`[(ngModel)]`/`FormControl` array (all needing the same template `name` to bind correctly), each
-instance's own `value` decides membership, and toggling adds or removes just that entry instead of
-writing a scalar. `trueValue`/`falseValue` (default `true`/`false`) only apply in the default,
-scalar mode — they let the bound value be something other than a raw boolean, e.g. `'yes'`/`'no'`,
-without changing anything else about the component.
+Setting `value` on a checkbox switches it into group mode: several instances share one `[(ngModel)]`/`FormControl` array (all needing the same template `name` to bind correctly), each instance's own `value` decides membership, and toggling adds or removes just that entry instead of writing a scalar. `trueValue`/`falseValue` (default `true`/`false`) only apply in the default, scalar mode — they let the bound value be something other than a raw boolean, e.g. `'yes'`/`'no'`, without changing anything else about the component.

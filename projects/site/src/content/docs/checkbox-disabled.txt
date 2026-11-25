@@ -1,0 +1,3 @@
+## Disabled
+
+Set `disabled` (or disable the bound form control) to prevent toggling and apply muted disabled styling.
