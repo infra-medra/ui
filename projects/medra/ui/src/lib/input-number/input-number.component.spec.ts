@@ -392,3 +392,78 @@ describe('InputNumberComponent', () => {
     expect(fixture.componentInstance.model().quantity).toBe(43);
   });
 });
+
+describe('InputNumberComponent scenarios', () => {
+  @Component({
+    standalone: true,
+    imports: [InputNumberComponent, ReactiveFormsModule],
+    template: `<med-input-number showClear [formControl]="control" />`,
+  })
+  class ClearHostComponent {
+    readonly control = new FormControl<number | null>(3);
+  }
+
+  // INN-003.S1
+  it('[INN-003.S1] currency mode with USD shows 1234.5 as $1,234.50', () => {
+    const fixture = TestBed.createComponent(InputNumberComponent);
+    fixture.componentRef.setInput('mode', 'currency');
+    fixture.componentRef.setInput('currency', 'USD');
+    fixture.componentInstance.writeValue(1234.5);
+    fixture.detectChanges();
+
+    expect(trigger(fixture).value).toBe('$1,234.50');
+  });
+
+  // INN-003.S2
+  it('[INN-003.S2] typing "15" with max="10" emits no new value', () => {
+    const fixture = TestBed.createComponent(InputNumberComponent);
+    fixture.componentRef.setInput('max', 10);
+    fixture.detectChanges();
+    const onChange = jest.fn();
+    fixture.componentInstance.registerOnChange(onChange);
+
+    typeText(fixture, '15');
+
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  // INN-004.S1
+  it('[INN-004.S1] ArrowUp on value 5 with step="2" makes the value 7', () => {
+    const fixture = TestBed.createComponent(InputNumberComponent);
+    fixture.componentRef.setInput('step', 2);
+    fixture.componentInstance.writeValue(5);
+    fixture.detectChanges();
+    const onChange = jest.fn();
+    fixture.componentInstance.registerOnChange(onChange);
+
+    keydown(fixture, 'ArrowUp');
+
+    expect(onChange).toHaveBeenLastCalledWith(7);
+    expect(trigger(fixture).value).toBe('7');
+  });
+
+  // INN-004.S2
+  it('[INN-004.S2] with showButtons, max="10" and value 10 the increment button is disabled', () => {
+    const fixture = TestBed.createComponent(InputNumberComponent);
+    fixture.componentRef.setInput('showButtons', true);
+    fixture.componentRef.setInput('max', 10);
+    fixture.componentInstance.writeValue(10);
+    fixture.detectChanges();
+
+    const increment = fixture.nativeElement.querySelector('button[aria-label="Increment"]') as HTMLButtonElement;
+    expect(increment).not.toBeNull();
+    expect(increment.disabled).toBe(true);
+  });
+
+  // INN-005.S1
+  it('[INN-005.S1] activating the clear button with value 3 sets the form value to null', () => {
+    const fixture = TestBed.createComponent(ClearHostComponent);
+    fixture.detectChanges();
+    expect(trigger(fixture).value).toBe('3');
+
+    (fixture.nativeElement.querySelector('button[aria-label="Clear"]') as HTMLButtonElement).click();
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.control.value).toBeNull();
+  });
+});

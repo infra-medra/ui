@@ -130,6 +130,19 @@ describe('TextareaDirective', () => {
       expect(textarea.style.height).toBe('80px'); // 20 + 3 lines * 20
     });
 
+    // TXA-002.S1
+    it('[TXA-002.S1] grows as lines are added and shrinks back as they are removed', () => {
+      const { textarea } = createAutoResizeHost();
+      typeInto(textarea, 'one');
+      expect(textarea.style.height).toBe('40px');
+
+      typeInto(textarea, 'one\ntwo\nthree');
+      expect(textarea.style.height).toBe('80px');
+
+      typeInto(textarea, 'one');
+      expect(textarea.style.height).toBe('40px');
+    });
+
     it('shrinks back down when content is removed', () => {
       const { textarea } = createAutoResizeHost();
       typeInto(textarea, 'one\ntwo\nthree');

@@ -40,7 +40,8 @@ describe('InputTextDirective', () => {
     expect(input.className).toContain('px-(--spacing-field-lg-x)');
   });
 
-  it('sets border/ring color and aria-invalid when invalid', () => {
+  // ITX-002.S1
+  it('[ITX-002.S1] sets border/ring color and aria-invalid when invalid', () => {
     const { input } = createHost({ invalid: true });
 
     expect(input.className).toContain('border-danger-500');
@@ -140,6 +141,45 @@ describe('InputTextDirective', () => {
 
     typeInto(input, 'medraui');
     expect(fixture.componentInstance.control.value).toBe('medraui');
+  });
+
+  describe('scenarios', () => {
+    @Component({
+      standalone: true,
+      imports: [InputTextDirective, ReactiveFormsModule],
+      template: `<input medInputText [formControl]="name" />`,
+    })
+    class FormsHostComponent {
+      readonly name = new FormControl<string | null>('abc');
+    }
+
+    @Component({
+      standalone: true,
+      imports: [InputTextDirective],
+      template: `<input medInputText fluid />`,
+    })
+    class FluidHostComponent {}
+
+    // ITX-002.S2
+    it('[ITX-002.S2] typing "abcd" into a field bound to "abc" updates the control value', () => {
+      const fixture = TestBed.createComponent(FormsHostComponent);
+      fixture.detectChanges();
+      const input = fixture.nativeElement.querySelector('input') as HTMLInputElement;
+      expect(input.value).toBe('abc');
+
+      typeInto(input, 'abcd');
+
+      expect(fixture.componentInstance.name.value).toBe('abcd');
+    });
+
+    // ITX-003.S1
+    it('[ITX-003.S1] a fluid input renders full width', () => {
+      const fixture = TestBed.createComponent(FluidHostComponent);
+      fixture.detectChanges();
+      const input = fixture.nativeElement.querySelector('input') as HTMLInputElement;
+
+      expect(input.className).toContain('w-full');
+    });
   });
 
   it('[UI-010.S1] applies variant="filled" and fluid styling', () => {

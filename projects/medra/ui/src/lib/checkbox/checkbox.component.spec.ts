@@ -341,3 +341,77 @@ describe('CheckboxComponent', () => {
     expect(emitted).toEqual([['alpha']]);
   });
 });
+
+describe('CheckboxComponent scenarios', () => {
+  @Component({
+    standalone: true,
+    imports: [CheckboxComponent, ReactiveFormsModule],
+    template: `<med-checkbox [formControl]="accepted" />`,
+  })
+  class BinaryHostComponent {
+    readonly accepted = new FormControl<boolean | null>(null);
+  }
+
+  @Component({
+    standalone: true,
+    imports: [CheckboxComponent, ReactiveFormsModule],
+    template: `
+      <med-checkbox value="a" [formControl]="letters" />
+      <med-checkbox value="b" [formControl]="letters" />
+    `,
+  })
+  class GroupHostComponent {
+    readonly letters = new FormControl<string[]>(['a']);
+  }
+
+  @Component({
+    standalone: true,
+    imports: [CheckboxComponent, ReactiveFormsModule],
+    template: `<med-checkbox readonly [formControl]="accepted" />`,
+  })
+  class ReadonlyHostComponent {
+    readonly accepted = new FormControl<boolean>(true);
+  }
+
+  // CKB-002.S1
+  it('[CKB-002.S1] clicking an unchecked checkbox checks it and sets the form value to true', () => {
+    const fixture = TestBed.createComponent(BinaryHostComponent);
+    fixture.detectChanges();
+    const input = nativeInput(fixture);
+    expect(input.checked).toBe(false);
+
+    input.click();
+    fixture.detectChanges();
+
+    expect(input.checked).toBe(true);
+    expect(fixture.componentInstance.accepted.value).toBe(true);
+  });
+
+  // CKB-003.S1
+  it('[CKB-003.S1] checking the second of two checkboxes sharing a control holding ["a"] yields ["a", "b"]', () => {
+    const fixture = TestBed.createComponent(GroupHostComponent);
+    fixture.detectChanges();
+    const [first, second] = [...fixture.nativeElement.querySelectorAll('input[type="checkbox"]')] as HTMLInputElement[];
+    expect(first.checked).toBe(true);
+    expect(second.checked).toBe(false);
+
+    second.click();
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.letters.value).toEqual(['a', 'b']);
+  });
+
+  // CKB-004.S1
+  it('[CKB-004.S1] clicking a checked readonly checkbox keeps it checked and leaves the form value unchanged', () => {
+    const fixture = TestBed.createComponent(ReadonlyHostComponent);
+    fixture.detectChanges();
+    const input = nativeInput(fixture);
+    expect(input.checked).toBe(true);
+
+    input.click();
+    fixture.detectChanges();
+
+    expect(input.checked).toBe(true);
+    expect(fixture.componentInstance.accepted.value).toBe(true);
+  });
+});

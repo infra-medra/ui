@@ -103,6 +103,18 @@ describe('TabsComponent', () => {
     expect(fixture.componentInstance.activeIndex).toBe(0);
   });
 
+  // TBD-004.S1
+  it('[TBD-004.S1] ArrowRight on the active last tab wraps to the first enabled tab', () => {
+    const fixture = create({ activeIndex: 2 });
+    expect(tabButtons(fixture)[2].getAttribute('aria-selected')).toBe('true');
+
+    tabButtons(fixture)[2].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true }));
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.activeIndex).toBe(0);
+    expect(tabButtons(fixture)[0].getAttribute('aria-selected')).toBe('true');
+  });
+
   it('ArrowRight skips a disabled tab', () => {
     const fixture = create({ billingDisabled: true });
 
@@ -222,8 +234,10 @@ describe('TabsComponent', () => {
       expect(fixture.nativeElement.querySelector('.billing-marker')).not.toBeNull();
     });
 
-    it('never re-instantiates once activated, even after switching away and back', () => {
+    // TBD-005.S1
+    it('[TBD-005.S1] never re-instantiates once activated, even after switching away and back', () => {
       const fixture = createLazy();
+      expect(billingCtorSpy).not.toHaveBeenCalled(); // never active yet
       tabButtons(fixture)[1].click(); // Billing
       fixture.detectChanges();
       expect(billingCtorSpy).toHaveBeenCalledTimes(1);
@@ -234,6 +248,7 @@ describe('TabsComponent', () => {
       fixture.detectChanges();
 
       expect(billingCtorSpy).toHaveBeenCalledTimes(1); // still just once
+      expect(fixture.nativeElement.querySelector('.billing-marker')).not.toBeNull(); // and still created
     });
 
     it('a tab that starts active instantiates its lazy content immediately', () => {
@@ -301,7 +316,8 @@ describe('TabsComponent', () => {
       expect(navButtons(fixture)).toHaveLength(0);
     });
 
-    it('shows only the "scroll right" button when content overflows and is scrolled to the start', () => {
+    // TBD-005.S2
+    it('[TBD-005.S2] shows only the "scroll right" button when content overflows and is scrolled to the start', () => {
       const fixture = createNav();
       mockScrollMetrics(tablist(fixture), { scrollLeft: 0, clientWidth: 100, scrollWidth: 400 });
       tabsComponent(fixture).updateScrollState();
