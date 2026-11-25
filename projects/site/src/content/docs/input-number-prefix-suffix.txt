@@ -1,0 +1,3 @@
+## Prefix & Suffix
+
+Add static text before or after the formatted number using `prefix` and `suffix`. Both are stripped automatically when parsing typed edits.

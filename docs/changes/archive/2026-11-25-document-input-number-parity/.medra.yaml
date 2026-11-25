@@ -1,0 +1,350 @@
+change: document-input-number-parity
+created: 2026-11-24
+track: fast
+phase: archived
+diff_base: 180c284
+gates:
+  proposal:
+    status: approved
+    by: Tiago Cavalli
+    at: 2026-11-25T10:44:05Z
+    hash: 177bd9f5c70ed750514376336ea43995da6974b7b2d7554e11d70dc15dec6b26
+    note: null
+  plan:
+    status: pending
+  tasks:
+    status: pending
+  verify:
+    status: approved
+    by: Tiago Cavalli
+    at: 2026-11-25T10:44:06Z
+    hash: 49dd467b569410a1af324aec3dffaac004689146528362cb4bd99c86addb1db5
+    note: null
+gate_notes: []
+reviews:
+  - stage: verify
+    by: reviewer
+    at: 2026-11-25T03:38:54Z
+    recorded_at: 2026-11-25T03:38:54.778Z
+    hash: e97dfbf20ef34fbdf0e4d2b4b8d06d15f931e6cf5074ac7749865f2ad6a7809f
+    verdict: fail
+    report: reviews/2026-11-25-verify-reviewer-r1.md
+  - stage: verify
+    by: reviewer
+    at: 2026-11-25T03:50:09Z
+    recorded_at: 2026-11-25T03:50:09.086Z
+    hash: cf502c8e656071ba757b18c2e4a80284e6929c63c1244dfb407e6f1639251940
+    verdict: fail
+    report: reviews/2026-11-25-verify-reviewer-r2.md
+  - stage: verify
+    by: reviewer
+    at: 2026-11-25T04:02:28Z
+    recorded_at: 2026-11-25T04:02:28.088Z
+    hash: bc735206a61b7e91498031098fd4ba0d566b45851f3cd8a050f7c522b9399d5f
+    verdict: pass-with-findings
+    report: reviews/2026-11-25-verify-reviewer-r3.md
+  - stage: verify
+    by: reviewer
+    at: 2026-11-25T10:41:46Z
+    recorded_at: 2026-11-25T10:41:46.955Z
+    hash: 7f05e91c224fb256c161cb1c8f1d3703fac34b5e923aaec500ab76b82dfafd82
+    verdict: pass
+    report: reviews/2026-11-25-verify-reviewer-r4.md
+track_history: []
+blockers: []
+verify_fix_rounds: 1
+last_fix_round_at: 2026-11-25T03:50:58.136Z
+test_hashes:
+  T001:
+    e2e/site/input-number-docs.spec.ts: d62bd3625a71b859c1113dedeb899352f8000b9b6640547803e8f4cfaccbc39e
+  T003:
+    projects/medra/ui/src/lib/input-number/input-number.component.spec.ts: a0f7bb14c0b8948de21bac4e3bd1d9e8c99a36501fbb36f28d96371b21984664
+test_snapshots:
+  d62bd3625a71b859c1113dedeb899352f8000b9b6640547803e8f4cfaccbc39e: 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
+  a0f7bb14c0b8948de21bac4e3bd1d9e8c99a36501fbb36f28d96371b21984664: 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
+last_task_done_at: 2026-11-25T10:37:06.696Z
+suite:
+  at: 2026-11-25T10:38:56Z
+  exit: 0
+  commands:
+    - npm test
+  fingerprint: 9022601fe0dac5342bacf2920bdee5e4bda3ed4300c3b93b460281ddcefe3537
+handoff_snapshots:
+  check:
+    "3":
+      .changeset/date-picker-parity.md: 28e4c1ba01cc303045948d0b14b99e5921807a9a6c8cf6a51bcc513af8b54621
+      .changeset/input-number-signal-forms-bounds.md: 7604ea621e82f1bcb4eed1b85da55c8c187bb619cc873f401069dbdc8e10ccc2
+      e2e/site/date-picker-docs.spec.ts: e5946ab9b7275841e8940b2d67f740d8651c45cf5774dd9eee67b77f4bf3bd71
+      e2e/site/input-number-docs.spec.ts: d62bd3625a71b859c1113dedeb899352f8000b9b6640547803e8f4cfaccbc39e
+      projects/medra/ui/src/lib/date-picker/date-picker-panel.component.spec.ts: 251143a279936d9b2f23c12fd36053c40c0e38e4de82f14aca521a13dd3e9d7e
+      projects/medra/ui/src/lib/date-picker/date-picker-panel.component.ts: f408798d6fe10120b121a5fd55d7b17dce35601a09c4527974ccb2ed0c149527
+      projects/medra/ui/src/lib/date-picker/date-picker.component.spec.ts: a9681bf16cdd0a5a2de8ba8c6db55a991d6e19fc19e5c28a23ec29058a8d8185
+      projects/medra/ui/src/lib/date-picker/date-picker.component.ts: 6d140fd490c75992598397f791e4ff6acc257605ff0313ff81428a691e6a232a
+      projects/medra/ui/src/lib/date-picker/date-picker.types.ts: ec6116a1b4fccfcf018c3ec2ba43f2aeafc219fafef93f3888fd895c2eb1e38d
+      projects/medra/ui/src/lib/input-number/input-number.component.spec.ts: a0f7bb14c0b8948de21bac4e3bd1d9e8c99a36501fbb36f28d96371b21984664
+      projects/medra/ui/src/lib/input-number/input-number.component.ts: 82e517be34ebdbb989a2e0f72c7fbd7d7db1e3fb44378f9131893c758dfa6a4e
+      projects/site/src/app/pages/docs/components/date-picker.page.ts: e632262d897dd5b72dedd5e9f47caeccfa72874c5add2d80a8e88a0bc4a94f84
+      projects/site/src/app/pages/docs/components/demos/date-picker-button-bar.demo.html: 5f8f76c31a5e263c617d48d7b7fb3f311ba2e19687b8478b1fb5916d50cc8bd9
+      projects/site/src/app/pages/docs/components/demos/date-picker-button-bar.demo.ts: 0ccb18fb7b8440f490d94c8dc9a55a4e37895a1d59e993e0917665e93ac9a788
+      projects/site/src/app/pages/docs/components/demos/date-picker-clear-icon.demo.html: c19a4d51f7de0bbfa93a5b3dc3e22d2ef1fcde3287790cc2ff6ed45f2992747e
+      projects/site/src/app/pages/docs/components/demos/date-picker-clear-icon.demo.ts: 38f22a4fa91d7366867e783b42089afdfa91db84272d7b6c30eb7e68e2e80842
+      projects/site/src/app/pages/docs/components/demos/date-picker-date-template.demo.html: 239ecfcfeec9da5e4c38a7abf942941e590478879ce7ed32b4fcad0f0ed31b48
+      projects/site/src/app/pages/docs/components/demos/date-picker-date-template.demo.ts: f0ccb59a022df64a7dcc280339013474a2026bd0bad2ba5ef9313bd7995e7a34
+      projects/site/src/app/pages/docs/components/demos/date-picker-disabled.demo.html: d359a4b34c91e7c66782df18f66d181ec8aa087760d1dfff924eeb83b0cc1817
+      projects/site/src/app/pages/docs/components/demos/date-picker-disabled.demo.ts: 5d2ac487f5ce32537bfe56d82b339206aefeda1f6868a1c3c2075a113dd752a1
+      projects/site/src/app/pages/docs/components/demos/date-picker-drilldown.demo.html: db4ee17602c2802be75163f54afc95bcdb0333a7b73920bafc4e07ae8b41df47
+      projects/site/src/app/pages/docs/components/demos/date-picker-drilldown.demo.ts: 18bd32032e52c92bb294f6742ddd51efad37aaaa6cb3430ec4ae78f8cd4540fd
+      projects/site/src/app/pages/docs/components/demos/date-picker-filled.demo.html: bb5bae4beb57f1f3ffdb575fc0e03410a079c19b0a45a2619242961a2e47bd4a
+      projects/site/src/app/pages/docs/components/demos/date-picker-filled.demo.ts: 89a9e667db536bc81cf0ad5c2b9c886c3e542bf6153da00e1e3da65d65a78a6f
+      projects/site/src/app/pages/docs/components/demos/date-picker-float-label.demo.html: f2577ab35a790f3603c37fae3848a90454660377870ab825aa625f20074fac8e
+      projects/site/src/app/pages/docs/components/demos/date-picker-float-label.demo.ts: a88e2a501d15cddf300a3af280569f9505d868f8fbab872b948b3d8644735fa7
+      projects/site/src/app/pages/docs/components/demos/date-picker-fluid.demo.html: 312dba220d4888b2b05b105ba794a42e6c3d38094b2925f563518f74ff50e10c
+      projects/site/src/app/pages/docs/components/demos/date-picker-fluid.demo.ts: 323cf81e0df5f0c64c96b01b032b4ce9fb69f5b2780fc523eef19fb382ac37cd
+      projects/site/src/app/pages/docs/components/demos/date-picker-format.demo.html: ce9ed3390105999d52df3a544da22371eab4611af75a6f72b1bcf508ebe95a57
+      projects/site/src/app/pages/docs/components/demos/date-picker-format.demo.ts: a7240cb32a15eb91a60fc542c58597a4931737bd9449c58e862c2c2c91cee3f1
+      projects/site/src/app/pages/docs/components/demos/date-picker-ifta-label.demo.html: 161ac1782d719c012b08b1eab3701c875c251ceda680425785bee199cf487511
+      projects/site/src/app/pages/docs/components/demos/date-picker-ifta-label.demo.ts: ad39d725cbada531f3c99238f51ac5241642c5d9ac93b4a019dc5b2e966f07f9
+      projects/site/src/app/pages/docs/components/demos/date-picker-inline.demo.html: 6913e5babe153a6d12f5af61605285ae9ee0b46f8c6f58531e7e5276a6e0dc89
+      projects/site/src/app/pages/docs/components/demos/date-picker-inline.demo.ts: a0aace545a9ed5fae6d27a0d002e8144a7f274d50832340db10e9e93acfeb8bd
+      projects/site/src/app/pages/docs/components/demos/date-picker-invalid.demo.html: 93a260fe81e9be401ebe8fdc2c38069550e4efad07d2ca3c246f96ea2bdbb114
+      projects/site/src/app/pages/docs/components/demos/date-picker-invalid.demo.ts: 3ad6fcdc7a6f7c5b0e2e5b3e4345a561af32ce7e37f4ca7bd5bb0c72f404cc28
+      projects/site/src/app/pages/docs/components/demos/date-picker-locale.demo.html: 7c05659f89ae632ec8a79fe8bb520cc73b06c8bb78875d605d06b2ce9ae52184
+      projects/site/src/app/pages/docs/components/demos/date-picker-locale.demo.ts: fcbb7952a8e4d77a0b97438af655c1a5e5a03ebca691c8127478448a855e1317
+      projects/site/src/app/pages/docs/components/demos/date-picker-min-max.demo.html: 5f57824218f39e7c44c34b7261467b8621fe1cde4ec7d935052e51c583689c67
+      projects/site/src/app/pages/docs/components/demos/date-picker-min-max.demo.ts: ea42c5b653af01a092e6acbef0a9e70b5df10ce0071cdc86593d5bebea2a93f5
+      projects/site/src/app/pages/docs/components/demos/date-picker-month-picker.demo.html: 29af9d883258fdd4afda86c46ba0ffa0839e62b90b6163bd0f6c27a4740397d9
+      projects/site/src/app/pages/docs/components/demos/date-picker-month-picker.demo.ts: de87cec026cd6370735ff50334c449bcee01095c6913ef0d34402c7b859fc9dd
+      projects/site/src/app/pages/docs/components/demos/date-picker-multiple-months.demo.html: 5c4fb8225d7ef318c084d104d98e9f51117a819b34ea31c9b7f85281d34c8160
+      projects/site/src/app/pages/docs/components/demos/date-picker-multiple-months.demo.ts: 4e9462ff6413c718ce53c63b814de3a0b71b4c01650a8c902d22762d637b3910
+      projects/site/src/app/pages/docs/components/demos/date-picker-multiple.demo.html: 654ec5ddd0c164a4f395a2ccbcef1816cfb1201816489a46448dd120205e6c60
+      projects/site/src/app/pages/docs/components/demos/date-picker-multiple.demo.ts: 6dad6a17bd02ab23e31f586e77360344b84e2551a3bd9d069fb8aa4e4e541b61
+      projects/site/src/app/pages/docs/components/demos/date-picker-range.demo.html: 23a5e7a2023d811570312890740aa23ed7045605f2595372957948375337e1a9
+      projects/site/src/app/pages/docs/components/demos/date-picker-range.demo.ts: 58f1799999b11d4179c128f1195ebfca74676d18a170d3b6c91c2d2ce7e28bfc
+      projects/site/src/app/pages/docs/components/demos/date-picker-reactive-forms.demo.html: 5bf38b311b9327e855429b3b2a23a34510976f8101e1503c602ee65ef4db3afb
+      projects/site/src/app/pages/docs/components/demos/date-picker-reactive-forms.demo.ts: 30873ef0b3d3c6856f58c6c83157f8fe949488ad6b69d725d95f2de310f376cc
+      projects/site/src/app/pages/docs/components/demos/date-picker-signal-forms.demo.html: d72d032af090f1b7a58b34e7fb11696798b5915d566b2b727d9b8e531b33fdc4
+      projects/site/src/app/pages/docs/components/demos/date-picker-signal-forms.demo.ts: e6173154324ae4e6ef65df879b4045912d3d7bca509c4eec84de93344427939b
+      projects/site/src/app/pages/docs/components/demos/date-picker-sizes.demo.html: 9456135481399429d56f6724d184af1a9dde3222e329371f402567bf66311e4b
+      projects/site/src/app/pages/docs/components/demos/date-picker-sizes.demo.ts: b9661ab7d2de325c53c2e0fe403718de9a78618faf0ed96ec4571ab39ad1479c
+      projects/site/src/app/pages/docs/components/demos/date-picker-template-driven.demo.html: 5b60a0162afeb72b3806d053c9ba85a701352def039051477641485546292833
+      projects/site/src/app/pages/docs/components/demos/date-picker-template-driven.demo.ts: c3fc5d53306630598a5ad4cec7ef52e884e6d3e51f8595f600e9be0c19776d6d
+      projects/site/src/app/pages/docs/components/demos/date-picker-time-only.demo.html: 2f1e0dca1c4d018e7c7932a4135496e8f9a4eac24c99aab384f9b7bae9202b83
+      projects/site/src/app/pages/docs/components/demos/date-picker-time-only.demo.ts: 99edd68210a65580ad2317c48ad54397d9c90bf19d2ea907677822b34c458e24
+      projects/site/src/app/pages/docs/components/demos/date-picker-year-picker.demo.html: 2841806b3295c0451446c3842640f8411da90baaae95b7f4a99f5877ae120e53
+      projects/site/src/app/pages/docs/components/demos/date-picker-year-picker.demo.ts: 97633b7adcdd14881ddf5f3041012cad613b347702b120c2dea4f1d4c4964316
+      projects/site/src/app/pages/docs/components/demos/input-number-buttons.demo.html: 300751fa1d6c60280eb920813946df454d75cefb5a43f0bd3925e79be4655cd1
+      projects/site/src/app/pages/docs/components/demos/input-number-buttons.demo.ts: 91a8fe8d542816abcab23803dc81c70bcb7a2fd3dc2c19d0581770ba95de3999
+      projects/site/src/app/pages/docs/components/demos/input-number-clear-icon.demo.html: 1d76f5e415d39a11d86125c191fabe0eb39f2e28ebad0fa2cd77042b7028d57c
+      projects/site/src/app/pages/docs/components/demos/input-number-clear-icon.demo.ts: 1031212d3dd199e445431cc7374ed7a223ee5ec2e798cca2d9c1e535831ee96c
+      projects/site/src/app/pages/docs/components/demos/input-number-currency.demo.html: 7354e0d47561fe06cdc50f1176a69e0f175826f9e4e4d7c0d8b56011dbc4c837
+      projects/site/src/app/pages/docs/components/demos/input-number-currency.demo.ts: 7e2eab58ae5657f8d03d8c54ca4f1e040758cb79702d013413d7e4cc5fa875ab
+      projects/site/src/app/pages/docs/components/demos/input-number-disabled.demo.html: bc1a55644863ff00efdde69c6e810c87092e8a9206b5b96ff39ecec5c5209122
+      projects/site/src/app/pages/docs/components/demos/input-number-disabled.demo.ts: 2af8667ce8f73cb7323ad34ddfa18a3218271b5c82a9b00910ad3a49bbda3580
+      projects/site/src/app/pages/docs/components/demos/input-number-filled.demo.html: e335bff543027a6e4699a4c97c4584e15f499a1f9fa8afa98a1eddf465ade952
+      projects/site/src/app/pages/docs/components/demos/input-number-filled.demo.ts: bdba8d8d251f2fde2ffab63d8d57e27aec0d56d67c86f6a61cd46dfb7417afb6
+      projects/site/src/app/pages/docs/components/demos/input-number-float-label.demo.html: 62f3efb701846a81add27e9a5423704d044e90d599e3565e50b2cbdfe10ca38c
+      projects/site/src/app/pages/docs/components/demos/input-number-float-label.demo.ts: 01e8f3449f1f2754d2200763e6b97f9eb1501cdad03b78b0b43f4a4fe01204dc
+      projects/site/src/app/pages/docs/components/demos/input-number-fluid.demo.html: 4d5c3534e514d96a688966c25ff5bdcdda713493315fec9a38a0ce19ae570765
+      projects/site/src/app/pages/docs/components/demos/input-number-fluid.demo.ts: bf3c6ea0dbd63ff69692a8fa4bd9312922b38fd43dfaf01d5409c486e3eca124
+      projects/site/src/app/pages/docs/components/demos/input-number-ifta-label.demo.html: 71d65cbd207ac87093427caa5241673ac975505f68a0d8a2be5172f5fb7c402b
+      projects/site/src/app/pages/docs/components/demos/input-number-ifta-label.demo.ts: 96ccb6e23ea9b72124b1cd58696831c3884d02e89bc7c4766996ecb37988712b
+      projects/site/src/app/pages/docs/components/demos/input-number-invalid.demo.html: c70e276190781ec2a5e6703f38470590797c236a3dfdc63ab9ea526803a37d47
+      projects/site/src/app/pages/docs/components/demos/input-number-invalid.demo.ts: dd560271a788040d7d9d497903c0dab1423fa11dc31e6e2353fd595c28196616
+      projects/site/src/app/pages/docs/components/demos/input-number-locale.demo.html: 2297f1460bff307e2b2a57e70c1a14df7f1ada556a271550c93935ddc5e4f541
+      projects/site/src/app/pages/docs/components/demos/input-number-locale.demo.ts: 15f66abed1886f5ab2a19459d5f6b9b60ee69dbdcf1199de67eec95239869614
+      projects/site/src/app/pages/docs/components/demos/input-number-numerals.demo.html: 999ad238caed63b296e80efadf5d6913e5febbfb15033e0a683b97a3dc57f033
+      projects/site/src/app/pages/docs/components/demos/input-number-numerals.demo.ts: 4cd4e486736d2614df6968ea73f78c7ca797494eb612dd6f5d2b278cc82a6575
+      projects/site/src/app/pages/docs/components/demos/input-number-prefix-suffix.demo.html: 0fca5dda15b69a34b5643636604cdd42406c2a942bb8d84d94d5e0e9df22ceac
+      projects/site/src/app/pages/docs/components/demos/input-number-prefix-suffix.demo.ts: 0d836ae303009efbf79dab07c46f6469fd97457a5308ab056d6a062ebbdd72a5
+      projects/site/src/app/pages/docs/components/demos/input-number-reactive-forms.demo.html: 3d3a983418195d3ce1f2ddd10c5f3ab9635f5e39f6c7161f4797d4932e63297b
+      projects/site/src/app/pages/docs/components/demos/input-number-reactive-forms.demo.ts: c91a468d84e490af29fb72fc303bf4d655cb0f908ddb85875137a6b75f1a341e
+      projects/site/src/app/pages/docs/components/demos/input-number-signal-forms.demo.html: 99c21966c801ab4e904cc37931b0ee8864494eca4507a902d4fff739413ed1ff
+      projects/site/src/app/pages/docs/components/demos/input-number-signal-forms.demo.ts: 5ff6079e03f0f484271da86dc871029f5cbccf7afb7a3d68a9d34d7a5bf64dc0
+      projects/site/src/app/pages/docs/components/demos/input-number-sizes.demo.html: 057148ce46bf2104fde7ec44c63b35dd390deb9172153c14e974f0984bd9f314
+      projects/site/src/app/pages/docs/components/demos/input-number-sizes.demo.ts: 3a8ea3126391ee5f8a08662485a97d874050f431e1a038e1a7c8844b45b20a64
+      projects/site/src/app/pages/docs/components/demos/input-number-template-driven.demo.html: a9eb23cd07431d2e914acb8f9c7f9e337a2f333488991ce50b4d1ce5fb290229
+      projects/site/src/app/pages/docs/components/demos/input-number-template-driven.demo.ts: c772de7e3899241180094f770f8811adf1b769941f36cdbe388962b89e47b1a4
+      projects/site/src/app/pages/docs/components/input-number.page.ts: 6d4ade30d03dc6ac7f44eba7a1db64fa2a7d24bf6d5f25eab18ae06e980ba088
+      projects/site/src/content/docs/date-picker-basic.txt: 3f949ecc822c38d0128f1b705913cbf5f6f63afefc36d58cdae4e57c3038071e
+      projects/site/src/content/docs/date-picker-button-bar.txt: b9d5b82eaee18bd51d6c2b3d8577024062198bbd0e59dee54460f4a37684852c
+      projects/site/src/content/docs/date-picker-clear-icon.txt: 4826510f712b3dc16cd6b6cbcba2290e90bd7edbf7a23d5792072658977f99a2
+      projects/site/src/content/docs/date-picker-date-template.txt: f27ffa2529766fa65754e34a628bb99f1e0326429699dfa00cb38200f0d6bdc9
+      projects/site/src/content/docs/date-picker-disabled.txt: 1f09bd46836a16ffe92537c9838bed29696ed0eefb0851bf4917be8abe48e748
+      projects/site/src/content/docs/date-picker-drilldown.txt: 188df5f197e66fb5f82e9498b89980f989d24cf8db6091c9e000d72d8087f150
+      projects/site/src/content/docs/date-picker-filled.txt: 351a9506b73d51305e143a8d44400d9d343349ad32e800832cf1d43d281df9a4
+      projects/site/src/content/docs/date-picker-float-label.txt: d12931ee0c18c47d1a427c49cfc12d081a7a800a964af93196c2c29979ff4c4d
+      projects/site/src/content/docs/date-picker-fluid.txt: 5d6e1a5e8770b9d1bfac7eb4bd0d1dbf41976125b1e9093c499dc6dd07524acf
+      projects/site/src/content/docs/date-picker-format.txt: 32ad30dc88e34c2e3179ed80cf4a1da7188698e120a642534581d069cae6da59
+      projects/site/src/content/docs/date-picker-ifta-label.txt: 987f002ab150a72c2f0ee24624c7e2b5d6eb05e7cc8cd1efea9885917ee6eecb
+      projects/site/src/content/docs/date-picker-inline.txt: 6342855b75967b23fbe1415af211beb5ddff95c0342fe3ce025b3161034202c6
+      projects/site/src/content/docs/date-picker-invalid.txt: d549f9c82b821c9700fb212b8214662f21391978bd756c15228954f32b0e1c6c
+      projects/site/src/content/docs/date-picker-locale.txt: fd49708d359c13b593e51e8ae820a4d269b265ccf5b99959a6dc7e5fc15f36ca
+      projects/site/src/content/docs/date-picker-min-max.txt: 7acbc5f39d41454f7477bbf59d4d166f5c4d8ed0cf667df5d7bdae368eccf13e
+      projects/site/src/content/docs/date-picker-month-picker.txt: aaa02408b02d7f834b69ca039643c0f0f16af85914c32ffd20bd741c46dc9905
+      projects/site/src/content/docs/date-picker-multiple-months.txt: 860e3e885f61a79bc918e007cd81b4ee753dfde838523827a0c651204ac8dcda
+      projects/site/src/content/docs/date-picker-multiple.txt: 4a833afbf7c809140499a6eeec9e1d131559ad7925f173c731115a8a9f1b8edb
+      projects/site/src/content/docs/date-picker-range.txt: 9a58e83d9496c88f4e37c6656b8ed07abe990a15160193a44f025a1aa473fb70
+      projects/site/src/content/docs/date-picker-reactive-forms.txt: 26aec517ae05f454874646153ad9794d1d062ca267b596d56e383963a95db291
+      projects/site/src/content/docs/date-picker-show-time.txt: 4f270823be527d6912f720c55007abb20f9b3daa4f900244593ae061d16fb531
+      projects/site/src/content/docs/date-picker-signal-forms.txt: 97375601317d3e64e9e46c9735f56eaa80554bfe5ca02732cfdc815039f5285f
+      projects/site/src/content/docs/date-picker-sizes.txt: 5162a9478d8776da43818e12a2318d944284aedd525c12fab2233fd113e504fb
+      projects/site/src/content/docs/date-picker-template-driven.txt: 506876fbd65d3d93e174993b82d920f39a69ed32835cc1d1b0f799b45469a24a
+      projects/site/src/content/docs/date-picker-time-only.txt: 72200e99123835c6e0dfdb26f430aeeb13d81a621616eafee19e5cbf96c8a92d
+      projects/site/src/content/docs/date-picker-year-picker.txt: ae2fdafa81bcc22e46925fbabaafad47752a4d154be2f4a8411b6340fc30c2f8
+      projects/site/src/content/docs/input-number-basic.txt: 355bfb4d237e484ab757746de1d4b7bb77c6e85192bad2160da6da44dafab000
+      projects/site/src/content/docs/input-number-buttons.txt: a88f5e223856cb3bdc060f9b54d468662ffcff3379407e4b017696b697da172a
+      projects/site/src/content/docs/input-number-clear-icon.txt: 01448cfcee61bc127dc2a6ffa8f467e9c052b2688f133e914758d43425ff0ac0
+      projects/site/src/content/docs/input-number-currency.txt: 683c5141408f1409df2e0805e8efb248977960457acb0f96f4fd5860d250f2d3
+      projects/site/src/content/docs/input-number-disabled.txt: edf6faaf01a4ac643b7d7d3596ad0a9b76a40bf3e1987ec44f401552da0a2ba7
+      projects/site/src/content/docs/input-number-filled.txt: d694b453965c2dd2bf0039686251beec703e200e59f498ffbd73297d91db25a9
+      projects/site/src/content/docs/input-number-float-label.txt: d064109840b859ec800a11bda73fb9f07c968a363e0caadd8b3b37f04f53bc69
+      projects/site/src/content/docs/input-number-fluid.txt: 4c89baba76205e2c026629127e2f5da9d604a832c3822c2b7653906b1f8190e0
+      projects/site/src/content/docs/input-number-ifta-label.txt: 92bdca55c7a99240a0c20881411dae244f71dd9edda80e9bf4fba801aec8b67c
+      projects/site/src/content/docs/input-number-invalid.txt: 3d19da327a3435022f3aaa209ca2a9c23ec56c0b1b3e31bc33e0da51b50e60a9
+      projects/site/src/content/docs/input-number-locale.txt: 036e16ab190efa28751da76276b8cf2f8697a512241fbeba570e5a35ba77fbdf
+      projects/site/src/content/docs/input-number-numerals.txt: 16c1e068c742fc7fa837654c10eaee382e6a174e4bff1201893eeb302bcd22ea
+      projects/site/src/content/docs/input-number-prefix-suffix.txt: 34cbd5cf6255f3e71a5bdcb432dca8a7240ae53a87be3cb2a7a10835b4861334
+      projects/site/src/content/docs/input-number-reactive-forms.txt: b0d1780aaa0450ce0fbac7a2918123cfc32166f4c0973c67c1812b4cb832ca99
+      projects/site/src/content/docs/input-number-signal-forms.txt: 1e7375b601e5a8490c40ad9843ec2deb36e6adbd0f9bebadde075280df9ad28a
+      projects/site/src/content/docs/input-number-sizes.txt: 63116202a186ddcc525415f485d68ea4ca24c50356105d06f723466b2daff0b8
+      projects/site/src/content/docs/input-number-template-driven.txt: 917efef0b86b18d316cf001ce3a35b74c94f64e87ec039beac178ddfebd15d35
+    "4":
+      .changeset/date-picker-parity.md: 28e4c1ba01cc303045948d0b14b99e5921807a9a6c8cf6a51bcc513af8b54621
+      .changeset/input-number-signal-forms-bounds.md: 7604ea621e82f1bcb4eed1b85da55c8c187bb619cc873f401069dbdc8e10ccc2
+      e2e/site/date-picker-docs.spec.ts: e5946ab9b7275841e8940b2d67f740d8651c45cf5774dd9eee67b77f4bf3bd71
+      e2e/site/input-number-docs.spec.ts: d62bd3625a71b859c1113dedeb899352f8000b9b6640547803e8f4cfaccbc39e
+      projects/medra/ui/src/lib/date-picker/date-picker-panel.component.spec.ts: 251143a279936d9b2f23c12fd36053c40c0e38e4de82f14aca521a13dd3e9d7e
+      projects/medra/ui/src/lib/date-picker/date-picker-panel.component.ts: f408798d6fe10120b121a5fd55d7b17dce35601a09c4527974ccb2ed0c149527
+      projects/medra/ui/src/lib/date-picker/date-picker.component.spec.ts: a9681bf16cdd0a5a2de8ba8c6db55a991d6e19fc19e5c28a23ec29058a8d8185
+      projects/medra/ui/src/lib/date-picker/date-picker.component.ts: 6d140fd490c75992598397f791e4ff6acc257605ff0313ff81428a691e6a232a
+      projects/medra/ui/src/lib/date-picker/date-picker.types.ts: ec6116a1b4fccfcf018c3ec2ba43f2aeafc219fafef93f3888fd895c2eb1e38d
+      projects/medra/ui/src/lib/input-number/input-number.component.spec.ts: a0f7bb14c0b8948de21bac4e3bd1d9e8c99a36501fbb36f28d96371b21984664
+      projects/medra/ui/src/lib/input-number/input-number.component.ts: 82e517be34ebdbb989a2e0f72c7fbd7d7db1e3fb44378f9131893c758dfa6a4e
+      projects/site/src/app/pages/docs/components/date-picker.page.ts: e632262d897dd5b72dedd5e9f47caeccfa72874c5add2d80a8e88a0bc4a94f84
+      projects/site/src/app/pages/docs/components/demos/date-picker-button-bar.demo.html: 5f8f76c31a5e263c617d48d7b7fb3f311ba2e19687b8478b1fb5916d50cc8bd9
+      projects/site/src/app/pages/docs/components/demos/date-picker-button-bar.demo.ts: 0ccb18fb7b8440f490d94c8dc9a55a4e37895a1d59e993e0917665e93ac9a788
+      projects/site/src/app/pages/docs/components/demos/date-picker-clear-icon.demo.html: c19a4d51f7de0bbfa93a5b3dc3e22d2ef1fcde3287790cc2ff6ed45f2992747e
+      projects/site/src/app/pages/docs/components/demos/date-picker-clear-icon.demo.ts: 38f22a4fa91d7366867e783b42089afdfa91db84272d7b6c30eb7e68e2e80842
+      projects/site/src/app/pages/docs/components/demos/date-picker-date-template.demo.html: 239ecfcfeec9da5e4c38a7abf942941e590478879ce7ed32b4fcad0f0ed31b48
+      projects/site/src/app/pages/docs/components/demos/date-picker-date-template.demo.ts: f0ccb59a022df64a7dcc280339013474a2026bd0bad2ba5ef9313bd7995e7a34
+      projects/site/src/app/pages/docs/components/demos/date-picker-disabled.demo.html: d359a4b34c91e7c66782df18f66d181ec8aa087760d1dfff924eeb83b0cc1817
+      projects/site/src/app/pages/docs/components/demos/date-picker-disabled.demo.ts: 5d2ac487f5ce32537bfe56d82b339206aefeda1f6868a1c3c2075a113dd752a1
+      projects/site/src/app/pages/docs/components/demos/date-picker-drilldown.demo.html: db4ee17602c2802be75163f54afc95bcdb0333a7b73920bafc4e07ae8b41df47
+      projects/site/src/app/pages/docs/components/demos/date-picker-drilldown.demo.ts: 18bd32032e52c92bb294f6742ddd51efad37aaaa6cb3430ec4ae78f8cd4540fd
+      projects/site/src/app/pages/docs/components/demos/date-picker-filled.demo.html: bb5bae4beb57f1f3ffdb575fc0e03410a079c19b0a45a2619242961a2e47bd4a
+      projects/site/src/app/pages/docs/components/demos/date-picker-filled.demo.ts: 89a9e667db536bc81cf0ad5c2b9c886c3e542bf6153da00e1e3da65d65a78a6f
+      projects/site/src/app/pages/docs/components/demos/date-picker-float-label.demo.html: f2577ab35a790f3603c37fae3848a90454660377870ab825aa625f20074fac8e
+      projects/site/src/app/pages/docs/components/demos/date-picker-float-label.demo.ts: a88e2a501d15cddf300a3af280569f9505d868f8fbab872b948b3d8644735fa7
+      projects/site/src/app/pages/docs/components/demos/date-picker-fluid.demo.html: 312dba220d4888b2b05b105ba794a42e6c3d38094b2925f563518f74ff50e10c
+      projects/site/src/app/pages/docs/components/demos/date-picker-fluid.demo.ts: 323cf81e0df5f0c64c96b01b032b4ce9fb69f5b2780fc523eef19fb382ac37cd
+      projects/site/src/app/pages/docs/components/demos/date-picker-format.demo.html: ce9ed3390105999d52df3a544da22371eab4611af75a6f72b1bcf508ebe95a57
+      projects/site/src/app/pages/docs/components/demos/date-picker-format.demo.ts: a7240cb32a15eb91a60fc542c58597a4931737bd9449c58e862c2c2c91cee3f1
+      projects/site/src/app/pages/docs/components/demos/date-picker-ifta-label.demo.html: 161ac1782d719c012b08b1eab3701c875c251ceda680425785bee199cf487511
+      projects/site/src/app/pages/docs/components/demos/date-picker-ifta-label.demo.ts: ad39d725cbada531f3c99238f51ac5241642c5d9ac93b4a019dc5b2e966f07f9
+      projects/site/src/app/pages/docs/components/demos/date-picker-inline.demo.html: 6913e5babe153a6d12f5af61605285ae9ee0b46f8c6f58531e7e5276a6e0dc89
+      projects/site/src/app/pages/docs/components/demos/date-picker-inline.demo.ts: a0aace545a9ed5fae6d27a0d002e8144a7f274d50832340db10e9e93acfeb8bd
+      projects/site/src/app/pages/docs/components/demos/date-picker-invalid.demo.html: 93a260fe81e9be401ebe8fdc2c38069550e4efad07d2ca3c246f96ea2bdbb114
+      projects/site/src/app/pages/docs/components/demos/date-picker-invalid.demo.ts: 3ad6fcdc7a6f7c5b0e2e5b3e4345a561af32ce7e37f4ca7bd5bb0c72f404cc28
+      projects/site/src/app/pages/docs/components/demos/date-picker-locale.demo.html: 7c05659f89ae632ec8a79fe8bb520cc73b06c8bb78875d605d06b2ce9ae52184
+      projects/site/src/app/pages/docs/components/demos/date-picker-locale.demo.ts: fcbb7952a8e4d77a0b97438af655c1a5e5a03ebca691c8127478448a855e1317
+      projects/site/src/app/pages/docs/components/demos/date-picker-min-max.demo.html: 5f57824218f39e7c44c34b7261467b8621fe1cde4ec7d935052e51c583689c67
+      projects/site/src/app/pages/docs/components/demos/date-picker-min-max.demo.ts: ea42c5b653af01a092e6acbef0a9e70b5df10ce0071cdc86593d5bebea2a93f5
+      projects/site/src/app/pages/docs/components/demos/date-picker-month-picker.demo.html: 29af9d883258fdd4afda86c46ba0ffa0839e62b90b6163bd0f6c27a4740397d9
+      projects/site/src/app/pages/docs/components/demos/date-picker-month-picker.demo.ts: de87cec026cd6370735ff50334c449bcee01095c6913ef0d34402c7b859fc9dd
+      projects/site/src/app/pages/docs/components/demos/date-picker-multiple-months.demo.html: 5c4fb8225d7ef318c084d104d98e9f51117a819b34ea31c9b7f85281d34c8160
+      projects/site/src/app/pages/docs/components/demos/date-picker-multiple-months.demo.ts: 4e9462ff6413c718ce53c63b814de3a0b71b4c01650a8c902d22762d637b3910
+      projects/site/src/app/pages/docs/components/demos/date-picker-multiple.demo.html: 654ec5ddd0c164a4f395a2ccbcef1816cfb1201816489a46448dd120205e6c60
+      projects/site/src/app/pages/docs/components/demos/date-picker-multiple.demo.ts: 6dad6a17bd02ab23e31f586e77360344b84e2551a3bd9d069fb8aa4e4e541b61
+      projects/site/src/app/pages/docs/components/demos/date-picker-range.demo.html: 23a5e7a2023d811570312890740aa23ed7045605f2595372957948375337e1a9
+      projects/site/src/app/pages/docs/components/demos/date-picker-range.demo.ts: 58f1799999b11d4179c128f1195ebfca74676d18a170d3b6c91c2d2ce7e28bfc
+      projects/site/src/app/pages/docs/components/demos/date-picker-reactive-forms.demo.html: 5bf38b311b9327e855429b3b2a23a34510976f8101e1503c602ee65ef4db3afb
+      projects/site/src/app/pages/docs/components/demos/date-picker-reactive-forms.demo.ts: 30873ef0b3d3c6856f58c6c83157f8fe949488ad6b69d725d95f2de310f376cc
+      projects/site/src/app/pages/docs/components/demos/date-picker-signal-forms.demo.html: d72d032af090f1b7a58b34e7fb11696798b5915d566b2b727d9b8e531b33fdc4
+      projects/site/src/app/pages/docs/components/demos/date-picker-signal-forms.demo.ts: e6173154324ae4e6ef65df879b4045912d3d7bca509c4eec84de93344427939b
+      projects/site/src/app/pages/docs/components/demos/date-picker-sizes.demo.html: 9456135481399429d56f6724d184af1a9dde3222e329371f402567bf66311e4b
+      projects/site/src/app/pages/docs/components/demos/date-picker-sizes.demo.ts: b9661ab7d2de325c53c2e0fe403718de9a78618faf0ed96ec4571ab39ad1479c
+      projects/site/src/app/pages/docs/components/demos/date-picker-template-driven.demo.html: 5b60a0162afeb72b3806d053c9ba85a701352def039051477641485546292833
+      projects/site/src/app/pages/docs/components/demos/date-picker-template-driven.demo.ts: c3fc5d53306630598a5ad4cec7ef52e884e6d3e51f8595f600e9be0c19776d6d
+      projects/site/src/app/pages/docs/components/demos/date-picker-time-only.demo.html: 2f1e0dca1c4d018e7c7932a4135496e8f9a4eac24c99aab384f9b7bae9202b83
+      projects/site/src/app/pages/docs/components/demos/date-picker-time-only.demo.ts: 99edd68210a65580ad2317c48ad54397d9c90bf19d2ea907677822b34c458e24
+      projects/site/src/app/pages/docs/components/demos/date-picker-year-picker.demo.html: 2841806b3295c0451446c3842640f8411da90baaae95b7f4a99f5877ae120e53
+      projects/site/src/app/pages/docs/components/demos/date-picker-year-picker.demo.ts: 97633b7adcdd14881ddf5f3041012cad613b347702b120c2dea4f1d4c4964316
+      projects/site/src/app/pages/docs/components/demos/input-number-buttons.demo.html: 300751fa1d6c60280eb920813946df454d75cefb5a43f0bd3925e79be4655cd1
+      projects/site/src/app/pages/docs/components/demos/input-number-buttons.demo.ts: 91a8fe8d542816abcab23803dc81c70bcb7a2fd3dc2c19d0581770ba95de3999
+      projects/site/src/app/pages/docs/components/demos/input-number-clear-icon.demo.html: 1d76f5e415d39a11d86125c191fabe0eb39f2e28ebad0fa2cd77042b7028d57c
+      projects/site/src/app/pages/docs/components/demos/input-number-clear-icon.demo.ts: 1031212d3dd199e445431cc7374ed7a223ee5ec2e798cca2d9c1e535831ee96c
+      projects/site/src/app/pages/docs/components/demos/input-number-currency.demo.html: 7354e0d47561fe06cdc50f1176a69e0f175826f9e4e4d7c0d8b56011dbc4c837
+      projects/site/src/app/pages/docs/components/demos/input-number-currency.demo.ts: 7e2eab58ae5657f8d03d8c54ca4f1e040758cb79702d013413d7e4cc5fa875ab
+      projects/site/src/app/pages/docs/components/demos/input-number-disabled.demo.html: bc1a55644863ff00efdde69c6e810c87092e8a9206b5b96ff39ecec5c5209122
+      projects/site/src/app/pages/docs/components/demos/input-number-disabled.demo.ts: 2af8667ce8f73cb7323ad34ddfa18a3218271b5c82a9b00910ad3a49bbda3580
+      projects/site/src/app/pages/docs/components/demos/input-number-filled.demo.html: e335bff543027a6e4699a4c97c4584e15f499a1f9fa8afa98a1eddf465ade952
+      projects/site/src/app/pages/docs/components/demos/input-number-filled.demo.ts: bdba8d8d251f2fde2ffab63d8d57e27aec0d56d67c86f6a61cd46dfb7417afb6
+      projects/site/src/app/pages/docs/components/demos/input-number-float-label.demo.html: 62f3efb701846a81add27e9a5423704d044e90d599e3565e50b2cbdfe10ca38c
+      projects/site/src/app/pages/docs/components/demos/input-number-float-label.demo.ts: 01e8f3449f1f2754d2200763e6b97f9eb1501cdad03b78b0b43f4a4fe01204dc
+      projects/site/src/app/pages/docs/components/demos/input-number-fluid.demo.html: 4d5c3534e514d96a688966c25ff5bdcdda713493315fec9a38a0ce19ae570765
+      projects/site/src/app/pages/docs/components/demos/input-number-fluid.demo.ts: bf3c6ea0dbd63ff69692a8fa4bd9312922b38fd43dfaf01d5409c486e3eca124
+      projects/site/src/app/pages/docs/components/demos/input-number-ifta-label.demo.html: 71d65cbd207ac87093427caa5241673ac975505f68a0d8a2be5172f5fb7c402b
+      projects/site/src/app/pages/docs/components/demos/input-number-ifta-label.demo.ts: 96ccb6e23ea9b72124b1cd58696831c3884d02e89bc7c4766996ecb37988712b
+      projects/site/src/app/pages/docs/components/demos/input-number-invalid.demo.html: c70e276190781ec2a5e6703f38470590797c236a3dfdc63ab9ea526803a37d47
+      projects/site/src/app/pages/docs/components/demos/input-number-invalid.demo.ts: dd560271a788040d7d9d497903c0dab1423fa11dc31e6e2353fd595c28196616
+      projects/site/src/app/pages/docs/components/demos/input-number-locale.demo.html: 2297f1460bff307e2b2a57e70c1a14df7f1ada556a271550c93935ddc5e4f541
+      projects/site/src/app/pages/docs/components/demos/input-number-locale.demo.ts: 15f66abed1886f5ab2a19459d5f6b9b60ee69dbdcf1199de67eec95239869614
+      projects/site/src/app/pages/docs/components/demos/input-number-numerals.demo.html: 999ad238caed63b296e80efadf5d6913e5febbfb15033e0a683b97a3dc57f033
+      projects/site/src/app/pages/docs/components/demos/input-number-numerals.demo.ts: 4cd4e486736d2614df6968ea73f78c7ca797494eb612dd6f5d2b278cc82a6575
+      projects/site/src/app/pages/docs/components/demos/input-number-prefix-suffix.demo.html: 0fca5dda15b69a34b5643636604cdd42406c2a942bb8d84d94d5e0e9df22ceac
+      projects/site/src/app/pages/docs/components/demos/input-number-prefix-suffix.demo.ts: 0d836ae303009efbf79dab07c46f6469fd97457a5308ab056d6a062ebbdd72a5
+      projects/site/src/app/pages/docs/components/demos/input-number-reactive-forms.demo.html: 3d3a983418195d3ce1f2ddd10c5f3ab9635f5e39f6c7161f4797d4932e63297b
+      projects/site/src/app/pages/docs/components/demos/input-number-reactive-forms.demo.ts: c91a468d84e490af29fb72fc303bf4d655cb0f908ddb85875137a6b75f1a341e
+      projects/site/src/app/pages/docs/components/demos/input-number-signal-forms.demo.html: 99c21966c801ab4e904cc37931b0ee8864494eca4507a902d4fff739413ed1ff
+      projects/site/src/app/pages/docs/components/demos/input-number-signal-forms.demo.ts: 5ff6079e03f0f484271da86dc871029f5cbccf7afb7a3d68a9d34d7a5bf64dc0
+      projects/site/src/app/pages/docs/components/demos/input-number-sizes.demo.html: 057148ce46bf2104fde7ec44c63b35dd390deb9172153c14e974f0984bd9f314
+      projects/site/src/app/pages/docs/components/demos/input-number-sizes.demo.ts: 3a8ea3126391ee5f8a08662485a97d874050f431e1a038e1a7c8844b45b20a64
+      projects/site/src/app/pages/docs/components/demos/input-number-template-driven.demo.html: a9eb23cd07431d2e914acb8f9c7f9e337a2f333488991ce50b4d1ce5fb290229
+      projects/site/src/app/pages/docs/components/demos/input-number-template-driven.demo.ts: c772de7e3899241180094f770f8811adf1b769941f36cdbe388962b89e47b1a4
+      projects/site/src/app/pages/docs/components/input-number.page.ts: 6d4ade30d03dc6ac7f44eba7a1db64fa2a7d24bf6d5f25eab18ae06e980ba088
+      projects/site/src/content/docs/date-picker-basic.txt: 3f949ecc822c38d0128f1b705913cbf5f6f63afefc36d58cdae4e57c3038071e
+      projects/site/src/content/docs/date-picker-button-bar.txt: b9d5b82eaee18bd51d6c2b3d8577024062198bbd0e59dee54460f4a37684852c
+      projects/site/src/content/docs/date-picker-clear-icon.txt: 4826510f712b3dc16cd6b6cbcba2290e90bd7edbf7a23d5792072658977f99a2
+      projects/site/src/content/docs/date-picker-date-template.txt: f27ffa2529766fa65754e34a628bb99f1e0326429699dfa00cb38200f0d6bdc9
+      projects/site/src/content/docs/date-picker-disabled.txt: 1f09bd46836a16ffe92537c9838bed29696ed0eefb0851bf4917be8abe48e748
+      projects/site/src/content/docs/date-picker-drilldown.txt: 188df5f197e66fb5f82e9498b89980f989d24cf8db6091c9e000d72d8087f150
+      projects/site/src/content/docs/date-picker-filled.txt: 351a9506b73d51305e143a8d44400d9d343349ad32e800832cf1d43d281df9a4
+      projects/site/src/content/docs/date-picker-float-label.txt: d12931ee0c18c47d1a427c49cfc12d081a7a800a964af93196c2c29979ff4c4d
+      projects/site/src/content/docs/date-picker-fluid.txt: 5d6e1a5e8770b9d1bfac7eb4bd0d1dbf41976125b1e9093c499dc6dd07524acf
+      projects/site/src/content/docs/date-picker-format.txt: 32ad30dc88e34c2e3179ed80cf4a1da7188698e120a642534581d069cae6da59
+      projects/site/src/content/docs/date-picker-ifta-label.txt: 987f002ab150a72c2f0ee24624c7e2b5d6eb05e7cc8cd1efea9885917ee6eecb
+      projects/site/src/content/docs/date-picker-inline.txt: 6342855b75967b23fbe1415af211beb5ddff95c0342fe3ce025b3161034202c6
+      projects/site/src/content/docs/date-picker-invalid.txt: d549f9c82b821c9700fb212b8214662f21391978bd756c15228954f32b0e1c6c
+      projects/site/src/content/docs/date-picker-locale.txt: fd49708d359c13b593e51e8ae820a4d269b265ccf5b99959a6dc7e5fc15f36ca
+      projects/site/src/content/docs/date-picker-min-max.txt: 7acbc5f39d41454f7477bbf59d4d166f5c4d8ed0cf667df5d7bdae368eccf13e
+      projects/site/src/content/docs/date-picker-month-picker.txt: aaa02408b02d7f834b69ca039643c0f0f16af85914c32ffd20bd741c46dc9905
+      projects/site/src/content/docs/date-picker-multiple-months.txt: 860e3e885f61a79bc918e007cd81b4ee753dfde838523827a0c651204ac8dcda
+      projects/site/src/content/docs/date-picker-multiple.txt: 4a833afbf7c809140499a6eeec9e1d131559ad7925f173c731115a8a9f1b8edb
+      projects/site/src/content/docs/date-picker-range.txt: 9a58e83d9496c88f4e37c6656b8ed07abe990a15160193a44f025a1aa473fb70
+      projects/site/src/content/docs/date-picker-reactive-forms.txt: 26aec517ae05f454874646153ad9794d1d062ca267b596d56e383963a95db291
+      projects/site/src/content/docs/date-picker-show-time.txt: 4f270823be527d6912f720c55007abb20f9b3daa4f900244593ae061d16fb531
+      projects/site/src/content/docs/date-picker-signal-forms.txt: 97375601317d3e64e9e46c9735f56eaa80554bfe5ca02732cfdc815039f5285f
+      projects/site/src/content/docs/date-picker-sizes.txt: 5162a9478d8776da43818e12a2318d944284aedd525c12fab2233fd113e504fb
+      projects/site/src/content/docs/date-picker-template-driven.txt: 506876fbd65d3d93e174993b82d920f39a69ed32835cc1d1b0f799b45469a24a
+      projects/site/src/content/docs/date-picker-time-only.txt: 72200e99123835c6e0dfdb26f430aeeb13d81a621616eafee19e5cbf96c8a92d
+      projects/site/src/content/docs/date-picker-year-picker.txt: ae2fdafa81bcc22e46925fbabaafad47752a4d154be2f4a8411b6340fc30c2f8
+      projects/site/src/content/docs/input-number-basic.txt: 355bfb4d237e484ab757746de1d4b7bb77c6e85192bad2160da6da44dafab000
+      projects/site/src/content/docs/input-number-buttons.txt: a88f5e223856cb3bdc060f9b54d468662ffcff3379407e4b017696b697da172a
+      projects/site/src/content/docs/input-number-clear-icon.txt: 01448cfcee61bc127dc2a6ffa8f467e9c052b2688f133e914758d43425ff0ac0
+      projects/site/src/content/docs/input-number-currency.txt: 683c5141408f1409df2e0805e8efb248977960457acb0f96f4fd5860d250f2d3
+      projects/site/src/content/docs/input-number-disabled.txt: edf6faaf01a4ac643b7d7d3596ad0a9b76a40bf3e1987ec44f401552da0a2ba7
+      projects/site/src/content/docs/input-number-filled.txt: d694b453965c2dd2bf0039686251beec703e200e59f498ffbd73297d91db25a9
+      projects/site/src/content/docs/input-number-float-label.txt: d064109840b859ec800a11bda73fb9f07c968a363e0caadd8b3b37f04f53bc69
+      projects/site/src/content/docs/input-number-fluid.txt: 4c89baba76205e2c026629127e2f5da9d604a832c3822c2b7653906b1f8190e0
+      projects/site/src/content/docs/input-number-ifta-label.txt: 92bdca55c7a99240a0c20881411dae244f71dd9edda80e9bf4fba801aec8b67c
+      projects/site/src/content/docs/input-number-invalid.txt: 3d19da327a3435022f3aaa209ca2a9c23ec56c0b1b3e31bc33e0da51b50e60a9
+      projects/site/src/content/docs/input-number-locale.txt: 036e16ab190efa28751da76276b8cf2f8697a512241fbeba570e5a35ba77fbdf
+      projects/site/src/content/docs/input-number-numerals.txt: 16c1e068c742fc7fa837654c10eaee382e6a174e4bff1201893eeb302bcd22ea
+      projects/site/src/content/docs/input-number-prefix-suffix.txt: 34cbd5cf6255f3e71a5bdcb432dca8a7240ae53a87be3cb2a7a10835b4861334
+      projects/site/src/content/docs/input-number-reactive-forms.txt: b0d1780aaa0450ce0fbac7a2918123cfc32166f4c0973c67c1812b4cb832ca99
+      projects/site/src/content/docs/input-number-signal-forms.txt: 1e7375b601e5a8490c40ad9843ec2deb36e6adbd0f9bebadde075280df9ad28a
+      projects/site/src/content/docs/input-number-sizes.txt: 63116202a186ddcc525415f485d68ea4ca24c50356105d06f723466b2daff0b8
+      projects/site/src/content/docs/input-number-template-driven.txt: 917efef0b86b18d316cf001ce3a35b74c94f64e87ec039beac178ddfebd15d35
+archived:
+  at: 2026-11-25
+  sequence: 28

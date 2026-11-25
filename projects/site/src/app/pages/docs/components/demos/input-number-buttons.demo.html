@@ -1,0 +1,14 @@
+<div class="grid gap-4 sm:grid-cols-3 max-w-2xl">
+  <div>
+    <label class="mb-1 block text-xs font-medium text-surface-600 dark:text-surface-300">Stacked (default)</label>
+    <med-input-number [(ngModel)]="stacked" showButtons />
+  </div>
+  <div>
+    <label class="mb-1 block text-xs font-medium text-surface-600 dark:text-surface-300">Horizontal</label>
+    <med-input-number [(ngModel)]="horizontal" showButtons buttonLayout="horizontal" [step]="0.25" [min]="0" [max]="100" />
+  </div>
+  <div>
+    <label class="mb-1 block text-xs font-medium text-surface-600 dark:text-surface-300">Vertical</label>
+    <med-input-number [(ngModel)]="vertical" showButtons buttonLayout="vertical" [min]="0" [max]="100" class="max-w-32" />
+  </div>
+</div>

@@ -1,0 +1,3 @@
+## Filled
+
+`variant="filled"` swaps the default `'outlined'` border for a filled surface background.

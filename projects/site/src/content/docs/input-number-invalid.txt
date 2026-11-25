@@ -1,0 +1,3 @@
+## Invalid
+
+`invalid` sets `aria-invalid="true"` on the underlying spinbutton `<input>` and applies danger border and focus-ring styles.

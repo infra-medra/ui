@@ -1,0 +1,3 @@
+## Locale
+
+Pass any BCP 47 tag to `locale` (default `'en-US'`) to format grouping and decimal separators according to the target locale via `Intl.NumberFormat`, while keeping keyboard entry lenient for that locale's decimal separator.

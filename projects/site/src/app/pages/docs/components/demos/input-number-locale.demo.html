@@ -1,0 +1,14 @@
+<div class="grid gap-4 sm:grid-cols-3 max-w-2xl">
+  <div>
+    <label class="mb-1 block text-xs font-medium text-surface-600 dark:text-surface-300">en-US</label>
+    <med-input-number [(ngModel)]="usValue" locale="en-US" [minFractionDigits]="2" />
+  </div>
+  <div>
+    <label class="mb-1 block text-xs font-medium text-surface-600 dark:text-surface-300">de-DE</label>
+    <med-input-number [(ngModel)]="germanValue" locale="de-DE" [minFractionDigits]="2" />
+  </div>
+  <div>
+    <label class="mb-1 block text-xs font-medium text-surface-600 dark:text-surface-300">pt-BR</label>
+    <med-input-number [(ngModel)]="brazilValue" locale="pt-BR" [minFractionDigits]="2" />
+  </div>
+</div>

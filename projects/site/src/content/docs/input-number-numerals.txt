@@ -1,0 +1,3 @@
+## Numerals
+
+Control grouping separators, decimal precision, and numeric bounds with `useGrouping` (default `true`), `minFractionDigits`, `maxFractionDigits`, `min`, and `max`.

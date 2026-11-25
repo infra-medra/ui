@@ -1,0 +1,3 @@
+## Ifta Label
+
+Wrap the label and `med-input-number` inside `med-ifta-label` with `medIftaLabelText` so the label sits top-aligned inside the shared field border.

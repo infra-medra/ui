@@ -1,0 +1,3 @@
+## Fluid
+
+`med-input-number` fills the width of its container by default (`w-full`) and accepts the `fluid` boolean input for form-control API parity.
