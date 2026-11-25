@@ -1,0 +1,3 @@
+## Indeterminate
+
+Set `indeterminate` to show a mixed selection state with a minus icon while keeping the underlying checkbox value independent.

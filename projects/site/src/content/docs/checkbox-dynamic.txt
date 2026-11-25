@@ -1,0 +1,3 @@
+## Dynamic
+
+Render checkbox groups dynamically from a data collection by iterating over items and binding `[value]` to each item's value.
