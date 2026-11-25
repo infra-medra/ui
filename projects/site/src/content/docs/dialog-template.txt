@@ -1,0 +1,3 @@
+## Template
+
+Customize the header and footer regions of `<med-dialog>` using `#header` and `#footer` templates. `#header` renders alongside the `header` title string, while `#footer` adds a dedicated action row beneath the body.

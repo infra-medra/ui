@@ -88,7 +88,7 @@ const MIN_HEIGHT_PX = 160;
     class:
       'relative flex w-[calc(100vw-2rem)] max-h-[85vh] flex-col rounded-lg bg-surface-0 shadow-overlay-lg dark:bg-surface-800 sm:w-auto sm:min-w-[24rem] sm:max-w-lg',
     role: 'dialog',
-    'aria-modal': 'true',
+    '[attr.aria-modal]': 'modal ? "true" : null',
     '[attr.aria-labelledby]': 'options.header ? headerId : null',
     '[attr.data-dialog-id]': 'dialogId',
     '[attr.data-maximized]': 'maximized() ? "true" : null',
@@ -208,6 +208,7 @@ export class DialogShellComponent implements AfterViewInit {
   protected readonly maximizable = this.options.maximizable ?? false;
   protected readonly maximizeLabel = this.options.maximizeLabel ?? 'Maximize';
   protected readonly restoreLabel = this.options.restoreLabel ?? 'Restore';
+  protected readonly modal = this.options.modal ?? true;
   /** The full bordered header bar renders only when there's something that actually needs a full-width row — a title, a maximize control, or a drag handle. A bare `closable` with none of those gets a floating corner button instead, see the template's own comment. */
   protected readonly showHeaderBar = !!this.options.header || this.maximizable || this.draggable;
 

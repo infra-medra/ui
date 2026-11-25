@@ -1,6 +1,0 @@
-## Window-like controls
-
-`draggable` lets the header drag the dialog around the viewport; `resizable` adds a drag-resize
-handle at the bottom-right corner; `maximizable` shows a header toggle that fills the dialog to
-the viewport (and restores it back). All three default to `false` — a dialog stays a plain,
-fixed-position panel unless you opt in.

@@ -1,0 +1,8 @@
+<button medButton variant="outlined" (click)="visible.set(true)">Show</button>
+
+<med-dialog [(visible)]="visible" header="Maximizable Dialog" [maximizable]="true">
+  <p class="text-sm text-surface-600 dark:text-surface-300">
+    Use the maximize button in the header to expand the dialog across the viewport and restore it to its previous
+    dimensions.
+  </p>
+</med-dialog>

@@ -3,19 +3,17 @@ import { ButtonDirective, DialogService } from '@medra.dev/ui';
 import { DialogContentDemo } from './dialog-content.demo';
 
 @Component({
-  selector: 'app-dialog-window-controls-demo',
+  selector: 'app-dialog-draggable-demo',
   imports: [ButtonDirective],
-  templateUrl: './dialog-window-controls.demo.html',
+  templateUrl: './dialog-draggable.demo.html',
 })
-export class DialogWindowControlsDemo {
+export class DialogDraggableDemo {
   private readonly dialogService = inject(DialogService);
 
   protected open(): void {
     this.dialogService.open<DialogContentDemo, boolean>(DialogContentDemo, {
-      header: 'Delete project?',
+      header: 'Draggable Dialog',
       draggable: true,
-      resizable: true,
-      maximizable: true,
     });
   }
 }

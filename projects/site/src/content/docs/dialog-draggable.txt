@@ -1,0 +1,3 @@
+## Draggable
+
+Pass `draggable: true` to `DialogService.open()` so users can drag the dialog around the viewport by its header bar.

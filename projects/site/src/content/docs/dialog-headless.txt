@@ -1,0 +1,3 @@
+## Headless
+
+Provide a `#headless` template inside `<med-dialog>` to replace the built-in header, body wrapper, and footer with completely custom dialog markup.

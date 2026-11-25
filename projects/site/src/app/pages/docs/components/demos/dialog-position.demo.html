@@ -1,0 +1,15 @@
+<div class="flex flex-wrap gap-2">
+  <button medButton variant="outlined" (click)="show('top-left')">Top Left</button>
+  <button medButton variant="outlined" (click)="show('top')">Top</button>
+  <button medButton variant="outlined" (click)="show('top-right')">Top Right</button>
+  <button medButton variant="outlined" (click)="show('center')">Center</button>
+  <button medButton variant="outlined" (click)="show('bottom-left')">Bottom Left</button>
+  <button medButton variant="outlined" (click)="show('bottom')">Bottom</button>
+  <button medButton variant="outlined" (click)="show('bottom-right')">Bottom Right</button>
+</div>
+
+<med-dialog [(visible)]="visible" [position]="position()" header="Positioned Dialog">
+  <p class="text-sm text-surface-600 dark:text-surface-300">
+    Anchored at <span class="font-medium text-surface-900 dark:text-surface-50">{{ position() }}</span>.
+  </p>
+</med-dialog>

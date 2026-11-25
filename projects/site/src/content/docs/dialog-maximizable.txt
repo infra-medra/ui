@@ -1,0 +1,3 @@
+## Maximizable
+
+Enable `[maximizable]="true"` (or `maximizable: true` in `DialogOptions`) to display a header toggle button that expands the dialog to fill the viewport and restores its previous size on a second click.

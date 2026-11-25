@@ -1,0 +1,3 @@
+## Long Content
+
+Dialog panels are capped at `85vh` height, so lengthy content automatically scrolls inside the body region while the header and footer stay fixed in view.

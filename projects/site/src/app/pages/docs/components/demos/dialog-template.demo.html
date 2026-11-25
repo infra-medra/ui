@@ -1,0 +1,17 @@
+<button medButton variant="outlined" (click)="visible.set(true)">Show</button>
+
+<med-dialog [(visible)]="visible" header="Edit Profile">
+  <ng-template #header>
+    <med-icon name="user" variant="solid" class="size-5 text-brand-600 dark:text-brand-400" />
+  </ng-template>
+  <p class="text-sm text-surface-600 dark:text-surface-300">
+    Update your account details below. Custom header and footer templates wrap the dialog body without replacing the
+    built-in close control.
+  </p>
+  <ng-template #footer>
+    <div class="flex justify-end gap-2">
+      <button medButton type="button" variant="text" severity="secondary" (click)="visible.set(false)">Cancel</button>
+      <button medButton type="button" (click)="visible.set(false)">Save</button>
+    </div>
+  </ng-template>
+</med-dialog>

@@ -1,8 +1,9 @@
-## Dismissal and responsiveness
+## Responsive & Dismissal
 
 `closeOnEscape` and `dismissableMask` (default `true` for both) control whether Escape and a
-backdrop click close the dialog — set either to `false` for a dialog that must be dismissed some
-other, more deliberate way (an unsaved-changes confirmation, say). `breakpoints` maps a `max-width`
-media query to a width the dialog should take at that viewport size (e.g. `{ '640px': '95vw' }`),
-so a dialog sized for desktop doesn't overflow a phone screen. The returned `DialogRef`'s
-`opened$` fires once the dialog is on screen, alongside the existing `closed$`.
+backdrop click close the dialog on both `<med-dialog>` and `DialogService.open()` — set either to
+`false` for a dialog that must be dismissed some other, more deliberate way (an unsaved-changes
+confirmation, say). `breakpoints` (supported on `DialogService.open()`) maps a `max-width` media
+query to a width the dialog should take at that viewport size (e.g. `{ '640px': '95vw' }`), so a
+dialog sized for desktop doesn't overflow a phone screen. The returned `DialogRef`'s `opened$` fires
+once the dialog is on screen, alongside the existing `closed$`.

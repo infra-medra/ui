@@ -1,0 +1,3 @@
+## Resizable
+
+Pass `resizable: true` to `DialogService.open()` to add a bottom-right corner grip that resizes the dialog panel interactively.
