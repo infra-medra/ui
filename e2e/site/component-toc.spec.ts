@@ -1,7 +1,8 @@
 import { expect, test, type Page } from '@playwright/test';
 
 const AUTOCOMPLETE_URL = '/docs/components/autocomplete';
-const BUTTON_URL = '/docs/components/button';
+/** A component page that lists no examples, so its index holds only the four fixed parts. */
+const NO_EXAMPLES_URL = '/docs/components/knob';
 const FIXED_PARTS = ['Examples', 'API reference', 'Accessibility', 'Theming'];
 /** The examples the AutoComplete page lists in "On this page", in page order, with their anchor ids. */
 const EXAMPLES: readonly { label: string; id: string }[] = [
@@ -73,7 +74,7 @@ test.describe('Component page — "On this page" index', () => {
 
   // SITE-021.S4
   test('SITE-021.S4: a page that lists no examples keeps the four fixed parts', async ({ page }) => {
-    const toc = await openPage(page, BUTTON_URL);
+    const toc = await openPage(page, NO_EXAMPLES_URL);
 
     const labels = await toc.getByRole('link').allTextContents();
     expect(labels.map((label) => label.trim())).toEqual(FIXED_PARTS);
