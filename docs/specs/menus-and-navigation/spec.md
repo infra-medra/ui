@@ -2,13 +2,15 @@
 
 **Capability:** `menus-and-navigation`
 **ID prefix:** `NAV`
-**Paths:** `projects/medra/ui/src/lib/menu/**`, `projects/medra/ui/src/lib/menubar/**`, `projects/medra/ui/src/lib/mega-menu/**`, `projects/medra/ui/src/lib/tiered-menu/**`, `projects/medra/ui/src/lib/context-menu/**`, `projects/medra/ui/src/lib/panel-menu/**`, `projects/medra/ui/src/lib/tab-menu/**`, `projects/medra/ui/src/lib/breadcrumb/**`, `projects/medra/ui/src/lib/steps/**`, `projects/medra/ui/src/lib/stepper/**`, `projects/medra/ui/src/lib/tabs/**`, `projects/medra/ui/src/lib/dock/**`, `projects/medra/ui/src/lib/paginator/**`, `projects/medra/ui/router/**`
+**Paths:** `projects/medra/ui/src/lib/menu/**`, `projects/medra/ui/src/lib/menubar/**`, `projects/medra/ui/src/lib/mega-menu/**`, `projects/medra/ui/src/lib/tiered-menu/**`, `projects/medra/ui/src/lib/context-menu/**`, `projects/medra/ui/src/lib/panel-menu/**`, `projects/medra/ui/src/lib/tab-menu/**`, `projects/medra/ui/src/lib/breadcrumb/**`, `projects/medra/ui/src/lib/steps/**`, `projects/medra/ui/src/lib/stepper/**`, `projects/medra/ui/src/lib/dock/**`, `projects/medra/ui/src/lib/paginator/**`, `projects/medra/ui/router/**`
 
 ## Purpose
 
 Lets users move through an application with menus, tabs, breadcrumbs, step indicators, docks and paginators. All menu components share one item model (label, icon, command, url, router link, badge, disabled, visible) and consistent keyboard behavior.
 
 ## Requirements
+
+<!-- retired: NAV-018, NAV-018.S1, NAV-019, NAV-019.S1, NAV-019.S2 -->
 
 ### REQ NAV-001: Shared menu item behavior
 
@@ -216,32 +218,6 @@ With `orientation="vertical"`, `med-stepper` SHALL render its own vertical step 
 - **When** the user clicks the third step header
 - **Then** the third panel is shown
 
-### REQ NAV-018: Tabs
-
-`med-tabs` SHALL render one tab button per `med-tab` (labelled from its header) and show only the active panel, hiding others. Tab buttons SHALL be linked to panels through `aria-controls`/`aria-labelledby` and `aria-selected`. Clicking SHALL switch the active panel; disabled tabs SHALL carry `aria-disabled` and ignore clicks. `activeIndex` SHALL be two-way. Only the active tab SHALL be in the Tab order; ArrowLeft/ArrowRight SHALL move with wrap skipping disabled tabs, and Home/End jump to ends. `ariaLabel` defaults to "Tabs".
-
-#### Scenario NAV-018.S1: Arrow wrap
-
-- **Given** the last tab is active
-- **When** the user presses ArrowRight
-- **Then** the first enabled tab becomes active
-
-### REQ NAV-019: Lazy tab content and scroll navigators
-
-A tab whose content is wrapped in `<ng-template>` SHALL not create its content until first activated and SHALL never recreate it after switching away; a tab that starts active SHALL create it immediately; tabs without a template SHALL project eagerly. With `showNavigators`, previous/next scroll buttons (labels customizable, defaults "Scroll tabs left"/"Scroll tabs right") SHALL appear only for the direction where the tab strip can scroll, none when nothing overflows, and none by default.
-
-#### Scenario NAV-019.S1: Lazy first activation
-
-- **Given** a tab with lazy content that has never been active
-- **When** it becomes active
-- **Then** its content is created once and stays created afterward
-
-#### Scenario NAV-019.S2: Navigators at start
-
-- **Given** `showNavigators` and overflowing tabs scrolled to the start
-- **When** it renders
-- **Then** only the scroll-right button is shown
-
 ### REQ NAV-020: Dock
 
 `med-dock` SHALL render one button per item labelled from `item.label` within a `role="toolbar"`, at a `position` of bottom (default) or top. Hovering or keyboard-focusing an item SHALL magnify it with a smaller falloff on its neighbors; leaving or blurring SHALL reset all to normal scale. Clicking SHALL run the command; disabled items SHALL be disabled buttons that never run. It SHALL use a roving tabindex starting at the first item moved by ArrowLeft/ArrowRight with wrap (skipping disabled) and Home/End. An `#item` template SHALL replace the default icon.
@@ -309,3 +285,37 @@ With the router integration, an item whose route is active SHALL be marked with 
 - **Given** the current route matches item A
 - **When** the app navigates to item B's route
 - **Then** B has `aria-current="page"` and A loses it
+
+### REQ NAV-025: Context menu programmatic opening
+
+`[medContextMenu]` SHALL be exported as `medContextMenu` and SHALL expose `show(origin, preventDefault?)` to open the panel from code. With a `MouseEvent` it SHALL open at the event's pointer position and call the event's `preventDefault()` unless a `preventDefault` callback is given, in which case it SHALL call that callback instead. With an `HTMLElement` it SHALL open anchored to that element, and with an `{ x, y }` point it SHALL open at that viewport point. `show()` SHALL follow the same rules as a right-click: it SHALL open nothing when there are no items or `contextMenuDisabled` is true, and a new call SHALL close the previous panel and open exactly one fresh one.
+
+#### Scenario NAV-025.S1: Open from a pointer event
+
+- **Given** a context menu with items, referenced through `#cm="medContextMenu"`
+- **When** code calls `cm.show(event)` with a `MouseEvent`
+- **Then** the panel opens and the event's default action is prevented
+
+#### Scenario NAV-025.S2: Custom preventDefault callback
+
+- **Given** a context menu with items
+- **When** code calls `show(event, callback)` with a `MouseEvent` and a callback
+- **Then** the panel opens, the callback runs, and the event's own `preventDefault()` is not called
+
+#### Scenario NAV-025.S3: Anchored to an element
+
+- **Given** a context menu with items
+- **When** code calls `show(element)` with an `HTMLElement`
+- **Then** the panel opens
+
+#### Scenario NAV-025.S4: Disabled or empty
+
+- **Given** a context menu with `contextMenuDisabled` set to true, or with no items
+- **When** code calls `show(event)`
+- **Then** no panel opens and the event's default action is not prevented
+
+#### Scenario NAV-025.S5: Repeated call
+
+- **Given** a context menu opened with `show()`
+- **When** code calls `show()` again
+- **Then** exactly one panel is open

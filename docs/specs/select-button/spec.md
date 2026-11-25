@@ -2,10 +2,11 @@
 
 **Capability:** `select-button`
 **ID prefix:** `SLB`
+**Paths:** `projects/medra/ui/src/lib/select-button/**`
 
 ## Purpose
 
-Defines the documentation requirements for the SelectButton component page (`/docs/components/select-button`).
+Defines the behavior of `med-select-button`: a row of toggle buttons for single or multiple choice that works with Angular forms, and the requirements for its documentation page (`/docs/components/select-button`).
 
 ## Requirements
 
@@ -40,3 +41,39 @@ The `/docs/components/select-button` page SHALL include `Template` (`#example-te
 - **Given** the `/docs/components/select-button` documentation page
 - **When** loaded in a real browser with zero console errors or hydration warnings
 - **Then** all 11 "On this page" `#example-*` links render in the stated order, and the `Template` and `Fluid` prose, demos and code blocks are visible, with the `Template` demo showing custom item markup and updating its bound value on click
+
+### REQ SLB-005: Select button selection
+
+`med-select-button` SHALL render one button per option from `options` (primitives, objects with `optionLabel`, `optionValue` and `optionDisabled` keys, or `{label, value, disabled}`), SHALL in single mode select one option and expose `role="radiogroup"` with `role="radio"` buttons, and SHALL in `multiple` mode toggle options into an array and expose `role="group"` with `aria-pressed` buttons.
+
+#### Scenario SLB-005.S1: Single selection
+
+- **Given** a single-mode `med-select-button` with options "A" and "B"
+- **When** the user clicks "B"
+- **Then** the form value is `"B"` and only "B" is checked
+
+#### Scenario SLB-005.S2: Multiple selection
+
+- **Given** a `multiple` `med-select-button`
+- **When** the user clicks "A" then "B"
+- **Then** the form value is `["A", "B"]`
+
+### REQ SLB-006: Select button deselection and disabled options
+
+`med-select-button` SHALL deselect an option when it is clicked again, unless `allowEmpty` is false (in which case the last selected option stays), and SHALL NOT select disabled options.
+
+#### Scenario SLB-006.S1: Deselect
+
+- **Given** a single-mode `med-select-button` with "A" selected
+- **When** the user clicks "A"
+- **Then** the form value is `null`
+
+### REQ SLB-007: Select button keyboard
+
+In single mode, `med-select-button` SHALL use a roving tab stop and SHALL, on ArrowRight/ArrowDown and ArrowLeft/ArrowUp, wrap to the next or previous enabled option, and on Home and End go to the first or last enabled option, selecting and focusing it.
+
+#### Scenario SLB-007.S1: Arrow selects
+
+- **Given** a single-mode `med-select-button` with "A" selected and focused
+- **When** the user presses ArrowRight
+- **Then** "B" is selected and focused
