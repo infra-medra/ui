@@ -1,0 +1,22 @@
+<med-icon-field>
+  <input
+    medInputText
+    type="text"
+    placeholder="Search..."
+    class="w-64 pr-9"
+    [(ngModel)]="value"
+  />
+  @if (value) {
+    <button
+      type="button"
+      medIconFieldIcon
+      position="right"
+      aria-label="Clear"
+      class="pointer-events-auto cursor-pointer text-surface-400 hover:text-surface-600 dark:hover:text-surface-200"
+      (click)="value = ''"
+    >
+      <med-icon name="x-mark" variant="mini" class="size-4" />
+    </button>
+  }
+</med-icon-field>
+<p class="mt-2 text-sm text-surface-500 dark:text-surface-400">Value: {{ value || '(empty)' }}</p>

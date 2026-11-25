@@ -1,0 +1,10 @@
+<input
+  medInputText
+  [formControl]="usernameControl"
+  [invalid]="usernameControl.invalid && usernameControl.touched"
+  placeholder="Username"
+  class="w-64"
+/>
+<p class="mt-2 text-sm text-surface-500 dark:text-surface-400">
+  Value: {{ usernameControl.value || '(empty)' }} · {{ usernameControl.valid ? 'valid' : 'required' }}
+</p>

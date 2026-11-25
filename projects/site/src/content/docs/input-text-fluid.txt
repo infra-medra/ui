@@ -1,0 +1,3 @@
+## Fluid
+
+`input[medInputText]` fills the width of its container by default (`w-full`) and accepts `[fluid]` (or an ancestor `medFluid` directive) for form-control API parity.
