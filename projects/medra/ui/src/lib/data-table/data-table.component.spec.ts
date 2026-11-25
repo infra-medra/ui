@@ -3795,40 +3795,40 @@ describe('DataTableComponent cell selection', () => {
     readonly status: string;
   }
 
-  function createCellHost(configure?: (host: CellSelectionHost) => void) {
-    @Component({
-      standalone: true,
-      imports: [DataTableComponent, TableColumnComponent],
-      template: `
-        <med-data-table
-          [value]="rows()"
-          [cellSelection]="cellSelection"
-          [selectionMode]="selectionMode"
-          [(selection)]="selection"
-          [dataKey]="dataKey"
-          (cellSelect)="selectedEvents.push($event)"
-          (cellUnselect)="unselectedEvents.push($event)"
-          (rowSelect)="rowSelectedEvents.push($event)"
-        >
-          <med-table-column field="name" header="Name" />
-          <med-table-column field="status" header="Status" />
-        </med-data-table>
-      `,
-    })
-    class CellSelectionHost {
-      rows = signal<CellRow[]>([
-        { id: 1, name: 'Widget', status: 'active' },
-        { id: 2, name: 'Gadget', status: 'critical' },
-      ]);
-      cellSelection = true;
-      selectionMode: 'single' | 'multiple' | null = 'single';
-      selection: { row: CellRow; field: string } | readonly { row: CellRow; field: string }[] | null = null;
-      dataKey: string | null = null;
-      selectedEvents: { row: CellRow; field: string }[] = [];
-      unselectedEvents: { row: CellRow; field: string }[] = [];
-      rowSelectedEvents: CellRow[] = [];
-    }
+  @Component({
+    standalone: true,
+    imports: [DataTableComponent, TableColumnComponent],
+    template: `
+      <med-data-table
+        [value]="rows()"
+        [cellSelection]="cellSelection"
+        [selectionMode]="selectionMode"
+        [(selection)]="selection"
+        [dataKey]="dataKey"
+        (cellSelect)="selectedEvents.push($event)"
+        (cellUnselect)="unselectedEvents.push($event)"
+        (rowSelect)="rowSelectedEvents.push($event)"
+      >
+        <med-table-column field="name" header="Name" />
+        <med-table-column field="status" header="Status" />
+      </med-data-table>
+    `,
+  })
+  class CellSelectionHost {
+    rows = signal<CellRow[]>([
+      { id: 1, name: 'Widget', status: 'active' },
+      { id: 2, name: 'Gadget', status: 'critical' },
+    ]);
+    cellSelection = true;
+    selectionMode: 'single' | 'multiple' | null = 'single';
+    selection: { row: CellRow; field: string } | readonly { row: CellRow; field: string }[] | null = null;
+    dataKey: string | null = null;
+    selectedEvents: { row: CellRow; field: string }[] = [];
+    unselectedEvents: { row: CellRow; field: string }[] = [];
+    rowSelectedEvents: CellRow[] = [];
+  }
 
+  function createCellHost(configure?: (host: CellSelectionHost) => void) {
     const fixture = TestBed.createComponent(CellSelectionHost);
     configure?.(fixture.componentInstance);
     fixture.detectChanges();

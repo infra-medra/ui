@@ -43,7 +43,7 @@ function headerTexts(fixture: ComponentFixture<unknown>): string[] {
 }
 
 function bodyDataRows(fixture: ComponentFixture<unknown>): HTMLTableRowElement[] {
-  return Array.from(fixture.nativeElement.querySelectorAll<HTMLTableRowElement>('tbody tr')).filter(
+  return Array.from((fixture.nativeElement as HTMLElement).querySelectorAll<HTMLTableRowElement>('tbody tr')).filter(
     (tr) => !tr.querySelector('button[aria-expanded]') && !tr.textContent?.includes('No results found'),
   );
 }

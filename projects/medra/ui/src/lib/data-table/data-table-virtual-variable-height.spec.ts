@@ -205,7 +205,7 @@ describe('DataTableComponent virtualScrollRowHeight (DAT-061)', () => {
     const entries = initialRows
       .map((tr) => {
         const entry = observed.find((o) => o.target === tr);
-        return entry ? ({ target: tr, contentRect: { height: 70 } as DOMRectReadOnly } as ResizeObserverEntry) : null;
+        return entry ? ({ target: tr, contentRect: { height: 70 } as DOMRectReadOnly } as unknown as ResizeObserverEntry) : null;
       })
       .filter((e): e is ResizeObserverEntry => e !== null);
     expect(entries.length).toBe(10);
@@ -265,8 +265,8 @@ describe('DataTableComponent virtualScrollRowHeight (DAT-061)', () => {
     // Row 16 (above top visible row 20) grows +50px; row 22 (inside viewport) grows +20px.
     cb(
       [
-        { target: row16, contentRect: { height: 90 } as DOMRectReadOnly } as ResizeObserverEntry,
-        { target: row22, contentRect: { height: 60 } as DOMRectReadOnly } as ResizeObserverEntry,
+        { target: row16, contentRect: { height: 90 } as DOMRectReadOnly } as unknown as ResizeObserverEntry,
+        { target: row22, contentRect: { height: 60 } as DOMRectReadOnly } as unknown as ResizeObserverEntry,
       ],
       {} as ResizeObserver,
     );
