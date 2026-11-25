@@ -27,3 +27,18 @@
 | 23 | 2026-11-24 | data-table-virtual-variable-height | data-display | +DAT-061 | `<med-data-table>` in `virtualScroll` mode currently enforces a uniform `virtualScrollItemSize` pixel height on every... |
 | 24 | 2026-11-24 | data-table-virtual-features | data-display | +DAT-062 | `<med-data-table>` currently disables `#rowexpansion`, `rowGroupMode` (`'subheader'` and `'rowspan'`), `expandableRow... |
 | 25 | 2026-11-24 | data-table-virtual-horizontal-columns | data-display | +DAT-063 | `<med-data-table>` currently renders every visible column in `<thead>`, `<tbody>`, and `<tfoot>`, which degrades DOM ... |
+| 26 | 2026-11-24 | document-date-picker-parity | date-picker | +DTP-016 | The `/docs/components/date-picker` documentation page currently exposes only 3 examples (`Basic`, `Time selection`, a... |
+| 27 | 2026-11-24 | enhance-date-picker-parity | date-picker | +DTP-017 +DTP-018 +DTP-019 +DTP-020 +DTP-021 +DTP-022 +DTP-023 | After documenting the 19 already-implemented DatePicker features in `document-date-picker-parity`, 7 PrimeNG DatePick... |
+| 28 | 2026-11-25 | document-input-number-parity | input-number | +INN-001 +INN-002 | `InputNumberComponent` (`projects/medra/ui/src/lib/input-number/input-number.component.ts`) already implements full f... |
+| 29 | 2026-11-25 | document-button-parity | button | +BTD-001 | `ButtonDirective` (`projects/medra/ui/src/lib/button/button.directive.ts`) already implements nearly all PrimeNG Butt... |
+| 30 | 2026-11-25 | add-button-group | button | +BTD-002 +BTD-003 | In `document-button-parity`, all existing `ButtonDirective` features were documented on `/docs/components/button`, le... |
+| 31 | 2026-11-25 | document-input-text-parity | input-text | +ITX-001 | `InputTextDirective` (`projects/medra/ui/src/lib/input-text/input-text.directive.ts`) already supports all core Prime... |
+| 32 | 2026-11-25 | document-textarea-parity | textarea | +TXA-001 | `TextareaDirective` (`projects/medra/ui/src/lib/textarea/textarea.directive.ts`) already implements all core PrimeNG ... |
+| 33 | 2026-11-25 | document-checkbox-parity | checkbox | +CKB-001 | `CheckboxComponent` (`projects/medra/ui/src/lib/checkbox/checkbox.component.ts`) already implements binary and array-... |
+| 34 | 2026-11-25 | document-dialog-parity | dialog | +DLD-001 | `DialogComponent` (`<med-dialog>`) and `DialogService` (`projects/medra/ui/src/lib/dialog/`) already implement declar... |
+| 35 | 2026-11-25 | add-dialog-modal | dialog | +DLD-002 +DLD-003 | In `document-dialog-parity`, all existing Dialog capabilities were documented on `/docs/components/dialog`, leaving n... |
+| 36 | 2026-11-25 | document-tabs-parity | tabs | +TBD-001 | `TabsComponent` (`<med-tabs>`) and `TabComponent` (`<med-tab>`) (`projects/medra/ui/src/lib/tabs/`) already implement... |
+| 37 | 2026-11-25 | add-tab-header-template | tabs | +TBD-002 +TBD-003 | In `document-tabs-parity`, all existing `TabsComponent` and `TabComponent` features were documented on `/docs/compone... |
+| 38 | 2026-11-25 | document-radio-button-parity | radio-button | +RDB-001 | `RadioButtonComponent` (`projects/medra/ui/src/lib/radio-button/radio-button.component.ts`) already implements every ... |
+| 39 | 2026-11-25 | document-select-button-parity | select-button | +SLB-001 | `SelectButtonComponent` (`projects/medra/ui/src/lib/select-button/select-button.component.ts`) already implements mos... |
+| 40 | 2026-11-25 | add-select-button-item-template | select-button | +SLB-002 +SLB-003 +SLB-004 | In `document-select-button-parity`, all existing `SelectButtonComponent` features were documented on `/docs/component... |

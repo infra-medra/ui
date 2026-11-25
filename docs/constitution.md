@@ -1,9 +1,9 @@
 # Constitution
 
 **Status:** ratified
-**Version:** 1.2
+**Version:** 1.3
 **Ratified:** 2026-11-19
-**Last amended:** 2026-11-23
+**Last amended:** 2026-11-25
 
 ## Articles
 
@@ -81,6 +81,13 @@ Every test tagged with a scenario ID MUST assert each Given and Then clause of t
 **Gate:** Does every test tagged with a scenario ID assert each Given and Then clause of that scenario, with defaults left unset where the scenario relies on them?
 **Rationale:** Coverage matches only the scenario tag, so an unasserted clause passes silently. This was found in extend-data-table-sorting-and-pagination, add-data-table-resize-modes-visibility-groups and add-data-table-pagination-options.
 
+### Article XII: The publish job never builds
+
+The CI job that holds the npm publish identity MUST NOT run install, build or test steps. It MUST only publish the artifact that an earlier read-only job built and tested, and a workflow contract test MUST assert this separation.
+
+**Gate:** Does this change keep every install, build and test step out of the job that holds the publish identity, with a workflow contract test asserting it?
+**Rationale:** Skipping install scripts does not stop build tooling from running dependency code, so a build inside the publishing job exposes the publish identity to that code. This was found in automate-medra-ui-versioning-and-release, add-data-table-column-filters, data-table-sorting-columns-csv and document-input-text-parity.
+
 ## Amendments
 
 | Version | Date | Change | Source |
@@ -88,3 +95,4 @@ Every test tagged with a scenario ID MUST assert each Given and Then clause of t
 | 1.0 | 2026-11-19 | Initial constitution | init |
 | 1.1 | 2026-11-19 | Add Article X (version follows Angular major); retire IX into VII | init |
 | 1.2 | 2026-11-23 | Add Article XI (tests assert every clause of the scenario they cover), promoted from L-002 (Tiago Cavalli) | L-002 |
+| 1.3 | 2026-11-25 | Add Article XII (the publish job never builds), promoted from L-001 (Tiago Cavalli) | L-001 |
