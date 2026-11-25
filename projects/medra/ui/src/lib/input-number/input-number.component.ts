@@ -65,8 +65,8 @@ import { InputNumberCurrencyDisplay, InputNumberMode, NumberFormatOptions, forma
         inputmode="decimal"
         role="spinbutton"
         [id]="inputId()"
-        [attr.aria-valuemin]="min()"
-        [attr.aria-valuemax]="max()"
+        [attr.aria-valuemin]="min() ?? null"
+        [attr.aria-valuemax]="max() ?? null"
         [attr.aria-valuenow]="numericValue()"
         [attr.aria-valuetext]="formattedValue()"
         [attr.aria-invalid]="invalid() ? 'true' : null"
@@ -122,8 +122,8 @@ import { InputNumberCurrencyDisplay, InputNumberMode, NumberFormatOptions, forma
   `,
 })
 export class InputNumberComponent implements ControlValueAccessor {
-  readonly min = input<number | null>(null);
-  readonly max = input<number | null>(null);
+  readonly min = input<number | null | undefined>(null);
+  readonly max = input<number | null | undefined>(null);
   readonly step = input(1, { transform: numberAttribute });
   readonly mode = input<InputNumberMode>('decimal');
   readonly currency = input('USD');
@@ -225,12 +225,12 @@ export class InputNumberComponent implements ControlValueAccessor {
 
   protected readonly atMin = computed(() => {
     const current = this.value();
-    const min = this.min();
+    const min = this.min() ?? null;
     return current !== null && min !== null && current <= min;
   });
   protected readonly atMax = computed(() => {
     const current = this.value();
-    const max = this.max();
+    const max = this.max() ?? null;
     return current !== null && max !== null && current >= max;
   });
 
@@ -276,7 +276,7 @@ export class InputNumberComponent implements ControlValueAccessor {
         this.stepBy(-this.step() * 10);
         break;
       case 'Home': {
-        const min = this.min();
+        const min = this.min() ?? null;
         if (min !== null) {
           event.preventDefault();
           this.commitValue(min);
@@ -284,7 +284,7 @@ export class InputNumberComponent implements ControlValueAccessor {
         break;
       }
       case 'End': {
-        const max = this.max();
+        const max = this.max() ?? null;
         if (max !== null) {
           event.preventDefault();
           this.commitValue(max);
@@ -326,18 +326,18 @@ export class InputNumberComponent implements ControlValueAccessor {
 
   /** Where stepping starts from when there's no value yet: `min` if set (never start below it), else 0 clamped to `max` if that's negative. */
   private startingValue(): number {
-    const min = this.min();
+    const min = this.min() ?? null;
     if (min !== null) {
       return min;
     }
-    const max = this.max();
+    const max = this.max() ?? null;
     return max !== null ? Math.min(0, max) : 0;
   }
 
   private clamp(candidate: number): number {
     let result = candidate;
-    const min = this.min();
-    const max = this.max();
+    const min = this.min() ?? null;
+    const max = this.max() ?? null;
     if (min !== null) {
       result = Math.max(min, result);
     }

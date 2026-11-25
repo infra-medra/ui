@@ -1,0 +1,3 @@
+## Clear Icon
+
+Enable `showClear` to display an inline reset button whenever the field holds a non-null number. Customize its accessible label with `clearLabel` (default `'Clear'`).

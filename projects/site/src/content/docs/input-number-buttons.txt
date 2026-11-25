@@ -1,0 +1,3 @@
+## Buttons
+
+Enable pointer steppers with `showButtons` and choose between `buttonLayout="stacked"` (default), `'horizontal'`, or `'vertical'`. Buttons invoke the same `step`-based clamping logic as `ArrowUp`/`ArrowDown`.

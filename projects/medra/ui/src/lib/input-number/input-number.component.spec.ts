@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { FormField, form } from '@angular/forms/signals';
 import { InputNumberComponent } from './input-number.component';
 
 function trigger(fixture: ComponentFixture<unknown>): HTMLInputElement {
@@ -343,5 +344,51 @@ describe('InputNumberComponent', () => {
 
     expect(host.getAttribute('data-variant')).toBe('filled');
     expect(host.className).toContain('w-full');
+  });
+
+  it('INN-002.S1: accepts undefined min and max without clamping to NaN or emitting aria bounds', () => {
+    const fixture = createInputNumber();
+    fixture.componentRef.setInput('min', undefined);
+    fixture.componentRef.setInput('max', undefined);
+    fixture.detectChanges();
+
+    const inputEl = trigger(fixture);
+    expect(inputEl.getAttribute('aria-valuemin')).toBeNull();
+    expect(inputEl.getAttribute('aria-valuemax')).toBeNull();
+
+    typeText(fixture, '42');
+    keydown(fixture, 'ArrowUp');
+    expect(inputEl.value).toBe('43');
+  });
+
+  it('INN-002.S1: binds Signal Forms [formField] with undefined min/max and syncs bidirectionally without NaN clamping', () => {
+    @Component({
+      standalone: true,
+      imports: [FormField, InputNumberComponent],
+      template: `<med-input-number [formField]="quantityForm.quantity" />`,
+    })
+    class SignalFormsHost {
+      readonly model = signal<{ quantity: number | null }>({ quantity: 10 });
+      readonly quantityForm = form(this.model);
+    }
+
+    const fixture = TestBed.createComponent(SignalFormsHost);
+    fixture.detectChanges();
+
+    const inputEl = trigger(fixture);
+    expect(inputEl.value).toBe('10');
+    expect(inputEl.getAttribute('aria-valuemin')).toBeNull();
+    expect(inputEl.getAttribute('aria-valuemax')).toBeNull();
+
+    // Model -> input sync
+    fixture.componentInstance.model.set({ quantity: 25 });
+    fixture.detectChanges();
+    expect(inputEl.value).toBe('25');
+
+    // Input -> model sync without NaN clamping
+    typeText(fixture, '42');
+    keydown(fixture, 'ArrowUp');
+    expect(inputEl.value).toBe('43');
+    expect(fixture.componentInstance.model().quantity).toBe(43);
   });
 });

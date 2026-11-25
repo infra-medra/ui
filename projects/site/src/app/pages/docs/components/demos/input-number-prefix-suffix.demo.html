@@ -1,0 +1,18 @@
+<div class="grid gap-4 sm:grid-cols-2 max-w-xl">
+  <div>
+    <label class="mb-1 block text-xs font-medium text-surface-600 dark:text-surface-300">Mile</label>
+    <med-input-number [(ngModel)]="miles" suffix=" mi" />
+  </div>
+  <div>
+    <label class="mb-1 block text-xs font-medium text-surface-600 dark:text-surface-300">Percent</label>
+    <med-input-number [(ngModel)]="percent" prefix="%" [min]="0" [max]="100" />
+  </div>
+  <div>
+    <label class="mb-1 block text-xs font-medium text-surface-600 dark:text-surface-300">Expiry</label>
+    <med-input-number [(ngModel)]="expiry" prefix="Expires in " suffix=" days" />
+  </div>
+  <div>
+    <label class="mb-1 block text-xs font-medium text-surface-600 dark:text-surface-300">Temperature</label>
+    <med-input-number [(ngModel)]="temperature" prefix="↑ " suffix="°C" [min]="-40" [max]="60" />
+  </div>
+</div>

@@ -1,0 +1,3 @@
+## Currency
+
+Set `mode="currency"` along with `currency` (default `'USD'`), `currencyDisplay` (`'symbol'`, `'narrowSymbol'`, `'code'`, or `'name'`), and `locale` to format and parse localized currency amounts.
