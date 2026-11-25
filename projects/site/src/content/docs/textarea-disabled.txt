@@ -1,0 +1,3 @@
+## Disabled
+
+Use the native `disabled` attribute (or form-control disabled state) to prevent editing and apply muted disabled styling.

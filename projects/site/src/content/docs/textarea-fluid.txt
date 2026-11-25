@@ -1,0 +1,3 @@
+## Fluid
+
+`textarea[medTextarea]` fills the width of its container by default (`w-full`) and accepts `[fluid]` for form-control API parity.

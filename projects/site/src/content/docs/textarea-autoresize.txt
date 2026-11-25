@@ -1,4 +1,4 @@
-## Auto-resize
+## Auto Resize
 
 `autoResize` grows the textarea's own height to fit its content instead of scrolling internally —
 the manual drag handle is dropped in favor of `resize-none overflow-hidden` while it's on, since a

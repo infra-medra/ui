@@ -1,0 +1,3 @@
+## Signal Forms
+
+Bind `<textarea medTextarea>` to an `@angular/forms/signals` form using `[formField]` through its built-in `ControlValueAccessor` implementation.

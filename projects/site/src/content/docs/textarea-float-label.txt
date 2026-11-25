@@ -1,0 +1,3 @@
+## Float Label
+
+Wrap `<textarea medTextarea class="peer" placeholder=" "></textarea>` and `<label medFloatLabelText>` inside `med-float-label` so the label floats above the field on focus or when populated.
