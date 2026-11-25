@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, TemplateRef, booleanAttribute, contentChild, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, TemplateRef, booleanAttribute, computed, contentChild, contentChildren, input, signal } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 
 /**
@@ -57,14 +57,20 @@ import { NgTemplateOutlet } from '@angular/common';
   `,
 })
 export class TabComponent {
-  readonly header = input.required<string>();
+  readonly header = input('');
   readonly disabled = input(false, { transform: booleanAttribute });
 
   readonly active = signal(false);
   readonly panelId = signal('');
   readonly tabButtonId = signal('');
 
-  protected readonly contentTemplate = contentChild(TemplateRef);
+  readonly headerTemplate = contentChild<TemplateRef<void>>('header');
+  private readonly allTemplates = contentChildren(TemplateRef);
+  protected readonly contentTemplate = computed(() => {
+    // Angular may hand out a new `TemplateRef` object per query read, so compare anchor nodes.
+    const headerAnchor = this.headerTemplate()?.elementRef.nativeElement;
+    return this.allTemplates().find((template) => template.elementRef.nativeElement !== headerAnchor) ?? null;
+  });
   private hasBeenActive = false;
 
   /** Plain mutated field, not a signal — see the class doc comment for why this needs to run synchronously inside the template read instead of a separate `effect()`. */

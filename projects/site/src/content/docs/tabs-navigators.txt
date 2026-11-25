@@ -1,4 +1,4 @@
-## Scroll navigators
+## Scrollable
 
 `showNavigators` (default `false`) adds scroll-left/scroll-right buttons over the same
 horizontally-scrollable tab row — a complementary, opt-in affordance for pointer/keyboard users who'd

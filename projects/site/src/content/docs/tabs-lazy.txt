@@ -1,6 +1,6 @@
-## Lazy content
+## Lazy
 
-Plain projected content (the "Overview" tab above) is instantiated the moment `<med-tabs>` itself
+Plain projected content (the "Overview" tab below) is instantiated the moment `<med-tabs>` itself
 renders, whether or not that tab is ever opened. Wrap a tab's content in `<ng-template>` instead —
 `<med-tab header="Reports"><ng-template>...</ng-template></med-tab>` — and it's only instantiated
 the first time that tab is activated, then kept alive (not re-created) on every switch back to it.
