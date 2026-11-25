@@ -1,0 +1,3 @@
+## Min / Max & Disabled Dates
+
+Constrain selectable dates with `minDate` and `maxDate`, block individual dates with `disabledDates`, or disable recurring weekdays with `disabledDays` (for example `[0, 6]` for weekends). Typed dates outside the allowed set are rejected on blur.

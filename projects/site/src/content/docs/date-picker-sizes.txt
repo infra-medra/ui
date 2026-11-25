@@ -1,0 +1,3 @@
+## Sizes
+
+`size` accepts `sm`, `default`, and `lg`, matching the sizing tokens of the other form fields.

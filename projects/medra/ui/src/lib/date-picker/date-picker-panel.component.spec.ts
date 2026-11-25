@@ -1,10 +1,11 @@
-﻿import { ComponentFixture, TestBed } from '@angular/core/testing';
+﻿import { Component, TemplateRef, viewChild } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DatePickerPanelComponent } from './date-picker-panel.component';
 import { DatePickerSelectionMode, DateRange } from './date-picker.types';
 
 interface PanelInputs {
   selectionMode?: DatePickerSelectionMode;
-  pickerView?: 'date' | 'month';
+  pickerView?: 'date' | 'month' | 'year';
   navigation?: 'calendar' | 'drilldown';
   initialViewDate?: Date;
   todayDate?: Date;
@@ -17,6 +18,18 @@ interface PanelInputs {
   disabledDays?: readonly number[];
   firstDayOfWeek?: number;
   numberOfMonths?: number;
+  showButtonBar?: boolean;
+  todayLabel?: string;
+  clearLabel?: string;
+  previousDecadeLabel?: string;
+  nextDecadeLabel?: string;
+  timeOnly?: boolean;
+  showTime?: boolean;
+  hourFormat?: '12' | '24';
+  autoFocus?: boolean;
+  inline?: boolean;
+  disabled?: boolean;
+  dateTemplate?: TemplateRef<unknown> | null;
 }
 
 function createPanel(inputs: PanelInputs = {}): ComponentFixture<DatePickerPanelComponent> {
@@ -36,6 +49,18 @@ function createPanel(inputs: PanelInputs = {}): ComponentFixture<DatePickerPanel
   if (inputs.disabledDays) fixture.componentRef.setInput('disabledDays', inputs.disabledDays);
   if (inputs.firstDayOfWeek !== undefined) fixture.componentRef.setInput('firstDayOfWeek', inputs.firstDayOfWeek);
   if (inputs.numberOfMonths !== undefined) fixture.componentRef.setInput('numberOfMonths', inputs.numberOfMonths);
+  if (inputs.showButtonBar !== undefined) fixture.componentRef.setInput('showButtonBar', inputs.showButtonBar);
+  if (inputs.todayLabel !== undefined) fixture.componentRef.setInput('todayLabel', inputs.todayLabel);
+  if (inputs.clearLabel !== undefined) fixture.componentRef.setInput('clearLabel', inputs.clearLabel);
+  if (inputs.previousDecadeLabel !== undefined) fixture.componentRef.setInput('previousDecadeLabel', inputs.previousDecadeLabel);
+  if (inputs.nextDecadeLabel !== undefined) fixture.componentRef.setInput('nextDecadeLabel', inputs.nextDecadeLabel);
+  if (inputs.timeOnly !== undefined) fixture.componentRef.setInput('timeOnly', inputs.timeOnly);
+  if (inputs.showTime !== undefined) fixture.componentRef.setInput('showTime', inputs.showTime);
+  if (inputs.hourFormat !== undefined) fixture.componentRef.setInput('hourFormat', inputs.hourFormat);
+  if (inputs.autoFocus !== undefined) fixture.componentRef.setInput('autoFocus', inputs.autoFocus);
+  if (inputs.inline !== undefined) fixture.componentRef.setInput('inline', inputs.inline);
+  if (inputs.disabled !== undefined) fixture.componentRef.setInput('disabled', inputs.disabled);
+  if (inputs.dateTemplate !== undefined) fixture.componentRef.setInput('dateTemplate', inputs.dateTemplate);
   fixture.detectChanges();
   return fixture;
 }
@@ -511,5 +536,181 @@ describe('DatePickerPanelComponent - selectionMode="multiple"', () => {
     pointerdownOn(fixture, '#test-panel-day-2026-6-10');
     expect(dateSelected).not.toHaveBeenCalled();
     expect(rangeCompleted).not.toHaveBeenCalled();
+  });
+});
+
+describe('DatePickerPanelComponent - parity features (DTP-017..DTP-021)', () => {
+  it('DTP-017.S2: autoFocus="false" does not steal focus on mount', () => {
+    const externalButton = document.createElement('button');
+    externalButton.textContent = 'Focus holder';
+    document.body.appendChild(externalButton);
+    externalButton.focus();
+
+    const fixture = createPanel({ autoFocus: false });
+    expect(fixture.nativeElement.contains(document.activeElement)).toBe(false);
+    expect(document.activeElement).toBe(externalButton);
+
+    externalButton.remove();
+  });
+
+  it('DTP-018.S1: showButtonBar renders custom todayLabel/clearLabel, emits todayDate and clearRequested, and disables Today when out of bounds', () => {
+    const today = new Date(2026, 6, 15);
+    const fixture = createPanel({
+      showButtonBar: true,
+      todayDate: today,
+      todayLabel: 'Jump Today',
+      clearLabel: 'Reset',
+    });
+    const selected = jest.fn();
+    const cleared = jest.fn();
+    fixture.componentInstance.dateSelect.subscribe(selected);
+    (fixture.componentInstance as unknown as { clearRequested: { subscribe: (fn: () => void) => void } }).clearRequested?.subscribe(cleared);
+
+    const buttons = Array.from(fixture.nativeElement.querySelectorAll('button')) as HTMLButtonElement[];
+    const todayBtn = buttons.find((b) => b.textContent?.trim() === 'Jump Today')!;
+    const clearBtn = buttons.find((b) => b.textContent?.trim() === 'Reset')!;
+    expect(todayBtn).toBeDefined();
+    expect(clearBtn).toBeDefined();
+
+    todayBtn.click();
+    fixture.detectChanges();
+    expect(selected).toHaveBeenCalledWith(today);
+
+    clearBtn.click();
+    fixture.detectChanges();
+    expect(cleared).toHaveBeenCalledTimes(1);
+
+    const blockedFixture = createPanel({
+      showButtonBar: true,
+      todayDate: new Date(2026, 6, 15),
+      minDate: new Date(2026, 6, 20),
+    });
+    const blockedTodayBtn = Array.from(blockedFixture.nativeElement.querySelectorAll('button')).find((b) => (b as HTMLElement).textContent?.trim() === 'Today') as HTMLButtonElement;
+    expect(blockedTodayBtn.disabled).toBe(true);
+  });
+
+  it('DTP-019.S1: pickerView="year" renders a 12-year decade grid, pages decades, and emits Jan 1 of the chosen year', () => {
+    const fixture = createPanel({
+      pickerView: 'year',
+      initialViewDate: new Date(2026, 6, 15),
+      previousDecadeLabel: 'Prev 10y',
+      nextDecadeLabel: 'Next 10y',
+    });
+    const selected = jest.fn();
+    fixture.componentInstance.dateSelect.subscribe(selected);
+
+    const cells = gridCells(fixture);
+    expect(cells.length).toBe(12);
+    expect(cells[0].textContent?.trim()).toBe('2020');
+    expect(cells[11].textContent?.trim()).toBe('2031');
+
+    clickOn(fixture, 'button[aria-label="Prev 10y"]');
+    const prevCells = gridCells(fixture);
+    expect(prevCells[0].textContent?.trim()).toBe('2010');
+
+    clickOn(fixture, 'button[aria-label="Next 10y"]');
+    clickOn(fixture, 'button[aria-label="Next 10y"]');
+    const nextCells = gridCells(fixture);
+    expect(nextCells[0].textContent?.trim()).toBe('2030');
+
+    pointerdownOn(fixture, '#test-panel-year-2034');
+    expect(selected).toHaveBeenCalledWith(new Date(2034, 0, 1));
+  });
+
+  it('DTP-020.S1: timeOnly renders only time controls without grids and commits Date on hour/minute/period changes', () => {
+    const fixture = createPanel({
+      timeOnly: true,
+      hourFormat: '12',
+      todayDate: new Date(2026, 6, 15),
+      initialViewDate: new Date(2026, 6, 15),
+    });
+    const selected = jest.fn();
+    fixture.componentInstance.dateSelect.subscribe(selected);
+
+    expect(fixture.nativeElement.querySelector('[role="grid"]')).toBeNull();
+    expect(fixture.nativeElement.querySelector('[role="listbox"]')).toBeNull();
+
+    const hourInput = fixture.nativeElement.querySelector('input[aria-label="Hour"]') as HTMLInputElement;
+    const minuteInput = fixture.nativeElement.querySelector('input[aria-label="Minute"]') as HTMLInputElement;
+    expect(hourInput).not.toBeNull();
+    expect(minuteInput).not.toBeNull();
+
+    hourInput.value = '8';
+    hourInput.dispatchEvent(new Event('input'));
+    minuteInput.value = '15';
+    minuteInput.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+
+    expect(selected).toHaveBeenCalled();
+    const lastDate = selected.mock.calls[selected.mock.calls.length - 1][0] as Date;
+    expect(lastDate.getHours() % 12 || 12).toBe(8);
+    expect(lastDate.getMinutes()).toBe(15);
+
+    const periodBtn = Array.from(fixture.nativeElement.querySelectorAll('button')).find((b) => {
+      const text = (b as HTMLElement).textContent?.trim();
+      return text === 'AM' || text === 'PM';
+    }) as HTMLButtonElement | undefined;
+    expect(periodBtn).toBeDefined();
+    const hoursBeforeToggle = lastDate.getHours();
+    periodBtn!.click();
+    fixture.detectChanges();
+    const toggledDate = selected.mock.calls[selected.mock.calls.length - 1][0] as Date;
+    expect(Math.abs(toggledDate.getHours() - hoursBeforeToggle)).toBe(12);
+
+    const default24hFixture = createPanel({
+      timeOnly: true,
+      todayDate: new Date(2026, 6, 15),
+      initialViewDate: new Date(2026, 6, 15),
+    });
+    const selected24h = jest.fn();
+    default24hFixture.componentInstance.dateSelect.subscribe(selected24h);
+    const hour24Input = default24hFixture.nativeElement.querySelector('input[aria-label="Hour"]') as HTMLInputElement;
+    hour24Input.value = '17';
+    hour24Input.dispatchEvent(new Event('input'));
+    default24hFixture.detectChanges();
+    const last24hDate = selected24h.mock.calls[selected24h.mock.calls.length - 1][0] as Date;
+    expect(last24hDate.getHours()).toBe(17);
+    const amPmBtn = Array.from(default24hFixture.nativeElement.querySelectorAll('button')).find((b) => {
+      const text = (b as HTMLElement).textContent?.trim();
+      return text === 'AM' || text === 'PM';
+    });
+    expect(amPmBtn).toBeUndefined();
+
+    const inlineFixture = createPanel({ timeOnly: true, inline: true });
+    const doneBtn = Array.from(inlineFixture.nativeElement.querySelectorAll('button')).find((b) => (b as HTMLElement).textContent?.trim() === 'Done');
+    expect(doneBtn).toBeUndefined();
+  });
+
+  it('DTP-021.S1: dateTemplate renders custom cell content with accurate context fields', () => {
+    @Component({
+      standalone: true,
+      imports: [DatePickerPanelComponent],
+      template: `
+        <ng-template #tpl let-dateObj let-day="date" let-today="today" let-outsideMonth="outsideMonth">
+          <span class="panel-custom-day" [attr.data-day]="day" [attr.data-today]="today" [attr.data-outside]="outsideMonth">
+            {{ day }}!
+          </span>
+        </ng-template>
+        <med-date-picker-panel
+          panelId="tpl-panel"
+          [initialViewDate]="viewDate"
+          [todayDate]="viewDate"
+          [dateTemplate]="tplRef() ?? null"
+        />
+      `,
+    })
+    class PanelTemplateHost {
+      readonly viewDate = new Date(2026, 6, 15);
+      readonly tplRef = viewChild<TemplateRef<unknown>>('tpl');
+    }
+
+    const fixture = TestBed.createComponent(PanelTemplateHost);
+    fixture.detectChanges();
+
+    const todayCell = fixture.nativeElement.querySelector('#tpl-panel-day-2026-6-15 .panel-custom-day') as HTMLElement | null;
+    expect(todayCell).not.toBeNull();
+    expect(todayCell!.textContent?.trim()).toBe('15!');
+    expect(todayCell!.getAttribute('data-today')).toBe('true');
+    expect(todayCell!.getAttribute('data-outside')).toBe('false');
   });
 });

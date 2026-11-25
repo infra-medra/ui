@@ -1,0 +1,167 @@
+change: document-date-picker-parity
+created: 2026-11-24
+track: fast
+phase: archived
+diff_base: 180c284
+gates:
+  proposal:
+    status: approved
+    by: Tiago Cavalli
+    at: 2026-11-24T22:49:01Z
+    hash: 971ff1db7b164f6b43539ee03ba4daf50abd18d403ddb70fe26498311ac53725
+    note: null
+  plan:
+    status: pending
+  tasks:
+    status: pending
+  verify:
+    status: approved
+    by: Tiago Cavalli
+    at: 2026-11-25T00:36:30Z
+    hash: e33f2d69bd8e6b2da464f03a48d0069b2a69a4b15b7bf7e8caf5b11ae6fa7f9b
+    note: null
+gate_notes: []
+reviews:
+  - stage: verify
+    by: reviewer
+    at: 2026-11-25T00:08:52Z
+    recorded_at: 2026-11-25T00:08:52.199Z
+    hash: 4ad85c1bc3993e248104b9f5db208d40539dc42592c3317b7a6c7aaa8925b02d
+    verdict: fail
+    report: reviews/2026-11-24-verify-reviewer-r1.md
+  - stage: verify
+    by: reviewer
+    at: 2026-11-25T00:24:27Z
+    recorded_at: 2026-11-25T00:24:27.252Z
+    hash: 87ef04f546a928acc89504f9e455249963574c5390b733ed39cffde5a20b78bf
+    verdict: pass
+    report: reviews/2026-11-24-verify-reviewer-r2.md
+track_history: []
+blockers: []
+verify_fix_rounds: 1
+last_fix_round_at: 2026-11-25T00:09:18.780Z
+test_hashes:
+  T001:
+    e2e/site/date-picker-docs.spec.ts: 45f74f7e1d900e678b3368355b7c29891fcc039143ab3dc8603fe59592ca6aa6
+test_snapshots:
+  45f74f7e1d900e678b3368355b7c29891fcc039143ab3dc8603fe59592ca6aa6: H4sIAAAAAAAAA51WbW/bNhD+7l9xaAuIWm3ZDtBited1Sex2BpIuSIyigBEstHSWiVCkRp5fMsP/faBeHDlW0mAfAkTH57l77ni8s0hSbQi2gJsUQ2oCoSXYwdzoBLw/Uskf1kbEC2q7A6/faIRaWYKr068jGIDXjnRo26FOUq1QkW1HnLCVivAezSN69ONqdD4ZDf8e/Ti9vLoY3cAApg2ALYioBx5ueJJKbM24FaHXBMlnKHvgnWXfsGseQ+faJJwq2C+5oRYsdcglVsAXuaEWnAjVSvimgr4UCtpwyTfPEJaSRHrg/7I01RIMV3EVfZ1910JJJFXkxH3Wi9CKFmXdK0KcGa5y84vqcw+2Jgm4zE9q6ZERUkZ6rSrEYWmDb3wlYk5Cq3p2KJGblgh1lX7ujDAOnyNZ8S9Wdd5k3/XqhOUziVFVXGmqJQi14lJU8ePCUt+FUnNqZdBqKzorXGTW+ihz4kes8Zz4SyQrYsVl1viH2TszfMnM9T2ESSrdq4yMWGG10pPiBIb5SX23Ig9JrPAo8nVxUIl9C9xC9uT7jYYbGEGENjRihswbcsK8ESHS4TJBRVlnQMpjBDacXLU63Y/BTdf3msB8GPwO2wZk84h5j6c9MKgiNBb+UkALYXO+FOreNiE12mITpJMVYaJtE7iKINQRwkzq8N7CXBvgUkL3ExQpuqS4fVAhsG3ubbcPD3k6gMZoY3tgyQgVT2/dALvtZwDHCLRinvsnw7kE0JjMSU4M0qVdOFuQoLU8Rt/vNzI2X3NBuQ+L9F3g2g1k19NsC2sR0aIH3ZNfO01YoJvDPfjU6cDO7z9lx5o0c2O59JwLJx1euNrAoIAhnT1ca4nMU4+vswlbUDzBHnjVsnqw8wM3PUkb5vHpwuD8l8Gbt2VvvLn1DoTkS4SVMf2A9J98hed6qYgdLYFAooppUep1F8MkEggYQKcPAn47XhwFpw/i/Xu/uKEyVde4RXvCDgbH5KkorqxkuK6Bwb5GgaIFE36JOcjJQct8TomMmC0Jmecq4jVB4RquMR5tUnb39t1WRLt3d/7Ljs61Ii7UBDfEMs1lHUpxFsPsfRQXV15D4f+u3ntBcgHOnE4eLjBie2yByikFNsAVl0tOyBjKrGcZyoBwQ04iKoLPn8Hz/ICMSJhf3loe4qtBTmgmC65Y52kG7gXCYB9n30iblNNiMNdS6rVQccuKmRQq7vUisZp2b9vtBKNW9YeEH8yFscTqc3ZhjhM+UOIGwJl7//9LDk/TlvPQykbIT9TsQ9XfwS4X1m7DWBGaYoQ+7rysaJX3m63IYV7Igz7wnKpKkSrLtOV8HL7MvZvAhkZLOVak3bAZz78hRo/yKkHHKl0SDCrUfWjhjp7W4bAKew9+oDQVD+c7l0tk3nPS9v5nSyKtptyIYk8O3mQVcvMmCKUI738a9ChgXdkPV9jT0peb71XVP1yTNTdQ9faqSygJ5T0cOHjNVRw4COZCSuZ1PrS7H9onnZOP9epybGrQWuaNXKlqJ3xVy9Nh5pXeG5WJk69BBx39s+SSTW8zt26Pub//AFC8tNaHDAAA
+last_task_done_at: 2026-11-24T23:58:45.828Z
+suite:
+  at: 2026-11-25T00:21:48Z
+  exit: 0
+  commands:
+    - npm test
+  fingerprint: 961fac531b12b2b833018fd803151fa53d9cb8cf09b6c1cdd6a7433a6696dddf
+handoff_snapshots:
+  check:
+    "1":
+      e2e/site/date-picker-docs.spec.ts: 45f74f7e1d900e678b3368355b7c29891fcc039143ab3dc8603fe59592ca6aa6
+      projects/site/src/app/pages/docs/components/date-picker.page.ts: 20bc1b2216981ae545a0829fcab3ed08c2c1a5ed3cb5e78478f91d1e2bc08d55
+      projects/site/src/app/pages/docs/components/demos/date-picker-clear-icon.demo.html: c19a4d51f7de0bbfa93a5b3dc3e22d2ef1fcde3287790cc2ff6ed45f2992747e
+      projects/site/src/app/pages/docs/components/demos/date-picker-clear-icon.demo.ts: 38f22a4fa91d7366867e783b42089afdfa91db84272d7b6c30eb7e68e2e80842
+      projects/site/src/app/pages/docs/components/demos/date-picker-disabled.demo.html: d359a4b34c91e7c66782df18f66d181ec8aa087760d1dfff924eeb83b0cc1817
+      projects/site/src/app/pages/docs/components/demos/date-picker-disabled.demo.ts: 5d2ac487f5ce32537bfe56d82b339206aefeda1f6868a1c3c2075a113dd752a1
+      projects/site/src/app/pages/docs/components/demos/date-picker-drilldown.demo.html: db4ee17602c2802be75163f54afc95bcdb0333a7b73920bafc4e07ae8b41df47
+      projects/site/src/app/pages/docs/components/demos/date-picker-drilldown.demo.ts: 18bd32032e52c92bb294f6742ddd51efad37aaaa6cb3430ec4ae78f8cd4540fd
+      projects/site/src/app/pages/docs/components/demos/date-picker-float-label.demo.html: f2577ab35a790f3603c37fae3848a90454660377870ab825aa625f20074fac8e
+      projects/site/src/app/pages/docs/components/demos/date-picker-float-label.demo.ts: a88e2a501d15cddf300a3af280569f9505d868f8fbab872b948b3d8644735fa7
+      projects/site/src/app/pages/docs/components/demos/date-picker-format.demo.html: ce9ed3390105999d52df3a544da22371eab4611af75a6f72b1bcf508ebe95a57
+      projects/site/src/app/pages/docs/components/demos/date-picker-format.demo.ts: a7240cb32a15eb91a60fc542c58597a4931737bd9449c58e862c2c2c91cee3f1
+      projects/site/src/app/pages/docs/components/demos/date-picker-ifta-label.demo.html: 161ac1782d719c012b08b1eab3701c875c251ceda680425785bee199cf487511
+      projects/site/src/app/pages/docs/components/demos/date-picker-ifta-label.demo.ts: ad39d725cbada531f3c99238f51ac5241642c5d9ac93b4a019dc5b2e966f07f9
+      projects/site/src/app/pages/docs/components/demos/date-picker-invalid.demo.html: 93a260fe81e9be401ebe8fdc2c38069550e4efad07d2ca3c246f96ea2bdbb114
+      projects/site/src/app/pages/docs/components/demos/date-picker-invalid.demo.ts: 3ad6fcdc7a6f7c5b0e2e5b3e4345a561af32ce7e37f4ca7bd5bb0c72f404cc28
+      projects/site/src/app/pages/docs/components/demos/date-picker-locale.demo.html: 7c05659f89ae632ec8a79fe8bb520cc73b06c8bb78875d605d06b2ce9ae52184
+      projects/site/src/app/pages/docs/components/demos/date-picker-locale.demo.ts: fcbb7952a8e4d77a0b97438af655c1a5e5a03ebca691c8127478448a855e1317
+      projects/site/src/app/pages/docs/components/demos/date-picker-min-max.demo.html: 5f57824218f39e7c44c34b7261467b8621fe1cde4ec7d935052e51c583689c67
+      projects/site/src/app/pages/docs/components/demos/date-picker-min-max.demo.ts: ea42c5b653af01a092e6acbef0a9e70b5df10ce0071cdc86593d5bebea2a93f5
+      projects/site/src/app/pages/docs/components/demos/date-picker-month-picker.demo.html: 29af9d883258fdd4afda86c46ba0ffa0839e62b90b6163bd0f6c27a4740397d9
+      projects/site/src/app/pages/docs/components/demos/date-picker-month-picker.demo.ts: de87cec026cd6370735ff50334c449bcee01095c6913ef0d34402c7b859fc9dd
+      projects/site/src/app/pages/docs/components/demos/date-picker-multiple.demo.html: 654ec5ddd0c164a4f395a2ccbcef1816cfb1201816489a46448dd120205e6c60
+      projects/site/src/app/pages/docs/components/demos/date-picker-multiple.demo.ts: 6dad6a17bd02ab23e31f586e77360344b84e2551a3bd9d069fb8aa4e4e541b61
+      projects/site/src/app/pages/docs/components/demos/date-picker-range.demo.html: 23a5e7a2023d811570312890740aa23ed7045605f2595372957948375337e1a9
+      projects/site/src/app/pages/docs/components/demos/date-picker-range.demo.ts: 58f1799999b11d4179c128f1195ebfca74676d18a170d3b6c91c2d2ce7e28bfc
+      projects/site/src/app/pages/docs/components/demos/date-picker-reactive-forms.demo.html: 5bf38b311b9327e855429b3b2a23a34510976f8101e1503c602ee65ef4db3afb
+      projects/site/src/app/pages/docs/components/demos/date-picker-reactive-forms.demo.ts: 30873ef0b3d3c6856f58c6c83157f8fe949488ad6b69d725d95f2de310f376cc
+      projects/site/src/app/pages/docs/components/demos/date-picker-signal-forms.demo.html: d72d032af090f1b7a58b34e7fb11696798b5915d566b2b727d9b8e531b33fdc4
+      projects/site/src/app/pages/docs/components/demos/date-picker-signal-forms.demo.ts: e6173154324ae4e6ef65df879b4045912d3d7bca509c4eec84de93344427939b
+      projects/site/src/app/pages/docs/components/demos/date-picker-sizes.demo.html: 9456135481399429d56f6724d184af1a9dde3222e329371f402567bf66311e4b
+      projects/site/src/app/pages/docs/components/demos/date-picker-sizes.demo.ts: b9661ab7d2de325c53c2e0fe403718de9a78618faf0ed96ec4571ab39ad1479c
+      projects/site/src/app/pages/docs/components/demos/date-picker-template-driven.demo.html: 5b60a0162afeb72b3806d053c9ba85a701352def039051477641485546292833
+      projects/site/src/app/pages/docs/components/demos/date-picker-template-driven.demo.ts: c3fc5d53306630598a5ad4cec7ef52e884e6d3e51f8595f600e9be0c19776d6d
+      projects/site/src/content/docs/date-picker-basic.txt: 3f949ecc822c38d0128f1b705913cbf5f6f63afefc36d58cdae4e57c3038071e
+      projects/site/src/content/docs/date-picker-clear-icon.txt: 4826510f712b3dc16cd6b6cbcba2290e90bd7edbf7a23d5792072658977f99a2
+      projects/site/src/content/docs/date-picker-disabled.txt: 1f09bd46836a16ffe92537c9838bed29696ed0eefb0851bf4917be8abe48e748
+      projects/site/src/content/docs/date-picker-drilldown.txt: 7be7dd67a49b29c1ee6f76e67ccac4f8b99b47d9321755753dde8c15e82dfa4b
+      projects/site/src/content/docs/date-picker-float-label.txt: d12931ee0c18c47d1a427c49cfc12d081a7a800a964af93196c2c29979ff4c4d
+      projects/site/src/content/docs/date-picker-format.txt: 32ad30dc88e34c2e3179ed80cf4a1da7188698e120a642534581d069cae6da59
+      projects/site/src/content/docs/date-picker-ifta-label.txt: 987f002ab150a72c2f0ee24624c7e2b5d6eb05e7cc8cd1efea9885917ee6eecb
+      projects/site/src/content/docs/date-picker-invalid.txt: d549f9c82b821c9700fb212b8214662f21391978bd756c15228954f32b0e1c6c
+      projects/site/src/content/docs/date-picker-locale.txt: 00f378c25d3a95c75de2676101f9c7f679e7530bfa7d5dd66790bba96220a486
+      projects/site/src/content/docs/date-picker-min-max.txt: 1b12cada6d5cfe1b9767a7abdaafab9d4e82c24a8473629217a64d4176ea7d92
+      projects/site/src/content/docs/date-picker-month-picker.txt: aaa02408b02d7f834b69ca039643c0f0f16af85914c32ffd20bd741c46dc9905
+      projects/site/src/content/docs/date-picker-multiple.txt: 4a833afbf7c809140499a6eeec9e1d131559ad7925f173c731115a8a9f1b8edb
+      projects/site/src/content/docs/date-picker-range.txt: 9a58e83d9496c88f4e37c6656b8ed07abe990a15160193a44f025a1aa473fb70
+      projects/site/src/content/docs/date-picker-reactive-forms.txt: 26aec517ae05f454874646153ad9794d1d062ca267b596d56e383963a95db291
+      projects/site/src/content/docs/date-picker-signal-forms.txt: 97375601317d3e64e9e46c9735f56eaa80554bfe5ca02732cfdc815039f5285f
+      projects/site/src/content/docs/date-picker-sizes.txt: 5162a9478d8776da43818e12a2318d944284aedd525c12fab2233fd113e504fb
+      projects/site/src/content/docs/date-picker-template-driven.txt: 506876fbd65d3d93e174993b82d920f39a69ed32835cc1d1b0f799b45469a24a
+    "2":
+      e2e/site/date-picker-docs.spec.ts: 024cabfdcc5afbf84841a5fc2e3809a941659fd2911b6d6a49bc72249cc6c7ba
+      projects/site/src/app/pages/docs/components/date-picker.page.ts: 6b55e0749db667c063e53051b425d54754bbb0a5e9c0d0acc5dc467ded2a3023
+      projects/site/src/app/pages/docs/components/demos/date-picker-clear-icon.demo.html: c19a4d51f7de0bbfa93a5b3dc3e22d2ef1fcde3287790cc2ff6ed45f2992747e
+      projects/site/src/app/pages/docs/components/demos/date-picker-clear-icon.demo.ts: 38f22a4fa91d7366867e783b42089afdfa91db84272d7b6c30eb7e68e2e80842
+      projects/site/src/app/pages/docs/components/demos/date-picker-disabled.demo.html: d359a4b34c91e7c66782df18f66d181ec8aa087760d1dfff924eeb83b0cc1817
+      projects/site/src/app/pages/docs/components/demos/date-picker-disabled.demo.ts: 5d2ac487f5ce32537bfe56d82b339206aefeda1f6868a1c3c2075a113dd752a1
+      projects/site/src/app/pages/docs/components/demos/date-picker-drilldown.demo.html: db4ee17602c2802be75163f54afc95bcdb0333a7b73920bafc4e07ae8b41df47
+      projects/site/src/app/pages/docs/components/demos/date-picker-drilldown.demo.ts: 18bd32032e52c92bb294f6742ddd51efad37aaaa6cb3430ec4ae78f8cd4540fd
+      projects/site/src/app/pages/docs/components/demos/date-picker-float-label.demo.html: f2577ab35a790f3603c37fae3848a90454660377870ab825aa625f20074fac8e
+      projects/site/src/app/pages/docs/components/demos/date-picker-float-label.demo.ts: a88e2a501d15cddf300a3af280569f9505d868f8fbab872b948b3d8644735fa7
+      projects/site/src/app/pages/docs/components/demos/date-picker-format.demo.html: ce9ed3390105999d52df3a544da22371eab4611af75a6f72b1bcf508ebe95a57
+      projects/site/src/app/pages/docs/components/demos/date-picker-format.demo.ts: a7240cb32a15eb91a60fc542c58597a4931737bd9449c58e862c2c2c91cee3f1
+      projects/site/src/app/pages/docs/components/demos/date-picker-ifta-label.demo.html: 161ac1782d719c012b08b1eab3701c875c251ceda680425785bee199cf487511
+      projects/site/src/app/pages/docs/components/demos/date-picker-ifta-label.demo.ts: ad39d725cbada531f3c99238f51ac5241642c5d9ac93b4a019dc5b2e966f07f9
+      projects/site/src/app/pages/docs/components/demos/date-picker-invalid.demo.html: 93a260fe81e9be401ebe8fdc2c38069550e4efad07d2ca3c246f96ea2bdbb114
+      projects/site/src/app/pages/docs/components/demos/date-picker-invalid.demo.ts: 3ad6fcdc7a6f7c5b0e2e5b3e4345a561af32ce7e37f4ca7bd5bb0c72f404cc28
+      projects/site/src/app/pages/docs/components/demos/date-picker-locale.demo.html: 7c05659f89ae632ec8a79fe8bb520cc73b06c8bb78875d605d06b2ce9ae52184
+      projects/site/src/app/pages/docs/components/demos/date-picker-locale.demo.ts: fcbb7952a8e4d77a0b97438af655c1a5e5a03ebca691c8127478448a855e1317
+      projects/site/src/app/pages/docs/components/demos/date-picker-min-max.demo.html: 5f57824218f39e7c44c34b7261467b8621fe1cde4ec7d935052e51c583689c67
+      projects/site/src/app/pages/docs/components/demos/date-picker-min-max.demo.ts: ea42c5b653af01a092e6acbef0a9e70b5df10ce0071cdc86593d5bebea2a93f5
+      projects/site/src/app/pages/docs/components/demos/date-picker-month-picker.demo.html: 29af9d883258fdd4afda86c46ba0ffa0839e62b90b6163bd0f6c27a4740397d9
+      projects/site/src/app/pages/docs/components/demos/date-picker-month-picker.demo.ts: de87cec026cd6370735ff50334c449bcee01095c6913ef0d34402c7b859fc9dd
+      projects/site/src/app/pages/docs/components/demos/date-picker-multiple-months.demo.html: 5c4fb8225d7ef318c084d104d98e9f51117a819b34ea31c9b7f85281d34c8160
+      projects/site/src/app/pages/docs/components/demos/date-picker-multiple-months.demo.ts: 4e9462ff6413c718ce53c63b814de3a0b71b4c01650a8c902d22762d637b3910
+      projects/site/src/app/pages/docs/components/demos/date-picker-multiple.demo.html: 654ec5ddd0c164a4f395a2ccbcef1816cfb1201816489a46448dd120205e6c60
+      projects/site/src/app/pages/docs/components/demos/date-picker-multiple.demo.ts: 6dad6a17bd02ab23e31f586e77360344b84e2551a3bd9d069fb8aa4e4e541b61
+      projects/site/src/app/pages/docs/components/demos/date-picker-range.demo.html: 23a5e7a2023d811570312890740aa23ed7045605f2595372957948375337e1a9
+      projects/site/src/app/pages/docs/components/demos/date-picker-range.demo.ts: 58f1799999b11d4179c128f1195ebfca74676d18a170d3b6c91c2d2ce7e28bfc
+      projects/site/src/app/pages/docs/components/demos/date-picker-reactive-forms.demo.html: 5bf38b311b9327e855429b3b2a23a34510976f8101e1503c602ee65ef4db3afb
+      projects/site/src/app/pages/docs/components/demos/date-picker-reactive-forms.demo.ts: 30873ef0b3d3c6856f58c6c83157f8fe949488ad6b69d725d95f2de310f376cc
+      projects/site/src/app/pages/docs/components/demos/date-picker-signal-forms.demo.html: d72d032af090f1b7a58b34e7fb11696798b5915d566b2b727d9b8e531b33fdc4
+      projects/site/src/app/pages/docs/components/demos/date-picker-signal-forms.demo.ts: e6173154324ae4e6ef65df879b4045912d3d7bca509c4eec84de93344427939b
+      projects/site/src/app/pages/docs/components/demos/date-picker-sizes.demo.html: 9456135481399429d56f6724d184af1a9dde3222e329371f402567bf66311e4b
+      projects/site/src/app/pages/docs/components/demos/date-picker-sizes.demo.ts: b9661ab7d2de325c53c2e0fe403718de9a78618faf0ed96ec4571ab39ad1479c
+      projects/site/src/app/pages/docs/components/demos/date-picker-template-driven.demo.html: 5b60a0162afeb72b3806d053c9ba85a701352def039051477641485546292833
+      projects/site/src/app/pages/docs/components/demos/date-picker-template-driven.demo.ts: c3fc5d53306630598a5ad4cec7ef52e884e6d3e51f8595f600e9be0c19776d6d
+      projects/site/src/content/docs/date-picker-basic.txt: 3f949ecc822c38d0128f1b705913cbf5f6f63afefc36d58cdae4e57c3038071e
+      projects/site/src/content/docs/date-picker-clear-icon.txt: 4826510f712b3dc16cd6b6cbcba2290e90bd7edbf7a23d5792072658977f99a2
+      projects/site/src/content/docs/date-picker-disabled.txt: 1f09bd46836a16ffe92537c9838bed29696ed0eefb0851bf4917be8abe48e748
+      projects/site/src/content/docs/date-picker-drilldown.txt: 188df5f197e66fb5f82e9498b89980f989d24cf8db6091c9e000d72d8087f150
+      projects/site/src/content/docs/date-picker-float-label.txt: d12931ee0c18c47d1a427c49cfc12d081a7a800a964af93196c2c29979ff4c4d
+      projects/site/src/content/docs/date-picker-format.txt: 32ad30dc88e34c2e3179ed80cf4a1da7188698e120a642534581d069cae6da59
+      projects/site/src/content/docs/date-picker-ifta-label.txt: 987f002ab150a72c2f0ee24624c7e2b5d6eb05e7cc8cd1efea9885917ee6eecb
+      projects/site/src/content/docs/date-picker-invalid.txt: d549f9c82b821c9700fb212b8214662f21391978bd756c15228954f32b0e1c6c
+      projects/site/src/content/docs/date-picker-locale.txt: fd49708d359c13b593e51e8ae820a4d269b265ccf5b99959a6dc7e5fc15f36ca
+      projects/site/src/content/docs/date-picker-min-max.txt: 7acbc5f39d41454f7477bbf59d4d166f5c4d8ed0cf667df5d7bdae368eccf13e
+      projects/site/src/content/docs/date-picker-month-picker.txt: aaa02408b02d7f834b69ca039643c0f0f16af85914c32ffd20bd741c46dc9905
+      projects/site/src/content/docs/date-picker-multiple-months.txt: 860e3e885f61a79bc918e007cd81b4ee753dfde838523827a0c651204ac8dcda
+      projects/site/src/content/docs/date-picker-multiple.txt: 4a833afbf7c809140499a6eeec9e1d131559ad7925f173c731115a8a9f1b8edb
+      projects/site/src/content/docs/date-picker-range.txt: 9a58e83d9496c88f4e37c6656b8ed07abe990a15160193a44f025a1aa473fb70
+      projects/site/src/content/docs/date-picker-reactive-forms.txt: 26aec517ae05f454874646153ad9794d1d062ca267b596d56e383963a95db291
+      projects/site/src/content/docs/date-picker-show-time.txt: 4f270823be527d6912f720c55007abb20f9b3daa4f900244593ae061d16fb531
+      projects/site/src/content/docs/date-picker-signal-forms.txt: 97375601317d3e64e9e46c9735f56eaa80554bfe5ca02732cfdc815039f5285f
+      projects/site/src/content/docs/date-picker-sizes.txt: 5162a9478d8776da43818e12a2318d944284aedd525c12fab2233fd113e504fb
+      projects/site/src/content/docs/date-picker-template-driven.txt: 506876fbd65d3d93e174993b82d920f39a69ed32835cc1d1b0f799b45469a24a
+archived:
+  at: 2026-11-24
+  sequence: 26

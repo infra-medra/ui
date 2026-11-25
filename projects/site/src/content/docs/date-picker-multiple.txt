@@ -1,0 +1,3 @@
+## Multiple
+
+`selectionMode="multiple"` binds a `readonly Date[]`. Clicking days in the calendar toggles them in and out of the selection while keeping the panel open, and the text input becomes read-only.

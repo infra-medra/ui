@@ -1,9 +1,10 @@
-import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, booleanAttribute, computed, effect, input, numberAttribute, output, signal, viewChild, viewChildren } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, OnInit, TemplateRef, booleanAttribute, computed, effect, inject, input, numberAttribute, output, signal, viewChild, viewChildren } from '@angular/core';
 import { IconComponent } from '../icon/icon.component';
 import { selectOptionVariants } from '../select/select.styles';
 import { startOfDay } from './date-format';
 import { dayCellVariants, monthCellVariants } from './date-picker.styles';
-import { DatePickerSelectionMode, DateRange } from './date-picker.types';
+import { DatePickerDateTemplateContext, DatePickerSelectionMode, DatePickerView, DateRange } from './date-picker.types';
 
 export interface DateGridCell {
   readonly date: Date;
@@ -62,7 +63,7 @@ const YEAR_LIST_WINDOW = 100;
 @Component({
   selector: 'med-date-picker-panel',
   standalone: true,
-  imports: [IconComponent],
+  imports: [IconComponent, NgTemplateOutlet],
   changeDetection: ChangeDetectionStrategy.OnPush,
   // `w-full`, not just `block`: `.cdk-overlay-pane` is a flex container, so a
   // plain block child sizes to shrink-to-fit content instead of the pane's
@@ -74,243 +75,287 @@ const YEAR_LIST_WINDOW = 100;
   host: { class: 'block w-full' },
   template: `
     <div
-      class="w-full min-w-[min(19rem,calc(100vw-2rem))] p-3 sm:[min-width:min(var(--dp-panel-min-width),calc(100vw-2rem))]"
-      [style.--dp-panel-min-width]="outerMinWidthRem()"
+      [class]="outerPanelClass()"
+      [style.--dp-panel-min-width]="timeOnly() ? null : outerMinWidthRem()"
+      [attr.aria-disabled]="disabled() ? 'true' : null"
       [id]="panelId()"
     >
-      @if (selectionMode() === 'range') {
-        <p class="mb-2 text-xs font-medium text-surface-500 dark:text-surface-400">
-          {{ rangeStage() === 'start' ? startDateLabel() : endDateLabel() }}
-        </p>
-      }
-
-      @switch (view()) {
-        @case ('year') {
-          <div class="mb-2 flex items-center gap-2 border-b border-surface-200 px-1 pb-2 dark:border-surface-700">
-            <med-icon name="magnifying-glass" variant="mini" class="size-4 shrink-0 text-surface-400" />
-            <input
-              #yearFilterInput
-              type="text"
-              inputmode="numeric"
-              class="w-full bg-transparent text-sm text-surface-900 placeholder:text-surface-400 focus:outline-none dark:text-surface-50 dark:placeholder:text-surface-500"
-              [placeholder]="yearFilterPlaceholder()"
-              [attr.aria-label]="yearFilterPlaceholder()"
-              [value]="yearFilterText()"
-              (input)="onYearFilterInput($event)"
-              (keydown)="onKeydown($event)"
-            />
-          </div>
-          <div
-            #yearContainer
-            [id]="containerId('year')"
-            role="listbox"
-            tabindex="-1"
-            class="max-h-60 overflow-y-auto outline-none [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-surface-300 dark:[&::-webkit-scrollbar-thumb]:bg-surface-600"
-            [attr.aria-activedescendant]="activeYearId()"
-            (keydown)="onKeydown($event)"
-          >
-            @if (yearListItems().length === 0) {
-              <p class="px-3 py-2 text-sm text-surface-400 dark:text-surface-500">{{ emptyLabel() }}</p>
-            } @else {
-              @for (year of yearListItems(); track year) {
-                <div
-                  [id]="yearRowId(year)"
-                  role="option"
-                  [attr.aria-selected]="isYearRelevant(year)"
-                  [class]="yearRowClass(year)"
-                  (pointerdown)="onYearPointerDown($event, year)"
-                  (pointerenter)="focusedYear.set(year)"
-                >
-                  <span class="flex-1">{{ year }}</span>
-                  @if (isYearRelevant(year)) {
-                    <med-icon name="check" variant="mini" class="size-4 shrink-0 text-brand-500 dark:text-brand-400" />
-                  }
-                </div>
-              }
-            }
-          </div>
+      @if (!timeOnly()) {
+        @if (selectionMode() === 'range') {
+          <p class="mb-2 text-xs font-medium text-surface-500 dark:text-surface-400">
+            {{ rangeStage() === 'start' ? startDateLabel() : endDateLabel() }}
+          </p>
         }
-        @case ('month') {
-          <div class="mb-2 flex items-center justify-between">
-            @if (navigation() === 'calendar') {
-              <button
-                type="button"
-                class="rounded-sm p-1 hover:bg-surface-100 disabled:pointer-events-none disabled:opacity-(--opacity-disabled) dark:hover:bg-surface-700"
-                [disabled]="!canGoPreviousYear()"
-                [attr.aria-label]="previousYearLabel()"
-                (click)="previousYear()"
-              >
-                <med-icon name="chevron-left" variant="mini" class="size-4" />
-              </button>
-            } @else {
-              <span class="w-6"></span>
-            }
+
+        @switch (view()) {
+          @case ('year') {
             @if (navigation() === 'drilldown') {
-              <button type="button" class="rounded-sm px-2 py-1 text-sm font-semibold hover:bg-surface-100 dark:hover:bg-surface-700" (click)="goToYearView()">
-                {{ viewYear() }}
-              </button>
-            } @else {
-              <span class="text-sm font-semibold">{{ viewYear() }}</span>
-            }
-            @if (navigation() === 'calendar') {
-              <button
-                type="button"
-                class="rounded-sm p-1 hover:bg-surface-100 disabled:pointer-events-none disabled:opacity-(--opacity-disabled) dark:hover:bg-surface-700"
-                [disabled]="!canGoNextYear()"
-                [attr.aria-label]="nextYearLabel()"
-                (click)="nextYear()"
-              >
-                <med-icon name="chevron-right" variant="mini" class="size-4" />
-              </button>
-            } @else {
-              <span class="w-6"></span>
-            }
-          </div>
-          <div
-            #monthContainer
-            [id]="containerId('month')"
-            role="grid"
-            tabindex="-1"
-            class="grid grid-cols-4 gap-1 outline-none"
-            [attr.aria-label]="viewYear()"
-            [attr.aria-activedescendant]="activeMonthId()"
-            (keydown)="onKeydown($event)"
-          >
-            @for (label of monthLabels(); track $index) {
-              <div
-                [id]="monthCellId($index)"
-                role="gridcell"
-                [attr.aria-selected]="isMonthSelected($index)"
-                [attr.aria-disabled]="isMonthDisabled(viewYear(), $index) ? 'true' : null"
-                [class]="monthCellClass($index)"
-                (pointerdown)="onMonthPointerDown($event, $index)"
-                (pointerenter)="onMonthPointerEnter($index)"
-              >
-                {{ label }}
-              </div>
-            }
-          </div>
-        }
-        @case ('day') {
-          <div class="flex gap-6">
-            @for (offset of monthOffsets(); track offset) {
-              <div [class]="offset === 0 ? 'flex-1' : 'hidden flex-1 sm:block'">
-                <div class="mb-2 flex items-center justify-between">
-                  @if (navigation() === 'calendar' && offset === 0) {
-                    <button
-                      type="button"
-                      class="rounded-sm p-1 hover:bg-surface-100 disabled:pointer-events-none disabled:opacity-(--opacity-disabled) dark:hover:bg-surface-700"
-                      [disabled]="!canGoPreviousMonth()"
-                      [attr.aria-label]="previousMonthLabel()"
-                      (click)="previousMonth()"
-                    >
-                      <med-icon name="chevron-left" variant="mini" class="size-4" />
-                    </button>
-                  } @else {
-                    <span class="w-6"></span>
-                  }
-
-                  @if (navigation() === 'drilldown' && offset === 0) {
-                    <button type="button" class="rounded-sm px-2 py-1 text-sm font-semibold hover:bg-surface-100 dark:hover:bg-surface-700" (click)="goToMonthView()">
-                      {{ monthYearLabelForOffset(offset) }}
-                    </button>
-                  } @else {
-                    <span class="text-sm font-semibold">{{ monthYearLabelForOffset(offset) }}</span>
-                  }
-
-                  @if (navigation() === 'calendar' && offset === monthOffsets().length - 1) {
-                    <button
-                      type="button"
-                      class="rounded-sm p-1 hover:bg-surface-100 disabled:pointer-events-none disabled:opacity-(--opacity-disabled) dark:hover:bg-surface-700"
-                      [disabled]="!canGoNextMonth()"
-                      [attr.aria-label]="nextMonthLabel()"
-                      (click)="nextMonth()"
-                    >
-                      <med-icon name="chevron-right" variant="mini" class="size-4" />
-                    </button>
-                  } @else if (navigation() === 'calendar' && offset === 0) {
-                    <!-- Below sm, only the first month ever renders (see the
-                         hidden/sm:block column class above), so the "real"
-                         next button above — attached to the *last* offset —
-                         is itself hidden then, leaving no way to page forward
-                         at all. This is a second, mobile-only copy of the
-                         same action on the one column that's actually visible
-                         there. sm:invisible (not sm:hidden) once the last
-                         offset's own button takes over again: this slot's
-                         width has to keep matching the plain w-6 spacer used
-                         everywhere else in this row, or the header title
-                         next to it drifts off-center at sm and up (a
-                         display:none button collapses to zero width, a
-                         visibility:hidden one keeps its box). -->
-                    <button
-                      type="button"
-                      class="rounded-sm p-1 hover:bg-surface-100 disabled:pointer-events-none disabled:opacity-(--opacity-disabled) dark:hover:bg-surface-700 sm:invisible"
-                      [disabled]="!canGoNextMonth()"
-                      [attr.aria-label]="nextMonthLabel()"
-                      (click)="nextMonth()"
-                    >
-                      <med-icon name="chevron-right" variant="mini" class="size-4" />
-                    </button>
-                  } @else {
-                    <span class="w-6"></span>
-                  }
-                </div>
-                <div
-                  #dayContainer
-                  [id]="containerId('day') + '-' + offset"
-                  role="grid"
-                  tabindex="-1"
-                  class="outline-none"
-                  [attr.aria-label]="monthYearLabelForOffset(offset)"
-                  [attr.aria-activedescendant]="offset === focusedMonthOffset() ? activeDayId() : null"
+              <div class="mb-2 flex items-center gap-2 border-b border-surface-200 px-1 pb-2 dark:border-surface-700">
+                <med-icon name="magnifying-glass" variant="mini" class="size-4 shrink-0 text-surface-400" />
+                <input
+                  #yearFilterInput
+                  type="text"
+                  inputmode="numeric"
+                  class="w-full bg-transparent text-sm text-surface-900 placeholder:text-surface-400 focus:outline-none dark:text-surface-50 dark:placeholder:text-surface-500"
+                  [disabled]="disabled()"
+                  [placeholder]="yearFilterPlaceholder()"
+                  [attr.aria-label]="yearFilterPlaceholder()"
+                  [value]="yearFilterText()"
+                  (input)="onYearFilterInput($event)"
                   (keydown)="onKeydown($event)"
-                >
-                  <div role="row" class="grid grid-cols-7">
-                    @for (label of weekdayLabels(); track $index) {
-                      <span role="columnheader" [attr.abbr]="label.full" class="flex h-8 items-center justify-center text-xs text-surface-500 dark:text-surface-400">{{ label.short }}</span>
-                    }
-                  </div>
-                  @for (week of weeksForOffset(offset); track $index) {
-                    <div role="row" class="grid grid-cols-7">
-                      @for (cell of week; track cell.date.getTime()) {
-                        @if (cell.outsideMonth && effectiveNumberOfMonths() > 1) {
-                          <!-- Blank, not the adjacent month's real date: with 2+ months
-                               visible side by side, that date already renders for real in
-                               its own month's grid — showing it again here as filler would
-                               duplicate it (and duplicate any range/selected styling on it,
-                               which reads as confusing rather than helpful). -->
-                          <div class="size-9" aria-hidden="true"></div>
-                        } @else {
-                          <div
-                            [id]="dayCellId(cell.date)"
-                            role="gridcell"
-                            [attr.aria-selected]="isDaySelected(cell) || null"
-                            [attr.aria-current]="isToday(cell.date) ? 'date' : null"
-                            [attr.aria-disabled]="cell.disabled ? 'true' : null"
-                            [class]="dayCellClass(cell)"
-                            (pointerdown)="onDayPointerDown($event, cell)"
-                            (pointerenter)="onDayPointerEnter(cell)"
-                          >
-                            {{ cell.date.getDate() }}
-                          </div>
-                        }
+                />
+              </div>
+              <div
+                #yearContainer
+                [id]="containerId('year')"
+                role="listbox"
+                tabindex="-1"
+                class="max-h-60 overflow-y-auto outline-none [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-surface-300 dark:[&::-webkit-scrollbar-thumb]:bg-surface-600"
+                [attr.aria-activedescendant]="activeYearId()"
+                (keydown)="onKeydown($event)"
+              >
+                @if (yearListItems().length === 0) {
+                  <p class="px-3 py-2 text-sm text-surface-400 dark:text-surface-500">{{ emptyLabel() }}</p>
+                } @else {
+                  @for (year of yearListItems(); track year) {
+                    <div
+                      [id]="yearRowId(year)"
+                      role="option"
+                      [attr.aria-selected]="isYearRelevant(year)"
+                      [attr.aria-disabled]="isYearDisabled(year) ? 'true' : null"
+                      [class]="yearRowClass(year)"
+                      (pointerdown)="onYearPointerDown($event, year)"
+                      (pointerenter)="focusedYear.set(year)"
+                    >
+                      <span class="flex-1">{{ year }}</span>
+                      @if (isYearRelevant(year)) {
+                        <med-icon name="check" variant="mini" class="size-4 shrink-0 text-brand-500 dark:text-brand-400" />
                       }
                     </div>
                   }
-                </div>
+                }
+              </div>
+            } @else {
+              <div class="mb-2 flex items-center justify-between">
+                <button
+                  type="button"
+                  class="rounded-sm p-1 hover:bg-surface-100 disabled:pointer-events-none disabled:opacity-(--opacity-disabled) dark:hover:bg-surface-700"
+                  [disabled]="disabled() || !canGoPreviousDecade()"
+                  [attr.aria-label]="previousDecadeLabel()"
+                  (click)="previousDecade()"
+                >
+                  <med-icon name="chevron-left" variant="mini" class="size-4" />
+                </button>
+                <span class="text-sm font-semibold">{{ decadeStart() }} - {{ decadeStart() + 11 }}</span>
+                <button
+                  type="button"
+                  class="rounded-sm p-1 hover:bg-surface-100 disabled:pointer-events-none disabled:opacity-(--opacity-disabled) dark:hover:bg-surface-700"
+                  [disabled]="disabled() || !canGoNextDecade()"
+                  [attr.aria-label]="nextDecadeLabel()"
+                  (click)="nextDecade()"
+                >
+                  <med-icon name="chevron-right" variant="mini" class="size-4" />
+                </button>
+              </div>
+              <div
+                #yearGridContainer
+                [id]="containerId('year')"
+                role="grid"
+                tabindex="-1"
+                class="grid grid-cols-4 gap-1 outline-none"
+                [attr.aria-label]="decadeStart() + ' - ' + (decadeStart() + 11)"
+                [attr.aria-activedescendant]="activeYearGridId()"
+                (keydown)="onKeydown($event)"
+              >
+                @for (year of decadeYears(); track year) {
+                  <div
+                    [id]="yearRowId(year)"
+                    role="gridcell"
+                    [attr.aria-selected]="isYearRelevant(year)"
+                    [attr.aria-disabled]="isYearDisabled(year) ? 'true' : null"
+                    [class]="yearCellClass(year)"
+                    (pointerdown)="onYearPointerDown($event, year)"
+                    (pointerenter)="onYearPointerEnter(year)"
+                  >
+                    {{ year }}
+                  </div>
+                }
               </div>
             }
-          </div>
+          }
+          @case ('month') {
+            <div class="mb-2 flex items-center justify-between">
+              @if (navigation() === 'calendar') {
+                <button
+                  type="button"
+                  class="rounded-sm p-1 hover:bg-surface-100 disabled:pointer-events-none disabled:opacity-(--opacity-disabled) dark:hover:bg-surface-700"
+                  [disabled]="disabled() || !canGoPreviousYear()"
+                  [attr.aria-label]="previousYearLabel()"
+                  (click)="previousYear()"
+                >
+                  <med-icon name="chevron-left" variant="mini" class="size-4" />
+                </button>
+              } @else {
+                <span class="w-6"></span>
+              }
+              @if (navigation() === 'drilldown') {
+                <button type="button" [disabled]="disabled()" class="rounded-sm px-2 py-1 text-sm font-semibold hover:bg-surface-100 dark:hover:bg-surface-700" (click)="goToYearView()">
+                  {{ viewYear() }}
+                </button>
+              } @else {
+                <span class="text-sm font-semibold">{{ viewYear() }}</span>
+              }
+              @if (navigation() === 'calendar') {
+                <button
+                  type="button"
+                  class="rounded-sm p-1 hover:bg-surface-100 disabled:pointer-events-none disabled:opacity-(--opacity-disabled) dark:hover:bg-surface-700"
+                  [disabled]="disabled() || !canGoNextYear()"
+                  [attr.aria-label]="nextYearLabel()"
+                  (click)="nextYear()"
+                >
+                  <med-icon name="chevron-right" variant="mini" class="size-4" />
+                </button>
+              } @else {
+                <span class="w-6"></span>
+              }
+            </div>
+            <div
+              #monthContainer
+              [id]="containerId('month')"
+              role="grid"
+              tabindex="-1"
+              class="grid grid-cols-4 gap-1 outline-none"
+              [attr.aria-label]="viewYear()"
+              [attr.aria-activedescendant]="activeMonthId()"
+              (keydown)="onKeydown($event)"
+            >
+              @for (label of monthLabels(); track $index) {
+                <div
+                  [id]="monthCellId($index)"
+                  role="gridcell"
+                  [attr.aria-selected]="isMonthSelected($index)"
+                  [attr.aria-disabled]="isMonthDisabled(viewYear(), $index) ? 'true' : null"
+                  [class]="monthCellClass($index)"
+                  (pointerdown)="onMonthPointerDown($event, $index)"
+                  (pointerenter)="onMonthPointerEnter($index)"
+                >
+                  {{ label }}
+                </div>
+              }
+            </div>
+          }
+          @case ('day') {
+            <div class="flex gap-6">
+              @for (offset of monthOffsets(); track offset) {
+                <div [class]="offset === 0 ? 'flex-1' : 'hidden flex-1 sm:block'">
+                  <div class="mb-2 flex items-center justify-between">
+                    @if (navigation() === 'calendar' && offset === 0) {
+                      <button
+                        type="button"
+                        class="rounded-sm p-1 hover:bg-surface-100 disabled:pointer-events-none disabled:opacity-(--opacity-disabled) dark:hover:bg-surface-700"
+                        [disabled]="disabled() || !canGoPreviousMonth()"
+                        [attr.aria-label]="previousMonthLabel()"
+                        (click)="previousMonth()"
+                      >
+                        <med-icon name="chevron-left" variant="mini" class="size-4" />
+                      </button>
+                    } @else {
+                      <span class="w-6"></span>
+                    }
+
+                    @if (navigation() === 'drilldown' && offset === 0) {
+                      <button type="button" [disabled]="disabled()" class="rounded-sm px-2 py-1 text-sm font-semibold hover:bg-surface-100 dark:hover:bg-surface-700" (click)="goToMonthView()">
+                        {{ monthYearLabelForOffset(offset) }}
+                      </button>
+                    } @else {
+                      <span class="text-sm font-semibold">{{ monthYearLabelForOffset(offset) }}</span>
+                    }
+
+                    @if (navigation() === 'calendar' && offset === monthOffsets().length - 1) {
+                      <button
+                        type="button"
+                        class="rounded-sm p-1 hover:bg-surface-100 disabled:pointer-events-none disabled:opacity-(--opacity-disabled) dark:hover:bg-surface-700"
+                        [disabled]="disabled() || !canGoNextMonth()"
+                        [attr.aria-label]="nextMonthLabel()"
+                        (click)="nextMonth()"
+                      >
+                        <med-icon name="chevron-right" variant="mini" class="size-4" />
+                      </button>
+                    } @else if (navigation() === 'calendar' && offset === 0) {
+                      <button
+                        type="button"
+                        class="rounded-sm p-1 hover:bg-surface-100 disabled:pointer-events-none disabled:opacity-(--opacity-disabled) dark:hover:bg-surface-700 sm:invisible"
+                        [disabled]="disabled() || !canGoNextMonth()"
+                        [attr.aria-label]="nextMonthLabel()"
+                        (click)="nextMonth()"
+                      >
+                        <med-icon name="chevron-right" variant="mini" class="size-4" />
+                      </button>
+                    } @else {
+                      <span class="w-6"></span>
+                    }
+                  </div>
+                  <div
+                    #dayContainer
+                    [id]="containerId('day') + '-' + offset"
+                    role="grid"
+                    tabindex="-1"
+                    class="outline-none"
+                    [attr.aria-label]="monthYearLabelForOffset(offset)"
+                    [attr.aria-activedescendant]="offset === focusedMonthOffset() ? activeDayId() : null"
+                    (keydown)="onKeydown($event)"
+                  >
+                    <div role="row" class="grid grid-cols-7">
+                      @for (label of weekdayLabels(); track $index) {
+                        <span role="columnheader" [attr.abbr]="label.full" class="flex h-8 items-center justify-center text-xs text-surface-500 dark:text-surface-400">{{ label.short }}</span>
+                      }
+                    </div>
+                    @for (week of weeksForOffset(offset); track $index) {
+                      <div role="row" class="grid grid-cols-7">
+                        @for (cell of week; track cell.date.getTime()) {
+                          @if (cell.outsideMonth && effectiveNumberOfMonths() > 1) {
+                            <div class="size-9" aria-hidden="true"></div>
+                          } @else {
+                            <div
+                              [id]="dayCellId(cell.date)"
+                              role="gridcell"
+                              [attr.aria-selected]="isDaySelected(cell) || null"
+                              [attr.aria-current]="isToday(cell.date) ? 'date' : null"
+                              [attr.aria-disabled]="cell.disabled ? 'true' : null"
+                              [class]="dayCellClass(cell)"
+                              (pointerdown)="onDayPointerDown($event, cell)"
+                              (pointerenter)="onDayPointerEnter(cell)"
+                            >
+                              @if (dateTemplate(); as tpl) {
+                                <ng-container [ngTemplateOutlet]="tpl" [ngTemplateOutletContext]="dateCellContext(cell)" />
+                              } @else {
+                                {{ cell.date.getDate() }}
+                              }
+                            </div>
+                          }
+                        }
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          }
         }
       }
 
-      @if (showTime() && selectionMode() === 'single' && pickerView() !== 'month') {
-        <div class="mt-3 flex items-center justify-center gap-3 border-t border-surface-200 pt-3 dark:border-surface-700">
+      @if (timeOnly() || (showTime() && selectionMode() === 'single' && pickerView() !== 'month' && pickerView() !== 'year')) {
+        <div
+          [class]="timeOnly() ? 'flex items-center justify-center gap-3' : 'mt-3 flex items-center justify-center gap-3 border-t border-surface-200 pt-3 dark:border-surface-700'"
+          (keydown.escape)="onTimeEscape($event)"
+        >
           <div class="flex items-center gap-1">
             <input
+              #hourInput
               type="number"
               inputmode="numeric"
               class="w-11 rounded-sm border border-surface-300 bg-transparent px-1 py-1 text-center text-sm tabular-nums text-surface-900 focus:outline-none focus:ring-2 focus:ring-brand-500 dark:border-surface-600 dark:text-surface-50"
+              [disabled]="disabled()"
               [attr.aria-label]="hourLabel()"
               [attr.min]="hourFormat() === '24' ? 0 : 1"
               [attr.max]="hourFormat() === '24' ? 23 : 12"
@@ -322,6 +367,7 @@ const YEAR_LIST_WINDOW = 100;
               type="number"
               inputmode="numeric"
               class="w-11 rounded-sm border border-surface-300 bg-transparent px-1 py-1 text-center text-sm tabular-nums text-surface-900 focus:outline-none focus:ring-2 focus:ring-brand-500 dark:border-surface-600 dark:text-surface-50"
+              [disabled]="disabled()"
               [attr.aria-label]="minuteLabel()"
               min="0"
               max="59"
@@ -332,30 +378,55 @@ const YEAR_LIST_WINDOW = 100;
             @if (hourFormat() === '12') {
               <button
                 type="button"
-                class="rounded-sm px-1.5 py-1 text-xs font-medium text-surface-600 hover:bg-surface-100 dark:text-surface-300 dark:hover:bg-surface-700"
+                class="rounded-sm px-1.5 py-1 text-xs font-medium text-surface-600 hover:bg-surface-100 disabled:pointer-events-none disabled:opacity-(--opacity-disabled) dark:text-surface-300 dark:hover:bg-surface-700"
+                [disabled]="disabled()"
                 (click)="togglePeriod()"
               >
                 {{ period() }}
               </button>
             }
           </div>
+          @if (!inline()) {
+            <button
+              type="button"
+              class="rounded-sm px-2 py-1 text-xs font-medium text-brand-600 hover:bg-brand-50 disabled:pointer-events-none disabled:opacity-(--opacity-disabled) dark:text-brand-400 dark:hover:bg-brand-950"
+              [disabled]="disabled()"
+              (click)="closeRequested.emit()"
+            >
+              {{ doneLabel() }}
+            </button>
+          }
+        </div>
+      }
+
+      @if (showButtonBar()) {
+        <div class="mt-3 flex items-center justify-between border-t border-surface-200 pt-3 dark:border-surface-700">
           <button
             type="button"
-            class="rounded-sm px-2 py-1 text-xs font-medium text-brand-600 hover:bg-brand-50 dark:text-brand-400 dark:hover:bg-brand-950"
-            (click)="closeRequested.emit()"
+            class="rounded-sm px-2 py-1 text-xs font-medium text-surface-700 hover:bg-surface-100 disabled:pointer-events-none disabled:opacity-(--opacity-disabled) dark:text-surface-200 dark:hover:bg-surface-700"
+            [disabled]="disabled() || isTodayDisabled()"
+            (click)="onTodayClick()"
           >
-            {{ doneLabel() }}
+            {{ todayLabel() }}
+          </button>
+          <button
+            type="button"
+            class="rounded-sm px-2 py-1 text-xs font-medium text-surface-700 hover:bg-surface-100 disabled:pointer-events-none disabled:opacity-(--opacity-disabled) dark:text-surface-200 dark:hover:bg-surface-700"
+            [disabled]="disabled()"
+            (click)="onClearClick()"
+          >
+            {{ clearLabel() }}
           </button>
         </div>
       }
     </div>
   `,
 })
-export class DatePickerPanelComponent implements AfterViewInit {
+export class DatePickerPanelComponent implements OnInit {
   readonly panelId = input.required<string>();
   readonly selectionMode = input<DatePickerSelectionMode>('single');
   /** Named differently from the internal `view` signal (`'year'|'month'|'day'`, the *current* rendered level) — this is the *terminal* level the picker settles at. Single mode only, see `DatePickerComponent`'s class doc. */
-  readonly pickerView = input<'date' | 'month'>('date');
+  readonly pickerView = input<DatePickerView>('date');
   readonly navigation = input<'calendar' | 'drilldown'>('calendar');
   readonly initialViewDate = input.required<Date>();
   readonly todayDate = input.required<Date>();
@@ -377,6 +448,9 @@ export class DatePickerPanelComponent implements AfterViewInit {
   /** Only used by `pickerView="month"` in `navigation="calendar"` mode — pages by year instead of by month. */
   readonly previousYearLabel = input('Previous year');
   readonly nextYearLabel = input('Next year');
+  /** Only used by `pickerView="year"` in `navigation="calendar"` mode — pages by decade. */
+  readonly previousDecadeLabel = input('Previous decade');
+  readonly nextDecadeLabel = input('Next decade');
   readonly yearFilterPlaceholder = input('Search year');
   readonly emptyLabel = input('No matching years');
   /**
@@ -391,17 +465,27 @@ export class DatePickerPanelComponent implements AfterViewInit {
   readonly numberOfMonths = input(1, { transform: numberAttribute });
   /** Adds an hour/minute row below the day grid — see `DatePickerComponent`'s class doc for the datetime design. Ignored in `selectionMode="range"` (documented cut, same category as free-text range typing). */
   readonly showTime = input(false, { transform: booleanAttribute });
+  readonly timeOnly = input(false, { transform: booleanAttribute });
   readonly hourFormat = input<'12' | '24'>('24');
   readonly stepMinute = input(1, { transform: numberAttribute });
   readonly hourLabel = input('Hour');
   readonly minuteLabel = input('Minute');
   readonly doneLabel = input('Done');
+  readonly showButtonBar = input(false, { transform: booleanAttribute });
+  readonly todayLabel = input('Today');
+  readonly clearLabel = input('Clear');
+  readonly dateTemplate = input<TemplateRef<DatePickerDateTemplateContext> | null>(null);
+  readonly autoFocus = input(true, { transform: booleanAttribute });
+  readonly inline = input(false, { transform: booleanAttribute });
+  readonly disabled = input(false, { transform: booleanAttribute });
 
   readonly dateSelect = output<Date>();
   readonly rangeComplete = output<DateRange>();
   readonly multipleSelect = output<readonly Date[]>();
+  readonly clearRequested = output<void>();
   readonly closeRequested = output<void>();
 
+  private readonly cdr = inject(ChangeDetectorRef);
   protected readonly view = signal<'year' | 'month' | 'day'>('day');
   protected readonly viewYear = signal(0);
   protected readonly viewMonth = signal(0);
@@ -540,13 +624,25 @@ export class DatePickerPanelComponent implements AfterViewInit {
     return filterText ? allYears.filter((year) => String(year).includes(filterText)) : allYears;
   });
 
+  protected readonly decadeStart = computed(() => Math.floor(this.viewYear() / 10) * 10);
+  protected readonly decadeYears = computed(() => Array.from({ length: 12 }, (_, i) => this.decadeStart() + i));
+  protected readonly outerPanelClass = computed(() => {
+    const base = this.timeOnly()
+      ? 'w-full p-3'
+      : 'w-full min-w-[min(19rem,calc(100vw-2rem))] p-3 sm:[min-width:min(var(--dp-panel-min-width),calc(100vw-2rem))]';
+    return this.disabled() ? `${base} pointer-events-none select-none opacity-(--opacity-disabled)` : base;
+  });
+
   protected readonly activeDayId = computed(() => (this.view() === 'day' ? this.dayCellId(this.focusedDate()) : null));
   protected readonly activeMonthId = computed(() => (this.view() === 'month' ? this.monthCellId(this.focusedMonth()) : null));
-  protected readonly activeYearId = computed(() => (this.view() === 'year' ? this.yearRowId(this.focusedYear()) : null));
+  protected readonly activeYearId = computed(() => (this.view() === 'year' && this.navigation() === 'drilldown' ? this.yearRowId(this.focusedYear()) : null));
+  protected readonly activeYearGridId = computed(() => (this.view() === 'year' && this.navigation() === 'calendar' ? this.yearRowId(this.focusedYear()) : null));
 
   private readonly yearFilterInputRef = viewChild<ElementRef<HTMLInputElement>>('yearFilterInput');
   private readonly yearContainerRef = viewChild<ElementRef<HTMLElement>>('yearContainer');
+  private readonly yearGridContainerRef = viewChild<ElementRef<HTMLElement>>('yearGridContainer');
   private readonly monthContainerRef = viewChild<ElementRef<HTMLElement>>('monthContainer');
+  private readonly hourInputRef = viewChild<ElementRef<HTMLInputElement>>('hourInput');
   /** One per visible month (see `numberOfMonths`) — `focusedMonthOffset()` picks which one actually gets focus. */
   private readonly dayContainerRefs = viewChildren<ElementRef<HTMLElement>>('dayContainer');
 
@@ -574,10 +670,22 @@ export class DatePickerPanelComponent implements AfterViewInit {
    * input itself).
    */
   private readonly focusActiveContainer = effect(() => {
+    if (!this.autoFocus()) {
+      return;
+    }
+    if (this.timeOnly()) {
+      this.hourInputRef()?.nativeElement.focus();
+      return;
+    }
     const yearContainer = this.yearContainerRef()?.nativeElement;
     const dayContainers = this.dayContainerRefs();
     const relevantDayContainer = (dayContainers[this.focusedMonthOffset()] ?? dayContainers[0])?.nativeElement;
-    const element = this.yearFilterInputRef()?.nativeElement ?? yearContainer ?? this.monthContainerRef()?.nativeElement ?? relevantDayContainer;
+    const element =
+      this.yearFilterInputRef()?.nativeElement ??
+      yearContainer ??
+      this.yearGridContainerRef()?.nativeElement ??
+      this.monthContainerRef()?.nativeElement ??
+      relevantDayContainer;
     element?.focus();
     if (yearContainer) {
       // The year list can hold ~200 rows in a scrollable `max-h-60` box —
@@ -591,9 +699,9 @@ export class DatePickerPanelComponent implements AfterViewInit {
     }
   });
 
-  ngAfterViewInit(): void {
+  ngOnInit(): void {
     this.beginFreshPick(this.initialViewDate());
-    if (this.showTime()) {
+    if (this.showTime() || this.timeOnly()) {
       const seedTime = this.selectedValue() ?? new Date();
       this.selectedHour24.set(seedTime.getHours());
       this.selectedMinute.set(seedTime.getMinutes());
@@ -709,8 +817,43 @@ export class DatePickerPanelComponent implements AfterViewInit {
     return range.start?.getFullYear() === year || range.end?.getFullYear() === year;
   }
 
+  protected dateCellContext(cell: DateGridCell): DatePickerDateTemplateContext {
+    return {
+      $implicit: cell.date,
+      date: cell.date.getDate(),
+      month: cell.date.getMonth(),
+      year: cell.date.getFullYear(),
+      today: this.isToday(cell.date),
+      selected: this.isDaySelected(cell),
+      disabled: cell.disabled,
+      selectable: !cell.disabled,
+      outsideMonth: cell.outsideMonth,
+    };
+  }
+
+  protected isYearDisabled(year: number): boolean {
+    const min = this.minDateNormalized();
+    const max = this.maxDateNormalized();
+    if (min && new Date(year, 11, 31) < min) {
+      return true;
+    }
+    if (max && new Date(year, 0, 1) > max) {
+      return true;
+    }
+    return false;
+  }
+
+  protected yearCellClass(year: number): string {
+    return monthCellVariants({
+      active: year === this.focusedYear(),
+      current: year === this.todayDate().getFullYear(),
+      selected: this.isYearRelevant(year),
+      disabled: this.isYearDisabled(year),
+    });
+  }
+
   protected yearRowClass(year: number): string {
-    return selectOptionVariants({ active: year === this.focusedYear(), disabled: false });
+    return selectOptionVariants({ active: year === this.focusedYear(), disabled: this.isYearDisabled(year) });
   }
 
   /** Checks against the *first* visible month — the "next" chevron always shifts the whole window by one month, regardless of `effectiveNumberOfMonths()`. */
@@ -732,14 +875,14 @@ export class DatePickerPanelComponent implements AfterViewInit {
   }
 
   protected previousMonth(): void {
-    if (!this.canGoPreviousMonth()) {
+    if (this.disabled() || !this.canGoPreviousMonth()) {
       return;
     }
     this.setViewMonth(dateFromAbsoluteMonth(this.viewYear() * 12 + this.viewMonth() - 1, 1));
   }
 
   protected nextMonth(): void {
-    if (!this.canGoNextMonth()) {
+    if (this.disabled() || !this.canGoNextMonth()) {
       return;
     }
     this.setViewMonth(dateFromAbsoluteMonth(this.viewYear() * 12 + this.viewMonth() + 1, 1));
@@ -757,39 +900,65 @@ export class DatePickerPanelComponent implements AfterViewInit {
   }
 
   protected previousYear(): void {
-    if (this.canGoPreviousYear()) {
+    if (!this.disabled() && this.canGoPreviousYear()) {
       this.viewYear.update((year) => year - 1);
     }
   }
 
   protected nextYear(): void {
-    if (this.canGoNextYear()) {
+    if (!this.disabled() && this.canGoNextYear()) {
       this.viewYear.update((year) => year + 1);
     }
   }
 
+  protected canGoPreviousDecade(): boolean {
+    const min = this.minDateNormalized();
+    return !min || min.getFullYear() < this.decadeStart();
+  }
+
+  protected canGoNextDecade(): boolean {
+    const max = this.maxDateNormalized();
+    return !max || max.getFullYear() > this.decadeStart() + 11;
+  }
+
+  protected previousDecade(): void {
+    if (!this.disabled() && this.canGoPreviousDecade()) {
+      this.viewYear.update((year) => year - 10);
+      this.focusedYear.set(this.decadeStart());
+      this.cdr.detectChanges();
+    }
+  }
+
+  protected nextDecade(): void {
+    if (!this.disabled() && this.canGoNextDecade()) {
+      this.viewYear.update((year) => year + 10);
+      this.focusedYear.set(this.decadeStart());
+      this.cdr.detectChanges();
+    }
+  }
+
   protected goToMonthView(): void {
-    if (this.navigation() === 'drilldown') {
+    if (!this.disabled() && this.navigation() === 'drilldown') {
       this.view.set('month');
     }
   }
 
   protected goToYearView(): void {
-    if (this.navigation() === 'drilldown') {
+    if (!this.disabled() && this.navigation() === 'drilldown') {
       this.view.set('year');
     }
   }
 
   protected onDayPointerDown(event: Event, cell: DateGridCell): void {
     event.preventDefault(); // keep focus on the grid container, not the (non-focusable) cell
-    if (!cell.disabled) {
+    if (!this.disabled() && !cell.disabled) {
       this.focusedDate.set(cell.date);
       this.activateDate(cell.date);
     }
   }
 
   protected onDayPointerEnter(cell: DateGridCell): void {
-    if (cell.disabled) {
+    if (this.disabled() || cell.disabled) {
       return;
     }
     this.focusedDate.set(cell.date);
@@ -800,23 +969,34 @@ export class DatePickerPanelComponent implements AfterViewInit {
 
   protected onMonthPointerDown(event: Event, month: number): void {
     event.preventDefault();
-    if (!this.isMonthDisabled(this.viewYear(), month)) {
+    if (!this.disabled() && !this.isMonthDisabled(this.viewYear(), month)) {
       this.selectMonth(month);
     }
   }
 
   protected onMonthPointerEnter(month: number): void {
-    if (!this.isMonthDisabled(this.viewYear(), month)) {
+    if (!this.disabled() && !this.isMonthDisabled(this.viewYear(), month)) {
       this.focusedMonth.set(month);
     }
   }
 
   protected onYearPointerDown(event: Event, year: number): void {
     event.preventDefault();
-    this.selectYear(year);
+    if (!this.disabled() && !this.isYearDisabled(year)) {
+      this.selectYear(year);
+    }
+  }
+
+  protected onYearPointerEnter(year: number): void {
+    if (!this.disabled() && !this.isYearDisabled(year)) {
+      this.focusedYear.set(year);
+    }
   }
 
   protected onKeydown(event: KeyboardEvent): void {
+    if (this.disabled()) {
+      return;
+    }
     switch (this.view()) {
       case 'day':
         this.onDayKeydown(event);
@@ -932,6 +1112,57 @@ export class DatePickerPanelComponent implements AfterViewInit {
   }
 
   private onYearKeydown(event: KeyboardEvent): void {
+    if (this.navigation() === 'calendar') {
+      const years = this.decadeYears();
+      const index = Math.max(0, years.indexOf(this.focusedYear()));
+      switch (event.key) {
+        case 'ArrowRight':
+          event.preventDefault();
+          this.focusedYear.set(years[Math.min(index + 1, years.length - 1)]);
+          break;
+        case 'ArrowLeft':
+          event.preventDefault();
+          this.focusedYear.set(years[Math.max(index - 1, 0)]);
+          break;
+        case 'ArrowDown':
+          event.preventDefault();
+          this.focusedYear.set(years[Math.min(index + 4, years.length - 1)]);
+          break;
+        case 'ArrowUp':
+          event.preventDefault();
+          this.focusedYear.set(years[Math.max(index - 4, 0)]);
+          break;
+        case 'PageDown':
+          event.preventDefault();
+          this.nextDecade();
+          break;
+        case 'PageUp':
+          event.preventDefault();
+          this.previousDecade();
+          break;
+        case 'Home':
+          event.preventDefault();
+          this.focusedYear.set(years[0]);
+          break;
+        case 'End':
+          event.preventDefault();
+          this.focusedYear.set(years[years.length - 1]);
+          break;
+        case 'Enter':
+        case ' ':
+          event.preventDefault();
+          this.selectYear(this.focusedYear());
+          break;
+        case 'Escape':
+          event.preventDefault();
+          this.closeRequested.emit();
+          break;
+        case 'Tab':
+          this.closeRequested.emit();
+          break;
+      }
+      return;
+    }
     const years = this.yearListItems();
     const index = years.indexOf(this.focusedYear());
     switch (event.key) {
@@ -981,7 +1212,14 @@ export class DatePickerPanelComponent implements AfterViewInit {
   }
 
   private selectYear(year: number): void {
+    if (this.disabled() || this.isYearDisabled(year)) {
+      return;
+    }
     this.viewYear.set(year);
+    if (this.pickerView() === 'year') {
+      this.dateSelect.emit(new Date(year, 0, 1));
+      return;
+    }
     this.view.set('month');
   }
 
@@ -1023,9 +1261,9 @@ export class DatePickerPanelComponent implements AfterViewInit {
     }
   }
 
-  /** Merges the current hour/minute state onto `date`'s day when `showTime()` is on — a no-op otherwise (or in range mode, where time stays out of scope). */
+  /** Merges the current hour/minute state onto `date`'s day when `showTime()` or `timeOnly()` is on — a no-op otherwise (or in range mode, where time stays out of scope). */
   private withTime(date: Date): Date {
-    if (!this.showTime() || this.selectionMode() !== 'single') {
+    if ((!this.showTime() && !this.timeOnly()) || this.selectionMode() !== 'single') {
       return date;
     }
     return new Date(date.getFullYear(), date.getMonth(), date.getDate(), this.selectedHour24(), this.selectedMinute());
@@ -1046,15 +1284,20 @@ export class DatePickerPanelComponent implements AfterViewInit {
     this.emitTimeChangeIfDateSelected();
   }
 
-  /** Adjusting the time controls before any day is picked just updates the pending state used by the next `activateDate()` — nothing to re-emit yet. */
+  /** Adjusting the time controls before any day is picked just updates the pending state used by the next `activateDate()` unless `timeOnly()` is active (where there is no calendar grid to pick a day). */
   private emitTimeChangeIfDateSelected(): void {
     const current = this.selectedValue();
     if (current) {
       this.dateSelect.emit(this.withTime(current));
+    } else if (this.timeOnly()) {
+      this.dateSelect.emit(this.withTime(startOfDay(this.todayDate())));
     }
   }
 
   protected onHourInput(event: Event): void {
+    if (this.disabled()) {
+      return;
+    }
     const raw = (event.target as HTMLInputElement).valueAsNumber;
     if (Number.isNaN(raw)) {
       return;
@@ -1068,6 +1311,9 @@ export class DatePickerPanelComponent implements AfterViewInit {
   }
 
   protected onMinuteInput(event: Event): void {
+    if (this.disabled()) {
+      return;
+    }
     const raw = (event.target as HTMLInputElement).valueAsNumber;
     if (Number.isNaN(raw)) {
       return;
@@ -1076,7 +1322,73 @@ export class DatePickerPanelComponent implements AfterViewInit {
   }
 
   protected togglePeriod(): void {
+    if (this.disabled()) {
+      return;
+    }
     this.setHour24(this.combine12Hour(this.displayHour(), this.period() === 'AM' ? 'PM' : 'AM'));
+  }
+
+  protected onTimeEscape(event: Event): void {
+    event.preventDefault();
+    this.closeRequested.emit();
+  }
+
+  protected isTodayDisabled(): boolean {
+    const today = startOfDay(this.todayDate());
+    if (this.pickerView() === 'month') {
+      return this.isMonthDisabled(today.getFullYear(), today.getMonth());
+    }
+    if (this.pickerView() === 'year') {
+      return this.isYearDisabled(today.getFullYear());
+    }
+    return this.isDayDisabled(today);
+  }
+
+  protected onTodayClick(): void {
+    if (this.disabled() || this.isTodayDisabled()) {
+      return;
+    }
+    const today = startOfDay(this.todayDate());
+    this.setViewMonth(today);
+    this.focusedDate.set(today);
+    this.focusedMonth.set(today.getMonth());
+    this.focusedYear.set(today.getFullYear());
+    if (this.pickerView() === 'year') {
+      this.dateSelect.emit(new Date(today.getFullYear(), 0, 1));
+      return;
+    }
+    if (this.pickerView() === 'month') {
+      this.dateSelect.emit(new Date(today.getFullYear(), today.getMonth(), 1));
+      return;
+    }
+    if (this.selectionMode() === 'single') {
+      if (this.timeOnly()) {
+        const now = new Date();
+        this.selectedHour24.set(now.getHours());
+        this.selectedMinute.set(now.getMinutes());
+      }
+      this.dateSelect.emit(this.withTime(today));
+      return;
+    }
+    if (this.selectionMode() === 'multiple') {
+      const current = this.selectedDates();
+      const exists = current.some((d) => isSameDay(d, today));
+      const next = exists ? current : [...current, today].sort((a, b) => a.getTime() - b.getTime());
+      this.multipleSelect.emit(next);
+      return;
+    }
+    this.rangeAnchor.set(null);
+    this.previewEnd.set(null);
+    this.rangeComplete.emit({ start: today, end: today });
+  }
+
+  protected onClearClick(): void {
+    if (this.disabled()) {
+      return;
+    }
+    this.rangeAnchor.set(null);
+    this.previewEnd.set(null);
+    this.clearRequested.emit();
   }
 
   /** Seeds view state for the very first render (`ngAfterViewInit`) or a drilldown month selection — always makes `seedDate`'s month the *first* visible one, since there's no existing window worth preserving yet. */
@@ -1087,7 +1399,7 @@ export class DatePickerPanelComponent implements AfterViewInit {
     this.focusedMonth.set(seedDate.getMonth());
     this.focusedYear.set(seedDate.getFullYear());
     this.yearFilterText.set('');
-    this.view.set(this.navigation() === 'drilldown' ? 'year' : this.pickerView() === 'month' ? 'month' : 'day');
+    this.view.set(this.navigation() === 'drilldown' || this.pickerView() === 'year' ? 'year' : this.pickerView() === 'month' ? 'month' : 'day');
   }
 
   /**

@@ -1,0 +1,3 @@
+## Multiple Months
+
+`numberOfMonths` controls how many side-by-side calendar months are displayed in the overlay. It defaults to `1` in `single` and `multiple` modes, `2` in `range` mode, and `1` when `navigation="drilldown"` is active; on narrow viewports below the `sm` breakpoint, multi-month grids collapse to a single month.

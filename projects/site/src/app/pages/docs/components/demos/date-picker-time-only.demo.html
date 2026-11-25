@@ -1,0 +1,4 @@
+<med-date-picker [(ngModel)]="time" [timeOnly]="true" hourFormat="12" showClear class="max-w-xs" />
+<p class="mt-2 text-sm text-surface-500 dark:text-surface-400">
+  Selected: {{ time ? time.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : 'none' }}
+</p>

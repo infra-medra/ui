@@ -1,0 +1,3 @@
+## Time Only
+
+`timeOnly` hides the calendar grid and shows only the time controls, formatting the bound `Date` as a time string.

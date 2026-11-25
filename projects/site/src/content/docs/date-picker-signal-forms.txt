@@ -1,0 +1,3 @@
+## Signal Forms
+
+Bind `med-date-picker` to an `@angular/forms/signals` form using `[formField]` through its built-in `ControlValueAccessor` implementation.

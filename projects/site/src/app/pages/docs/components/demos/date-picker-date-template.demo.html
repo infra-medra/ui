@@ -1,0 +1,10 @@
+<med-date-picker [(ngModel)]="selectedDate" showClear class="max-w-xs">
+  <ng-template #date let-day="date" let-today="today">
+    <span data-testid="date-template-cell" [class.font-bold]="today" [class.underline]="day === 15">
+      {{ day }}
+    </span>
+  </ng-template>
+</med-date-picker>
+<p class="mt-2 text-sm text-surface-500 dark:text-surface-400">
+  Selected: {{ selectedDate ? selectedDate.toLocaleDateString() : 'none' }}
+</p>

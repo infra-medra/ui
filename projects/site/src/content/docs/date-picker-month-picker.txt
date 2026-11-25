@@ -1,0 +1,3 @@
+## Month Picker
+
+`view="month"` skips the day grid so the calendar opens directly on the twelve months of the year. Selecting a month commits a `Date` set to the first day of that month.

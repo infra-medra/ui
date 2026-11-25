@@ -1,0 +1,3 @@
+## Inline
+
+`inline` renders the calendar panel directly on the page without an input field or overlay popup.
