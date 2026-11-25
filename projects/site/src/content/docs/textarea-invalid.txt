@@ -1,0 +1,3 @@
+## Invalid
+
+Set `invalid` to apply `aria-invalid="true"` and danger border and focus-ring styles on the textarea.
