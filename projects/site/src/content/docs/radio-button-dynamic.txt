@@ -1,0 +1,3 @@
+## Dynamic
+
+Render radio button groups dynamically from a collection by iterating with `@for` and binding `[value]` to each item's value.

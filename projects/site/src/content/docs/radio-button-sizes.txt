@@ -1,0 +1,3 @@
+## Sizes
+
+Set `size` to `'sm'`, `'default'`, or `'lg'` to adjust the outer ring and inner selection dot dimensions.

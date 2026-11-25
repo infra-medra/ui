@@ -1,0 +1,10 @@
+<div class="flex flex-wrap items-center gap-6">
+  <label class="flex items-center gap-2 text-sm text-surface-900 dark:text-surface-50">
+    <med-radio-button name="invalid-state" value="yes" [(ngModel)]="selected" [invalid]="!selected" />
+    Yes
+  </label>
+  <label class="flex items-center gap-2 text-sm text-surface-900 dark:text-surface-50">
+    <med-radio-button name="invalid-state" value="no" [(ngModel)]="selected" [invalid]="!selected" />
+    No
+  </label>
+</div>

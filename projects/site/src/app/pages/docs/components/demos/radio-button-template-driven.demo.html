@@ -1,0 +1,11 @@
+<div class="flex flex-col gap-2">
+  <label class="flex items-center gap-2 text-sm text-surface-900 dark:text-surface-50">
+    <med-radio-button name="template-plan" value="free" [(ngModel)]="plan" required />
+    Free
+  </label>
+  <label class="flex items-center gap-2 text-sm text-surface-900 dark:text-surface-50">
+    <med-radio-button name="template-plan" value="pro" [(ngModel)]="plan" required />
+    Pro
+  </label>
+</div>
+<p class="mt-2 text-sm text-surface-500 dark:text-surface-400">Value: {{ plan }}</p>

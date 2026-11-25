@@ -1,0 +1,3 @@
+## Filled
+
+`variant="filled"` swaps the default transparent `'outlined'` ring background for a filled surface background.
