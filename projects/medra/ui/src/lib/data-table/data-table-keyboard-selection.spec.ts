@@ -458,7 +458,7 @@ describe('DataTableComponent cell keyboard & drag selection (DAT-043)', () => {
     })
     class VirtualCellHostComponent {
       items = manyItems;
-      selection: TableCellSelection<Item>[] | null = null;
+      selection: TableCellSelection<ItemRow>[] | null = null;
     }
 
     const fixture = TestBed.createComponent(VirtualCellHostComponent);

@@ -2,7 +2,10 @@ import { Component, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DataTableComponent } from './data-table.component';
 import { TableColumnComponent } from './table-column.component';
-import { TableLoadingMode, TableRowGroupMode, TableSelectionMode } from './data-table.types';
+import { TableLoadingMode, TableSelectionMode } from './data-table.types';
+
+/** Values accepted by the table's `rowGroupMode` input. */
+type TableRowGroupMode = 'subheader' | 'rowspan' | null;
 
 interface WideColumnDef {
   readonly field: string;
