@@ -1,0 +1,117 @@
+change: document-slider-parity
+created: 2026-11-25
+track: full
+phase: archived
+diff_base: c205169
+gates:
+  proposal:
+    status: approved
+    by: Tiago Cavalli
+    at: 2026-11-25T22:14:24Z
+    hash: debb3e89ca655eb938e860f12a4ea0a1fe7cf286fc6efa778d849259a477e076
+    note: null
+  plan:
+    status: approved
+    by: Tiago Cavalli
+    at: 2026-11-25T22:14:24Z
+    hash: a503d65127ad6d4d300396814c6246478cbb587f7b765f30a0cb4b98efc9d177
+    note: null
+  tasks:
+    status: approved
+    by: Tiago Cavalli
+    at: 2026-11-25T22:14:25Z
+    hash: 9427b960755b4a023717d30bd6fb031a1794440bc592ccf226c9302cae00b157
+    note: null
+  verify:
+    status: approved
+    by: Tiago Cavalli
+    at: 2026-11-26T00:18:37Z
+    hash: e5fede5ab2ad6b3efe0c1e3fb36f843f2ed634628d64ddbbce06fa6fbe0b746c
+    note: "F-01 fixed after review: SLD-004.S1 host disables through FormControl only (test edit authorized by the user)"
+gate_notes: []
+reviews:
+  - stage: verify
+    by: reviewer agent
+    at: 2026-11-25T22:38:29Z
+    recorded_at: 2026-11-25T22:38:29.515Z
+    hash: 2c8c795269ac8efbb383b83fd4ed12fdb50cf525350908d3bfa35b59cdb3e0c8
+    verdict: pass-with-findings
+    report: reviews/2026-11-25-verify-reviewer-r1.md
+track_history:
+  - from: fast
+    to: full
+    at: 2026-11-25T21:16:48Z
+    reason: "User chose to implement the vertical orientation in this change: it adds library behavior, public styling variants and a changeset"
+blockers: []
+verify_fix_rounds: 0
+last_fix_round_at: null
+test_hashes:
+  T001:
+    e2e/site/slider-docs.spec.ts: 1b16aa61fb81812df05eee24bb111c0b762c1acbe8a928942924e14c0bf48c07
+  T003:
+    projects/medra/ui/src/lib/slider/slider.component.spec.ts: 9047028e249511a9d25071c5e22030ece9e2546e251df4b15319d47f579dc912
+  T004:
+    e2e/site/slider-vertical.spec.ts: 47e9e98270c50d12853274aea4bf51568bdd1a1374d726492848a9310633a1eb
+    projects/medra/ui/src/lib/slider/slider.component.spec.ts: 9047028e249511a9d25071c5e22030ece9e2546e251df4b15319d47f579dc912
+test_snapshots:
+  1b16aa61fb81812df05eee24bb111c0b762c1acbe8a928942924e14c0bf48c07: H4sIAAAAAAAAA61XbW/bNhD+7l9xaFNISm3ZbpNis+ttaZJ2AbIuSLKgQJAttHS2iVKkRtJOMtf/fThSsmVbzdq1H1pZ1N1zb88dLzzLlbYwB7zPMbFNsGjo/4cc4VQlzCoNCxhplUHwSy7Yw53m44ltk1jQbzQSJY2Fs4N3xzCAoJ2qxLQTleVKorSmbQRPUa8Ejz+cHR9eHh/9dfzh4Lez0+MLGMB1A2AOPO1BgPcsywW2hszwJGiCYEMUPQjeuHdYNLdFjcW8InlBr7WCmskxViTP3fvnRVvOY824tGZTDQ4r32ohZqgtT5ioaF6VR/Vx8H+waufCvdeKptywocC0In1UHtUqcDljglflT4qTWvFESauVWLdwuDqsV5oaq7Kqgj+oFR5xYVFXhN/6g89kZiyZaI2UztYTRMfw1h3XKlrMcsEstlLNZygrupfFFzjyX+pZgCyxfIZbls+LDxXbN8AMOML0G4327i68VcnUoAE7QUgxU4GBEdfGgu8IsJNpNgQmU8g1GpI80FrdnVNzNUlLQjLB5GOBwA31HqYwY2KKMey2G8w8yARGU5lYrmTRvyuQP/KUWTQhGe+VrdyEIY6Uxh4Yq7kcN4GNLOryNerBmVYZN/h6pnj6E8wbAOyOcetiiE1CDDiRVl1xvDsZvUdMMQ2jfgN88N49GHhx4Y2GQR5EsYvei3pE73DoNKLYKiIY4/IS723ovawIO7wx2jcP50pgGBRzZQkbjyjf4ddouLyHwSpjwRc651IW9RuLRoOmYJyiSTQfYhhc+NqmKplmKC1zhcnZGCG8OD1qdTrd+KIbBU0IIxj47BJCGKy+9kCjTFEb+F2CnXDj9QWXH00Tcq0MNkEQ+ShA03QUSlSKMBSK6DJSGpgQ0N2DgshEXU+WcO7RFkvzZd1Qa6VNyYPrGxrLN30nQBqxkmFAP5wcBYBaOxCvGOdTM6GzOENj2BijaEOZzChB8zfMzLhiv/TA4r2FAWRmHNPPsAAA4COnEtOVRHkbDCDwbsCnT9CePKTaJfrT+3ed/U7HP7r+8cI/XvrHnn/st3ns0k52omjpB6wFc3u9M1+ZXdzAzpzkF7dLxxbuuYj6DffDE8cFbNBSg9DNSmM8nMMdT+2kB90XP3SaMEGiWw9+7HSc+ob2WFkV0o1aIhcJUskpsQAGhdiK25LN+NglIWjCHCTLsAdBlUABLKJVP7LricbR7uDJ03LWPbkJ1hwp+F/apBb4lc3wUE2lDbcu8VigHNvJur8G3WA6ScnjVXhF8irO0K0oEFietxy/r3n65+BJ1bNSB6kfmcUDIcIQhfEMFCbOWE4HxXvM05J/RRwrXyiS47+nTNRE4VE8SIHhQKilQoEWOAyg0wcOr7cXmSIHfeDPn0cb3KaLpbg+YAGDbeVrftNf06B+h8Gy5rG0k5AvmbdWIxIt63NgrebDqcUwoAoHTZB4B+c4Pr7Pw9unO3OeLnZuo8eBqrPO+VzmYaOyJRHLShb4t/XohRIZeINX3PChwFWTF0JeoxBdlntZ2hCFGw7kIUoLP/8MQRDFVvMsjEoSegvvNDKL+nLCZNjZDIBGJwyWdpZUvM+ZnQxGSgh1x+W4RU5yOe71Uj677t602xmmrc2LpDZasrAV6poPNLMv/cz7ej+oVwig5YZ+UGntXKOD/g//SutfUo5S9rvWww9Q92i34URa1MVS5e61XmUdgkzNik3Kb01KItDa7+4+Oh6qqSxWI/BZM/HWMNtejdbYG1BOfW39nx8tt7ZFTQhedZ4F9Og+qxuSX4Fb3WRX8Ffkdw9edoLKS/cbTW3svlvW9qrW9r7V2vqqvGVsv2ps3xkrK7/6swL8pjqcWqukATW1hqfo6lvszMQD4NZ4GsSNajOVKEe+tT/r6Uqy8LIa9zrMo+vutuVLx83BJkjNClpz0W7A1MxzpjlrOYpLdUfp3O886nzFrk9pdTU4kYlGZvxakAiefAy/k1evvsGrI3zcq++J9f8j3Oss+VuA+LVxtVlc3zhTtNrRv38BbggnomMRAAA=
+  9047028e249511a9d25071c5e22030ece9e2546e251df4b15319d47f579dc912: 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
+  47e9e98270c50d12853274aea4bf51568bdd1a1374d726492848a9310633a1eb: H4sIAAAAAAAAA5VTXW/TQBB8768YnnwWiROKqCBVEA1UpVKpUFP1/WJvnBPnO+tunQ+i/Hd0ZydNWnjgwbF9O7OZnVmrqraOsQWta8q5BybP2GHubIXkS63lZuVUueBBKCSXZ2e5NZ7x8+rmGmMkg8LmfpDbqraGDPuB16ogF4CBkBXkc6dmJJJpLGBJjlUuNaxTZFiysgZievetPxx+yKbv06QHkWL8GdszRDUiea6OwAvC074HrWVVa4IjU5DzkGCpNdjJ/BekKVA4WZbKlFDswYummqGpV9IVUCZ3JD352HEpdUNJD9JvTA6xRS1Lwu6gA5ArqTgeZ574SdEqGDdVv0lssVIFL0Z4d/5x2MOCgl8jfBoOsUsvX7JLy1YE+9LLs1hrDS2oshi3EG1zydaJRNZ1vzW0v/etH4DJSdtwkvncWa1vDdug7XZ+T1RQITpg+x+tAeOWUBJPNg9Wk0i6zNJsrpxncdK83QsRqWnG9rtc0hWzU7OGSSTSKdk/ijLpIdlLTU4njKlM7BrjrnXsmVHwXjIJQfrI7z3LUc4YQ5DOaunI8LWmigxDenx//HHXvaZxHtuYQpnyqw56HoLubhbAETfO4JBV6JvF5+fE4ln7gl1L3Ae4t6GboUMFQyZ040gyuceFNM+A2PrUgBnNrSOMcd9UM3Li2IWS+KWrcSeNXSXpSYiz6OAJedbNPbFrkaZvjtEBO7PrbI238R5lYYDzY9CmA206UGfBAXW0vZVtfPhdklj3sHm93i2gsCsj/lU8sNHHxbCHLTxT7Ue4+Nv30nKaWuzNPN7LrLZai+6rjdvz396+zrDNKSoJesL1B821WbYnBQAA
+last_task_done_at: 2026-11-25T22:34:40.353Z
+suite:
+  at: 2026-11-25T23:12:47Z
+  exit: 0
+  commands:
+    - npm test
+  fingerprint: 2a182fbdf096dc3d2a1b7566df826c04962135cd5a8afd1327314338e44e0137
+handoff_snapshots:
+  check:
+    "1":
+      .changeset/slider-vertical.md: c3992f36a4e8a5ce222054f67eab0d97c3c06aea4a74c9cc88571cf336d171ab
+      e2e/site/slider-docs.spec.ts: 1b16aa61fb81812df05eee24bb111c0b762c1acbe8a928942924e14c0bf48c07
+      e2e/site/slider-vertical.spec.ts: 47e9e98270c50d12853274aea4bf51568bdd1a1374d726492848a9310633a1eb
+      projects/medra/ui/src/lib/slider/slider.component.spec.ts: 9047028e249511a9d25071c5e22030ece9e2546e251df4b15319d47f579dc912
+      projects/medra/ui/src/lib/slider/slider.component.ts: 726ec882220e187d7a53a21a761cfc8dd68c34b07ae4c2687bdce02ab78eab46
+      projects/medra/ui/src/lib/slider/slider.styles.ts: 81bf89df1d08480f4a7ad0e987030d85676319bb7bced565d327da5c13fe6ade
+      projects/site/src/app/pages/docs/components/demos/slider-controlled.demo.html: d57cf7276c2de78db803ae1fb7681a9bf6a94ae7af01f97257eb7bc7826d7304
+      projects/site/src/app/pages/docs/components/demos/slider-controlled.demo.ts: d02d08e18821beac00e0235656a6351a78ad94cb200e2c968c29d3ef83cd19c6
+      projects/site/src/app/pages/docs/components/demos/slider-custom.demo.html: cef3c6e989d15b41154ed4943846530ad3f6db2f004c8109e9a883f710ea1da6
+      projects/site/src/app/pages/docs/components/demos/slider-custom.demo.ts: b75add533d782ea812813afd20fc49cb76ec933e306a1734b1306f07e2d2e372
+      projects/site/src/app/pages/docs/components/demos/slider-disabled.demo.html: 0e2c9f6ff5e3c03ed9ca72bae03f34cad90b9f303ed0155fe50ad519fd4e866b
+      projects/site/src/app/pages/docs/components/demos/slider-disabled.demo.ts: e6fbbebd8ef04ffebb5b2dfaa7007fb98a64f34f00316f331078067910bd4914
+      projects/site/src/app/pages/docs/components/demos/slider-filter.demo.html: 160a787a85e34d7f604c7b92f76eaf85d889852708059afb3af99a2ec6640cd6
+      projects/site/src/app/pages/docs/components/demos/slider-filter.demo.ts: cb9f6bf20086d4c8e0d4cda84f7bf1b847d6783e50256771976b843bb924bc19
+      projects/site/src/app/pages/docs/components/demos/slider-invalid.demo.html: 8b9e67b8cd6496939aa3a7773450abe72ec1c063b6eb1813e1dda64203f483ed
+      projects/site/src/app/pages/docs/components/demos/slider-invalid.demo.ts: b2c5521473fa0a560d32b5b1b58e2671cc9346c31f48d6080a0bc810349485ce
+      projects/site/src/app/pages/docs/components/demos/slider-range.demo.html: 9c355a3f9e6cecf229ef60e88f642df7ae62dc26803dd31a900613db03ec1582
+      projects/site/src/app/pages/docs/components/demos/slider-range.demo.ts: 919168b6fca7501f33ad00c623c84a88576938507927438a913d6f08892ed228
+      projects/site/src/app/pages/docs/components/demos/slider-reactive-forms.demo.html: 5c7ce106921d96f1e281eb817cdbc74e6b748376cda25dcbbe16307e5acd6bdb
+      projects/site/src/app/pages/docs/components/demos/slider-reactive-forms.demo.ts: eacb6459e91163361fe5d1f22292b71ae4036527e765fd403cc729b7c3de841c
+      projects/site/src/app/pages/docs/components/demos/slider-signal-forms.demo.html: 8cccb42741e407fa065ca9d2bed6105c6c60b74fb38181b5134c20a8e359ba49
+      projects/site/src/app/pages/docs/components/demos/slider-signal-forms.demo.ts: 0759687b13bb4305d83bc106acae8cd8174f64ae5badd31fe87b5a81082bcbc5
+      projects/site/src/app/pages/docs/components/demos/slider-sizes.demo.html: 9a9c6451b812691f96d6d60c4f316fe32cec91227948e7200adaa849b760d5b8
+      projects/site/src/app/pages/docs/components/demos/slider-sizes.demo.ts: 77194b1018ea703542ace9582ee616adec030a53f7efb7254b990ee3fc7779e3
+      projects/site/src/app/pages/docs/components/demos/slider-step.demo.html: 6fd2608a81276e898d8382aab0e85e738186b1bbecfcdfdbfc2733f7d541c0c0
+      projects/site/src/app/pages/docs/components/demos/slider-step.demo.ts: c75941e071e06d70cbfd2774636b43eb70afde4cf974e3f2c84e412b6d6fc7d3
+      projects/site/src/app/pages/docs/components/demos/slider-template-driven.demo.html: 04b6292a3f35bfb87eddd116fd2aa2923320dffd206e7a566a4524167aac265e
+      projects/site/src/app/pages/docs/components/demos/slider-template-driven.demo.ts: 9dc67da391bfb5cc278125a227ad0e6094578806274bbcd007729cf8a1c034da
+      projects/site/src/app/pages/docs/components/demos/slider-vertical.demo.html: de63ba51d8b969e66c4556e4bea6c19de6900cdf2b812a272c0d590f3d1687d4
+      projects/site/src/app/pages/docs/components/demos/slider-vertical.demo.ts: 558a1cdbd12bbc03c791c104100aca2c80b68e76e14d5d0d39682a613addf29e
+      projects/site/src/app/pages/docs/components/slider.page.ts: 18dc1ed39f38d1fac61a33640bf49c11d0481b6e67d23cb770f1965994d9cecd
+      projects/site/src/content/docs/slider-basic.txt: 449d693ac7fb50b27f8f083d9b7a12cef11e261f5b19435833cab245aa08592d
+      projects/site/src/content/docs/slider-controlled.txt: 228c8c565b9f7cf0e7f35d7a2114b9558a7e31b32c74aaec2fd7a72bba37ff58
+      projects/site/src/content/docs/slider-custom.txt: 3631c6189d37a1e52d213cc09176b8cb0699af3ac47976923780d1e27de1ad5b
+      projects/site/src/content/docs/slider-disabled.txt: c72cf49fa7c8fd2a4da6055d0e6e434fb238103f8a1d93528e9600e5f2cb5bc5
+      projects/site/src/content/docs/slider-filter.txt: 0fc2cee2792b01b2f38357b13e05447e0c337e3243cae3c29ca5334685c9cda7
+      projects/site/src/content/docs/slider-invalid.txt: faead641c70388fad9f077351e016181684a531aafc0b8de3f299159151e9dc3
+      projects/site/src/content/docs/slider-range-constraints.txt: f6f65eb295e1b20c38ed2961b7e4c1a3df1fbf978bafa77b97c4feec69e8b48b
+      projects/site/src/content/docs/slider-range.txt: 83511cbdfcd6be17e3945916958a1e2b045896e8f24e6647db3f6f63bf48c8ce
+      projects/site/src/content/docs/slider-reactive-forms.txt: 09bb5a27e981a1dd4a47cabae98943623774be9acf8d864e8afa35225ae32a7f
+      projects/site/src/content/docs/slider-signal-forms.txt: 3497d61ef956800605493e8b48aad81c78fb770d0b31dbe34326e44eb7a144ff
+      projects/site/src/content/docs/slider-sizes.txt: a2c9850005fcefb6fa223139ed5b28da840f957a5fc39fb08d4d6518a58e47bd
+      projects/site/src/content/docs/slider-step.txt: 9847a4417bb95143bb09418600db82bfb96863661a7b29082e101e77d7618c7a
+      projects/site/src/content/docs/slider-template-driven.txt: b375553807666df39f3e1c0791eb8f8eb079a577653b154f399e76bbf839c1eb
+      projects/site/src/content/docs/slider-vertical.txt: fa380813c7645445331f3700f45604a95ec425c277de02544606cf5439cfc2b0
+archived:
+  at: 2026-11-25
+  sequence: 41

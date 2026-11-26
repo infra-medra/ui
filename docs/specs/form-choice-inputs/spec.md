@@ -2,7 +2,7 @@
 
 **Capability:** `form-choice-inputs`
 **ID prefix:** `CHO`
-**Paths:** `projects/medra/ui/src/lib/toggle-switch/**`, `projects/medra/ui/src/lib/toggle-button/**`, `projects/medra/ui/src/lib/rating/**`, `projects/medra/ui/src/lib/slider/**`, `projects/medra/ui/src/lib/knob/**`, `projects/medra/ui/src/lib/color-picker/**`
+**Paths:** `projects/medra/ui/src/lib/toggle-switch/**`, `projects/medra/ui/src/lib/toggle-button/**`, `projects/medra/ui/src/lib/rating/**`, `projects/medra/ui/src/lib/knob/**`, `projects/medra/ui/src/lib/color-picker/**`
 
 ## Purpose
 
@@ -10,7 +10,7 @@ Provides form controls for picking a value without typing: boolean toggles, sing
 
 ## Requirements
 
-<!-- retired: CHO-001, CHO-001.S1, CHO-002, CHO-002.S1, CHO-003, CHO-003.S1, CHO-004, CHO-004.S1, CHO-007, CHO-007.S1, CHO-007.S2, CHO-008, CHO-008.S1, CHO-009, CHO-009.S1 -->
+<!-- retired: CHO-001, CHO-001.S1, CHO-002, CHO-002.S1, CHO-003, CHO-003.S1, CHO-004, CHO-004.S1, CHO-007, CHO-007.S1, CHO-007.S2, CHO-008, CHO-008.S1, CHO-009, CHO-009.S1, CHO-012, CHO-012.S1, CHO-013, CHO-013.S1, CHO-014, CHO-014.S1 -->
 
 ### REQ CHO-005: Toggle switch
 
@@ -57,36 +57,6 @@ Provides form controls for picking a value without typing: boolean toggles, sing
 - **Given** a `readonly` `med-rating` with value 3 and 5 stars
 - **When** it renders
 - **Then** it has `role="img"` and the label "3 out of 5 stars"
-
-### REQ CHO-012: Slider single value
-
-`med-slider` SHALL expose a `role="slider"` thumb with min, max, value and orientation ARIA attributes, SHALL snap values to `step` within `min` and `max` (defaults 0, 100, 1), SHALL update on pointer down and drag on the track, and SHALL respond to ArrowRight/ArrowUp (plus one step), ArrowLeft/ArrowDown (minus one step), PageUp and PageDown (ten steps), Home and End.
-
-#### Scenario CHO-012.S1: Arrow key
-
-- **Given** a `med-slider` with value 50
-- **When** the user presses ArrowRight on the thumb
-- **Then** the value is 51
-
-### REQ CHO-013: Slider range mode
-
-With `range`, `med-slider` SHALL expose two slider thumbs labeled by `startLabel` and `endLabel` with a `{start, end}` value, SHALL keep the thumbs apart by at least `minStepsBetweenHandles` steps, SHALL move the nearer thumb when the track is pressed, and SHALL leave a thumb inert when `disabledMinHandle` or `disabledMaxHandle` applies to it.
-
-#### Scenario CHO-013.S1: Thumbs cannot cross
-
-- **Given** a range slider with value `{start: 20, end: 40}`
-- **When** the user presses End on the start thumb
-- **Then** the start becomes 40, not beyond the end
-
-### REQ CHO-014: Slider states
-
-`med-slider` SHALL set `aria-disabled` and ignore input when disabled, SHALL set `aria-invalid` on thumbs when `invalid`, and SHALL support `size` and `orientation`.
-
-#### Scenario CHO-014.S1: Disabled
-
-- **Given** a disabled `med-slider`
-- **When** the user presses a key on the thumb
-- **Then** the value does not change
 
 ### REQ CHO-015: Knob
 
