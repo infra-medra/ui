@@ -1,4 +1,4 @@
-## Range constraints
+## Range Constraints
 
 `minStepsBetweenHandles` (in `step` units, default `0`) keeps the two range-mode thumbs from
 getting closer than that, on top of the existing "never cross" rule.

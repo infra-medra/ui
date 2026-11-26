@@ -1,0 +1,3 @@
+## Controlled
+
+The bound value can change from outside the slider. Here two buttons update the model, and the thumb follows.

@@ -13,7 +13,7 @@ import {
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { roundToStepPrecision } from '../input-number/number-format';
 import { mergeClasses } from '../utils/merge-classes';
-import { SliderSize, sliderThumbVariants, trackBarVariants, trackFillVariants, trackWrapperVariants } from './slider.styles';
+import { SliderOrientation, SliderSize, sliderThumbVariants, trackBarVariants, trackFillVariants, trackWrapperVariants } from './slider.styles';
 import { SliderRange, SliderValue } from './slider.types';
 
 type Thumb = 'value' | 'start' | 'end';
@@ -48,11 +48,14 @@ type Thumb = 'value' | 'start' | 'end';
  * `writeValue(null | undefined)` normalizes to that same default rather
  * than throwing.
  *
- * **Scope cut for v1**: horizontal orientation only — a vertical slider
- * needs the consumer to size its container explicitly (there's no sane
- * default height the way there is a default width of 100%), which is
- * enough of a different contract to defer rather than guess at. Not a
- * dead end: adding an `orientation` input later doesn't break this API.
+ * **`orientation="vertical"`** runs the track bottom (`min`) to top
+ * (`max`): thumbs are placed with `bottom` and the fill grows by `height`,
+ * and pointer presses map `clientY` against the track's height. A vertical
+ * slider has no natural height the way a horizontal one has a default
+ * width of 100%, so its track defaults to `h-56`; pass `class="h-40"` (or
+ * any height) to change it, since `class` merges onto the track. The
+ * keyboard map is the same in both orientations (ArrowUp and ArrowRight
+ * increase the value).
  *
  * `minStepsBetweenHandles`/`disabledMinHandle`/`disabledMaxHandle` only
  * apply in `range` mode. The gap is enforced in the same place crossing
@@ -149,7 +152,8 @@ export class SliderComponent implements ControlValueAccessor {
   readonly disabledMinHandle = input(false, { transform: booleanAttribute });
   readonly disabledMaxHandle = input(false, { transform: booleanAttribute });
   readonly size = input<SliderSize>('default');
-  readonly orientation = input<'horizontal' | 'vertical'>('horizontal');
+  /** Track direction. `vertical` runs bottom (`min`) to top (`max`) and defaults to a fixed height that `class` can override. */
+  readonly orientation = input<SliderOrientation>('horizontal');
   readonly disabled = input(false, { transform: booleanAttribute });
   readonly invalid = input(false, { transform: booleanAttribute });
   readonly ariaLabel = input<string | null>(null);
@@ -196,19 +200,28 @@ export class SliderComponent implements ControlValueAccessor {
     return { start: this.clampToStep(r.start), end: this.clampToStep(r.end) };
   });
 
-  protected readonly wrapperClass = computed(() => mergeClasses(trackWrapperVariants({ size: this.size(), disabled: this.isDisabled() }), this.class()));
-  protected readonly barClass = computed(() => trackBarVariants({ size: this.size() }));
-  protected readonly fillClass = computed(() => trackFillVariants({ size: this.size(), invalid: this.invalid() }));
-  protected readonly thumbClass = computed(() => sliderThumbVariants({ size: this.size(), invalid: this.invalid() }));
+  private readonly isVertical = computed(() => this.orientation() === 'vertical');
 
+  protected readonly wrapperClass = computed(() =>
+    mergeClasses(trackWrapperVariants({ size: this.size(), orientation: this.orientation(), disabled: this.isDisabled() }), this.class()),
+  );
+  protected readonly barClass = computed(() => trackBarVariants({ size: this.size(), orientation: this.orientation() }));
+  protected readonly fillClass = computed(() => trackFillVariants({ size: this.size(), orientation: this.orientation(), invalid: this.invalid() }));
+  protected readonly thumbClass = computed(() => sliderThumbVariants({ size: this.size(), orientation: this.orientation(), invalid: this.invalid() }));
+
+  /** The highlighted span along the track: measured from the left when horizontal, from the bottom when vertical. */
   protected readonly fillStyle = computed(() => {
     const fromPct = this.range() ? this.percentFor(this.rangeValue().start) : 0;
     const toPct = this.range() ? this.percentFor(this.rangeValue().end) : this.percentFor(this.numericValue());
-    return { left: `${fromPct}%`, width: `${toPct - fromPct}%` };
+    return this.isVertical()
+      ? { bottom: `${fromPct}%`, height: `${toPct - fromPct}%` }
+      : { left: `${fromPct}%`, width: `${toPct - fromPct}%` };
   });
 
   protected thumbStyle(value: number): Record<string, string> {
-    return { left: `${this.percentFor(value)}%`, transform: 'translate(-50%, -50%)' };
+    return this.isVertical()
+      ? { bottom: `${this.percentFor(value)}%`, transform: 'translate(-50%, 50%)' }
+      : { left: `${this.percentFor(value)}%`, transform: 'translate(-50%, -50%)' };
   }
 
   private percentFor(value: number): number {
@@ -250,9 +263,12 @@ export class SliderComponent implements ControlValueAccessor {
     this.onChange(next);
   }
 
+  /** Maps the pointer to a value: left-to-right when horizontal, bottom-to-top when vertical. */
   private valueFromPointer(event: PointerEvent): number {
     const rect = this.trackRef()!.nativeElement.getBoundingClientRect();
-    const ratio = rect.width === 0 ? 0 : Math.min(1, Math.max(0, (event.clientX - rect.left) / rect.width));
+    const extent = this.isVertical() ? rect.height : rect.width;
+    const offset = this.isVertical() ? rect.bottom - event.clientY : event.clientX - rect.left;
+    const ratio = extent === 0 ? 0 : Math.min(1, Math.max(0, offset / extent));
     return this.min() + ratio * (this.max() - this.min());
   }
 

@@ -1,0 +1,3 @@
+## Template Driven
+
+Bind `<med-slider>` with `[(ngModel)]` inside a template-driven form through its `ControlValueAccessor` implementation.

@@ -1,0 +1,3 @@
+## Invalid
+
+Set `invalid` to show the danger styling on the fill and thumbs and to set `aria-invalid` on each thumb.

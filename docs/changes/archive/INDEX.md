@@ -42,3 +42,4 @@
 | 38 | 2026-11-25 | document-radio-button-parity | radio-button | +RDB-001 | `RadioButtonComponent` (`projects/medra/ui/src/lib/radio-button/radio-button.component.ts`) already implements every ... |
 | 39 | 2026-11-25 | document-select-button-parity | select-button | +SLB-001 | `SelectButtonComponent` (`projects/medra/ui/src/lib/select-button/select-button.component.ts`) already implements mos... |
 | 40 | 2026-11-25 | add-select-button-item-template | select-button | +SLB-002 +SLB-003 +SLB-004 | In `document-select-button-parity`, all existing `SelectButtonComponent` features were documented on `/docs/component... |
+| 41 | 2026-11-25 | document-slider-parity | form-choice-inputs, slider | -CHO-012 -CHO-013 -CHO-014 +SLD-001 +SLD-002 +SLD-003 +SLD-004 +SLD-005 | The `/docs/components/slider` page documents only an intro, the basic example and a `Range constraints` block, with n... |

@@ -443,3 +443,139 @@ describe('SliderComponent (range mode)', () => {
     expect(fixture.nativeElement.getAttribute('data-orientation')).toBe('vertical');
   });
 });
+
+describe('SliderComponent scenarios', () => {
+  @Component({
+    standalone: true,
+    imports: [SliderComponent, ReactiveFormsModule],
+    template: `<med-slider [formControl]="volume" />`,
+  })
+  class SingleHostComponent {
+    readonly volume = new FormControl<SliderValue>(50);
+  }
+
+  @Component({
+    standalone: true,
+    imports: [SliderComponent, ReactiveFormsModule],
+    template: `<med-slider range [formControl]="price" />`,
+  })
+  class RangeHostComponent {
+    readonly price = new FormControl<SliderValue>({ start: 20, end: 40 });
+  }
+
+  @Component({
+    standalone: true,
+    imports: [SliderComponent, ReactiveFormsModule],
+    template: `<med-slider [formControl]="volume" />`,
+  })
+  class DisabledHostComponent {
+    readonly volume = new FormControl<SliderValue>({ value: 50, disabled: true });
+  }
+
+  // SLD-002.S1
+  it('[SLD-002.S1] ArrowRight on a slider with value 50 makes the value 51', () => {
+    const fixture = TestBed.createComponent(SingleHostComponent);
+    fixture.detectChanges();
+    const [thumb] = thumbs(fixture);
+    expect(thumb.getAttribute('aria-valuenow')).toBe('50');
+
+    keydown(thumb, 'ArrowRight');
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.volume.value).toBe(51);
+    expect(thumb.getAttribute('aria-valuenow')).toBe('51');
+  });
+
+  // SLD-003.S1
+  it('[SLD-003.S1] End on the start thumb of { start: 20, end: 40 } stops the start at 40', () => {
+    const fixture = TestBed.createComponent(RangeHostComponent);
+    fixture.detectChanges();
+    const [startThumb, endThumb] = thumbs(fixture);
+    expect(startThumb.getAttribute('aria-valuenow')).toBe('20');
+    expect(endThumb.getAttribute('aria-valuenow')).toBe('40');
+
+    keydown(startThumb, 'End');
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.price.value).toEqual({ start: 40, end: 40 } satisfies SliderRange);
+  });
+
+  // SLD-004.S1
+  it('[SLD-004.S1] pressing a key on a disabled slider leaves the value unchanged', () => {
+    const fixture = TestBed.createComponent(DisabledHostComponent);
+    fixture.detectChanges();
+    const [thumb] = thumbs(fixture);
+    expect(thumb.getAttribute('aria-disabled')).toBe('true');
+
+    keydown(thumb, 'ArrowRight');
+    keydown(thumb, 'End');
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.volume.value).toBe(50);
+    expect(thumb.getAttribute('aria-valuenow')).toBe('50');
+  });
+});
+
+describe('SliderComponent (vertical orientation)', () => {
+  function createVertical(value?: number): ComponentFixture<SliderComponent> {
+    const fixture = TestBed.createComponent(SliderComponent);
+    fixture.componentRef.setInput('orientation', 'vertical');
+    if (value !== undefined) {
+      fixture.componentInstance.writeValue(value);
+    }
+    fixture.detectChanges();
+    return fixture;
+  }
+
+  /** A 200px-tall, 20px-wide vertical track whose top edge sits at y=100. */
+  function stubVerticalTrackRect(fixture: { nativeElement: HTMLElement }): void {
+    jest.spyOn(track(fixture), 'getBoundingClientRect').mockReturnValue({
+      left: 0,
+      width: 20,
+      right: 20,
+      top: 100,
+      bottom: 300,
+      height: 200,
+      x: 0,
+      y: 100,
+      toJSON: () => ({}),
+    });
+  }
+
+  function verticalPointer(type: string, clientY: number, pointerId = 1): PointerEvent {
+    return Object.assign(new Event(type, { bubbles: true, cancelable: true }), { clientX: 10, clientY, pointerId }) as PointerEvent;
+  }
+
+  // SLD-005.S1
+  it('[SLD-005.S1] places the thumb 30% up from the bottom and fills the bottom 30% of the track for value 30', () => {
+    const fixture = createVertical(30);
+    const [thumb] = thumbs(fixture);
+    const fill = track(fixture).children[1] as HTMLElement;
+    expect(thumb.getAttribute('aria-orientation')).toBe('vertical');
+    expect(thumb.getAttribute('aria-valuenow')).toBe('30');
+
+    expect(thumb.style.bottom).toBe('30%');
+    expect(thumb.style.left).toBe('');
+    expect(fill.style.bottom).toBe('0%');
+    expect(fill.style.height).toBe('30%');
+    expect(fill.style.width).toBe('');
+  });
+
+  // SLD-005.S2
+  it('[SLD-005.S2] pressing the track 25% down from its top sets the value to 75', () => {
+    const fixture = createVertical();
+    const onChange = jest.fn();
+    fixture.componentInstance.registerOnChange(onChange);
+    const trackEl = track(fixture);
+    trackEl.setPointerCapture = jest.fn();
+    stubVerticalTrackRect(fixture);
+    expect(thumbs(fixture)[0].getAttribute('aria-valuemin')).toBe('0');
+    expect(thumbs(fixture)[0].getAttribute('aria-valuemax')).toBe('100');
+
+    trackEl.dispatchEvent(verticalPointer('pointerdown', 150));
+    fixture.detectChanges();
+
+    expect(onChange).toHaveBeenLastCalledWith(75);
+    expect(thumbs(fixture)[0].getAttribute('aria-valuenow')).toBe('75');
+  });
+});

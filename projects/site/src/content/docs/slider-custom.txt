@@ -1,0 +1,3 @@
+## Custom
+
+The `class` input merges onto the track, so Tailwind arbitrary variants can restyle the parts inside it: here the fill (the track's second child) and the thumbs switch to the success color.

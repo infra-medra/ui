@@ -10,6 +10,22 @@
 **Occurrences:** 1
 **Last seen:** 33
 
+### L-027 [lesson] Check that an input changes rendering before triaging it as supported
+
+**Statement:** During parity triage, confirm in the component source and its tests that an input actually changes layout or behavior, not just an ARIA attribute, before classifying the feature as already supported. Slider orientation="vertical" only set aria-orientation, which forced a mid-change switch from fast to full track.
+**Scope:** stages: propose, tasks
+**Evidence:** document-slider-parity
+**Occurrences:** 1
+**Last seen:** 41
+
+### L-028 [lesson] Disable reactive-form test hosts through the FormControl only
+
+**Statement:** In test hosts that bind [formControl], disable the control with new FormControl({ value, disabled: true }) instead of a static disabled attribute on the same element. The attribute also binds FormControlDirective's disabled input and logs a dev-mode warning on every run, which hides real warnings.
+**Scope:** paths: **/*.spec.ts · stages: tasks, apply, verify
+**Evidence:** document-slider-parity
+**Occurrences:** 1
+**Last seen:** 41
+
 ## Promoted
 
 ### L-001 [lesson] Never run build or test code in a job that holds the publish identity

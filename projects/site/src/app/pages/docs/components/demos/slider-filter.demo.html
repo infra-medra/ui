@@ -1,0 +1,12 @@
+<div class="flex max-w-md flex-col gap-4">
+  <div class="h-32 rounded-md bg-linear-to-br from-brand-400 via-info-400 to-warn-400" [style.filter]="filter()"></div>
+  <label class="text-sm text-surface-700 dark:text-surface-300">Contrast
+    <med-slider [(ngModel)]="contrast" [max]="200" ariaLabel="Contrast" />
+  </label>
+  <label class="text-sm text-surface-700 dark:text-surface-300">Brightness
+    <med-slider [(ngModel)]="brightness" [max]="200" ariaLabel="Brightness" />
+  </label>
+  <label class="text-sm text-surface-700 dark:text-surface-300">Sepia
+    <med-slider [(ngModel)]="sepia" ariaLabel="Sepia" />
+  </label>
+</div>
