@@ -1,0 +1,3 @@
+## Filter
+
+Sliders work well for live adjustments. Each slider below drives one CSS filter on the preview.

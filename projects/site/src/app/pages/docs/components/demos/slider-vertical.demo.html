@@ -1,0 +1,5 @@
+<div class="flex items-end gap-10">
+  <med-slider [(ngModel)]="volume" orientation="vertical" ariaLabel="Volume" />
+  <med-slider [(ngModel)]="band" range orientation="vertical" startLabel="Low cut" endLabel="High cut" class="h-40" />
+</div>
+<p class="mt-2 text-sm text-surface-500 dark:text-surface-400">Volume: {{ volume }} · Band: {{ band.start }} – {{ band.end }}</p>

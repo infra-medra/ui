@@ -1,0 +1,3 @@
+## Step
+
+Set `step` to snap the value to fixed increments. Arrow keys move one step, Page Up/Down move ten steps, and pointer positions round to the nearest step.

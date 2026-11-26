@@ -1,0 +1,6 @@
+<div class="flex max-w-sm items-center gap-4">
+  <button medButton type="button" size="sm" variant="outlined" (click)="nudge(-10)">Decrease</button>
+  <med-slider [(ngModel)]="value" ariaLabel="Controlled value" class="flex-1" />
+  <button medButton type="button" size="sm" variant="outlined" (click)="nudge(10)">Increase</button>
+</div>
+<p class="mt-2 text-sm text-surface-500 dark:text-surface-400">Value: {{ value }}</p>

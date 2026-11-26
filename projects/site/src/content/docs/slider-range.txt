@@ -1,0 +1,3 @@
+## Range
+
+Set `range` to show two thumbs. The value becomes a `SliderRange` object (`{ start, end }`), and the two thumbs can never cross.

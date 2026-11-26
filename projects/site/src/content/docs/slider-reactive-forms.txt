@@ -1,0 +1,3 @@
+## Reactive Forms
+
+Bind `<med-slider>` to a `FormControl` with `[formControl]`. The value is a `number`, or a `SliderRange` in range mode.

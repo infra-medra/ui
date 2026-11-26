@@ -1,0 +1,3 @@
+## Vertical
+
+Set `orientation="vertical"` to run the track from `min` at the bottom to `max` at the top. A vertical track defaults to a fixed height; pass a height class such as `class="h-40"` to change it. The keyboard works the same way in both orientations.

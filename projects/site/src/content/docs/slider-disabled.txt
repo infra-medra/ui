@@ -1,0 +1,3 @@
+## Disabled
+
+Set `disabled` to make the slider read-only: its thumbs leave the tab order and ignore pointer and keyboard input.
